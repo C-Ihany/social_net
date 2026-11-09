@@ -164,6 +164,22 @@
 #zsv-tap-prev { left: 0; width: 35%; }
 #zsv-tap-next { right: 0; width: 65%; }
 
+/* Maintien (doigt ou souris) : story en pause, interface effacée */
+#zsv-inner .zsv-hud, #zsv-inner .zsv-bottom, #zsv-inner #zsv-caption { transition: opacity .2s; }
+#zsv-inner.zsv-holding .zsv-hud,
+#zsv-inner.zsv-holding .zsv-bottom,
+#zsv-inner.zsv-holding #zsv-caption { opacity: 0; pointer-events: none; }
+/* Appui long mobile : pas de loupe de sélection, pas d'aperçu/copie système de
+   l'image (iOS -webkit-touch-callout), pas de menu contextuel Android. Seul le
+   champ de réponse reste sélectionnable. */
+#zsv-inner, #zsv-inner * {
+  -webkit-user-select: none; user-select: none;
+  -webkit-touch-callout: none;
+  -webkit-tap-highlight-color: transparent;
+}
+#zsv-inner .zsv-media { -webkit-user-drag: none; pointer-events: none; }
+#zsv-inner .zsv-reply-input { -webkit-user-select: text; user-select: text; }
+
 /* ── Caption ─────────────────────────────────────────── */
 #zsv-caption {
   position: absolute; bottom: 82px; left: 0; right: 0;

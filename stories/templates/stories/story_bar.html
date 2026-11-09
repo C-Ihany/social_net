@@ -781,12 +781,29 @@ function _zvStartProgress(){
   _sv.raf = requestAnimationFrame(tick);
 }
 
-function _zvPause(){ _sv.paused = true; }
+function _zvPause(){
+  _sv.paused = true;
+  var v = document.getElementById('zsv-vid');
+  if(v && v.classList.contains('active') && !v.paused) v.pause();
+}
 function _zvResume(){
   /* Ne reprend pas si le clavier de réponse est encore ouvert */
   if(_sv.replyFocus) return;
   _sv.startTime = performance.now()-_sv.elapsed;
   _sv.paused = false;
+  var v = document.getElementById('zsv-vid');
+  if(v && v.classList.contains('active') && v.paused) v.play().catch(function(){});
+}
+/* Maintien (doigt ou souris) : la story est en pause et l'interface s'efface,
+   comme sur les autres réseaux ; relâcher reprend sans naviguer. */
+function _zvHoldStart(){
+  _sv.holding = true; _zvPause();
+  var inner = document.getElementById('zsv-inner'); if(inner) inner.classList.add('zsv-holding');
+}
+function _zvHoldEnd(){
+  var inner = document.getElementById('zsv-inner'); if(inner) inner.classList.remove('zsv-holding');
+  if(!_sv.holding) return false;
+  _sv.holding = false; _zvResume(); return true;
 }
 
 var _zvAdvancing = false;   /* verrou : un seul _zvAdvance actif à la fois */
@@ -992,7 +1009,7 @@ function _zvInitGestures(){
     var t=e.touches[0]; g.startX=t.clientX; g.startY=t.clientY;
     g.startT=Date.now(); g.swiping=false;
     clearTimeout(g.holdTid);
-    g.holdTid=setTimeout(function(){ _sv.holding=true; _zvPause(); }, 220);
+    g.holdTid=setTimeout(function(){ _zvHoldStart(); }, 220);
   },{passive:true});
 
   inner.addEventListener('touchmove', function(e){
@@ -1026,9 +1043,14 @@ function _zvInitGestures(){
         setTimeout(function(){ inner.style.transition=''; },300);
         _zvResume();
       }
-      g.swiping=false; return;
+      g.swiping=false; _lastTouchNav = Date.now(); return;
     }
-    if(_sv.holding){ _sv.holding=false; _zvResume(); return; }
+    if(_zvHoldEnd()){
+      /* Fin d'un maintien : bloquer le click synthétique qui suit le touchend,
+         sinon il tombait sur la zone de tap et faisait avancer la story. */
+      e.preventDefault(); _lastTouchNav = Date.now();
+      return;
+    }
     if(Math.abs(dx)<20 && Math.abs(dy)<20 && dt<500){
       var uiEl = t.target.closest('.zsv-ibtn,.zsv-emobtn,.zsv-reply-input,.zsv-reply-send,.zsv-views-btn,.zsv-del-btn,#zsv-link,#zsv-vmodal');
       if(!uiEl){
@@ -1037,19 +1059,46 @@ function _zvInitGestures(){
         if(t.clientX < window.innerWidth*0.35){ _zvBack(); } else { _zvAdvance(); }
       }
     }
-    g.swiping=false; _sv.holding=false;
+    g.swiping=false; _zvHoldEnd();
   },{passive:false});   /* passive:false requis pour pouvoir appeler preventDefault */
 
   /* Desktop uniquement — ignoré sur mobile (touch déclenche preventDefault avant) */
   var _lastTouchNav = 0;
-  document.getElementById('zsv-tap-prev').addEventListener('click', function(e){
-    if(Date.now()-_lastTouchNav < 600) return;
-    _zvBack();
-  });
-  document.getElementById('zsv-tap-next').addEventListener('click', function(e){
-    if(Date.now()-_lastTouchNav < 600) return;
-    _zvAdvance();
-  });
+  /* Souris : l'appui maintenu met en pause (comme le doigt), le relâchement
+     reprend ; le clic synthétique qui suit un maintien ne doit pas naviguer.
+     Avant, seul `click` (déclenché au relâchement) était écouté : impossible
+     de tenir une story, et relâcher la faisait avancer. */
+  var m = { tid:null, held:false, down:false };
+  function mouseDown(e){
+    if(e.pointerType && e.pointerType !== 'mouse' && e.pointerType !== 'pen') return;
+    if(e.button !== 0) return;
+    if(e.target.closest('.zsv-ibtn,.zsv-emobtn,.zsv-reply-input,.zsv-reply-send,.zsv-views-btn,.zsv-del-btn,#zsv-link,#zsv-vmodal')) return;
+    m.down = true; m.held = false; clearTimeout(m.tid);
+    m.tid = setTimeout(function(){ m.held = true; _zvHoldStart(); }, 220);
+    e.preventDefault();   /* pas de sélection de texte / drag d'image pendant le maintien */
+  }
+  function mouseUp(e){
+    if(!m.down) return;
+    m.down = false; clearTimeout(m.tid);
+    if(m.held){ _zvHoldEnd(); }
+  }
+  /* Android : le menu contextuel « enregistrer l'image » de l'appui long */
+  inner.addEventListener('contextmenu', function(e){ e.preventDefault(); });
+  var hasPointer = 'PointerEvent' in window;
+  inner.addEventListener(hasPointer ? 'pointerdown' : 'mousedown', mouseDown);
+  document.addEventListener(hasPointer ? 'pointerup' : 'mouseup', mouseUp);
+  document.addEventListener(hasPointer ? 'pointercancel' : 'mouseleave', mouseUp);
+  window.addEventListener('blur', mouseUp);
+
+  function tapNav(fn){
+    return function(e){
+      if(Date.now()-_lastTouchNav < 600) return;
+      if(m.held){ m.held = false; return; }   /* fin d'un maintien : pas de navigation */
+      fn();
+    };
+  }
+  document.getElementById('zsv-tap-prev').addEventListener('click', tapNav(_zvBack));
+  document.getElementById('zsv-tap-next').addEventListener('click', tapNav(_zvAdvance));
 }
 
 /* ═══════════════════════════════════════════════════
