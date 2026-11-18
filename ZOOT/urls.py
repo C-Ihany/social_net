@@ -50,6 +50,7 @@ urlpatterns = [
     path('account/', include('account.urls', namespace='account')),
     path('friend/', include('friend.urls', namespace='friend')),
     path('chat/', include('chat.urls', namespace='chat')),
+    path('e2ee/', include('e2ee.urls', namespace='e2ee')),
     path('stories/', include('stories.urls', namespace='stories')),
     path('notif/', include('notification.urls', namespace='notification')),
     path('groups/', include('group.urls', namespace='group')),

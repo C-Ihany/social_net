@@ -85,6 +85,7 @@ INSTALLED_APPS = [
     'channels',
     'django.contrib.humanize',
     'chat',
+    'e2ee',          # chiffrement de bout en bout du chat privé (clés publiques, boîte aux lettres)
     'notification',
     'post',
     'group',
