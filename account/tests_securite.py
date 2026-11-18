@@ -28,8 +28,9 @@ class PhoneLoginTests(TestCase):
         self.user.phone_number, self.user.phone_verified = '+261341234567', True
         self.user.save()
 
-    def ask_code(self, phone='034 12 345 67', channel='sms'):
-        return self.client.post(reverse('phone-login'), {'step': 'numero', 'phone': phone, 'channel': channel})
+    def ask_code(self, phone='034 12 345 67', channel='sms', country='MG'):
+        return self.client.post(reverse('phone-login'), {'step': 'numero', 'phone': phone, 'channel': channel,
+                                                         'country': country})
 
     def test_connexion_par_numero_et_code(self):
         response = self.ask_code()
@@ -105,14 +106,40 @@ class PhoneLoginTests(TestCase):
         self.client.post(reverse('phone-login'), {'step': 'code', 'code': code_of_other})
         self.assertNotIn('_auth_user_id', self.client.session)
 
-    def test_numero_etranger_seulement_par_whatsapp(self):
+    def test_tous_les_pays(self):
+        """Un numéro allemand, écrit à l'allemande avec le pays choisi, ou avec l'indicatif."""
+        self.user.phone_number = '+4915123456789'
+        self.user.save()
+        self.ask_code('0151 23456789', 'sms', 'DE')
+        self.assertEqual((SENT[-1][0], SENT[-1][2]), ('+4915123456789', 'sms'))
+        cache.clear()
+        self.ask_code('+49 151 23456789', 'whatsapp', '')
+        self.assertEqual(SENT[-1][0], '+4915123456789')
+
+    @override_settings(SMS_COUNTRIES=['MG'])
+    def test_pays_du_sms_reglables(self):
+        """SMS_COUNTRIES limite le SMS à certains pays ; WhatsApp et e-mail restent ouverts."""
         self.user.phone_number = '+33612345678'
         self.user.save()
-        self.ask_code('+33 6 12 34 56 78', 'sms')
+        response = self.ask_code('06 12 34 56 78', 'sms', 'FR')
+        self.assertContains(response, "pas proposé vers ce pays")
         self.assertEqual(SENT, [])
-        self.ask_code('+33 6 12 34 56 78', 'whatsapp')
-        self.assertEqual(SENT[-1][0], '+33612345678')
+        self.ask_code('06 12 34 56 78', 'whatsapp', 'FR')
         self.assertEqual(SENT[-1][2], 'whatsapp')
+
+    @override_settings(SMS_MAX_PER_DAY=2)
+    def test_plafond_quotidien_de_sms(self):
+        for number in ('+261341111111', '+261342222222'):
+            PhoneVerification.objects.create(user=self.user, phone=number, code='x', channel='sms')
+        response = self.ask_code()
+        self.assertContains(response, 'momentanément indisponibles')
+        self.assertEqual(SENT, [])
+
+    def test_la_page_propose_tous_les_pays_et_devine_le_sien(self):
+        response = self.client.get(reverse('phone-login'), HTTP_ACCEPT_LANGUAGE='de-DE,de;q=0.9')
+        self.assertContains(response, '<option value="DE" selected>')
+        self.assertContains(response, 'value="MG"')
+        self.assertContains(response, 'value="JP"')
 
     def test_code_par_email_a_l_adresse_du_compte(self):
         """À l'étranger sans SMS ni WhatsApp : le code part à l'e-mail du compte lié au numéro."""
@@ -146,17 +173,17 @@ class PhoneVerifyTests(TestCase):
         self.client.force_login(self.user)
 
     def test_confirmer_son_numero_par_whatsapp(self):
-        self.client.post(reverse('account:phone-send-otp'), {'phone': '034 12 345 67', 'channel': 'whatsapp'})
+        self.client.post(reverse('account:phone-send-otp'), {'phone': '034 12 345 67', 'country': 'MG', 'channel': 'whatsapp'})
         to, code, channel = SENT[0]
         self.assertEqual((to, channel), ('+261341234567', 'whatsapp'))
-        response = self.client.post(reverse('account:phone-verify-otp'), {'phone': '034 12 345 67', 'code': code})
+        response = self.client.post(reverse('account:phone-verify-otp'), {'phone': '+261341234567', 'code': code})
         self.assertEqual(response.json()['ok'], True)
         self.user.refresh_from_db()
         self.assertTrue(self.user.phone_verified)
 
     def test_un_email_ne_confirme_jamais_un_numero(self):
         """Confirmer un numéro par e-mail ne prouverait rien : on retombe sur SMS / WhatsApp."""
-        self.client.post(reverse('account:phone-send-otp'), {'phone': '034 12 345 67', 'channel': 'email'})
+        self.client.post(reverse('account:phone-send-otp'), {'phone': '034 12 345 67', 'country': 'MG', 'channel': 'email'})
         self.assertEqual(len(mail.outbox), 0)
         self.assertNotEqual(SENT[0][2], 'email')
 
@@ -164,18 +191,23 @@ class PhoneVerifyTests(TestCase):
         other = Account.objects.create_user('miora@example.com', 'miora', 'motdepasse-solide-456')
         other.phone_number, other.phone_verified = '+261341234567', True
         other.save()
-        response = self.client.post(reverse('account:phone-send-otp'), {'phone': '034 12 345 67'})
+        response = self.client.post(reverse('account:phone-send-otp'), {'phone': '034 12 345 67', 'country': 'MG'})
         self.assertEqual(response.status_code, 400)
         self.assertEqual(SENT, [])
 
 
 class PhoneNumberTests(TestCase):
-    def test_numeros(self):
-        self.assertEqual(sms.normalize_phone('034 12 345 67'), '+261341234567')
-        self.assertIsNone(sms.normalize_phone('+33 6 12 34 56 78'))                 # (pas par SMS)
-        self.assertEqual(sms.normalize_phone('+33 6 12 34 56 78', True), '+33612345678')
-        self.assertEqual(sms.normalize_phone('0049 151 2345 6789', True), '+4915123456789')
-        self.assertIsNone(sms.normalize_phone('12345', True))
+    def test_numeros_de_tous_les_pays(self):
+        self.assertEqual(sms.normalize_phone('034 12 345 67', 'MG'), '+261341234567')
+        self.assertEqual(sms.normalize_phone('06 12 34 56 78', 'FR'), '+33612345678')
+        self.assertEqual(sms.normalize_phone('0151 23456789', 'de'), '+4915123456789')
+        self.assertEqual(sms.normalize_phone('+1 415 555 2671'), '+14155552671')
+        self.assertEqual(sms.normalize_phone('0049 151 2345 6789'), '+4915123456789')
+        self.assertIsNone(sms.normalize_phone('06 12 34 56 78'))              # (sans pays ni indicatif)
+        self.assertIsNone(sms.normalize_phone('12345', 'FR'))
+        self.assertIsNone(sms.normalize_phone('+33 1 42 68 53 00'))           # (fixe : pas de SMS)
+        self.assertIsNone(sms.normalize_phone('+33 8 99 23 45 67'))           # (surtaxé)
+        self.assertEqual(sms.format_phone_display('+4915123456789'), '+49 1512 3456789')
 
     @override_settings(WHATSAPP_TOKEN='jeton', WHATSAPP_PHONE_ID='42', DEBUG=False)
     def test_message_whatsapp_envoye_a_meta(self):

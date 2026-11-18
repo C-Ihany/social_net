@@ -369,6 +369,10 @@ def edit_account_view(request, *args, **kwargs):
 	from regions import REGION_CHOICES
 	context['region_choices'] = REGION_CHOICES
 	context['blocked_users'] = Account.objects.filter(blocks_received__blocker=request.user).order_by('username')
+	# Confirmation du numéro : tous les pays, et le moyen de recevoir le code
+	context['phone_countries'] = country_choices(get_language() or 'fr')
+	context['phone_country'] = otp_codes.guess_region(request)
+	context['phone_channels'] = otp_channels()
 	return render(request, 'account/edit_account.html', context)
 
 
@@ -638,7 +642,8 @@ from django.views.decorators.http import require_POST
 from django.utils import timezone
 from datetime import timedelta
 import secrets
-from account.sms import format_phone_display, otp_channels
+from django.utils.translation import get_language
+from account.sms import country_choices, format_phone_display, otp_channels
 from account import otp as otp_codes
 
 
@@ -659,24 +664,25 @@ def phone_send_otp(request):
 	"""
 	Envoie un code pour confirmer le numéro du compte connecté.
 	POST /account/phone/envoyer-code/
-	Body (JSON ou form) : { "phone": "034 12 345 67", "channel": "sms" | "whatsapp" }
-	(« channel » est facultatif : sans lui, le premier moyen proposé.)
+	Body (JSON ou form) : { "phone": "+49 1512 3456789", "country": "DE", "channel": "sms" | "whatsapp" }
+	(« country » : le pays choisi, pour un numéro écrit sans indicatif ; « channel » est facultatif :
+	sans lui, le premier moyen proposé.)
 	"""
 	if not request.user.is_authenticated:
 		return JsonResponse({'error': 'Connexion requise.'}, status=401)
 
 	data = request.POST or _json_body(request)
 	channel = otp_codes.pick_channel(data.get('channel', ''))
-	phone_e164 = otp_codes.read_phone(data.get('phone', ''), channel)
+	phone_e164 = otp_codes.read_phone(data.get('phone', ''), data.get('country', ''))
 	if not phone_e164:
-		return JsonResponse({
-			'error': 'Numéro invalide. Utilisez le format 034 XX XXX XX (Airtel), 032/033 (Orange), ou 038 (Telma)'
-			         + (' ; à l\'étranger, +indicatif du pays (code par WhatsApp).' if 'whatsapp' in otp_channels() else '.')
-		}, status=400)
+		return JsonResponse({'error': _INVALID_PHONE}, status=400)
 	# Un numéro déjà confirmé par un autre compte ne peut pas l'être une 2e fois : sinon, la
 	# connexion par numéro ne saurait plus quel compte ouvrir.
 	if Account.objects.filter(phone_number=phone_e164, phone_verified=True).exclude(pk=request.user.pk).exists():
 		return JsonResponse({'error': 'Ce numéro est déjà lié à un autre compte.'}, status=400)
+	refused = otp_codes.channel_refused(phone_e164, channel)
+	if refused:
+		return JsonResponse({'error': refused}, status=400)
 	if otp_codes.too_many_sends(phone_e164):
 		return JsonResponse({
 			'error': 'Trop de tentatives. Attendez 1 heure avant de demander un nouveau code.'
@@ -686,6 +692,7 @@ def phone_send_otp(request):
 		return JsonResponse({'error': error}, status=500)
 	return JsonResponse({
 		'ok': True,
+		'phone': phone_e164,
 		'phone_display': format_phone_display(phone_e164),
 		'valid_minutes': PhoneVerification.OTP_VALID_MINUTES,
 		'channel': channel,
@@ -697,13 +704,13 @@ def phone_verify_otp(request):
 	"""
 	Vérifie le code saisi par l'utilisateur connecté, et confirme son numéro.
 	POST /account/phone/verifier/
-	Body (JSON ou form) : { "phone": "034 12 345 67", "code": "123456" }
+	Body (JSON ou form) : { "phone": "+491512345678", "country": "DE", "code": "123456" }
 	"""
 	if not request.user.is_authenticated:
 		return JsonResponse({'error': 'Connexion requise.'}, status=401)
 
 	data  = request.POST or _json_body(request)
-	phone_e164 = otp_codes.read_phone(data.get('phone', ''), 'whatsapp')
+	phone_e164 = otp_codes.read_phone(data.get('phone', ''), data.get('country', ''))
 	if not phone_e164:
 		return JsonResponse({'error': 'Numéro invalide.'}, status=400)
 	otp, error = otp_codes.check_code(phone_e164, 'verify', data.get('code'), user=request.user)
@@ -725,6 +732,10 @@ def phone_verify_otp(request):
 	})
 
 
+_INVALID_PHONE = ("Numéro invalide. Choisissez votre pays, ou écrivez le numéro avec l'indicatif "
+                  "(+…). Il faut un numéro de mobile.")
+
+
 # Ce qu'on répond quand un code est demandé, QUE LE NUMÉRO AIT UN COMPTE OU NON : sinon la
 # page dirait à n'importe qui quels numéros sont inscrits sur Vazimba.
 _CODE_SENT = "Si ce numéro est lié à un compte Vazimba, un code vient d'y être envoyé."
@@ -743,14 +754,18 @@ def phone_login_view(request):
 	if request.user.is_authenticated:
 		return redirect("post:index")
 	channels = otp_codes.channels_for('login')
-	context = {'channels': channels, 'step': 'numero'}
+	context = {'channels': channels, 'step': 'numero', 'countries': country_choices(get_language() or 'fr'),
+	           'country': otp_codes.guess_region(request)}
 	if request.method == 'POST' and request.POST.get('step') == 'numero':
 		channel = otp_codes.pick_channel(request.POST.get('channel', ''), 'login')
-		phone = otp_codes.read_phone(request.POST.get('phone', ''), channel)
-		context.update(channel=channel, phone_raw=request.POST.get('phone', ''))
+		country = request.POST.get('country', '')
+		phone = otp_codes.read_phone(request.POST.get('phone', ''), country)
+		context.update(channel=channel, phone_raw=request.POST.get('phone', ''), country=country or context['country'])
+		refused = otp_codes.channel_refused(phone, channel) if phone else None
 		if not phone:
-			context['error'] = ("Numéro invalide. Un numéro malgache (034…) ; à l'étranger, +indicatif du pays "
-			                    "et choisissez WhatsApp ou e-mail.")
+			context['error'] = _INVALID_PHONE
+		elif refused:
+			context['error'] = refused
 		elif otp_codes.too_many_sends(phone):
 			context['error'] = 'Trop de codes demandés pour ce numéro. Réessayez dans une heure.'
 		else:

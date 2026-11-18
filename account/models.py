@@ -113,7 +113,7 @@ class Account(AbstractBaseUser):
 	phone_number = models.CharField(
 		max_length=20, blank=True, default='',
 		verbose_name='Numéro de téléphone',
-		help_text='Format international : +261 34 XX XXX XX',
+		help_text='Format international E.164 : +indicatif du pays, puis le numéro',
 		db_index=True,
 	)
 	phone_verified = models.BooleanField(
@@ -239,7 +239,7 @@ class PhoneVerification(models.Model):
     phone = models.CharField(
         max_length=20,
         verbose_name='Numéro en cours de vérification',
-        help_text='Format E.164 (+261XXXXXXXXX)',
+        help_text='Format E.164 (+indicatif du pays, puis le numéro)',
     )
     # L'EMPREINTE du code (HMAC avec la clé secrète du site), jamais le code lui-même : quelqu'un
     # qui lirait la base (sauvegarde, accès à l'hébergeur) ne pourrait pas s'en servir.

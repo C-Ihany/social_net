@@ -51,11 +51,23 @@
         <form method="post">{% csrf_token %}
             <input type="hidden" name="step" value="numero">
             <div class="auth-field">
+                <label for="inputCountry">{% trans "Country" %}</label>
+                <div class="auth-input-wrap">
+                    <span class="material-icons">public</span>
+                    <select name="country" id="inputCountry" autocomplete="tel-country-code">
+                        <option value="">{% trans "Choose (or write +country code below)" %}</option>
+                        {% for code, name in countries %}
+                        <option value="{{ code }}"{% if code == country %} selected{% endif %}>{{ name }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+            </div>
+            <div class="auth-field">
                 <label for="inputPhone">{% trans "Phone number" %}</label>
                 <div class="auth-input-wrap">
                     <span class="material-icons">smartphone</span>
                     <input type="tel" name="phone" id="inputPhone" value="{{ phone_raw|default:'' }}"
-                           placeholder="034 12 345 67" required autofocus autocomplete="tel">
+                           required autofocus autocomplete="tel">
                 </div>
             </div>
             {% if channels|length > 1 %}
@@ -69,7 +81,6 @@
                     </label>
                     {% endfor %}
                 </div>
-                <small class="auth-hint">{% trans "Abroad: write +country code, and choose WhatsApp." %}</small>
                 {% if 'email' in channels %}<small class="auth-hint">{% trans "Email: the code goes to the email address of the account." %}</small>{% endif %}
             </div>
             {% elif channels %}

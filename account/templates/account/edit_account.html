@@ -152,13 +152,21 @@
                 {% endif %}
                     <!-- Champ numéro -->
                     <div class="edit-field" id="phone-input-group">
-                        <label for="phone-input">Votre numéro malgache</label>
+                        <label for="phone-country">Pays</label>
+                        <div class="edit-input-wrap edit-input-wrap--select">
+                            <span class="material-icons">public</span>
+                            <select id="phone-country" autocomplete="tel-country-code">
+                                <option value="">Choisir (ou écrire le numéro avec +indicatif)</option>
+                                {% for code, name in phone_countries %}
+                                <option value="{{ code }}"{% if code == phone_country %} selected{% endif %}>{{ name }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <label for="phone-input">Votre numéro de mobile</label>
                         <div class="edit-row">
                             <div class="edit-input-wrap edit-input-wrap--grow">
                                 <span class="material-icons">phone</span>
-                                <input type="tel" id="phone-input"
-                                       placeholder="034 XX XXX XX"
-                                       autocomplete="tel">
+                                <input type="tel" id="phone-input" autocomplete="tel">
                             </div>
                             <button id="btn-send-otp"
                                     onclick="phoneSendOtp()"
@@ -166,15 +174,24 @@
                                 Envoyer le code
                             </button>
                         </div>
+                        {% if phone_channels|length > 1 %}
+                        <div class="phone-channels">
+                            Recevoir le code par :
+                            {% for c in phone_channels %}
+                            <label><input type="radio" name="phone-channel" value="{{ c }}"{% if forloop.first %} checked{% endif %}>
+                                {% if c == 'whatsapp' %}WhatsApp{% else %}SMS{% endif %}</label>
+                            {% endfor %}
+                        </div>
+                        {% endif %}
                         <small class="edit-help">
-                            Formats acceptés : 034, 032, 033, 038 (Airtel/Orange/Telma)
+                            Tous les pays sont acceptés. Un numéro de mobile, pour recevoir le code.
                         </small>
                     </div>
 
                     <!-- Zone saisie du code (masquée jusqu'à envoi) -->
                     <div id="otp-input-group">
                         <div class="edit-field">
-                            <label for="otp-input">Code reçu par SMS <span id="otp-phone-hint" class="edit-label-hint"></span></label>
+                            <label for="otp-input">Code reçu <span id="otp-phone-hint" class="edit-label-hint"></span></label>
                             <div class="edit-row">
                                 <div class="edit-input-wrap edit-input-wrap--grow">
                                     <span class="material-icons">sms</span>
@@ -335,7 +352,12 @@
     'use strict';
 
     var CSRF = (document.cookie.match('(^|;)\\s*csrftoken=([^;]+)') || [])[2] || '';
-    var currentPhone = '';   // numéro normalisé renvoyé par le serveur
+    var currentPhone = '';   // numéro normalisé (E.164) renvoyé par le serveur
+
+    function phoneChannel() {
+        var picked = document.querySelector('input[name="phone-channel"]:checked');
+        return picked ? picked.value : '';
+    }
 
     function showMsg(text, isError) {
         var el = document.getElementById('phone-msg');
@@ -360,14 +382,16 @@
         fetch('{% url "account:phone-send-otp" %}', {
             method: 'POST',
             headers: { 'X-CSRFToken': CSRF, 'Content-Type': 'application/x-www-form-urlencoded' },
-            body: 'phone=' + encodeURIComponent(phone),
+            body: 'phone=' + encodeURIComponent(phone)
+                + '&country=' + encodeURIComponent(document.getElementById('phone-country').value)
+                + '&channel=' + encodeURIComponent(phoneChannel()),
         })
         .then(function (r) { return r.json().then(function(d) { return {ok: r.ok, data: d}; }); })
         .then(function (res) {
             btn.disabled = false; btn.style.opacity = '';
             if (!res.ok) { showMsg(res.data.error || 'Erreur.', true); return; }
 
-            currentPhone = phone;
+            currentPhone = res.data.phone;
             // Afficher la zone de saisie du code
             document.getElementById('otp-input-group').style.display = 'block';
             document.getElementById('phone-input-group').style.display = resend ? '' : 'none';
@@ -375,7 +399,7 @@
             if (hint) hint.textContent = '— envoyé à ' + res.data.phone_display;
             document.getElementById('otp-input').value = '';
             document.getElementById('otp-input').focus();
-            showMsg('Code envoyé ! Vérifiez vos SMS.', false);
+            showMsg(res.data.channel === 'whatsapp' ? 'Code envoyé ! Regardez WhatsApp.' : 'Code envoyé ! Vérifiez vos SMS.', false);
         })
         .catch(function () {
             btn.disabled = false; btn.style.opacity = '';
@@ -385,7 +409,7 @@
 
     window.phoneVerifyOtp = function () {
         var code  = (document.getElementById('otp-input').value || '').trim();
-        var phone = document.getElementById('phone-input').value.trim() || currentPhone;
+        var phone = currentPhone || document.getElementById('phone-input').value.trim();
         if (!code || code.length !== 6) { showMsg('Entrez le code à 6 chiffres.', true); return; }
 
         var btn = document.getElementById('btn-verify-otp');
@@ -395,7 +419,8 @@
         fetch('{% url "account:phone-verify-otp" %}', {
             method: 'POST',
             headers: { 'X-CSRFToken': CSRF, 'Content-Type': 'application/x-www-form-urlencoded' },
-            body: 'phone=' + encodeURIComponent(phone) + '&code=' + encodeURIComponent(code),
+            body: 'phone=' + encodeURIComponent(phone) + '&code=' + encodeURIComponent(code)
+                + '&country=' + encodeURIComponent(document.getElementById('phone-country').value),
         })
         .then(function (r) { return r.json().then(function(d) { return {ok: r.ok, data: d}; }); })
         .then(function (res) {

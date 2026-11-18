@@ -376,6 +376,10 @@ AT_SENDER    = config('AT_SENDER',   default='VAZIMBA')
 SMS_OTP_VALID_MINUTES = 10
 # Max envois par numéro par heure (anti-abus)
 SMS_OTP_MAX_SENDS_PER_HOUR = 3
+# Pays où le code part par SMS (codes ISO séparés par des virgules, ex. « MG,FR ») ; vide = tous.
+# Et plafond d'envois par SMS pour tout le site, par 24 h (protection contre le « SMS pumping »).
+SMS_COUNTRIES = [c for c in config('SMS_COUNTRIES', default='').split(',') if c.strip()]
+SMS_MAX_PER_DAY = config('SMS_MAX_PER_DAY', default=500, cast=int)
 
 # ── WhatsApp (envoi du code, WhatsApp Cloud API de Meta) ─────────────────────
 # Variables Railway à créer (voir account/sms.py, _send_via_whatsapp) :

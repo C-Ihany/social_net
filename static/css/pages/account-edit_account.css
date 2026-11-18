@@ -240,3 +240,9 @@
 .edit-zone-name { flex: 1; font-weight: 700; color: var(--text); }
 .edit-zone-text { font-size: .9rem; color: var(--text-muted); margin: 0; }
 .edit-zone-text--spaced { margin-bottom: .9rem; }
+
+/* Confirmation du numéro : pays (tous) et moyen de recevoir le code */
+#phone-input-group > .edit-input-wrap { margin-bottom: .8rem; }
+.phone-channels { display: flex; flex-wrap: wrap; gap: .4rem 1rem; align-items: center;
+    margin-top: .5rem; font-size: .85rem; color: var(--text-muted); }
+.phone-channels label { display: inline-flex; align-items: center; gap: .3rem; color: var(--text); cursor: pointer; }

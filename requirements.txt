@@ -85,8 +85,9 @@ charset-normalizer==3.4.3
 # ── Email transactionnel (HTTP API — SMTP bloqué par Railway) ────────────────
 django-anymail[brevo]>=10.0
 
-# ── SMS transactionnel (vérification téléphone, support Madagascar) ───────────
+# ── SMS transactionnel (vérification téléphone) ──────────────────────────────
 africastalking>=1.2.5
+phonenumbers==8.13.55   # Numéros de tous les pays (règles de numérotation tenues par Google)
 
 # ── Planificateur de tâches (cron digest push) ───────────────────────────────
 APScheduler==3.11.0

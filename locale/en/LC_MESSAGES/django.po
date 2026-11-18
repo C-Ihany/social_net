@@ -4333,3 +4333,9 @@ msgstr "Receive a code"
 
 msgid "Sign in with my email address"
 msgstr "Sign in with my email address"
+
+msgid "Country"
+msgstr "Country"
+
+msgid "Choose (or write +country code below)"
+msgstr "Choose (or write +country code below)"

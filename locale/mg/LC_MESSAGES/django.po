@@ -4393,3 +4393,9 @@ msgstr "Handray kaody"
 
 msgid "Sign in with my email address"
 msgstr "Hiditra amin'ny adiresy mailako"
+
+msgid "Country"
+msgstr "Firenena"
+
+msgid "Choose (or write +country code below)"
+msgstr "Safidio (na soraty miaraka amin'ny +kaodin'ny firenena ny laharana)"

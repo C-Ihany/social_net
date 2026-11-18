@@ -13,8 +13,10 @@ Protections :
 - code de 6 chiffres tiré par `secrets`, valable 10 minutes, 5 essais au plus ;
 - seule l'EMPREINTE du code est gardée en base (PhoneVerification.digest) ;
 - 3 envois par numéro et par heure (ici), et des limites par adresse IP (dans les urls.py) ;
-- par SMS, seulement des numéros malgaches (un SMS vers l'étranger coûte cher, et des robots
-  s'en servent pour faire payer le site) ; par WhatsApp, tous les numéros.
+- numéros de tous les pays, mais seulement des mobiles (account.sms.normalize_phone) ;
+- par SMS : les pays de SMS_COUNTRIES (vide = tous) et SMS_MAX_PER_DAY envois par jour pour tout
+  le site (un SMS coûte, et des robots s'en servent pour faire payer le site) ; par WhatsApp et
+  par e-mail, pas de limite de pays.
 """
 import logging
 from datetime import timedelta
@@ -24,15 +26,47 @@ from django.core.mail import send_mail
 from django.utils import timezone
 
 from account.models import Account, PhoneVerification
-from account.sms import normalize_phone, otp_channels, send_otp
+from account.sms import normalize_phone, otp_channels, region_of, send_otp, sms_allowed
 
 logger = logging.getLogger(__name__)
 
 
-def read_phone(raw, channel):
-    """Le numéro au format E.164, ou None. À l'étranger, seulement par WhatsApp ou e-mail
-    (par SMS, il faudrait payer un SMS vers l'étranger)."""
-    return normalize_phone(raw or '', international=(channel in ('whatsapp', 'email')))
+def read_phone(raw, region=None):
+    """Le numéro au format E.164, ou None. `region` : le pays choisi dans le formulaire."""
+    return normalize_phone(raw or '', region)
+
+
+def guess_region(request):
+    """Le pays à proposer d'abord dans la liste : celui du numéro de la personne connectée,
+    sinon celui de sa connexion (Cloudflare, s'il est devant le site), sinon celui de la langue
+    du navigateur (« fr-FR » -> FR). Rien de deviné : '' (la personne choisit)."""
+    from account.sms import country_choices
+    known = {code for code, _ in country_choices()}
+    user = getattr(request, 'user', None)
+    candidates = [region_of(getattr(user, 'phone_number', '') or '') if user and user.is_authenticated else '',
+                  request.META.get('HTTP_CF_IPCOUNTRY', '')]
+    for part in request.META.get('HTTP_ACCEPT_LANGUAGE', '').split(','):
+        tag = part.split(';')[0].strip()
+        if '-' in tag:
+            candidates.append(tag.split('-')[-1])
+    for code in candidates:
+        if code and code.upper() in known:
+            return code.upper()
+    return ''
+
+
+def channel_refused(phone, channel):
+    """Le message à montrer si ce moyen d'envoi n'est pas possible vers ce numéro, sinon None."""
+    if channel != 'sms':
+        return None
+    if not sms_allowed(phone):
+        return "Le SMS n'est pas proposé vers ce pays : choisissez un autre moyen de recevoir le code."
+    since = timezone.now() - timedelta(days=1)
+    if PhoneVerification.objects.filter(channel='sms', created_at__gte=since).count() \
+            >= getattr(settings, 'SMS_MAX_PER_DAY', 500):
+        logger.warning('[OTP] Plafond quotidien de SMS atteint')
+        return "Les SMS sont momentanément indisponibles : choisissez un autre moyen de recevoir le code."
+    return None
 
 
 def channels_for(purpose):

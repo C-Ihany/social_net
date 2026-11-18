@@ -158,12 +158,15 @@
     transition: color .2s;
 }
 .auth-input-wrap:focus-within .material-icons { color: var(--accent); }
-.auth-input-wrap input {
-    flex: 1; background: none; border: none; outline: none;
+.auth-input-wrap input,
+.auth-input-wrap select {
+    flex: 1; min-width: 0; background: none; border: none; outline: none;
     color: var(--text); font-size: .95rem; padding: 0;
     font-family: var(--font-primary, 'Space Grotesk', sans-serif);
 }
 .auth-input-wrap input::placeholder { color: var(--text-muted); }
+.auth-input-wrap select { cursor: pointer; }
+.auth-input-wrap select option { color: initial; }
 
 /* Errors */
 .auth-errors {

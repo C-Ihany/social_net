@@ -1,87 +1,92 @@
 """
 account/sms.py
 ──────────────
-Backend SMS pour Vazimba — vérification de numéro de téléphone.
+Envoi des codes de vérification (SMS, WhatsApp) et lecture des numéros de téléphone.
 
-Fournisseur principal : Africa's Talking (couverture Madagascar : Airtel, Orange, Telma)
-Backend développement : console (affiche le SMS dans le terminal, aucun envoi réel)
+Numéros : TOUS les pays, avec la bibliothèque `phonenumbers` (les règles de numérotation de
+chaque pays, tenues à jour par Google). Un numéro s'écrit au format international (+49…, +261…)
+ou au format du pays choisi dans le formulaire ; il est gardé au format E.164.
 
-Normalisation des numéros malgaches :
-  034 XX XXX XX  →  +26134XXXXXXX
-  032 XX XXX XX  →  +26132XXXXXXX
-  Formats acceptés : 034..., 0034..., +261 34..., 261 34...
+SMS : Africa's Talking (SMS_BACKEND=africastalking). Les pays où le SMS est proposé se règlent
+par SMS_COUNTRIES (vide = tous). En développement : console (le SMS s'affiche dans le terminal).
 """
 
 import logging
-import re
+import unicodedata
+from functools import lru_cache
 from typing import Optional
 
+import phonenumbers
+from phonenumbers import NumberParseException, PhoneNumberFormat, PhoneNumberType, geocoder
 from django.conf import settings
 
 logger = logging.getLogger(__name__)
 
 
 # ─────────────────────────────────────────────────────────────────────────────
-# Normalisation du numéro de téléphone
+# Numéros de téléphone (tous pays)
 # ─────────────────────────────────────────────────────────────────────────────
 
-_MADAGASCAR_PREFIXES = ('32', '33', '34', '38', '20')
+# Les numéros qui reçoivent des SMS et WhatsApp. Les autres (surtaxés, gratuits, partagés…)
+# sont refusés : des robots s'en servent pour faire payer les SMS au site (« SMS pumping »).
+_TEXTABLE = (PhoneNumberType.MOBILE, PhoneNumberType.FIXED_LINE_OR_MOBILE)
 
 
-def normalize_madagascar_phone(raw: str) -> Optional[str]:
-    """
-    Convertit un numéro saisi librement en format E.164 (+261XXXXXXXXX).
-    Retourne None si le numéro n'est pas reconnaissable.
+def normalize_phone(raw: str, region: Optional[str] = None) -> Optional[str]:
+    """Le numéro au format E.164 (+491511234567), ou None s'il n'est pas valable.
 
-    Exemples acceptés :
-        034 12 345 67  →  +261341234567
-        0341234567     →  +261341234567
-        +261 34 12 345 67  →  +261341234567
-        261341234567   →  +261341234567
-    """
+    `region` : le pays choisi (« DE », « MG », « FR »…), pour un numéro écrit sans indicatif.
+    Un numéro qui commence par + ou 00 n'en a pas besoin. Seuls les numéros de mobile passent."""
+    raw = (raw or '').strip()
     if not raw:
         return None
+    if raw.startswith('00'):
+        raw = '+' + raw[2:]
+    try:
+        number = phonenumbers.parse(raw, (region or '').upper() or None)
+    except NumberParseException:
+        return None
+    if not phonenumbers.is_valid_number(number) or phonenumbers.number_type(number) not in _TEXTABLE:
+        return None
+    return phonenumbers.format_number(number, PhoneNumberFormat.E164)
 
-    # Supprimer espaces, tirets, points, parenthèses
-    digits = re.sub(r'[\s\-\.\(\)]', '', raw)
 
-    # Supprimer le + initial si présent
-    if digits.startswith('+'):
-        digits = digits[1:]
-
-    # Forme internationale : 261XXXXXXXXX (12 chiffres)
-    if digits.startswith('261') and len(digits) == 12:
-        local = digits[3:]  # les 9 chiffres après 261
-        prefix2 = local[:2]
-        if prefix2 in _MADAGASCAR_PREFIXES:
-            return '+' + digits
-
-    # Forme locale commençant par 0 : 0XXXXXXXXX (10 chiffres)
-    if digits.startswith('0') and len(digits) == 10:
-        local = digits[1:]  # sans le 0 initial
-        prefix2 = local[:2]
-        if prefix2 in _MADAGASCAR_PREFIXES:
-            return '+261' + local
-
-    # Forme avec 00 international : 00261XXXXXXXXX (14 chiffres)
-    if digits.startswith('00261') and len(digits) == 14:
-        local = digits[5:]
-        prefix2 = local[:2]
-        if prefix2 in _MADAGASCAR_PREFIXES:
-            return '+261' + local
-
-    return None
+def region_of(e164: str) -> str:
+    """Le pays d'un numéro E.164 (« DE »), ou '' s'il est illisible."""
+    try:
+        return phonenumbers.region_code_for_number(phonenumbers.parse(e164 or '')) or ''
+    except NumberParseException:
+        return ''
 
 
 def format_phone_display(e164: str) -> str:
-    """
-    Formate un numéro E.164 pour l'affichage.
-    +261341234567 → +261 34 12 345 67
-    """
-    if not e164 or not e164.startswith('+261') or len(e164) != 13:
-        return e164
-    d = e164[4:]   # 9 chiffres
-    return f'+261 {d[:2]} {d[2:4]} {d[4:7]} {d[7:]}'
+    """Le numéro tel qu'on l'écrit : +49 1512 3456789, +261 34 12 345 67…"""
+    try:
+        return phonenumbers.format_number(phonenumbers.parse(e164 or ''), PhoneNumberFormat.INTERNATIONAL)
+    except NumberParseException:
+        return e164 or ''
+
+
+@lru_cache(maxsize=8)
+def country_choices(lang: str = 'fr') -> tuple:
+    """Tous les pays pour la liste du formulaire : ((« DE », « Allemagne (+49) »), …), triés par nom.
+    (Le malgache n'a pas de noms de pays dans phonenumbers : ce sont alors les noms français.)"""
+    lang = 'fr' if lang in ('fr', 'mg') else 'en'
+    choices = []
+    for region in phonenumbers.SUPPORTED_REGIONS:
+        example = phonenumbers.example_number(region)
+        if example is None:
+            continue
+        name = geocoder.country_name_for_number(example, lang) or region
+        choices.append((region, f'{name} (+{example.country_code})'))
+    plain = lambda text: unicodedata.normalize('NFD', text).encode('ascii', 'ignore').decode().lower()
+    return tuple(sorted(choices, key=lambda c: plain(c[1])))
+
+
+def sms_allowed(e164: str) -> bool:
+    """Vrai si le SMS est proposé vers ce pays (SMS_COUNTRIES, vide = tous les pays)."""
+    countries = [c.strip().upper() for c in getattr(settings, 'SMS_COUNTRIES', []) if c.strip()]
+    return not countries or region_of(e164) in countries
 
 
 # ─────────────────────────────────────────────────────────────────────────────
@@ -160,26 +165,8 @@ def send_otp_sms(to: str, code: str) -> dict:
 
 
 # ─────────────────────────────────────────────────────────────────────────────
-# Numéros étrangers et WhatsApp
+# WhatsApp
 # ─────────────────────────────────────────────────────────────────────────────
-# Le code peut aussi partir par WhatsApp : utile à l'étranger (le SMS malgache n'y arrive pas,
-# WhatsApp oui) et moins cher. Par SMS, seuls les numéros malgaches sont acceptés : un SMS vers
-# l'étranger coûte cher, et des robots s'en servent pour faire payer le site (« SMS pumping »).
-
-def normalize_phone(raw: str, international: bool = False) -> Optional[str]:
-    """Le numéro au format E.164. Un numéro malgache s'écrit librement (034…, +261…) ;
-    avec international=True, un numéro étranger est accepté s'il commence par + ou 00
-    (indicatif du pays) et compte de 8 à 15 chiffres."""
-    local = normalize_madagascar_phone(raw)
-    if local or not international or not raw:
-        return local
-    digits = re.sub(r'[\s\-\.\(\)]', '', raw)
-    if digits.startswith('00'):
-        digits = '+' + digits[2:]
-    if re.fullmatch(r'\+[1-9]\d{7,14}', digits):
-        return digits
-    return None
-
 
 def _send_via_whatsapp(to: str, code: str) -> dict:
     """Le code par WhatsApp, avec l'API officielle de Meta (WhatsApp Cloud API).
