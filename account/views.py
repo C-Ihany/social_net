@@ -725,11 +725,11 @@ def phone_verify_otp(request):
 	request.user.phone_number = phone_e164
 	request.user.phone_verified = True
 
-	return JsonResponse({
+	return otp_codes.remember_country(JsonResponse({
 		'ok': True,
 		'phone_display': format_phone_display(phone_e164),
 		'message': 'Numéro vérifié avec succès !',
-	})
+	}), phone_e164)
 
 
 _INVALID_PHONE = ("Numéro invalide. Choisissez votre pays, ou écrivez le numéro avec l'indicatif "
@@ -793,7 +793,7 @@ def phone_login_view(request):
 				else:
 					login(request, user, backend='account.backends.CaseInsensitiveModelBackend')
 					destination = get_redirect_if_exists(request)
-					return redirect(destination or "post:index")
+					return otp_codes.remember_country(redirect(destination or "post:index"), phone)
 	return render(request, "account/phone_login.html", context)
 
 

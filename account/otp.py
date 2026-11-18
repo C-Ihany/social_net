@@ -36,23 +36,34 @@ def read_phone(raw, region=None):
     return normalize_phone(raw or '', region)
 
 
+# Le pays choisi la dernière fois sur cet appareil (posé après une connexion ou une confirmation
+# réussie), pour le proposer d'office la fois suivante.
+COUNTRY_COOKIE = 'vz_phone_country'
+
+
 def guess_region(request):
-    """Le pays à proposer d'abord dans la liste : celui du numéro de la personne connectée,
-    sinon celui de sa connexion (Cloudflare, s'il est devant le site), sinon celui de la langue
-    du navigateur (« fr-FR » -> FR). Rien de deviné : '' (la personne choisit)."""
+    """Le pays à proposer d'abord dans la liste : celui du numéro de la personne connectée, sinon
+    celui choisi la dernière fois sur cet appareil, sinon rien (la personne choisit).
+    Pas d'après la langue ni le lieu de connexion : quelqu'un à l'étranger garde souvent le
+    numéro de son pays, et un mauvais pays proposé d'office ferait lire un autre numéro."""
     from account.sms import country_choices
     known = {code for code, _ in country_choices()}
     user = getattr(request, 'user', None)
     candidates = [region_of(getattr(user, 'phone_number', '') or '') if user and user.is_authenticated else '',
-                  request.META.get('HTTP_CF_IPCOUNTRY', '')]
-    for part in request.META.get('HTTP_ACCEPT_LANGUAGE', '').split(','):
-        tag = part.split(';')[0].strip()
-        if '-' in tag:
-            candidates.append(tag.split('-')[-1])
+                  request.COOKIES.get(COUNTRY_COOKIE, '')]
     for code in candidates:
         if code and code.upper() in known:
             return code.upper()
     return ''
+
+
+def remember_country(response, phone):
+    """Garde le pays de ce numéro sur l'appareil (cookie d'un an, sans rien d'autre)."""
+    region = region_of(phone)
+    if region:
+        response.set_cookie(COUNTRY_COOKIE, region, max_age=365 * 24 * 3600, samesite='Lax',
+                            secure=not settings.DEBUG, httponly=True)
+    return response
 
 
 def channel_refused(phone, channel):
@@ -153,6 +164,17 @@ def check_code(phone, purpose, code, user=None):
 
 
 def account_for_phone(phone):
-    """Le compte (actif) dont ce numéro est confirmé, s'il y en a exactement un."""
+    """Le compte (actif) dont ce numéro est confirmé, s'il y en a exactement un.
+    Quand il n'y en a pas, la raison est écrite dans le journal (numéro masqué) : la page, elle,
+    répond pareil dans tous les cas, pour ne pas dire qui est inscrit."""
     found = list(Account.objects.filter(phone_number=phone, phone_verified=True, is_active=True)[:2])
-    return found[0] if len(found) == 1 else None
+    if len(found) == 1:
+        return found[0]
+    masked = phone[:4] + '…' + phone[-2:]
+    if found:
+        logger.warning('[OTP] Connexion : plusieurs comptes confirmés pour %s', masked)
+    elif Account.objects.filter(phone_number=phone).exists():
+        logger.info('[OTP] Connexion : %s existe mais n\'est pas confirmé (ou compte inactif)', masked)
+    else:
+        logger.info('[OTP] Connexion : aucun compte avec le numéro %s', masked)
+    return None

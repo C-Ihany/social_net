@@ -135,11 +135,32 @@ class PhoneLoginTests(TestCase):
         self.assertContains(response, 'momentanément indisponibles')
         self.assertEqual(SENT, [])
 
-    def test_la_page_propose_tous_les_pays_et_devine_le_sien(self):
+    def test_la_page_propose_tous_les_pays_sans_deviner_d_apres_la_langue(self):
+        """Quelqu'un à l'étranger garde souvent le numéro de son pays : la langue du navigateur ne
+        doit pas choisir le pays à sa place (034… aurait été lu comme un numéro allemand)."""
         response = self.client.get(reverse('phone-login'), HTTP_ACCEPT_LANGUAGE='de-DE,de;q=0.9')
-        self.assertContains(response, '<option value="DE" selected>')
+        self.assertNotContains(response, ' selected>')
         self.assertContains(response, 'value="MG"')
         self.assertContains(response, 'value="JP"')
+
+    def test_le_pays_est_retenu_apres_une_connexion(self):
+        self.ask_code()
+        response = self.client.post(reverse('phone-login'), {'step': 'code', 'code': SENT[0][1]})
+        self.assertEqual(response.cookies['vz_phone_country'].value, 'MG')
+        self.client.logout()                     # (le client de test vide alors ses cookies)
+        self.client.cookies['vz_phone_country'] = 'MG'
+        self.assertContains(self.client.get(reverse('phone-login')), '<option value="MG" selected>')
+
+    def test_numero_range_par_la_migration_puis_retrouve(self):
+        """Un numéro écrit à la main (« 034 12 345 67 ») est rangé en +261341234567 et retrouvé."""
+        import importlib
+        from django.apps import apps
+        Account.objects.filter(pk=self.user.pk).update(phone_number='034 12 345 67')
+        importlib.import_module('account.migrations.0012_numeros_au_format_e164').tidy(apps, None)
+        self.user.refresh_from_db()
+        self.assertEqual(self.user.phone_number, '+261341234567')
+        self.ask_code()
+        self.assertEqual(len(SENT), 1)
 
     def test_code_par_email_a_l_adresse_du_compte(self):
         """À l'étranger sans SMS ni WhatsApp : le code part à l'e-mail du compte lié au numéro."""
@@ -220,3 +241,18 @@ class PhoneNumberTests(TestCase):
         self.assertEqual(body['to'], '33612345678')
         self.assertEqual(body['template']['components'][0]['parameters'][0]['text'], '123456')
         self.assertEqual(post.call_args.kwargs['headers']['Authorization'], 'Bearer jeton')
+
+
+class AdminPhoneTests(TestCase):
+    def test_l_administration_range_le_numero(self):
+        from account.admin import AccountAdminForm
+        user = Account.objects.create_user('lova@example.com', 'lova', 'motdepasse-solide-123')
+        form = AccountAdminForm(instance=user)
+        form.cleaned_data = {'phone_number': '+261 34 12 345 67'}
+        self.assertEqual(form.clean_phone_number(), '+261341234567')
+        form.cleaned_data = {'phone_number': '+33 6 12 34 56 78'}
+        self.assertEqual(form.clean_phone_number(), '+33612345678')
+        form.cleaned_data = {'phone_number': '034 12 345 67'}      # (sans indicatif : refusé)
+        from django import forms
+        with self.assertRaises(forms.ValidationError):
+            form.clean_phone_number()

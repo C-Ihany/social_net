@@ -51,6 +51,21 @@ def normalize_phone(raw: str, region: Optional[str] = None) -> Optional[str]:
     return phonenumbers.format_number(number, PhoneNumberFormat.E164)
 
 
+def tidy_phone(raw: str, region: Optional[str] = None) -> Optional[str]:
+    """Le numéro au format E.164 s'il est valable (mobile ou non), sinon None. Pour ranger un
+    numéro écrit à la main (administration, anciens comptes) dans le format que cherche le site."""
+    raw = (raw or '').strip()
+    if raw.startswith('00'):
+        raw = '+' + raw[2:]
+    try:
+        number = phonenumbers.parse(raw, (region or '').upper() or None)
+    except NumberParseException:
+        return None
+    if not phonenumbers.is_valid_number(number):
+        return None
+    return phonenumbers.format_number(number, PhoneNumberFormat.E164)
+
+
 def region_of(e164: str) -> str:
     """Le pays d'un numéro E.164 (« DE »), ou '' s'il est illisible."""
     try:
