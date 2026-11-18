@@ -57,6 +57,29 @@ class PolaApiTests(TestCase):
         data = self.post(client, 'verifier', {'code': SENT[-1][1]}).json()
         self.assertEqual((data['created'], data['me']['username'], data['me']['mode']), (False, 'lova', 'community'))
 
+    def test_membre_qui_demande_pola_seulement_reste_membre_et_le_sait(self):
+        client = Client()
+        client.get('/api/pola/bonjour')
+        self.post(client, 'code', {'phone': '+261341234567'})
+        data = self.post(client, 'verifier', {'code': SENT[-1][1], 'mode': 'pola'}).json()
+        self.assertEqual((data['member'], data['me']['mode']), (True, 'community'))
+
+    def test_pola_seulement_ne_liste_que_les_conversations_avec_pola(self):
+        from chat.utils import find_or_create_private_chat
+        client, miora = self.sign_up(mode='community')
+        rado = Account.objects.create_user('rado@example.com', 'rado', 'motdepasse-solide-789')
+        find_or_create_private_chat(miora, rado)                          # un membre du site seulement
+        friend = Account.objects.create_user('hery@example.com', 'hery', 'motdepasse-solide-456')
+        friend.pola_mode = 'pola'
+        friend.save()
+        find_or_create_private_chat(miora, friend)                        # un utilisateur de Pola
+        names = lambda: sorted(c['person']['username'] for c in client.get('/api/pola/conversations').json()['conversations'])
+        PrivateChatRoom.objects.update(is_active=True)
+        self.assertEqual(names(), ["hery", "rado"])
+        self.post(client, 'mode', {'mode': 'pola'})
+        self.assertEqual(names(), ['hery'])
+        self.assertEqual(PrivateChatRoom.objects.count(), 2)              # (rien n'est effacé)
+
     def test_pola_seulement_invisible_sur_le_reseau_social(self):
         _, hidden = self.sign_up()
         web = Client()

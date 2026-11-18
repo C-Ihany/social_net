@@ -127,7 +127,7 @@ def verify_code(request):
     otp, error = otp_codes.check_code(phone, 'login' if account else 'signup', data.get('code'))
     if error:
         return JsonResponse({'error': error}, status=400)
-    created = False
+    created = member = False
     if account is None:
         name = (data.get('name') or '').strip()
         if not name:
@@ -151,12 +151,17 @@ def verify_code(request):
         account.save()
         created = True
     elif not account.pola_mode:
-        account.pola_mode = Account.POLA_COMMUNITY      # (déjà membre de Vazimba : il l'était)
+        # Déjà membre de Vazimba : il le reste, même s'il a demandé « Pola seulement » (le cacher
+        # d'un coup à tous ses amis serait une surprise). Pola le lui dit (`member`) et lui
+        # propose de passer en « Pola seulement » dans ses réglages.
+        account.pola_mode = Account.POLA_COMMUNITY
         account.save(update_fields=['pola_mode'])
+    if not created and data.get('mode') == Account.POLA_ONLY and account.pola_mode == Account.POLA_COMMUNITY:
+        member = True
     request.session.pop('pola_phone', None)
     login(request, account, backend=_BACKEND)
     request.session.set_expiry(SESSION_DAYS * 24 * 3600)
-    return JsonResponse({'ok': True, 'created': created, 'me': _me(account)})
+    return JsonResponse({'ok': True, 'created': created, 'member': member, 'me': _me(account)})
 
 
 @require_POST
@@ -205,6 +210,10 @@ def conversations(request):
     me = request.user
     rooms = (PrivateChatRoom.objects.filter(Q(user1=me) | Q(user2=me), is_active=True)
              .select_related('user1', 'user2'))
+    if me.pola_mode == Account.POLA_ONLY:
+        # « Pola seulement » : seulement les conversations avec des utilisateurs de Pola ;
+        # celles avec les membres de Vazimba restent sur le site, rien n'est effacé.
+        rooms = rooms.filter((Q(user1=me) & ~Q(user2__pola_mode='')) | (Q(user2=me) & ~Q(user1__pola_mode='')))
     unread = dict(UnreadChatRoomMessages.objects.filter(user=me, room__in=rooms).values_list('room_id', 'count'))
     result = []
     for room in rooms:
