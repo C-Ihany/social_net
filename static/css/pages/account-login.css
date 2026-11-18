@@ -249,3 +249,17 @@
 }
 
 .auth-errors .material-icons { font-size: 1rem; flex-shrink: 0; }
+
+/* ── Connexion par numéro de téléphone ─────────────────────────────────── */
+.auth-btn-phone {
+    display: flex; align-items: center; justify-content: center; gap: .5rem;
+    text-decoration: none; margin-top: .75rem;
+}
+.auth-channels { display: flex; gap: .75rem; }
+.auth-channel {
+    flex: 1; display: flex; align-items: center; justify-content: center; gap: .4rem;
+    padding: .7rem; border-radius: var(--radius); cursor: pointer;
+    border: 1px solid rgba(var(--accent-rgb), .35); font-weight: 600;
+}
+.auth-channel:has(input:checked) { background: rgba(var(--accent-rgb), .12); border-color: var(--accent); }
+.auth-hint { display: block; margin-top: .4rem; opacity: .7; font-size: .8rem; }

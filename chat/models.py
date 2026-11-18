@@ -8,6 +8,7 @@ from django.dispatch import receiver
 from django.urls import reverse
 
 from notification.models import Notification
+from ZOOT.storage import private_storage
 
 class PrivateChatRoom(models.Model):
 	"""
@@ -73,7 +74,9 @@ class RoomChatMessage(models.Model):
 	content   = models.TextField(unique=False, blank=True, default='')
 
 	# ── File attachment ──────────────────────────────────────────────────────
-	file      = models.FileField(upload_to='chat_files/', blank=True, null=True)
+	# (dans le seau PRIVÉ quand il est configuré : voir ZOOT/storage.py ; on n'y accède que par
+	#  file_link, jamais par file.url, qui serait un lien direct)
+	file      = models.FileField(upload_to='chat_files/', blank=True, null=True, storage=private_storage)
 	# 'image' | 'video' | 'document' | '' (text-only)
 	file_type = models.CharField(max_length=20, blank=True, default='')
 
@@ -92,6 +95,12 @@ class RoomChatMessage(models.Model):
 		if self.file:
 			return f'[{self.file_type or "file"}] {self.file.name}'
 		return self.content[:80]
+
+	@property
+	def file_link(self):
+		"""L'adresse à donner au navigateur pour ce fichier : une page de Vazimba qui vérifie
+		que la personne est dans la conversation avant de le montrer (chat.views.chat_file)."""
+		return reverse('chat:file', args=[self.pk]) if self.file else ''
 
 
 class MessageReaction(models.Model):

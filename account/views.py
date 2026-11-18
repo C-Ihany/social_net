@@ -631,14 +631,15 @@ def update_cover_image(request):
 
 
 # ─────────────────────────────────────────────────────────────────────────────
-# Vérification du numéro de téléphone par SMS / OTP
+# Vérification du numéro de téléphone, et connexion par numéro (code SMS ou WhatsApp)
 # ─────────────────────────────────────────────────────────────────────────────
 
 from django.views.decorators.http import require_POST
 from django.utils import timezone
 from datetime import timedelta
 import secrets
-from account.sms import normalize_madagascar_phone, send_otp_sms, format_phone_display
+from account.sms import format_phone_display, otp_channels
+from account import otp as otp_codes
 
 
 def _json_body(request):
@@ -656,69 +657,45 @@ def _json_body(request):
 @require_POST
 def phone_send_otp(request):
 	"""
-	Envoie un code OTP par SMS au numéro fourni.
+	Envoie un code pour confirmer le numéro du compte connecté.
 	POST /account/phone/envoyer-code/
-	Body (JSON ou form) : { "phone": "034 12 345 67" }
+	Body (JSON ou form) : { "phone": "034 12 345 67", "channel": "sms" | "whatsapp" }
+	(« channel » est facultatif : sans lui, le premier moyen proposé.)
 	"""
 	if not request.user.is_authenticated:
 		return JsonResponse({'error': 'Connexion requise.'}, status=401)
 
-	raw = request.POST.get('phone') or _json_body(request).get('phone', '')
-
-	# Normaliser le numéro
-	phone_e164 = normalize_madagascar_phone(raw or '')
+	data = request.POST or _json_body(request)
+	channel = otp_codes.pick_channel(data.get('channel', ''))
+	phone_e164 = otp_codes.read_phone(data.get('phone', ''), channel)
 	if not phone_e164:
 		return JsonResponse({
-			'error': 'Numéro invalide. Utilisez le format 034 XX XXX XX (Airtel), 032/033 (Orange), ou 038 (Telma).'
+			'error': 'Numéro invalide. Utilisez le format 034 XX XXX XX (Airtel), 032/033 (Orange), ou 038 (Telma)'
+			         + (' ; à l\'étranger, +indicatif du pays (code par WhatsApp).' if 'whatsapp' in otp_channels() else '.')
 		}, status=400)
-
-	# Rate limiting DB : max 3 envois par numéro par heure
-	one_hour_ago = timezone.now() - timedelta(hours=1)
-	recent_sends = PhoneVerification.objects.filter(
-		phone=phone_e164,
-		created_at__gte=one_hour_ago,
-	).count()
-	if recent_sends >= PhoneVerification.MAX_SENDS_PER_HOUR:
+	# Un numéro déjà confirmé par un autre compte ne peut pas l'être une 2e fois : sinon, la
+	# connexion par numéro ne saurait plus quel compte ouvrir.
+	if Account.objects.filter(phone_number=phone_e164, phone_verified=True).exclude(pk=request.user.pk).exists():
+		return JsonResponse({'error': 'Ce numéro est déjà lié à un autre compte.'}, status=400)
+	if otp_codes.too_many_sends(phone_e164):
 		return JsonResponse({
 			'error': 'Trop de tentatives. Attendez 1 heure avant de demander un nouveau code.'
 		}, status=429)
-
-	# Invalider les anciens codes non utilisés pour ce user + numéro
-	PhoneVerification.objects.filter(
-		user=request.user,
-		phone=phone_e164,
-		verified=False,
-	).update(attempts=PhoneVerification.MAX_ATTEMPTS)  # invalider par épuisement tentatives
-
-	# Générer et stocker le nouveau code
-	code = PhoneVerification.generate_code()
-	otp = PhoneVerification.objects.create(
-		user=request.user,
-		phone=phone_e164,
-		code=code,
-	)
-
-	# Envoyer par SMS
-	try:
-		send_otp_sms(phone_e164, code)
-	except Exception as exc:
-		logger.error('[OTP] Envoi SMS échoué vers %s : %s', phone_e164, exc)
-		otp.delete()  # ne pas garder un code non envoyé
-		return JsonResponse({
-			'error': "Echec d'envoi SMS. Verifiez le numero et reessayez."
-		}, status=500)
-
+	error = otp_codes.issue_code(request.user, phone_e164, 'verify', channel)
+	if error:
+		return JsonResponse({'error': error}, status=500)
 	return JsonResponse({
 		'ok': True,
 		'phone_display': format_phone_display(phone_e164),
 		'valid_minutes': PhoneVerification.OTP_VALID_MINUTES,
+		'channel': channel,
 	})
 
 
 @require_POST
 def phone_verify_otp(request):
 	"""
-	Vérifie le code OTP saisi par l'utilisateur.
+	Vérifie le code saisi par l'utilisateur connecté, et confirme son numéro.
 	POST /account/phone/verifier/
 	Body (JSON ou form) : { "phone": "034 12 345 67", "code": "123456" }
 	"""
@@ -726,56 +703,13 @@ def phone_verify_otp(request):
 		return JsonResponse({'error': 'Connexion requise.'}, status=401)
 
 	data  = request.POST or _json_body(request)
-	raw   = data.get('phone', '')
-	code  = (data.get('code') or '').strip()
-
-	phone_e164 = normalize_madagascar_phone(raw)
+	phone_e164 = otp_codes.read_phone(data.get('phone', ''), 'whatsapp')
 	if not phone_e164:
 		return JsonResponse({'error': 'Numéro invalide.'}, status=400)
-	if not code or not code.isdigit() or len(code) != 6:
-		return JsonResponse({'error': 'Le code doit comporter 6 chiffres.'}, status=400)
+	otp, error = otp_codes.check_code(phone_e164, 'verify', data.get('code'), user=request.user)
+	if error:
+		return JsonResponse({'error': error}, status=400)
 
-	# Chercher le code valide le plus récent pour ce user+numéro
-	try:
-		otp = (
-			PhoneVerification.objects
-			.filter(
-				user=request.user,
-				phone=phone_e164,
-				verified=False,
-				attempts__lt=PhoneVerification.MAX_ATTEMPTS,
-			)
-			.latest('created_at')
-		)
-	except PhoneVerification.DoesNotExist:
-		return JsonResponse({
-			'error': 'Aucun code en cours pour ce numéro. Demandez-en un nouveau.'
-		}, status=400)
-
-	# Vérifier l'expiration
-	if otp.is_expired:
-		return JsonResponse({
-			'error': 'Code expiré. Demandez un nouveau code.'
-		}, status=400)
-
-	# Incrémenter le compteur de tentatives
-	otp.attempts += 1
-	otp.save(update_fields=['attempts'])
-
-	# compare_digest : comparaison en temps constant (pas de fuite par timing).
-	if not secrets.compare_digest(otp.code, code):
-		remaining = PhoneVerification.MAX_ATTEMPTS - otp.attempts
-		if remaining <= 0:
-			return JsonResponse({'error': 'Trop de tentatives incorrectes. Demandez un nouveau code.'}, status=400)
-		return JsonResponse({
-			'error': f'Code incorrect. {remaining} tentative(s) restante(s).'
-		}, status=400)
-
-	# Succes : marquer comme vérifié
-	otp.verified = True
-	otp.save(update_fields=['verified'])
-
-	# Mettre à jour l'utilisateur
 	Account.objects.filter(pk=request.user.pk).update(
 		phone_number=phone_e164,
 		phone_verified=True,
@@ -789,6 +723,60 @@ def phone_verify_otp(request):
 		'phone_display': format_phone_display(phone_e164),
 		'message': 'Numéro vérifié avec succès !',
 	})
+
+
+# Ce qu'on répond quand un code est demandé, QUE LE NUMÉRO AIT UN COMPTE OU NON : sinon la
+# page dirait à n'importe qui quels numéros sont inscrits sur Vazimba.
+_CODE_SENT = "Si ce numéro est lié à un compte Vazimba, un code vient d'y être envoyé."
+
+
+def phone_login_view(request):
+	"""Connexion avec son numéro de téléphone et un code reçu par SMS ou WhatsApp.
+
+	1. GET : le formulaire du numéro (et le choix SMS / WhatsApp) ;
+	2. POST step=numero : envoi du code (si un compte a ce numéro confirmé) ;
+	3. POST step=code : vérification, puis connexion.
+	Seuls les comptes dont le numéro a été confirmé peuvent se connecter ainsi.
+	"""
+	if request.user.is_authenticated:
+		return redirect("post:index")
+	channels = otp_channels()
+	context = {'channels': channels, 'step': 'numero'}
+	if request.method == 'POST' and request.POST.get('step') == 'numero':
+		channel = otp_codes.pick_channel(request.POST.get('channel', ''))
+		phone = otp_codes.read_phone(request.POST.get('phone', ''), channel)
+		context.update(channel=channel, phone_raw=request.POST.get('phone', ''))
+		if not phone:
+			context['error'] = ("Numéro invalide. Un numéro malgache (034…) ; à l'étranger, +indicatif du pays "
+			                    "et choisissez WhatsApp.")
+		elif otp_codes.too_many_sends(phone):
+			context['error'] = 'Trop de codes demandés pour ce numéro. Réessayez dans une heure.'
+		else:
+			account = otp_codes.account_for_phone(phone)
+			error = otp_codes.issue_code(account, phone, 'login', channel) if account else None
+			if error:
+				context['error'] = error
+			else:
+				request.session['phone_login'] = phone
+				context.update(step='code', info=_CODE_SENT, phone_display=format_phone_display(phone))
+	elif request.method == 'POST' and request.POST.get('step') == 'code':
+		phone = request.session.get('phone_login')
+		if not phone:
+			context['error'] = 'Recommencez : indiquez votre numéro.'
+		else:
+			otp, error = otp_codes.check_code(phone, 'login', request.POST.get('code'))
+			if error:
+				context.update(step='code', error=error, phone_display=format_phone_display(phone))
+			else:
+				request.session.pop('phone_login', None)
+				user = otp.user
+				if not user.is_active:
+					context['error'] = 'Ce compte est désactivé.'
+				else:
+					login(request, user, backend='account.backends.CaseInsensitiveModelBackend')
+					destination = get_redirect_if_exists(request)
+					return redirect(destination or "post:index")
+	return render(request, "account/phone_login.html", context)
 
 
 # ── Blocage d'un utilisateur ────────────────────────────────────────────────

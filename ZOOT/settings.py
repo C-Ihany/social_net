@@ -289,6 +289,9 @@ R2_ACCOUNT_ID        = config('R2_ACCOUNT_ID', default=None)
 R2_ACCESS_KEY_ID     = config('R2_ACCESS_KEY_ID', default=None) or config('R2_ACCESS_KEY', default=None)
 R2_SECRET_ACCESS_KEY = config('R2_SECRET_ACCESS_KEY', default=None)
 R2_BUCKET_NAME       = config('R2_BUCKET_NAME', default='vazimba-media')
+# Seau R2 SANS accès public pour les fichiers du chat privé (voir ZOOT/storage.py). Tant
+# qu'il n'est pas défini, ces fichiers restent dans le seau public (comportement d'avant).
+R2_PRIVATE_BUCKET_NAME = config('R2_PRIVATE_BUCKET_NAME', default=None)
 # Support both R2_PUBLIC_URL and CLOUDFLARE_R2_PUBLIC_URL
 _r2_pub_raw = config('R2_PUBLIC_URL', default=None) or config('CLOUDFLARE_R2_PUBLIC_URL', default=None)
 # Strip https:// prefix if present (we add it ourselves)
@@ -373,6 +376,16 @@ AT_SENDER    = config('AT_SENDER',   default='VAZIMBA')
 SMS_OTP_VALID_MINUTES = 10
 # Max envois par numéro par heure (anti-abus)
 SMS_OTP_MAX_SENDS_PER_HOUR = 3
+
+# ── WhatsApp (envoi du code, WhatsApp Cloud API de Meta) ─────────────────────
+# Variables Railway à créer (voir account/sms.py, _send_via_whatsapp) :
+#   WHATSAPP_TOKEN     → jeton d'accès permanent (utilisateur système de Meta Business)
+#   WHATSAPP_PHONE_ID  → identifiant du numéro expéditeur (pas le numéro lui-même)
+#   WHATSAPP_TEMPLATE  → nom du modèle « Authentification » approuvé (défaut : code_vazimba)
+WHATSAPP_TOKEN    = config('WHATSAPP_TOKEN', default='')
+WHATSAPP_PHONE_ID = config('WHATSAPP_PHONE_ID', default='')
+WHATSAPP_TEMPLATE = config('WHATSAPP_TEMPLATE', default='code_vazimba')
+WHATSAPP_LANG     = config('WHATSAPP_LANG', default='fr')
 
 # ── Recherche musique (Jamendo — gratuit, libre de droits) ────────────────────
 # Créer un compte gratuit sur https://developer.jamendo.com/ pour obtenir un client_id

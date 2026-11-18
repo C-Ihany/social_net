@@ -50,7 +50,7 @@ class LazyRoomChatMessageEncoder(Serializer):
         # Determine message type
         if obj.file:
             dump_object['msg_type']  = MSG_TYPE_FILE
-            dump_object['file_url']  = str(obj.file.url)
+            dump_object['file_url']  = obj.file_link       # (lien vérifié, jamais l'adresse directe)
             dump_object['file_name'] = obj.file.name.split('/')[-1]
             dump_object['file_type'] = obj.file_type or 'document'
         else:

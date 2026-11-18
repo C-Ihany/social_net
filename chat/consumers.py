@@ -397,6 +397,12 @@ class ChatConsumer(AsyncJsonWebsocketConsumer):
 			raise ClientError("ROOM_ACCESS_DENIED", "Room access denied")
 
 		room = await get_room_or_error(room_id, self.scope["user"])
+		# L'adresse du fichier ne vient JAMAIS du navigateur : on la recalcule d'après le message,
+		# s'il est bien à cette personne et dans cette conversation. Avant, n'importe quel lien
+		# envoyé ici s'affichait chez l'autre comme une pièce jointe.
+		file_url = await file_link_or_none(msg_id, room, self.scope["user"])
+		if not file_url:
+			raise ClientError("FILE_ACCESS_DENIED", "Fichier introuvable dans cette conversation")
 		connected_users = await get_connected_users(room)
 
 		# Increment unread count for the other (disconnected) user
@@ -647,6 +653,16 @@ class ChatConsumer(AsyncJsonWebsocketConsumer):
 			errorData['message'] = e.message
 			await self.send_json(errorData)
 		return
+
+
+@database_sync_to_async
+def file_link_or_none(msg_id, room, user):
+	"""Le lien vérifié d'un fichier envoyé par `user` dans `room`, sinon None."""
+	try:
+		msg = RoomChatMessage.objects.get(pk=int(msg_id), room=room, user=user)
+	except (RoomChatMessage.DoesNotExist, TypeError, ValueError):
+		return None
+	return msg.file_link or None
 
 
 @database_sync_to_async

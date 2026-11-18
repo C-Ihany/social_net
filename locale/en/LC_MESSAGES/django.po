@@ -4300,3 +4300,33 @@ msgstr "Something went wrong"
 #: coquille (2026-11)
 msgid "Search by name or email…"
 msgstr "Search by name or email…"
+
+msgid "Sign in with my phone number"
+msgstr "Sign in with my phone number"
+
+msgid "Enter the code you received."
+msgstr "Enter the code you received."
+
+msgid "6-digit code"
+msgstr "6-digit code"
+
+msgid "Resend a code"
+msgstr "Resend a code"
+
+msgid "We send you a code to sign in. Only for accounts whose number has been confirmed."
+msgstr "We send you a code to sign in. Only for accounts whose number has been confirmed."
+
+msgid "Phone number"
+msgstr "Phone number"
+
+msgid "Receive the code by"
+msgstr "Receive the code by"
+
+msgid "Abroad: write +country code, and choose WhatsApp."
+msgstr "Abroad: write +country code, and choose WhatsApp."
+
+msgid "Receive a code"
+msgstr "Receive a code"
+
+msgid "Sign in with my email address"
+msgstr "Sign in with my email address"

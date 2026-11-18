@@ -27,6 +27,7 @@ from django.contrib.auth import views as auth_views
 from account.views import (
     register_view,
     login_view,
+    phone_login_view,
     logout_view,
     account_view,
     account_search_view,
@@ -61,6 +62,9 @@ urlpatterns = [
 
     path('register/', ratelimit('5/h', key='ip')(register_view), name="register"),
     path('login/', ratelimit('10/5m', key='ip')(login_view), name="login"),
+    # Connexion par numéro : 10 demandes par heure et par adresse IP (envois de codes et essais
+    # confondus), en plus des 3 codes par numéro et par heure et des 5 essais par code.
+    path('connexion-telephone/', ratelimit('10/h', key='ip')(phone_login_view), name="phone-login"),
     path('logout/', logout_view, name="logout"),
     path('search/', account_search_view, name="search"),
     path('recherche/', global_search_view, name="recherche"),

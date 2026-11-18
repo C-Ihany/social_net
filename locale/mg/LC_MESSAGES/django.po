@@ -4360,3 +4360,33 @@ msgstr "Tsy misy hafatra vaovao"
 #: coquille (2026-11)
 msgid "Une erreur est survenue"
 msgstr "Nisy olana nitranga"
+
+msgid "Sign in with my phone number"
+msgstr "Hiditra amin'ny laharan-telefaonako"
+
+msgid "Enter the code you received."
+msgstr "Ampidiro ny kaody voarainao."
+
+msgid "6-digit code"
+msgstr "Kaody misy isa 6"
+
+msgid "Resend a code"
+msgstr "Handray kaody vaovao"
+
+msgid "We send you a code to sign in. Only for accounts whose number has been confirmed."
+msgstr "Handefa kaody ho anao izahay hidiranao. Ho an'ny kaonty efa voamarina ny laharany ihany."
+
+msgid "Phone number"
+msgstr "Laharan-telefaona"
+
+msgid "Receive the code by"
+msgstr "Handray ny kaody amin'ny alalan'ny"
+
+msgid "Abroad: write +country code, and choose WhatsApp."
+msgstr "Any ivelany : soraty ny +kaodin'ny firenena, ary safidio WhatsApp."
+
+msgid "Receive a code"
+msgstr "Handray kaody"
+
+msgid "Sign in with my email address"
+msgstr "Hiditra amin'ny adiresy mailako"

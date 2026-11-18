@@ -157,3 +157,83 @@ def send_otp_sms(to: str, code: str) -> dict:
     else:
         # Fallback console (développement ou backend inconnu)
         return _send_via_console(to, message)
+
+
+# ─────────────────────────────────────────────────────────────────────────────
+# Numéros étrangers et WhatsApp
+# ─────────────────────────────────────────────────────────────────────────────
+# Le code peut aussi partir par WhatsApp : utile à l'étranger (le SMS malgache n'y arrive pas,
+# WhatsApp oui) et moins cher. Par SMS, seuls les numéros malgaches sont acceptés : un SMS vers
+# l'étranger coûte cher, et des robots s'en servent pour faire payer le site (« SMS pumping »).
+
+def normalize_phone(raw: str, international: bool = False) -> Optional[str]:
+    """Le numéro au format E.164. Un numéro malgache s'écrit librement (034…, +261…) ;
+    avec international=True, un numéro étranger est accepté s'il commence par + ou 00
+    (indicatif du pays) et compte de 8 à 15 chiffres."""
+    local = normalize_madagascar_phone(raw)
+    if local or not international or not raw:
+        return local
+    digits = re.sub(r'[\s\-\.\(\)]', '', raw)
+    if digits.startswith('00'):
+        digits = '+' + digits[2:]
+    if re.fullmatch(r'\+[1-9]\d{7,14}', digits):
+        return digits
+    return None
+
+
+def _send_via_whatsapp(to: str, code: str) -> dict:
+    """Le code par WhatsApp, avec l'API officielle de Meta (WhatsApp Cloud API).
+
+    Il faut un modèle de message « Authentification » approuvé par Meta (WHATSAPP_TEMPLATE,
+    en français), avec le bouton « Copier le code » : c'est la seule forme de message que
+    WhatsApp laisse envoyer à quelqu'un qui n'a pas écrit en premier. Réglages :
+    WHATSAPP_TOKEN, WHATSAPP_PHONE_ID (identifiant du numéro expéditeur chez Meta)."""
+    import requests
+    token = getattr(settings, 'WHATSAPP_TOKEN', '')
+    phone_id = getattr(settings, 'WHATSAPP_PHONE_ID', '')
+    if not token or not phone_id:
+        raise RuntimeError('WhatsApp non configuré (WHATSAPP_TOKEN, WHATSAPP_PHONE_ID).')
+    body = {
+        'messaging_product': 'whatsapp',
+        'to': to.lstrip('+'),
+        'type': 'template',
+        'template': {
+            'name': getattr(settings, 'WHATSAPP_TEMPLATE', 'code_vazimba'),
+            'language': {'code': getattr(settings, 'WHATSAPP_LANG', 'fr')},
+            'components': [
+                {'type': 'body', 'parameters': [{'type': 'text', 'text': code}]},
+                # (le bouton « Copier le code » des modèles d'authentification reçoit le code aussi)
+                {'type': 'button', 'sub_type': 'url', 'index': '0',
+                 'parameters': [{'type': 'text', 'text': code}]},
+            ],
+        },
+    }
+    response = requests.post(
+        f'https://graph.facebook.com/{getattr(settings, "WHATSAPP_API_VERSION", "v21.0")}/{phone_id}/messages',
+        json=body, headers={'Authorization': f'Bearer {token}'}, timeout=15,
+    )
+    if response.status_code >= 300:
+        # (le corps de la réponse dit pourquoi ; jamais le jeton dans le journal)
+        raise RuntimeError(f'WhatsApp : erreur {response.status_code} — {response.text[:300]}')
+    return {'status': 'ok', 'backend': 'whatsapp'}
+
+
+def otp_channels() -> list:
+    """Les moyens d'envoi du code proposés : WhatsApp s'il est configuré, le SMS si un
+    fournisseur l'est. En développement, les deux (le code s'affiche dans le terminal)."""
+    channels = []
+    if getattr(settings, 'WHATSAPP_TOKEN', '') or settings.DEBUG:
+        channels.append('whatsapp')
+    if getattr(settings, 'SMS_BACKEND', 'console') != 'console' or settings.DEBUG:
+        channels.append('sms')
+    return channels
+
+
+def send_otp(to: str, code: str, channel: str = 'sms') -> dict:
+    """Envoie le code par le moyen choisi (« sms » ou « whatsapp »). En développement (aucun
+    fournisseur réglé), le code s'affiche dans le terminal de Django."""
+    if channel == 'whatsapp':
+        if not getattr(settings, 'WHATSAPP_TOKEN', '') and settings.DEBUG:
+            return _send_via_console(to, f'[WhatsApp] Votre code Vazimba : {code}')
+        return _send_via_whatsapp(to, code)
+    return send_otp_sms(to, code)

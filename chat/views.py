@@ -2,7 +2,7 @@ from django.db.models import Q, Max
 from django.shortcuts import render, redirect
 from django.urls import reverse
 from urllib.parse import urlencode
-from django.http import HttpResponse, JsonResponse
+from django.http import FileResponse, Http404, HttpResponse, HttpResponseRedirect, JsonResponse
 from django.conf import settings
 from django.contrib.auth.decorators import login_required
 from django.views.decorators.http import require_POST
@@ -143,6 +143,47 @@ _BLOCKED_EXTENSIONS = {
 }
 
 
+# ── Fichier du chat privé ─────────────────────────────────────────────────────
+@login_required(login_url="login")
+def chat_file(request, msg_id):
+    """Donne un fichier du chat privé, seulement à l'une des deux personnes de la conversation.
+
+    Avant, les messages portaient l'adresse publique du fichier sur R2 : n'importe qui ayant le
+    lien pouvait l'ouvrir, sans compte, pour toujours. Maintenant le lien passe par ici :
+    - en production (seau privé) : redirection vers un lien signé, valable 5 minutes ;
+    - en développement (disque) : le fichier est envoyé directement.
+    Un fichier envoyé avant ce changement (encore dans le seau public) reste donné par son
+    ancienne adresse tant qu'il n'a pas été déplacé (commande chat_fichiers_prives).
+    """
+    from ZOOT.storage import is_private_storage
+    msg = RoomChatMessage.objects.select_related('room').filter(pk=msg_id).first()
+    # (même réponse si le message n'existe pas ou n'est pas à vous : rien à deviner)
+    if not msg or not msg.file or request.user.pk not in (msg.room.user1_id, msg.room.user2_id):
+        raise Http404()
+    storage = msg.file.storage
+    if is_private_storage(storage):
+        if not storage.exists(msg.file.name):
+            # Ancien fichier, pas encore déplacé dans le seau privé : on le cherche là où il était.
+            from django.core.files.storage import default_storage
+            if not default_storage.exists(msg.file.name):
+                raise Http404()
+            response = HttpResponseRedirect(default_storage.url(msg.file.name))
+        else:
+            response = HttpResponseRedirect(storage.url(msg.file.name))
+    else:
+        try:
+            handle = msg.file.open('rb')
+        except (FileNotFoundError, OSError):
+            raise Http404()
+        inline = msg.file_type in ('image', 'video', 'voice')
+        response = FileResponse(handle, as_attachment=not inline, filename=os.path.basename(msg.file.name))
+        response['X-Content-Type-Options'] = 'nosniff'
+    # (ni le navigateur ni un proxy ne doivent garder ce fichier ou ce lien)
+    response['Cache-Control'] = 'private, no-store'
+    response['Referrer-Policy'] = 'no-referrer'
+    return response
+
+
 # ── File upload endpoint ──────────────────────────────────────────────────────
 @login_required(login_url="login")
 @require_POST
@@ -200,7 +241,7 @@ def upload_chat_file(request):
     )
 
     file_name = os.path.basename(f.name)
-    file_url  = msg.file.url
+    file_url  = msg.file_link        # (jamais l'adresse directe du stockage : voir chat_file)
 
     # ── Broadcast immédiat via channel layer ──────────────────────────────────
     # Évite le 2ème aller-retour client → WS consumer : le destinataire voit

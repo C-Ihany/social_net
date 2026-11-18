@@ -8,6 +8,7 @@ from chat.views import (
 	send_story_reply,
 	call_reject_push,
 	get_ice_servers,
+	chat_file,
 )
 
 app_name = 'chat'
@@ -19,4 +20,6 @@ urlpatterns = [
 	path('story-reply/',               send_story_reply,               name='story_reply'),
 	path('call-reject-push/',          call_reject_push,               name='call-reject-push'),
 	path('ice-servers/',               get_ice_servers,                name='ice-servers'),
+	# Un fichier du chat privé : seulement pour les deux personnes de la conversation.
+	path('fichier/<int:msg_id>/',      ratelimit('120/m', methods=('GET',))(chat_file), name='file'),
 ]

@@ -241,10 +241,16 @@ class PhoneVerification(models.Model):
         verbose_name='Numéro en cours de vérification',
         help_text='Format E.164 (+261XXXXXXXXX)',
     )
+    # L'EMPREINTE du code (HMAC avec la clé secrète du site), jamais le code lui-même : quelqu'un
+    # qui lirait la base (sauvegarde, accès à l'hébergeur) ne pourrait pas s'en servir.
     code = models.CharField(
-        max_length=6,
-        verbose_name='Code OTP',
+        max_length=64,
+        verbose_name='Empreinte du code',
     )
+    # « verify » : confirmer le numéro d'un compte ; « login » : se connecter avec son numéro.
+    purpose    = models.CharField(max_length=10, default='verify', verbose_name='But')
+    # « sms » ou « whatsapp »
+    channel    = models.CharField(max_length=10, default='sms', verbose_name='Envoyé par')
     created_at = models.DateTimeField(auto_now_add=True, verbose_name='Créé le')
     attempts   = models.PositiveSmallIntegerField(default=0, verbose_name='Tentatives')
     verified   = models.BooleanField(default=False, verbose_name='Validé')
@@ -268,6 +274,18 @@ class PhoneVerification(models.Model):
     def generate_code(cls):
         # secrets (et non random) : un OTP doit être imprévisible.
         return ''.join(secrets.choice(string.digits) for _ in range(6))
+
+    @staticmethod
+    def digest(phone, code):
+        """L'empreinte d'un code pour un numéro (c'est elle qu'on garde, puis qu'on compare)."""
+        import hashlib
+        import hmac
+        from django.conf import settings
+        return hmac.new(settings.SECRET_KEY.encode(), f'{phone}:{code}'.encode(), hashlib.sha256).hexdigest()
+
+    def matches(self, code):
+        """Le code saisi est-il le bon ? (comparaison en temps constant)"""
+        return secrets.compare_digest(self.code, self.digest(self.phone, code))
 
     @property
     def is_expired(self):

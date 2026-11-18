@@ -70,6 +70,10 @@
 
         <div class="auth-divider">ou</div>
 
+        <a class="auth-btn auth-btn-phone" href="{% url 'phone-login' %}{% if request.GET.next %}?next={{ request.GET.next|urlencode }}{% endif %}">
+            <span class="material-icons">smartphone</span> {% trans "Sign in with my phone number" %}
+        </a>
+
         <div class="auth-register-link">
             {% trans "Don't have an account?" %}
             <a href="{% url 'register' %}">{% trans "Create account" %}</a>

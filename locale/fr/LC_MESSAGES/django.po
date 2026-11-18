@@ -1218,3 +1218,33 @@ msgstr "Chargement des stories…"
 #: libellés anglais affichés en français (2026-11)
 msgid "No active stories from your friends yet."
 msgstr "Aucune story active de vos amis pour l'instant."
+
+msgid "Sign in with my phone number"
+msgstr "Se connecter avec mon numéro"
+
+msgid "Enter the code you received."
+msgstr "Saisissez le code reçu."
+
+msgid "6-digit code"
+msgstr "Code à 6 chiffres"
+
+msgid "Resend a code"
+msgstr "Recevoir un nouveau code"
+
+msgid "We send you a code to sign in. Only for accounts whose number has been confirmed."
+msgstr "Nous vous envoyons un code pour vous connecter. Seulement pour les comptes dont le numéro a été confirmé."
+
+msgid "Phone number"
+msgstr "Numéro de téléphone"
+
+msgid "Receive the code by"
+msgstr "Recevoir le code par"
+
+msgid "Abroad: write +country code, and choose WhatsApp."
+msgstr "À l'étranger : écrivez +indicatif du pays, et choisissez WhatsApp."
+
+msgid "Receive a code"
+msgstr "Recevoir un code"
+
+msgid "Sign in with my email address"
+msgstr "Se connecter avec mon adresse e-mail"
