@@ -494,3 +494,15 @@ if not DEBUG:
     # (un upload "image" contenant du HTML ne sera pas interprété comme tel).
     SECURE_CONTENT_TYPE_NOSNIFF = True
     SECURE_REFERRER_POLICY      = 'same-origin'
+# ── Journal ───────────────────────────────────────────────────────────────────
+# Les messages des codes de connexion (account.otp : « [OTP] … ») vont dans le journal de Railway,
+# y compris les simples informations (pourquoi aucun code n'est parti). Le reste de Django garde
+# son réglage habituel (disable_existing_loggers=False).
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False,
+    'handlers': {'console': {'class': 'logging.StreamHandler'}},
+    'loggers': {
+        'account': {'handlers': ['console'], 'level': 'INFO', 'propagate': False},
+    },
+}
