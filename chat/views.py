@@ -144,6 +144,12 @@ _BLOCKED_EXTENSIONS = {
 
 
 # ── Fichier du chat privé ─────────────────────────────────────────────────────
+def _on_disk(storage):
+    """Vrai si ce stockage est le disque du serveur (développement)."""
+    from django.core.files.storage import FileSystemStorage
+    return isinstance(storage, FileSystemStorage)
+
+
 @login_required(login_url="login")
 def chat_file(request, msg_id):
     """Donne un fichier du chat privé, seulement à l'une des deux personnes de la conversation.
@@ -170,6 +176,11 @@ def chat_file(request, msg_id):
             response = HttpResponseRedirect(default_storage.url(msg.file.name))
         else:
             response = HttpResponseRedirect(storage.url(msg.file.name))
+    elif not _on_disk(storage):
+        # Seau privé pas encore réglé (R2_PRIVATE_BUCKET_NAME) : le fichier est dans le seau public,
+        # on y renvoie comme avant. (Le faire passer par le serveur chargerait daphne, et sans
+        # « Range » les vidéos ne se liraient plus sur iPhone.)
+        response = HttpResponseRedirect(storage.url(msg.file.name))
     else:
         try:
             handle = msg.file.open('rb')
