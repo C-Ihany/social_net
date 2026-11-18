@@ -133,7 +133,7 @@ def keys_upload(request):
     for full_id, key in one_time.items():
         algorithm, _, key_id = str(full_id).partition(':')
         if algorithm and key_id:
-            OneTimeKey.objects.get_or_create(device=device, algorithm=algorithm, key_id=key_id,
+            OneTimeKey.objects.get_or_create(device=device, algorithm=algorithm, key_id=key_id, fallback=False,
                                              defaults={'key': key})
     for full_id, key in fallback.items():
         algorithm, _, key_id = str(full_id).partition(':')

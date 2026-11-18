@@ -37,7 +37,8 @@ class OneTimeKey(models.Model):
     used      = models.BooleanField(default=False)          # (pour une clé de secours seulement)
 
     class Meta:
-        unique_together = ('device', 'algorithm', 'key_id')
+        # (une clé de secours peut porter le même nom qu'une clé à usage unique : deux séries à part)
+        unique_together = ('device', 'algorithm', 'key_id', 'fallback')
 
 
 class ToDeviceMessage(models.Model):

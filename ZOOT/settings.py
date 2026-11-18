@@ -273,6 +273,12 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/4.2/howto/static-files/
 
+# Le moteur de chiffrement du chat (static/vendor/matrix-sdk-crypto-wasm-*) est un module
+# WebAssembly chargé par un module JavaScript : les navigateurs exigent ces types exacts.
+import mimetypes
+mimetypes.add_type('application/wasm', '.wasm')
+mimetypes.add_type('text/javascript', '.mjs')
+
 STATICFILES_DIRS = [
     os.path.join(BASE_DIR, 'static'),
 ]
