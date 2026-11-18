@@ -709,6 +709,8 @@ def get_profile_stories(request, user_id):
         profile_user = Account.objects.get(pk=user_id)
     except Account.DoesNotExist:
         return JsonResponse({'stories': []})
+    if not profile_user.visible_to(request.user):
+        return JsonResponse({'stories': []})
     now = timezone.now()
     stories_qs = Story.objects.filter(
         user=profile_user, expires_at__gt=now

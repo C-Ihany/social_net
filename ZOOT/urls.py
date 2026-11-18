@@ -51,6 +51,7 @@ urlpatterns = [
     path('friend/', include('friend.urls', namespace='friend')),
     path('chat/', include('chat.urls', namespace='chat')),
     path('e2ee/', include('e2ee.urls', namespace='e2ee')),
+    path('api/pola/', include('account.pola_urls', namespace='pola')),   # messagerie de Pola
     path('stories/', include('stories.urls', namespace='stories')),
     path('notif/', include('notification.urls', namespace='notification')),
     path('groups/', include('group.urls', namespace='group')),

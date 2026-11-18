@@ -46,7 +46,7 @@ def _landing_stats():
 		return str(n)
 
 	raw = {
-		'membres':  Account.objects.filter(is_active=True).count(),
+		'membres':  Account.objects.filter(is_active=True).exclude(pola_mode='pola').count(),
 		'posts':    Post.objects.filter(status='published').count(),
 		'annonces': Annonce.objects.filter(status='active').count(),
 		'groupes':  Group.objects.count(),

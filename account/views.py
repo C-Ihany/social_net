@@ -146,6 +146,9 @@ def account_view(request, *args, **kwargs):
 		account = Account.objects.get(pk=user_id)
 	except Account.DoesNotExist:
 		return HttpResponse("Utilisateur introuvable.", status=404)
+	if not account.visible_to(request.user):
+		# (compte « Pola seulement » : invisible sur le réseau social, même réponse qu'inconnu)
+		return HttpResponse("Utilisateur introuvable.", status=404)
 
 	# Posts (first page) — seuls les posts réellement visibles par le visiteur.
 	all_posts_qs = _visible_posts_for(request.user, account)
@@ -302,7 +305,7 @@ def account_search_view(request):
 		# (énumération de comptes), y compris pour les profils hide_email=True.
 		accounts_qs = Account.objects.filter(
 			Q(username__icontains=query)
-		).exclude(pk=request.user.pk if request.user.is_authenticated else 0)[:20]
+		).exclude(pk=request.user.pk if request.user.is_authenticated else 0).exclude(pola_mode=Account.POLA_ONLY)[:20]
 
 		accounts_with_friend = []
 		if request.user.is_authenticated:
@@ -470,7 +473,7 @@ def global_search_api(request):
 	from bazar.models import Annonce
 
 	# Users
-	users_qs = Account.objects.filter(Q(username__icontains=query))[:6]
+	users_qs = Account.objects.filter(Q(username__icontains=query)).exclude(pola_mode=Account.POLA_ONLY)[:6]
 	users = []
 	for u in users_qs:
 		try:
@@ -513,6 +516,8 @@ def profile_posts_more(request, *args, **kwargs):
 	try:
 		account = Account.objects.get(pk=user_id)
 	except Account.DoesNotExist:
+		return JsonResponse({'posts_html': '', 'has_next': False})
+	if not account.visible_to(request.user):
 		return JsonResponse({'posts_html': '', 'has_next': False})
 
 	# ?page=abc levait une ValueError non interceptée (500).

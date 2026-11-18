@@ -59,7 +59,8 @@ def private_chat_room_view(request, *args, **kwargs):
 		# Ouvrir (ou créer) la conversation avec l'utilisateur demandé
 		try:
 			other_user = Account.objects.get(pk=user_id)
-			if other_user != user:
+			# (compte « Pola seulement » : pas de nouvelle conversation sans son numéro)
+			if other_user != user and other_user.visible_to(user):
 				room = find_or_create_private_chat(user, other_user)
 				context["room"] = room
 		except Account.DoesNotExist:
@@ -393,7 +394,8 @@ def create_or_return_private_chat(request, *args, **kwargs):
 			try:
 				user2 = Account.objects.get(pk=user2_id)
 				from account.models import UserBlock
-				if UserBlock.is_blocked_between(user1, user2):
+				if UserBlock.is_blocked_between(user1, user2) or not user2.visible_to(user1):
+					# (bloqué, ou compte « Pola seulement » qu'on n'a pas trouvé par son numéro)
 					payload['response'] = "Cette conversation n'est pas disponible."
 					return HttpResponse(json.dumps(payload), content_type="application/json", status=403)
 				chat = find_or_create_private_chat(user1, user2)
@@ -435,6 +437,8 @@ def send_story_reply(request):
     try:
         author = User.objects.get(pk=author_id)
     except User.DoesNotExist:
+        return JsonResponse({'ok': False, 'error': 'User not found'}, status=404)
+    if not author.visible_to(request.user):
         return JsonResponse({'ok': False, 'error': 'User not found'}, status=404)
 
     # Trouver ou créer la room (bidirectionnel)

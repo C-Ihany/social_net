@@ -121,11 +121,44 @@ class Account(AbstractBaseUser):
 		verbose_name='Téléphone vérifié',
 		help_text='Le numéro a été confirmé par SMS.',
 	)
+# ── Messagerie de Pola (l'assistant de bureau) ─────────────
+	# Un utilisateur de Pola choisit, dans Pola, d'être :
+	#  « pola »      : Pola seulement — INVISIBLE sur le réseau social (ni profil public, ni
+	#                  recherche, ni suggestions) ; seuls les utilisateurs de Pola qui ont son
+	#                  numéro peuvent lui écrire ;
+	#  « community » : Pola + communauté Vazimba — un membre comme les autres ;
+	#  ''            : pas un utilisateur de la messagerie de Pola.
+	POLA_ONLY, POLA_COMMUNITY = 'pola', 'community'
+	pola_mode = models.CharField(
+		max_length=10, blank=True, default='', db_index=True,
+		choices=[('', '—'), ('pola', 'Pola seulement (invisible sur Vazimba)'),
+		         ('community', 'Pola + communauté Vazimba')],
+		verbose_name='Messagerie de Pola',
+	)
 # ---------------------------------------------------------
 	USERNAME_FIELD = 'email'
 	REQUIRED_FIELDS = ['username']
 
 	objects = MyAccountManager()
+
+	@property
+	def hidden(self):
+		"""Vrai pour un compte « Pola seulement » : il n'apparaît nulle part sur le réseau social."""
+		return self.pola_mode == self.POLA_ONLY
+
+	def visible_to(self, viewer):
+		"""Ce compte peut-il être vu par `viewer` (profil, stories, demande d'ami, nouvelle
+		conversation) ? Toujours, sauf un compte « Pola seulement » : seulement lui-même et ceux
+		avec qui il a déjà une conversation (ouverte depuis Pola, par son numéro)."""
+		if not self.hidden:
+			return True
+		if viewer is None or not getattr(viewer, 'is_authenticated', False):
+			return False
+		if viewer.pk == self.pk:
+			return True
+		from chat.models import PrivateChatRoom
+		return PrivateChatRoom.objects.filter(
+			models.Q(user1=self, user2_id=viewer.pk) | models.Q(user2=self, user1_id=viewer.pk)).exists()
 
 	def __str__(self):
 		return self.username
@@ -235,6 +268,7 @@ class PhoneVerification(models.Model):
         on_delete=models.CASCADE,
         related_name='phone_verifications',
         verbose_name='Utilisateur',
+        null=True, blank=True,      # (inscription depuis Pola : le compte n'existe pas encore)
     )
     phone = models.CharField(
         max_length=20,
@@ -247,7 +281,8 @@ class PhoneVerification(models.Model):
         max_length=64,
         verbose_name='Empreinte du code',
     )
-    # « verify » : confirmer le numéro d'un compte ; « login » : se connecter avec son numéro.
+    # « verify » : confirmer le numéro d'un compte ; « login » : se connecter avec son numéro ;
+    # « signup » : créer un compte depuis Pola avec son numéro.
     purpose    = models.CharField(max_length=10, default='verify', verbose_name='But')
     # « sms » ou « whatsapp »
     channel    = models.CharField(max_length=10, default='sms', verbose_name='Envoyé par')
@@ -261,7 +296,8 @@ class PhoneVerification(models.Model):
         ordering = ['-created_at']
 
     def __str__(self):
-        return f'{self.user.username} — {self.phone} ({"OK" if self.verified else "en attente"})'
+        who = self.user.username if self.user_id else '(inscription)'
+        return f'{who} — {self.phone} ({"OK" if self.verified else "en attente"})'
 
     # Durée de validité en minutes
     OTP_VALID_MINUTES = 10

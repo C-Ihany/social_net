@@ -261,7 +261,7 @@ def get_profile_suggestions(user, limit=12):
         # friends__user_id, c'est « figure dans la liste d'amis de X ».
         suggestions = list(
             Account.objects.filter(is_active=True, friends__user_id__in=friend_ids)
-            .exclude(id__in=excluded)
+            .exclude(id__in=excluded).exclude(pola_mode=Account.POLA_ONLY)
             .annotate(mutuals=Count('friends__user_id', distinct=True))
             .order_by('-mutuals', '-date_joined')[:limit]
         )
@@ -273,7 +273,7 @@ def get_profile_suggestions(user, limit=12):
         if region:
             fill = (
                 Account.objects.filter(is_active=True, region=region)
-                .exclude(id__in=taken)
+                .exclude(id__in=taken).exclude(pola_mode=Account.POLA_ONLY)
                 .order_by('-date_joined')[:limit - len(suggestions)]
             )
             for account in fill:
@@ -285,7 +285,7 @@ def get_profile_suggestions(user, limit=12):
         taken = excluded | {a.id for a in suggestions}
         fill = (
             Account.objects.filter(is_active=True)
-            .exclude(id__in=taken)
+            .exclude(id__in=taken).exclude(pola_mode=Account.POLA_ONLY)
             .order_by('-date_joined')[:limit - len(suggestions)]
         )
         for account in fill:
@@ -1478,7 +1478,7 @@ def global_search_view(request):
         # Users
         accounts_qs = Account.objects.filter(
             Q(username__icontains=query)
-        )[:20]
+        ).exclude(pola_mode=Account.POLA_ONLY)[:20]
 
         accounts_with_friend = []
         if request.user.is_authenticated:

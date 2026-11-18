@@ -26,6 +26,8 @@ def send_friend_request(request, *args, **kwargs):
 		# Un identifiant inconnu ou non numérique levait une exception
 		# non interceptée → erreur 500.
 		return _json({'response': "That user does not exist."}, status=404)
+	if not receiver.visible_to(user):
+		return _json({'response': "That user does not exist."}, status=404)
 
 	if receiver == user:
 		return _json({'response': "You cannot send a friend request to yourself."}, status=400)

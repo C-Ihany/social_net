@@ -666,7 +666,7 @@ def group_invite_search(request, slug):
     users = (
         Account.objects.filter(
             Q(username__icontains=query) | Q(email__icontains=query)
-        ).exclude(pk__in=already_ids)[:10]
+        ).exclude(pk__in=already_ids).exclude(pola_mode='pola')[:10]
     )
     data = []
     for u in users:
@@ -693,7 +693,9 @@ def group_invite_member(request, slug):
         from account.models import Account
         try:
             target = Account.objects.get(pk=user_id)
-        except Account.DoesNotExist:
+        except (Account.DoesNotExist, ValueError):
+            return JsonResponse({'ok': False, 'error': 'Utilisateur introuvable'})
+        if not target.visible_to(request.user):
             return JsonResponse({'ok': False, 'error': 'Utilisateur introuvable'})
 
         _, created = GroupMembership.objects.get_or_create(
