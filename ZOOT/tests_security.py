@@ -115,11 +115,11 @@ class ChatAccessTests(TestCase):
     def setUp(self):
         self.a, self.b, self.intruder = mk('alice'), mk('bob'), mk('mallory')
         self.room = PrivateChatRoom.objects.create(user1=self.a, user2=self.b)
-        RoomChatMessage.objects.create(user=self.a, room=self.room, content='secret')
+        RoomChatMessage.objects.create(user=self.a, room=self.room, content='message-prive-xq7')
 
     def test_intruder_cannot_open_room(self):
         r = client_for(self.intruder).get(reverse('chat:private-chat-room') + f'?room_id={self.room.pk}')
-        self.assertNotIn('secret', r.content.decode())
+        self.assertNotIn('message-prive-xq7', r.content.decode())   # (un mot que la page ne contient jamais)
         self.assertIsNone(r.context.get('room'))
 
     def test_html_upload_rejected(self):

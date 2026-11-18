@@ -280,7 +280,7 @@ export class VazimbaE2EE {
 
     /** Vrai si ce membre a déjà un code secret (sauvegarde) sur le serveur. */
     async hasRecovery() {
-        try { await this._fetch('GET', 'recovery'); return true; } catch (e) { return false; }
+        try { return JSON.parse(await this._fetch('GET', 'recovery')).exists === true; } catch (e) { return false; }
     }
 
     /** Vrai si cet appareil a la clé de sauvegarde (code secret déjà saisi ou créé ici). */
@@ -322,6 +322,7 @@ export class VazimbaE2EE {
     unlock(passphrase) {
         return this._serial(async () => {
             const blob = JSON.parse(await this._fetch('GET', 'recovery'));
+            if (!blob.exists) throw new E2EEError('NO_RECOVERY', 'Aucun code secret enregistré.');
             const wrapKey = await this._passwordKey(passphrase, unb64(blob.salt), blob.iterations);
             let raw;
             try {

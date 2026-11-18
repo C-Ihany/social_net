@@ -129,7 +129,7 @@ class E2eeServerTests(TestCase):
         good = dict(weak, iterations=600000, v=1)
         self.assertEqual(self.call(self.lova, 'LOVA1', 'put', 'recovery', good)[0], 200)
         self.assertEqual(self.call(self.lova, 'LOVA1', 'get', 'recovery')[1]['iterations'], 600000)
-        self.assertEqual(self.call(self.miora, 'MIO1', 'get', 'recovery')[0], 404)
+        self.assertEqual(self.call(self.miora, 'MIO1', 'get', 'recovery')[1], {'exists': False})
 
     def test_connexion_et_jeton_csrf_obligatoires(self):
         self.assertEqual(Client().get('/e2ee/sync').status_code, 401)

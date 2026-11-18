@@ -84,6 +84,10 @@
 
             <!-- Actions + WS dot -->
             <div class="chat-header-actions">
+                <!-- Conversation secrète (chiffrement de bout en bout) : static/js/e2ee/chat-secret.js -->
+                <button class="chat-header-btn" id="btn-secret" title="{% trans 'Conversation secrète' %}" onclick="if(window.VZSecret){VZSecret.toggle();}" style="display:none;" type="button">
+                    <span class="material-icons">lock_open</span>
+                </button>
                 <!-- Appel audio -->
                 <button class="chat-header-btn" id="btn-call-audio" title="{% trans 'Appel audio' %}" onclick="startCall('audio')" style="display:none;" type="button">
                     <span class="material-icons">call</span>
@@ -576,6 +580,9 @@ window._CT = {
 
 <!-- ── webrtc-adapter : normalise l'API WebRTC (Safari, Opera, anciens navigateurs) ── -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/webrtc-adapter/8.2.3/adapter.min.js" crossorigin="anonymous"></script>
+<!-- Conversation secrète : le moteur (8 Mo) n'est chargé que lorsqu'une conversation secrète est ouverte -->
+<script>window.VZ_E2EE_MODULE = "{% static 'js/e2ee/vz-e2ee.mjs' %}"; window.VZ_SECRET_URL = "{% url 'chat:secret' %}"; window.VZ_UPLOAD_URL = "{% url 'chat:upload-chat-file' %}"; window.VZ_CSRF = "{{ csrf_token }}";</script>
+<script src="{% static 'js/e2ee/chat-secret.js' %}" defer></script>
 
 <!-- ── Main chat JS ───────────────────────────────────────────── -->
 <script type="text/javascript">
@@ -632,6 +639,8 @@ window._CT = {
         if(btnA) btnA.style.display = '';
         if(btnV) btnV.style.display = '';
         if(infoBtn) infoBtn.style.display = '';
+        var secretBtn = document.getElementById('btn-secret');
+        if(secretBtn) secretBtn.style.display = '';
         // Mobile : glisser vers le panneau chat (style Messenger)
         if(window.innerWidth <= 768){
             document.querySelector('.chat-page').classList.add('chat-in-convo');
@@ -700,6 +709,8 @@ window._CT = {
     }
 
     function sendMessage(){
+        // Conversation secrète : tout passe par le chiffrement (chat-secret.js)
+        if(window.VZSecret && VZSecret.on){ VZSecret.sendMessage(); return; }
         // If a file is selected, upload it first
         if(_selectedFile){
             uploadAndSendFile(_selectedFile);
@@ -1130,6 +1141,7 @@ window._CT = {
             var blob  = new Blob(_chunks, { type: mtype });
             var fname = 'vocal_' + Date.now() + '.' + ext;
             _chunks   = [];
+            if(window.VZSecret && VZSecret.on){ VZSecret.sendFile(blob, fname, mtype, 'voice'); return; }
 
             /* roomId est la variable globale définie dans ce template */
             var rid = roomId;
@@ -1315,17 +1327,20 @@ window._CT = {
                     errMsg = 'Accès refusé à cette conversation.';
                 } else if(data.error === 'ROOM_INVALID'){
                     errMsg = 'Conversation introuvable.';
+                } else if(data.error === 'SECRET_ROOM' || data.error === 'NOT_SECRET_ROOM'){
+                    errMsg = data.message;
+                    if(window.VZSecret) VZSecret.resync(data.error);
                 }
                 _showChatError(errMsg);
                 return;
             }
-            if (data.join)  { getUserInfo(); getRoomChatMessages(); enableChatLogScrollListener(); if(currentFriendId) clearUnreadBadge(currentFriendId); }
+            if (data.join)  { if(window.VZSecret) VZSecret.onJoin(data); getUserInfo(); getRoomChatMessages(); enableChatLogScrollListener(); if(currentFriendId) clearUnreadBadge(currentFriendId); }
             if (data.leave) { console.log("Leaving room " + data.leave); }
             if (data.user_info) { handleUserInfoPayload(data.user_info) }
             if (data.msg_type == 0) {
                 appendChatMessage(data, false, true);
                 // Mettre à jour le sidebar : preview du dernier message
-                updateSidebarPreview(data.user_id, data.message);
+                updateSidebarPreview(data.user_id, data.encrypted ? '🔒 Message chiffré' : data.message);
             }
             if (data.msg_type == 1 || data.msg_type == 2) {
                 // MSG_TYPE_ENTER : si on est caller en attente et que le peer vient de rejoindre
@@ -1373,6 +1388,7 @@ window._CT = {
             if (data.msg_type == 9) { console.log('[CALL] terminé'); handleCallEnd(); }
             if (data.msg_type == 10){ updateUnreadBadge(data.from_user_id, data.count); }
             if (data.msg_type == 11){ applyReactions(data.msg_id, data.reactions); }   // réaction emoji
+            if (data.msg_type == 12 && window.VZSecret){ VZSecret.onToggle(data); }    // conversation secrète
             if (data.messages_payload) { handleMessagesPayload(data.messages, data.new_page_number) }
         };
 
@@ -1478,6 +1494,7 @@ window._CT = {
 
     /* ── Build a text chat bubble ───────────────────────────────── */
     function appendChatMessage(data, maintainPosition, isNewMessage){
+        if(data.encrypted && window.VZSecret){ VZSecret.appendText(data, maintainPosition, isNewMessage); return; }
         var messageType  = data.msg_type;
         var msg_id       = data.msg_id;
         var message      = data.message;
@@ -1561,8 +1578,12 @@ window._CT = {
             bubble.appendChild(quote);
         }
 
-        try { bubble.innerHTML += validateText(msg); }
-        catch(e) { bubble.textContent += msg; }
+        /* Texte dans son propre élément : un message chiffré y est écrit une fois déchiffré */
+        var textEl = document.createElement("span");
+        textEl.classList.add("msg-text");
+        try { textEl.innerHTML = validateText(msg); }
+        catch(e) { textEl.textContent = msg; }
+        bubble.appendChild(textEl);
 
         /* Timestamp intégré DANS la bulle — heure seulement */
         var timeStr = _extractTime(timestamp);
@@ -1611,7 +1632,7 @@ window._CT = {
         (function(id, name, txt){
             replyBtn.addEventListener("click", function(e){
                 e.stopPropagation();
-                startReply(id, name, txt);
+                startReply(id, name, row.getAttribute('data-text') || txt);
             });
         })(msg_id, cleanName, msg.trim().substring(0, 100));
         row.appendChild(replyBtn);
@@ -1625,7 +1646,8 @@ window._CT = {
     }
 
     /* ── Build a file message bubble ────────────────────────────── */
-    function appendFileMessage(data, maintainPosition, isNewMessage){
+    function appendFileMessage(data, maintainPosition, isNewMessage, replaceRow){
+        if(data.encrypted && !data._decrypted && window.VZSecret){ VZSecret.appendFile(data, maintainPosition, isNewMessage); return; }
         var chatLog = document.getElementById("id_chat_log");
         var isOwn   = (String(data.user_id) === String(currentUserId));
 
@@ -1734,6 +1756,10 @@ window._CT = {
         wrap.appendChild(tSpan);
 
         row.appendChild(wrap);
+        if(data.msg_id) row.setAttribute("data-msg-id", String(data.msg_id));
+
+        /* (fichier chiffré : la bulle d'attente est remplacée à sa place par le fichier déchiffré) */
+        if(replaceRow && replaceRow.parentNode){ replaceRow.parentNode.replaceChild(row, replaceRow); return row; }
 
         _insertDateSeparatorIfNeeded(chatLog, data.natural_timestamp, isNewMessage);
 
@@ -1741,6 +1767,7 @@ window._CT = {
         else chatLog.appendChild(row);
 
         if(!maintainPosition) chatLog.scrollTop = 0;
+        return row;
     }
 
     function clearChatLog(){

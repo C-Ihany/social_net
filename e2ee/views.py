@@ -416,8 +416,8 @@ def recovery(request):
     if request.method == 'GET':
         secret = RecoverySecret.objects.filter(user=me).first()
         if secret is None:
-            return _error(404, 'M_NOT_FOUND', 'Aucun code secret enregistré.')
-        return JsonResponse(secret.blob)
+            return JsonResponse({'exists': False})     # (pas d'erreur : c'est une simple question)
+        return JsonResponse(dict(secret.blob, exists=True))
     blob = request.json
     if set(blob) - _RECOVERY_FIELDS or not {'salt', 'iv', 'ciphertext', 'iterations'} <= set(blob) \
             or not isinstance(blob.get('iterations'), int) or blob['iterations'] < 100000:

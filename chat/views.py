@@ -170,7 +170,18 @@ def chat_file(request, msg_id):
     if not msg or not msg.file or request.user.pk not in (msg.room.user1_id, msg.room.user2_id):
         raise Http404()
     storage = msg.file.storage
-    if is_private_storage(storage):
+    if msg.encrypted:
+        # Fichier chiffré : le navigateur le télécharge lui-même pour le déchiffrer. On le donne
+        # d'ici (même domaine) plutôt que par un lien R2 : sinon il faudrait ouvrir R2 aux
+        # demandes d'un autre domaine (CORS). Ce n'est que du charabia, 25 Mo au plus.
+        try:
+            handle = msg.file.open('rb')
+        except (FileNotFoundError, OSError):
+            raise Http404()
+        response = FileResponse(handle, as_attachment=True, filename='chiffre.bin',
+                                content_type='application/octet-stream')
+        response['X-Content-Type-Options'] = 'nosniff'
+    elif is_private_storage(storage):
         if not storage.exists(msg.file.name):
             # Ancien fichier, pas encore déplacé dans le seau privé : on le cherche là où il était.
             from django.core.files.storage import default_storage

@@ -1414,3 +1414,37 @@
     align-items: center; justify-content: center; cursor: zoom-out;
 }
 #chat-lightbox-img { max-width: 92vw; max-height: 90vh; border-radius: var(--radius-sm); box-shadow: 0 8px 40px rgba(0,0,0,.6); }
+
+/* ── Conversation secrète (chiffrement de bout en bout) ─────────────────────
+   Bouton cadenas, bandeau, petit cadenas dans les bulles, fenêtre du code secret.
+   (static/js/e2ee/chat-secret.js) */
+.chat-header-btn.secret-on { color: var(--accent); }
+#vz-secret-banner {
+    display: none; align-items: center; gap: .5rem; flex-wrap: wrap;
+    padding: .45rem .9rem; font-size: .8rem; color: var(--text-muted);
+    background: rgba(var(--accent-rgb), .07); border-bottom: 1px solid var(--border);
+}
+#vz-secret-banner .material-icons { font-size: 1rem; color: var(--accent); }
+#vz-secret-banner .vz-secret-text { flex: 1; min-width: 12rem; }
+#vz-secret-banner .vz-secret-action {
+    border: 1px solid var(--accent); color: var(--accent); background: none;
+    border-radius: 999px; padding: .2rem .7rem; font-size: .78rem; cursor: pointer;
+}
+.bubble-lock { font-size: .75rem !important; opacity: .6; margin-right: .2rem; }
+.vz-secret-modal {
+    position: fixed; inset: 0; z-index: 3000; display: flex; align-items: center; justify-content: center;
+    padding: 1rem; background: rgba(0, 0, 0, .55);
+}
+.vz-secret-card {
+    width: 100%; max-width: 420px; background: var(--bg-card); color: var(--text);
+    border: 1px solid var(--border); border-radius: 16px; padding: 1.2rem 1.2rem 1rem;
+    box-shadow: 0 12px 40px rgba(0, 0, 0, .3);
+}
+.vz-secret-card h3 { font-size: 1.1rem; margin: 0 0 .5rem; }
+.vz-secret-card p { font-size: .88rem; color: var(--text-muted); line-height: 1.5; margin-bottom: .8rem; }
+.vz-secret-card input {
+    width: 100%; margin-bottom: .5rem; padding: .55rem .75rem; border-radius: 10px;
+    border: 1px solid var(--border); background: var(--bg); color: var(--text); font-size: .95rem;
+}
+.vz-secret-error { min-height: 1.2em; font-size: .8rem; color: var(--danger); margin-bottom: .4rem; }
+.vz-secret-buttons { display: flex; justify-content: flex-end; gap: .5rem; }
