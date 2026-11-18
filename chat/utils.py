@@ -61,11 +61,20 @@ class LazyRoomChatMessageEncoder(Serializer):
         dump_object['message']           = str(obj.content)
         dump_object['profile_image']     = str(obj.user.profile_image.url)
         dump_object['natural_timestamp'] = calculate_timestamp(obj.timestamp)
+        # Chiffré de bout en bout : `message` est le texte chiffré, que le navigateur déchiffre ;
+        # `ts` (heure exacte en ms) est demandé par le moteur de chiffrement.
+        dump_object['encrypted']         = bool(obj.encrypted)
+        dump_object['ts']                = int(obj.timestamp.timestamp() * 1000)
+        if obj.encrypted and obj.file:
+            dump_object['file_name'] = ''
         # ── Citation (reply) ────────────────────────────────────────────────
         if obj.reply_to_id:
             try:
                 rt = obj.reply_to
-                body = rt.content[:100] if rt.content else f'[{rt.file_type or "fichier"}]'
+                if rt.encrypted:
+                    body = rt.preview
+                else:
+                    body = rt.content[:100] if rt.content else f'[{rt.file_type or "fichier"}]'
                 dump_object['reply_to_id']       = str(rt.id)
                 dump_object['reply_to_username'] = str(rt.user.username)
                 dump_object['reply_to_content']  = body

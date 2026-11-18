@@ -18,3 +18,10 @@ MSG_TYPE_UNREAD_NOTIF = 10  # Notification badge non-lu → sidebar
 
 # Réactions emoji
 MSG_TYPE_REACTION = 11  # Toggle emoji reaction sur un message
+
+# Conversation secrète (chiffrement de bout en bout) activée ou coupée
+MSG_TYPE_SECRET = 12
+
+# Ce que le serveur montre à la place d'un message chiffré (il ne peut pas le lire)
+SECRET_PREVIEW      = '🔒 Message chiffré'
+SECRET_FILE_PREVIEW = '🔒 Fichier chiffré'

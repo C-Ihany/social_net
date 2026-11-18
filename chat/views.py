@@ -20,6 +20,9 @@ from chat.models import PrivateChatRoom, RoomChatMessage, UnreadChatRoomMessages
 from chat.utils import find_or_create_private_chat
 from chat.constants import MSG_TYPE_CALL_REJECT, MSG_TYPE_UNREAD_NOTIF
 
+import logging
+logger = logging.getLogger(__name__)
+
 DEBUG = False
 
 # ── MIME → file_type mapping ──────────────────────────────────────────────────
@@ -119,7 +122,7 @@ def private_chat_room_view(request, *args, **kwargs):
 		friend = room.user2 if room.user1_id == user.id else room.user1
 		last_msg_obj = last_msgs.get(room.pk)
 		m_and_f_raw.append({
-			'message': (last_msg_obj.content or '')[:30] if last_msg_obj else '',
+			'message': (last_msg_obj.preview or '')[:30] if last_msg_obj else '',
 			'friend':  friend,
 			'unread':  unread_by_room.get(room.pk, 0),
 			# Rooms sans message → en dernier, mais type cohérent (datetime) pour le tri
@@ -186,7 +189,8 @@ def chat_file(request, msg_id):
             handle = msg.file.open('rb')
         except (FileNotFoundError, OSError):
             raise Http404()
-        inline = msg.file_type in ('image', 'video', 'voice')
+        # (un fichier chiffré n'est que du charabia : toujours en téléchargement brut)
+        inline = msg.file_type in ('image', 'video', 'voice') and not msg.encrypted
         response = FileResponse(handle, as_attachment=not inline, filename=os.path.basename(msg.file.name))
         response['X-Content-Type-Options'] = 'nosniff'
     # (ni le navigateur ni un proxy ne doivent garder ce fichier ou ce lien)
@@ -206,6 +210,9 @@ def upload_chat_file(request):
     """
     room_id = request.POST.get('room_id')
     f = request.FILES.get('file')
+    # Conversation secrète : le navigateur envoie le fichier DÉJÀ chiffré (« chiffre.bin »), et dans
+    # `content` le message chiffré qui porte son vrai nom, son type et sa clé.
+    encrypted = request.POST.get('encrypted') == '1'
 
     if not f:
         return JsonResponse({'error': 'Aucun fichier reçu.'}, status=400)
@@ -220,6 +227,24 @@ def upload_chat_file(request):
 
     if request.user != room.user1 and request.user != room.user2:
         return JsonResponse({'error': 'Non autorisé.'}, status=403)
+
+    if room.encrypted != encrypted:
+        return JsonResponse({'error': ('Conversation secrète : ce fichier n\'était pas chiffré, il n\'est pas parti.'
+                                       if room.encrypted else 'Fichier chiffré refusé ici.')}, status=400)
+    if encrypted:
+        from chat.e2ee_check import is_ciphertext
+        content = request.POST.get('content', '')
+        if not is_ciphertext(content):
+            return JsonResponse({'error': 'Message chiffré invalide.'}, status=400)
+        if f.size > 25 * 1024 * 1024 + 64:
+            return JsonResponse({'error': 'Fichier trop volumineux (max 25 Mo).'}, status=400)
+        declared = request.POST.get('file_type', '')
+        f.name = 'chiffre.bin'          # (le serveur ne connaît ni le nom ni le contenu)
+        msg = RoomChatMessage.objects.create(
+            user=request.user, room=room, content=content, encrypted=True, file=f,
+            file_type=declared if declared in ('image', 'video', 'voice', 'document') else 'document',
+        )
+        return _broadcast_file(request, room, msg, '')
 
     # Determine file category
     mime = (f.content_type or '').split(';')[0].strip().lower()
@@ -250,8 +275,14 @@ def upload_chat_file(request):
         file=f,
         file_type=file_type,
     )
+    return _broadcast_file(request, room, msg, os.path.basename(f.name))
 
-    file_name = os.path.basename(f.name)
+
+def _broadcast_file(request, room, msg, file_name):
+    """Annonce un fichier du chat aux deux personnes (et le compte comme non lu)."""
+    from chat.constants import SECRET_FILE_PREVIEW
+    from chat.e2ee_check import ms
+    file_type = msg.file_type
     file_url  = msg.file_link        # (jamais l'adresse directe du stockage : voir chat_file)
 
     # ── Broadcast immédiat via channel layer ──────────────────────────────────
@@ -260,7 +291,7 @@ def upload_chat_file(request):
     broadcast_done = False
     try:
         channel_layer = get_channel_layer()
-        preview = '[🎤 vocal]' if file_type == 'voice' else f'[📎 {file_name}]'
+        preview = SECRET_FILE_PREVIEW if msg.encrypted else ('[🎤 vocal]' if file_type == 'voice' else f'[📎 {file_name}]')
 
         # Incrémenter non-lus pour l'autre utilisateur s'il n'est pas dans la room
         other = room.user2 if request.user == room.user1 else room.user1
@@ -287,6 +318,9 @@ def upload_chat_file(request):
                 "file_url":      file_url,
                 "file_name":     file_name,
                 "file_type":     file_type,
+                "encrypted":     msg.encrypted,
+                "content":       msg.content if msg.encrypted else '',
+                "ts":            ms(msg.timestamp),
             }
         )
 
@@ -315,6 +349,27 @@ def upload_chat_file(request):
         'msg_id':    msg.id,
         'broadcast': broadcast_done,  # True = client n'a PAS besoin d'envoyer via WS
     })
+
+
+# ── Conversation secrète : activer / couper ─────────────────────────────────
+@login_required(login_url="login")
+@require_POST
+def set_secret(request):
+    """POST room_id, on=1|0 : l'une des deux personnes active ou coupe la conversation secrète.
+    Les deux voient aussitôt le changement (et qui l'a fait)."""
+    room = PrivateChatRoom.objects.filter(pk=request.POST.get('room_id') or 0).first()
+    if room is None or request.user.pk not in (room.user1_id, room.user2_id):
+        return JsonResponse({'error': 'Salon introuvable.'}, status=404)
+    room.encrypted = request.POST.get('on') == '1'
+    room.save(update_fields=['encrypted'])
+    try:
+        async_to_sync(get_channel_layer().group_send)(room.group_name, {
+            'type': 'chat.secret', 'encrypted': room.encrypted,
+            'username': request.user.username, 'user_id': request.user.id,
+        })
+    except Exception:
+        logger.exception('set_secret : diffusion')
+    return JsonResponse({'ok': True, 'encrypted': room.encrypted})
 
 
 # ── Ajax call to return a private chatroom or create one if does not exist ────

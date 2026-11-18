@@ -12,6 +12,7 @@ from chat.models import RoomChatMessage, PrivateChatRoom, UnreadChatRoomMessages
 from account.utils import LazyAccountEncoder
 from chat.utils import calculate_timestamp, LazyRoomChatMessageEncoder
 from chat.exceptions import ClientError
+from chat.e2ee_check import is_ciphertext, ms
 from chat.constants import *   # inclut MSG_TYPE_REACTION
 from account.models import Account
 
@@ -75,7 +76,8 @@ class ChatConsumer(AsyncJsonWebsocketConsumer):
 			elif command == "send":
 				if len(content["message"].lstrip()) == 0:
 					raise ClientError(422,"You can't send an empty message.")
-				await self.send_room(content["room"], content["message"], content.get("reply_to_id"))
+				await self.send_room(content["room"], content["message"], content.get("reply_to_id"),
+				                     encrypted=bool(content.get("encrypted")))
 			elif command == "get_room_chat_messages":
 				await self.display_progress_bar(True)
 				room = await get_room_or_error(content['room_id'], self.scope["user"])
@@ -269,6 +271,7 @@ class ChatConsumer(AsyncJsonWebsocketConsumer):
 		# Instruct their client to finish opening the room
 		await self.send_json({
 			"join": str(room.id),
+			"encrypted": room.encrypted,
 		})
 
 		if self.scope["user"].is_authenticated:
@@ -322,7 +325,7 @@ class ChatConsumer(AsyncJsonWebsocketConsumer):
 		})
 
 
-	async def send_room(self, room_id, message, reply_to_id=None):
+	async def send_room(self, room_id, message, reply_to_id=None, encrypted=False):
 		"""
 		Called by receive_json when someone sends a message to a room.
 		"""
@@ -339,6 +342,14 @@ class ChatConsumer(AsyncJsonWebsocketConsumer):
 		# Get the room and send to the group about it
 		room = await get_room_or_error(room_id, self.scope["user"])
 
+		# Conversation secrète : seuls les messages chiffrés y entrent (et seulement là). Un message
+		# en clair y serait lisible par le serveur sans que les deux personnes le sachent.
+		if room.encrypted and not encrypted:
+			raise ClientError("SECRET_ROOM", "Conversation secrète : ce message n'était pas chiffré, il n'est pas parti.")
+		if encrypted and (not room.encrypted or not is_ciphertext(message)):
+			raise ClientError("NOT_SECRET_ROOM", "Message chiffré refusé ici.")
+		preview = SECRET_PREVIEW if encrypted else message
+
 		# get list of connected_users — must go through database_sync_to_async
 		connected_users = await get_connected_users(room)
 
@@ -350,9 +361,9 @@ class ChatConsumer(AsyncJsonWebsocketConsumer):
 
 		# Execute these functions asynchronously; capture msg_id for avatar lookup
 		results = await asyncio.gather(
-			append_unread_msg_if_not_connected(room, room.user1, connected_users, message),
-			append_unread_msg_if_not_connected(room, room.user2, connected_users, message),
-			create_room_chat_message(room, self.scope["user"], message, reply_to_id),
+			append_unread_msg_if_not_connected(room, room.user1, connected_users, preview),
+			append_unread_msg_if_not_connected(room, room.user2, connected_users, preview),
+			create_room_chat_message(room, self.scope["user"], message, reply_to_id, encrypted),
 		)
 		msg_obj = results[2]  # RoomChatMessage instance
 
@@ -365,6 +376,8 @@ class ChatConsumer(AsyncJsonWebsocketConsumer):
 				"user_id":          self.scope["user"].id,
 				"message":          message,
 				"msg_id":           msg_obj.id,
+				"encrypted":        encrypted,
+				"ts":               ms(msg_obj.timestamp),
 				"reply_to_id":      reply_data['id']       if reply_data else None,
 				"reply_to_username": reply_data['username'] if reply_data else None,
 				"reply_to_content": reply_data['content']  if reply_data else None,
@@ -400,13 +413,16 @@ class ChatConsumer(AsyncJsonWebsocketConsumer):
 		# L'adresse du fichier ne vient JAMAIS du navigateur : on la recalcule d'après le message,
 		# s'il est bien à cette personne et dans cette conversation. Avant, n'importe quel lien
 		# envoyé ici s'affichait chez l'autre comme une pièce jointe.
-		file_url = await file_link_or_none(msg_id, room, self.scope["user"])
-		if not file_url:
+		found = await file_link_or_none(msg_id, room, self.scope["user"])
+		if not found:
 			raise ClientError("FILE_ACCESS_DENIED", "Fichier introuvable dans cette conversation")
+		file_url, file_msg = found
+		if file_msg.encrypted:
+			file_name = ''      # (le vrai nom est dans le message chiffré)
 		connected_users = await get_connected_users(room)
 
 		# Increment unread count for the other (disconnected) user
-		preview = f'[📎 {file_name}]'
+		preview = SECRET_FILE_PREVIEW if file_msg.encrypted else f'[📎 {file_name}]'
 		await asyncio.gather(
 			append_unread_msg_if_not_connected(room, room.user1, connected_users, preview),
 			append_unread_msg_if_not_connected(room, room.user2, connected_users, preview),
@@ -422,7 +438,10 @@ class ChatConsumer(AsyncJsonWebsocketConsumer):
 				"msg_id":        msg_id,
 				"file_url":      file_url,
 				"file_name":     file_name,
-				"file_type":     file_type,
+				"file_type":     file_msg.file_type or file_type,
+				"encrypted":     file_msg.encrypted,
+				"content":       file_msg.content if file_msg.encrypted else '',
+				"ts":            ms(file_msg.timestamp),
 			}
 		)
 
@@ -516,6 +535,8 @@ class ChatConsumer(AsyncJsonWebsocketConsumer):
 				"message":           event["message"],
 				"natural_timestamp": timestamp,
 				"msg_id":            event.get("msg_id"),
+				"encrypted":         event.get("encrypted", False),
+				"ts":                event.get("ts"),
 				"reply_to_id":       event.get("reply_to_id"),
 				"reply_to_username": event.get("reply_to_username"),
 				"reply_to_content":  event.get("reply_to_content"),
@@ -535,6 +556,18 @@ class ChatConsumer(AsyncJsonWebsocketConsumer):
 			"file_type":       event["file_type"],
 			"natural_timestamp": timestamp,
 			"msg_id":          event.get("msg_id"),
+			"encrypted":       event.get("encrypted", False),
+			"content":         event.get("content", ""),
+			"ts":              event.get("ts"),
+		})
+
+	async def chat_secret(self, event):
+		"""La conversation secrète a été activée ou coupée par l'une des deux personnes."""
+		await self.send_json({
+			"msg_type":  MSG_TYPE_SECRET,
+			"encrypted": event["encrypted"],
+			"username":  event["username"],
+			"user_id":   event["user_id"],
 		})
 
 	async def chat_call(self, event):
@@ -662,7 +695,7 @@ def file_link_or_none(msg_id, room, user):
 		msg = RoomChatMessage.objects.get(pk=int(msg_id), room=room, user=user)
 	except (RoomChatMessage.DoesNotExist, TypeError, ValueError):
 		return None
-	return msg.file_link or None
+	return (msg.file_link, msg) if msg.file_link else None
 
 
 @database_sync_to_async
@@ -710,8 +743,8 @@ def get_user_info(room, user):
 
 
 @database_sync_to_async
-def create_room_chat_message(room, user, message, reply_to_id=None):
-	kwargs = {'user': user, 'room': room, 'content': message}
+def create_room_chat_message(room, user, message, reply_to_id=None, encrypted=False):
+	kwargs = {'user': user, 'room': room, 'content': message, 'encrypted': encrypted}
 	if reply_to_id:
 		try:
 			kwargs['reply_to_id'] = int(reply_to_id)
@@ -725,7 +758,10 @@ def get_reply_data(reply_to_id, room):
 	"""Retourne {'id', 'username', 'content'} du message cité (dans `room`), ou None."""
 	try:
 		msg = RoomChatMessage.objects.select_related('user').get(pk=int(reply_to_id), room=room)
-		body = msg.content[:100] if msg.content else f'[{msg.file_type or "fichier"}]'
+		if msg.encrypted:
+			body = msg.preview          # (le serveur ne peut pas citer un message chiffré)
+		else:
+			body = msg.content[:100] if msg.content else f'[{msg.file_type or "fichier"}]'
 		return {'id': str(msg.id), 'username': msg.user.username, 'content': body}
 	except Exception:
 		return None

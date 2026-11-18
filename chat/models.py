@@ -22,6 +22,10 @@ class PrivateChatRoom(models.Model):
 
 	is_active 			= models.BooleanField(default=False)
 
+	# Conversation secrète : les nouveaux messages et fichiers y sont chiffrés de bout en bout
+	# dans les navigateurs (static/js/e2ee/vz-e2ee.mjs). Le serveur ne peut plus les lire.
+	encrypted           = models.BooleanField(default=False)
+
 	def connect_user(self, user):
 		"""
 		return true if user is added to the connected_users list
@@ -80,6 +84,10 @@ class RoomChatMessage(models.Model):
 	# 'image' | 'video' | 'document' | '' (text-only)
 	file_type = models.CharField(max_length=20, blank=True, default='')
 
+	# Chiffré de bout en bout : `content` est alors le texte chiffré (Megolm), et le fichier
+	# éventuel est chiffré lui aussi (sa clé est DANS le texte chiffré).
+	encrypted = models.BooleanField(default=False)
+
 	# ── Reply (citation) ─────────────────────────────────────────────────────
 	reply_to  = models.ForeignKey(
 		'self', on_delete=models.SET_NULL, null=True, blank=True,
@@ -95,6 +103,14 @@ class RoomChatMessage(models.Model):
 		if self.file:
 			return f'[{self.file_type or "file"}] {self.file.name}'
 		return self.content[:80]
+
+	@property
+	def preview(self):
+		"""Le texte à montrer hors de la conversation (aperçu, notification, citation)."""
+		from chat.constants import SECRET_FILE_PREVIEW, SECRET_PREVIEW
+		if self.encrypted:
+			return SECRET_FILE_PREVIEW if self.file else SECRET_PREVIEW
+		return self.content
 
 	@property
 	def file_link(self):

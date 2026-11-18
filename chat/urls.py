@@ -9,6 +9,7 @@ from chat.views import (
 	call_reject_push,
 	get_ice_servers,
 	chat_file,
+	set_secret,
 )
 
 app_name = 'chat'
@@ -21,5 +22,7 @@ urlpatterns = [
 	path('call-reject-push/',          call_reject_push,               name='call-reject-push'),
 	path('ice-servers/',               get_ice_servers,                name='ice-servers'),
 	# Un fichier du chat privé : seulement pour les deux personnes de la conversation.
+	# Conversation secrète (chiffrement de bout en bout) : activer / couper
+	path('secret/',                    ratelimit('20/m')(set_secret),  name='secret'),
 	path('fichier/<int:msg_id>/',      ratelimit('120/m', methods=('GET',))(chat_file), name='file'),
 ]
