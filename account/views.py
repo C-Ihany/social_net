@@ -728,6 +728,8 @@ def phone_verify_otp(request):
 # Ce qu'on répond quand un code est demandé, QUE LE NUMÉRO AIT UN COMPTE OU NON : sinon la
 # page dirait à n'importe qui quels numéros sont inscrits sur Vazimba.
 _CODE_SENT = "Si ce numéro est lié à un compte Vazimba, un code vient d'y être envoyé."
+_CODE_SENT_EMAIL = ("Si ce numéro est lié à un compte Vazimba, un code vient d'être envoyé à l'adresse "
+                    "e-mail de ce compte (regardez aussi dans les indésirables).")
 
 
 def phone_login_view(request):
@@ -740,15 +742,15 @@ def phone_login_view(request):
 	"""
 	if request.user.is_authenticated:
 		return redirect("post:index")
-	channels = otp_channels()
+	channels = otp_codes.channels_for('login')
 	context = {'channels': channels, 'step': 'numero'}
 	if request.method == 'POST' and request.POST.get('step') == 'numero':
-		channel = otp_codes.pick_channel(request.POST.get('channel', ''))
+		channel = otp_codes.pick_channel(request.POST.get('channel', ''), 'login')
 		phone = otp_codes.read_phone(request.POST.get('phone', ''), channel)
 		context.update(channel=channel, phone_raw=request.POST.get('phone', ''))
 		if not phone:
 			context['error'] = ("Numéro invalide. Un numéro malgache (034…) ; à l'étranger, +indicatif du pays "
-			                    "et choisissez WhatsApp.")
+			                    "et choisissez WhatsApp ou e-mail.")
 		elif otp_codes.too_many_sends(phone):
 			context['error'] = 'Trop de codes demandés pour ce numéro. Réessayez dans une heure.'
 		else:
@@ -758,7 +760,8 @@ def phone_login_view(request):
 				context['error'] = error
 			else:
 				request.session['phone_login'] = phone
-				context.update(step='code', info=_CODE_SENT, phone_display=format_phone_display(phone))
+				context.update(step='code', info=_CODE_SENT_EMAIL if channel == 'email' else _CODE_SENT,
+				               phone_display=format_phone_display(phone))
 	elif request.method == 'POST' and request.POST.get('step') == 'code':
 		phone = request.session.get('phone_login')
 		if not phone:

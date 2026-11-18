@@ -1241,7 +1241,10 @@ msgid "Receive the code by"
 msgstr "Recevoir le code par"
 
 msgid "Abroad: write +country code, and choose WhatsApp."
-msgstr "À l'étranger : écrivez +indicatif du pays, et choisissez WhatsApp."
+msgstr "À l'étranger : écrivez +indicatif du pays, et choisissez WhatsApp ou e-mail."
+
+msgid "Email: the code goes to the email address of the account."
+msgstr "E-mail : le code part à l'adresse e-mail du compte."
 
 msgid "Receive a code"
 msgstr "Recevoir un code"

@@ -5,6 +5,10 @@ Les codes à usage unique envoyés par SMS ou WhatsApp : les fabriquer, les envo
 Servent à confirmer le numéro d'un compte (« verify ») et à se connecter avec son numéro
 (« login »).
 
+Pour se connecter, le code peut aussi partir par E-MAIL, à l'adresse du compte lié au numéro
+(utile à l'étranger, sans SMS ni WhatsApp). Jamais pour CONFIRMER un numéro : un e-mail ne
+prouve pas qu'on a le téléphone, et on pourrait s'attribuer le numéro de quelqu'un d'autre.
+
 Protections :
 - code de 6 chiffres tiré par `secrets`, valable 10 minutes, 5 essais au plus ;
 - seule l'EMPREINTE du code est gardée en base (PhoneVerification.digest) ;
@@ -15,6 +19,8 @@ Protections :
 import logging
 from datetime import timedelta
 
+from django.conf import settings
+from django.core.mail import send_mail
 from django.utils import timezone
 
 from account.models import Account, PhoneVerification
@@ -24,13 +30,20 @@ logger = logging.getLogger(__name__)
 
 
 def read_phone(raw, channel):
-    """Le numéro au format E.164, ou None. À l'étranger, seulement par WhatsApp."""
-    return normalize_phone(raw or '', international=(channel == 'whatsapp'))
+    """Le numéro au format E.164, ou None. À l'étranger, seulement par WhatsApp ou e-mail
+    (par SMS, il faudrait payer un SMS vers l'étranger)."""
+    return normalize_phone(raw or '', international=(channel in ('whatsapp', 'email')))
 
 
-def pick_channel(asked):
-    """Le moyen d'envoi demandé s'il est proposé, sinon le premier proposé."""
+def channels_for(purpose):
+    """Les moyens d'envoi proposés : l'e-mail en plus, seulement pour se connecter."""
     channels = otp_channels()
+    return channels + ['email'] if purpose == 'login' else channels
+
+
+def pick_channel(asked, purpose='verify'):
+    """Le moyen d'envoi demandé s'il est proposé, sinon le premier proposé."""
+    channels = channels_for(purpose)
     if asked in channels:
         return asked
     return channels[0] if channels else 'sms'
@@ -52,12 +65,30 @@ def issue_code(user, phone, purpose, channel):
     otp = PhoneVerification.objects.create(user=user, phone=phone, purpose=purpose, channel=channel,
                                            code=PhoneVerification.digest(phone, code))
     try:
-        send_otp(phone, code, channel)
+        if channel == 'email':
+            _send_by_email(user, code)
+        else:
+            send_otp(phone, code, channel)
     except Exception as exc:  # noqa: BLE001 - le fournisseur a refusé ou ne répond pas
         logger.error('[OTP] Envoi par %s échoué vers %s : %s', channel, phone, exc)
         otp.delete()          # (ne pas garder un code qui n'est pas parti)
         return "L'envoi du code a échoué. Vérifiez le numéro et réessayez."
     return None
+
+
+def _send_by_email(user, code):
+    """Le code de connexion à l'adresse e-mail du compte (Brevo en production)."""
+    minutes = PhoneVerification.OTP_VALID_MINUTES
+    send_mail(
+        subject=f'Votre code de connexion Vazimba : {code}',
+        message=(f"Bonjour {user.username},\n\n"
+                 f"Votre code pour vous connecter à Vazimba avec votre numéro : {code}\n"
+                 f"Il est valable {minutes} minutes.\n\n"
+                 "Si vous n'avez rien demandé, ignorez ce message : sans ce code, personne ne peut "
+                 "se connecter. Ne le donnez à personne, même pas à quelqu'un qui dit venir de Vazimba."),
+        from_email=getattr(settings, 'DEFAULT_FROM_EMAIL', None),
+        recipient_list=[user.email],
+    )
 
 
 def check_code(phone, purpose, code, user=None):

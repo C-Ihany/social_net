@@ -65,11 +65,12 @@
                     {% for c in channels %}
                     <label class="auth-channel">
                         <input type="radio" name="channel" value="{{ c }}" {% if c == channel or not channel and forloop.first %}checked{% endif %}>
-                        {% if c == 'whatsapp' %}WhatsApp{% else %}SMS{% endif %}
+                        {% if c == 'whatsapp' %}WhatsApp{% elif c == 'email' %}{% trans "Email" %}{% else %}SMS{% endif %}
                     </label>
                     {% endfor %}
                 </div>
                 <small class="auth-hint">{% trans "Abroad: write +country code, and choose WhatsApp." %}</small>
+                {% if 'email' in channels %}<small class="auth-hint">{% trans "Email: the code goes to the email address of the account." %}</small>{% endif %}
             </div>
             {% elif channels %}
             <input type="hidden" name="channel" value="{{ channels.0 }}">

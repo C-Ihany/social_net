@@ -1,6 +1,7 @@
 """Codes par SMS / WhatsApp et connexion par numéro de téléphone (étape 1 de la sécurité, 18/11/2026)."""
 from unittest import mock
 
+from django.core import mail
 from django.core.cache import cache
 from django.test import TestCase, override_settings
 from django.urls import reverse
@@ -113,6 +114,25 @@ class PhoneLoginTests(TestCase):
         self.assertEqual(SENT[-1][0], '+33612345678')
         self.assertEqual(SENT[-1][2], 'whatsapp')
 
+    def test_code_par_email_a_l_adresse_du_compte(self):
+        """À l'étranger sans SMS ni WhatsApp : le code part à l'e-mail du compte lié au numéro."""
+        self.user.phone_number = '+4915112345678'
+        self.user.save()
+        response = self.ask_code('+49 151 1234 5678', 'email')
+        self.assertContains(response, "adresse e-mail de ce compte")
+        self.assertEqual(SENT, [])                          # (ni SMS ni WhatsApp)
+        self.assertEqual(len(mail.outbox), 1)
+        self.assertEqual(mail.outbox[0].to, ['lova@example.com'])
+        code = mail.outbox[0].subject.split(': ')[-1]
+        self.assertEqual(PhoneVerification.objects.get().channel, 'email')
+        self.client.post(reverse('phone-login'), {'step': 'code', 'code': code})
+        self.assertEqual(int(self.client.session['_auth_user_id']), self.user.pk)
+
+    def test_email_meme_reponse_pour_un_numero_inconnu(self):
+        response = self.ask_code('+49 151 9999 9999', 'email')
+        self.assertContains(response, "adresse e-mail de ce compte")
+        self.assertEqual(len(mail.outbox), 0)
+
 
 @override_settings(DEBUG=True, WHATSAPP_TOKEN='', SMS_BACKEND='console')
 @mock.patch('account.otp.send_otp', fake_send)
@@ -133,6 +153,12 @@ class PhoneVerifyTests(TestCase):
         self.assertEqual(response.json()['ok'], True)
         self.user.refresh_from_db()
         self.assertTrue(self.user.phone_verified)
+
+    def test_un_email_ne_confirme_jamais_un_numero(self):
+        """Confirmer un numéro par e-mail ne prouverait rien : on retombe sur SMS / WhatsApp."""
+        self.client.post(reverse('account:phone-send-otp'), {'phone': '034 12 345 67', 'channel': 'email'})
+        self.assertEqual(len(mail.outbox), 0)
+        self.assertNotEqual(SENT[0][2], 'email')
 
     def test_un_numero_deja_lie_a_un_autre_compte_est_refuse(self):
         other = Account.objects.create_user('miora@example.com', 'miora', 'motdepasse-solide-456')

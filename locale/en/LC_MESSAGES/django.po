@@ -4323,7 +4323,10 @@ msgid "Receive the code by"
 msgstr "Receive the code by"
 
 msgid "Abroad: write +country code, and choose WhatsApp."
-msgstr "Abroad: write +country code, and choose WhatsApp."
+msgstr "Abroad: write +country code, and choose WhatsApp or email."
+
+msgid "Email: the code goes to the email address of the account."
+msgstr "Email: the code goes to the email address of the account."
 
 msgid "Receive a code"
 msgstr "Receive a code"

@@ -4383,7 +4383,10 @@ msgid "Receive the code by"
 msgstr "Handray ny kaody amin'ny alalan'ny"
 
 msgid "Abroad: write +country code, and choose WhatsApp."
-msgstr "Any ivelany : soraty ny +kaodin'ny firenena, ary safidio WhatsApp."
+msgstr "Any ivelany : soraty ny +kaodin'ny firenena, ary safidio WhatsApp na mailaka."
+
+msgid "Email: the code goes to the email address of the account."
+msgstr "Mailaka : alefa any amin'ny adiresy mailakan'ny kaonty ny kaody."
 
 msgid "Receive a code"
 msgstr "Handray kaody"
