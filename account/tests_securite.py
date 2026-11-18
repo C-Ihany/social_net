@@ -256,3 +256,12 @@ class AdminPhoneTests(TestCase):
         from django import forms
         with self.assertRaises(forms.ValidationError):
             form.clean_phone_number()
+
+
+class CsrfPageTests(TestCase):
+    def test_formulaire_perime_page_claire(self):
+        """Formulaire ouvert avant une connexion dans un autre onglet : page claire, pas l'erreur brute."""
+        from django.test import Client
+        response = Client(enforce_csrf_checks=True).post(reverse('phone-login'), {'step': 'code', 'code': '123456'})
+        self.assertEqual(response.status_code, 403)
+        self.assertContains(response, 'Cette page a expiré', status_code=403)
