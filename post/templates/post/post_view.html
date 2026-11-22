@@ -133,7 +133,7 @@
             </a>
             <a href="{% url 'post:post-view' %}?tab=foryou" class="vz-seg{% if active_tab == 'foryou' %} active{% endif %}"
                {% if active_tab == 'foryou' %}aria-current="page"{% endif %}>
-                <span class="material-icons">auto_awesome</span> {% trans "Pour toi" %}
+               {% trans "Pour toi" %}
             </a>
             {% if user_region %}
             <a href="{% url 'post:post-view' %}?tab=region" class="vz-seg{% if active_tab == 'region' %} active{% endif %}"
@@ -208,12 +208,6 @@
                 <button class="create-box-action post" type="button" id="cb-write-btn">
                     <span class="material-icons">edit_note</span><span class="btn-label"> {% trans "Write" %}</span>
                 </button>
-                <a class="create-box-action kabary" href="{% url 'post:kabary-create' %}">
-                    <span class="material-icons">record_voice_over</span><span class="btn-label"> {% trans "Kabary" %}</span>
-                </a>
-                <a class="create-box-action vintana" href="{% url 'post:vintana-create' %}">
-                    <span class="material-icons">lock_clock</span><span class="btn-label"> {% trans "Vintana" %}</span>
-                </a>
             </div>
         </div>
 
