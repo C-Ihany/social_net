@@ -20,6 +20,7 @@
         {% if sel_pmin %}<input type="hidden" name="pmin" value="{{ sel_pmin }}">{% endif %}
         {% if sel_pmax %}<input type="hidden" name="pmax" value="{{ sel_pmax }}">{% endif %}
         {% if sort != 'recent' %}<input type="hidden" name="sort" value="{{ sort }}">{% endif %}
+        {% if near %}<input type="hidden" name="near" value="1">{% endif %}
         <button type="submit" class="vz-btn vz-btn--pill bazar-on-hero"><i class="material-icons" aria-hidden="true">search</i>{% trans "Rechercher" %}</button>
     </form>
 
@@ -53,12 +54,16 @@
 </nav>
 
 <!-- ── Raccourci "Ma région" ── -->
-{% if user_region and not sel_region %}
+{% if near_label and not near and not sel_region %}
 <div class="bazar-near">
     <span class="bazar-near-label">{% trans "Près de chez moi :" %}</span>
-    <a href="?{% if qs_page %}{{ qs_page }}&amp;{% endif %}region={{ user_region }}" class="vz-chip vz-chip--accent">
-        <i class="material-icons" aria-hidden="true">place</i>{{ user_region_label }}
+    <a href="?{% if qs_page %}{{ qs_page }}&amp;{% endif %}near=1" class="vz-chip vz-chip--accent">
+        <i class="material-icons" aria-hidden="true">place</i>{{ near_label }}
     </a>
+</div>
+{% elif near %}
+<div class="bazar-near">
+    <span class="vz-chip vz-chip--accent vz-chip--static"><i class="material-icons" aria-hidden="true">place</i>{% trans "Près de chez moi :" %} {{ near_label }}</span>
 </div>
 {% endif %}
 
@@ -67,6 +72,7 @@
     <form method="get" action="{% url 'bazar:index' %}" class="bazar-filters-inner" id="filter-form">
         {% if q %}<input type="hidden" name="q" value="{{ q }}">{% endif %}
         {% if listing_type %}<input type="hidden" name="type" value="{{ listing_type }}">{% endif %}
+        {% if near %}<input type="hidden" name="near" value="1">{% endif %}
 
         <!-- Catégorie -->
         <select name="cat" class="bazar-filter-select" aria-label="{% trans 'Catégorie' %}" onchange="this.form.submit()">
@@ -107,11 +113,12 @@
         <div class="bazar-price-range">
             <input type="number" name="pmin" min="0" step="100" inputmode="numeric"
                    value="{{ sel_pmin }}"
-                   placeholder="{% trans 'Prix min (Ar)' %}" aria-label="{% trans 'Prix min (Ar)' %}">
+                   placeholder="{% trans 'Prix min' %}" aria-label="{% trans 'Prix min' %} ({{ user_currency_symbol }})">
             <span aria-hidden="true">—</span>
             <input type="number" name="pmax" min="0" step="100" inputmode="numeric"
                    value="{{ sel_pmax }}"
-                   placeholder="{% trans 'Prix max (Ar)' %}" aria-label="{% trans 'Prix max (Ar)' %}">
+                   placeholder="{% trans 'Prix max' %}" aria-label="{% trans 'Prix max' %} ({{ user_currency_symbol }})">
+            <span class="bazar-price-unit">{{ user_currency_symbol }}</span>
         </div>
 
         <!-- Tri -->
@@ -135,6 +142,10 @@
         </div>
     </form>
 </div>
+
+{% if price_currency_symbol %}
+<p class="bazar-price-note"><i class="material-icons" aria-hidden="true">payments</i>{% blocktrans with c=price_currency_symbol %}Prix en {{ c }} : seules les annonces dans cette devise sont affichées.{% endblocktrans %}</p>
+{% endif %}
 
 <!-- ── Compteur de résultats ── -->
 <div class="bazar-results-bar">

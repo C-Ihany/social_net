@@ -77,10 +77,10 @@
                     </span>
                     {% endif %}
                     <span class="fihav-stat"
-                          title="{% trans 'Score Fihavanana — solidarité et engagement dans la communauté' %}">
+                          title="{% trans 'Score de solidarité — entraide et engagement dans la communauté' %}">
                         <span class="fihav-badge-inline">
                             <span class="material-icons">favorite</span>
-                            Fihavanana&nbsp;
+                            {% trans "Solidarité" %}&nbsp;
                             <span class="fihav-stat-val">{{ profile_user.score_fihavanana }}</span>
                         </span>
                         <span class="fihav-level-txt">{{ profile_user.fihavanana_level.0 }}&nbsp;{{ profile_user.fihavanana_level.1 }}</span>
@@ -180,11 +180,11 @@
             <!-- Sidebar -->
             <aside class="profile-sidebar">
 
-                <!-- Score Fihavanana -->
+                <!-- Score de solidarité -->
                 <div class="fihav-card" id="fihav-sidebar-card">
                     <div class="fihav-card-title">
                         <span class="material-icons" aria-hidden="true">favorite</span>
-                        {% trans "Score Fihavanana" %}
+                        {% trans "Score de solidarité" %}
                     </div>
                     <div class="fihav-score-big" id="fihav-score-val">{{ profile_user.score_fihavanana }}</div>
                     {% with lvl=profile_user.fihavanana_level %}
@@ -196,28 +196,28 @@
                     <!-- Barre de progression vers le niveau suivant -->
                     {% with score=profile_user.score_fihavanana %}
                     {% if score < 30 %}
-                        {% with cur=score nxt=30 label="Mpankafy" %}
+                        {% with cur=score nxt=30 label=_("Ami") %}
                         <div class="fihav-progress-wrap" title="{{ cur }} / {{ nxt }}">
                             <div class="fihav-progress-bar" style="width:{% widthratio cur nxt 100 %}%;"></div>
                         </div>
                         <p class="fihav-next-level">{{ cur }} / {{ nxt }} → {{ label }}</p>
                         {% endwith %}
                     {% elif score < 80 %}
-                        {% with cur=score nxt=80 label="Mpiray tsipy" %}
+                        {% with cur=score nxt=80 label=_("Solidaire") %}
                         <div class="fihav-progress-wrap" title="{{ cur }} / {{ nxt }}">
                             <div class="fihav-progress-bar" style="width:{% widthratio cur nxt 100 %}%;"></div>
                         </div>
                         <p class="fihav-next-level">{{ cur }} / {{ nxt }} → {{ label }}</p>
                         {% endwith %}
                     {% elif score < 200 %}
-                        {% with cur=score nxt=200 label="Mpiahy" %}
+                        {% with cur=score nxt=200 label=_("Bienfaiteur") %}
                         <div class="fihav-progress-wrap" title="{{ cur }} / {{ nxt }}">
                             <div class="fihav-progress-bar" style="width:{% widthratio cur nxt 100 %}%;"></div>
                         </div>
                         <p class="fihav-next-level">{{ cur }} / {{ nxt }} → {{ label }}</p>
                         {% endwith %}
                     {% elif score < 500 %}
-                        {% with cur=score nxt=500 label="Mpitarika" %}
+                        {% with cur=score nxt=500 label=_("Leader") %}
                         <div class="fihav-progress-wrap" title="{{ cur }} / {{ nxt }}">
                             <div class="fihav-progress-bar" style="width:{% widthratio cur nxt 100 %}%;"></div>
                         </div>
@@ -240,10 +240,6 @@
                         <div class="fihav-breakdown-row">
                             <span><i class="material-icons" aria-hidden="true">edit_note</i> {% trans "Post standard" %}</span>
                             <span class="fihav-breakdown-val">+5</span>
-                        </div>
-                        <div class="fihav-breakdown-row">
-                            <span><i class="material-icons" aria-hidden="true">record_voice_over</i> Kabary</span>
-                            <span class="fihav-breakdown-val">+10</span>
                         </div>
                         <div class="fihav-breakdown-row">
                             <span><i class="material-icons" aria-hidden="true">chat_bubble_outline</i> {% trans "Commentaire" %}</span>
@@ -420,12 +416,6 @@
                         <button class="create-box-action post" type="button" id="pf-cb-write-btn">
                             <span class="material-icons">edit_note</span><span class="btn-label">{% trans "Write" %}</span>
                         </button>
-                        <a class="create-box-action" href="{% url 'post:kabary-create' %}">
-                            <span class="material-icons">record_voice_over</span><span class="btn-label">Kabary</span>
-                        </a>
-                        <a class="create-box-action" href="{% url 'post:vintana-create' %}">
-                            <span class="material-icons">auto_stories</span><span class="btn-label">Vintana</span>
-                        </a>
                     </div>
                 </div>
 

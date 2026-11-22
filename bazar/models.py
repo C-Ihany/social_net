@@ -3,6 +3,8 @@ from django.conf import settings
 from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
 
+from regions import CURRENCY_CHOICES, DEFAULT_CURRENCY, currency_symbol, format_money
+
 
 def whatsapp_digits(phone):
     """
@@ -90,8 +92,14 @@ class Annonce(models.Model):
     price           = models.DecimalField(
         max_digits=12, decimal_places=0,
         null=True, blank=True,
-        verbose_name=_('Prix (Ar)'),
+        verbose_name=_('Prix'),
         help_text=_('Laisser vide pour "Prix à discuter"'),
+    )
+    # Devise de TOUS les montants de l'annonce (prix, loyer, caution). Proposée d'après le
+    # pays du vendeur à la création ; les annonces d'avant l'ouverture à l'Afrique restent en MGA.
+    currency = models.CharField(
+        max_length=3, choices=CURRENCY_CHOICES, default=DEFAULT_CURRENCY,
+        verbose_name=_('Devise'),
     )
     price_negotiable = models.BooleanField(default=False, verbose_name=_('Prix négociable'))
 
@@ -122,7 +130,7 @@ class Annonce(models.Model):
     caution = models.DecimalField(
         max_digits=12, decimal_places=0,
         null=True, blank=True,
-        verbose_name=_('Caution (Ar)'),
+        verbose_name=_('Caution'),
     )
     duree_min = models.PositiveIntegerField(
         null=True, blank=True,
@@ -218,14 +226,22 @@ class Annonce(models.Model):
     def formatted_price(self):
         if self.price is None:
             return str(_('Prix à discuter'))
-        return f'{int(self.price):,} Ar'.replace(',', ' ')
+        return format_money(self.price, self.currency)
 
     @property
     def formatted_prix_location(self):
         if self.prix_location is None:
             return str(_('Prix à discuter'))
         period = dict(self.PERIODE_CHOICES).get(self.periode_location, '')
-        return f'{int(self.prix_location):,} Ar {period}'.replace(',', ' ')
+        return f'{format_money(self.prix_location, self.currency)} {period}'.strip()
+
+    @property
+    def formatted_caution(self):
+        return format_money(self.caution, self.currency) if self.caution else ''
+
+    @property
+    def currency_symbol(self):
+        return currency_symbol(self.currency)
 
     @property
     def display_price(self):

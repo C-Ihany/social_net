@@ -73,7 +73,7 @@ class Group(models.Model):
     created_at  = models.DateTimeField(auto_now_add=True)
     dina        = models.TextField(
         blank=True, default='',
-        verbose_name='Dina',
+        verbose_name='Charte du groupe (fonction retirée)',
         help_text='Charte communautaire du groupe (règles, engagements, traditions)',
     )
 

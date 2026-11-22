@@ -3,14 +3,14 @@
 {% load post_tags %}
 {% load i18n %}
 
-{% block page_title %}{% if post.is_locked %}{% trans "Capsule Vintana" %}{% else %}{{ post.title|default:post.author.username|truncatechars:60 }}{% endif %} — Vazimba{% endblock %}
+{% block page_title %}{% if post.is_locked %}{% trans "Capsule temporelle" %}{% else %}{{ post.title|default:post.author.username|truncatechars:60 }}{% endif %} — Vazimba{% endblock %}
 
 {% block extra_head %}
 {# ── Open Graph : jamais le contenu d'une capsule encore scellée ── #}
 <meta property="og:type"        content="article">
 <meta property="og:url"         content="{{ request.build_absolute_uri }}">
 {% if post.is_locked %}
-<meta property="og:title"       content="{% trans 'Capsule Vintana' %}">
+<meta property="og:title"       content="{% trans 'Capsule temporelle' %}">
 {% else %}
 <meta property="og:title"       content="{{ post.title }}">
 <meta property="og:description" content="{{ post.body|striptags|truncatechars:160 }}">

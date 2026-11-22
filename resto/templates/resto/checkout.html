@@ -52,11 +52,11 @@
         <div class="vz-card rs-box rs-card--pad">
             <p class="rs-card-title">{{ restaurant.name }}</p>
             {% for l in cart_summary.lines %}
-            <div class="rs-order-line"><div>{{ l.quantity }} × {{ l.name }}{% if l.options %}<small>{{ l.options }}</small>{% endif %}{% if l.included %}<small><i class="material-icons rs-ico" aria-hidden="true">check_circle</i> {% trans "Avec" %} : {{ l.included }}</small>{% endif %}{% if l.removed %}<small><i class="material-icons rs-ico" aria-hidden="true">block</i> {% trans "Sans" %} : {{ l.removed }}</small>{% endif %}{% if l.note %}<small><i class="material-icons rs-ico" aria-hidden="true">edit_note</i> {{ l.note }}</small>{% endif %}</div><div>{{ l.line_total|vz_ariary }}</div></div>
+            <div class="rs-order-line"><div>{{ l.quantity }} × {{ l.name }}{% if l.options %}<small>{{ l.options }}</small>{% endif %}{% if l.included %}<small><i class="material-icons rs-ico" aria-hidden="true">check_circle</i> {% trans "Avec" %} : {{ l.included }}</small>{% endif %}{% if l.removed %}<small><i class="material-icons rs-ico" aria-hidden="true">block</i> {% trans "Sans" %} : {{ l.removed }}</small>{% endif %}{% if l.note %}<small><i class="material-icons rs-ico" aria-hidden="true">edit_note</i> {{ l.note }}</small>{% endif %}</div><div>{{ l.line_total|vz_money:restaurant.currency }}</div></div>
             {% endfor %}
-            <div class="rs-total-row rs-total-row--mt"><span>{% trans "Sous-total" %}</span><span>{{ cart_summary.subtotal|vz_ariary }}</span></div>
+            <div class="rs-total-row rs-total-row--mt"><span>{% trans "Sous-total" %}</span><span>{{ cart_summary.subtotal|vz_money:restaurant.currency }}</span></div>
             <div class="rs-total-row rs-muted" id="rs-fee-row"><span>{% trans "Livraison" %}</span><span>{{ restaurant.formatted_delivery_fee }}</span></div>
-            <div class="rs-total-row rs-total-row--grand"><span>{% trans "Total" %}</span><span id="rs-total">{{ cart_summary.total|vz_ariary }}</span></div>
+            <div class="rs-total-row rs-total-row--grand"><span>{% trans "Total" %}</span><span id="rs-total">{{ cart_summary.total|vz_money:restaurant.currency }}</span></div>
             <p class="rs-muted rs-mt-s"><i class="material-icons rs-ico" aria-hidden="true">timer</i> {% trans "Délai estimé" %} : ~{{ restaurant.avg_prep_minutes }} min {% trans "de préparation" %}</p>
             <div class="vz-actions">
                 <a class="vz-btn vz-btn--muted" href="{% url 'resto:cart' %}">{% trans "Annuler" %}</a>
@@ -66,6 +66,7 @@
     </form>
 </div>
 
+<span id="rs-currency" data-symbol="{{ restaurant.currency_symbol }}" hidden></span>
 {{ checkout_data|json_script:"rs-checkout-data" }}
 <script>
 (function(){

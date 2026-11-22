@@ -56,7 +56,7 @@
         {% if not request.user.is_authenticated %}
         <!-- Visiteur non connecté : on n'affiche que les sections réellement
              accessibles sans compte. Auparavant la barre proposait Feed,
-             Kabary, Vintana, Live et Tendances, qui renvoyaient tous vers la
+             Live et Tendances, qui renvoyaient tous vers la
              page de connexion — une impasse à chaque clic. -->
         <a href="{% url 'tourisme:home' %}"
            class="zoot-nav-link {% if request.resolver_match.namespace == 'tourisme' %}active{% endif %}">
@@ -71,8 +71,7 @@
         {% endif %}
 
         <!-- Plus — dropdown toutes les autres sections.
-             Réservé aux connectés : son contenu (Tendances, Live, Kabary,
-             Vintana) exige un compte. -->
+             Réservé aux connectés : son contenu (Tendances, Live) exige un compte. -->
         {% if request.user.is_authenticated %}
         <div class="zoot-nav-more dropdown">
             <button class="zoot-nav-link zoot-nav-more-btn
@@ -109,17 +108,6 @@
                     <span class="material-icons">radio_button_checked</span>
                     Live
                     <span id="nav-live-count" class="zoot-live-count"></span>
-                </a>
-
-                <div class="dropdown-divider"></div>
-
-                <!-- Créer -->
-                <p class="zoot-dropdown-label">{% trans "Créer" %}</p>
-                <a class="dropdown-item zoot-tint-accent" href="{% url 'post:kabary-create' %}">
-                    <span class="material-icons">record_voice_over</span> Kabary
-                </a>
-                <a class="dropdown-item zoot-tint-vintana" href="{% url 'post:vintana-create' %}">
-                    <span class="material-icons">lock_clock</span> Vintana
                 </a>
 
             </div>
@@ -298,12 +286,6 @@
 
                 <!-- Créer -->
                 <p class="zoot-dropdown-label">{% trans "Créer" %}</p>
-                <a class="dropdown-item zoot-tint-accent" href="{% url 'post:kabary-create' %}">
-                    <span class="material-icons">record_voice_over</span> Kabary
-                </a>
-                <a class="dropdown-item zoot-tint-vintana" href="{% url 'post:vintana-create' %}">
-                    <span class="material-icons">lock_clock</span> Vintana
-                </a>
                 <!-- Live -->
                 <a class="dropdown-item zoot-tint-danger" href="{% url 'video:live-list' %}"
                    id="nav-live-btn">
@@ -427,15 +409,6 @@
     </a>
     <a href="{% url 'video:live-list' %}" class="zoot-mobile-link zoot-tint-danger">
         <span class="material-icons">radio_button_checked</span> Live
-    </a>
-
-    <div class="zoot-mobile-sep"></div>
-    <p class="zoot-mobile-label">{% trans "Créer" %}</p>
-    <a href="{% url 'post:kabary-create' %}" class="zoot-mobile-link zoot-tint-accent">
-        <span class="material-icons">record_voice_over</span> Kabary
-    </a>
-    <a href="{% url 'post:vintana-create' %}" class="zoot-mobile-link zoot-tint-vintana">
-        <span class="material-icons">lock_clock</span> Vintana
     </a>
 
     <div class="zoot-mobile-sep"></div>

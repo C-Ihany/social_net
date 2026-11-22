@@ -25,10 +25,10 @@
                     {% if l.included %}<p class="vz-card__subtitle rs-line-note"><i class="material-icons" aria-hidden="true">check_circle</i> {% trans "Avec" %} : {{ l.included }}</p>{% endif %}
                     {% if l.removed %}<p class="vz-card__subtitle rs-line-note"><i class="material-icons" aria-hidden="true">block</i> {% trans "Sans" %} : {{ l.removed }}</p>{% endif %}
                     {% if l.note %}<p class="vz-card__subtitle rs-line-note"><i class="material-icons" aria-hidden="true">edit_note</i> {{ l.note }}</p>{% endif %}
-                    <p class="vz-card__subtitle">{{ l.unit_price|vz_ariary }} × <span class="q">{{ l.quantity }}</span></p>
+                    <p class="vz-card__subtitle">{{ l.unit_price|vz_money:cart_summary.currency }} × <span class="q">{{ l.quantity }}</span></p>
                 </div>
                 <div class="vz-card__actions vz-card__actions--end rs-line-end">
-                    <span class="vz-card__price lt">{{ l.line_total|vz_ariary }}</span>
+                    <span class="vz-card__price lt">{{ l.line_total|vz_money:cart_summary.currency }}</span>
                     <div class="rs-qty">
                         <button type="button" class="vz-icon-btn" onclick="rsLine({{ l.id }}, -1)" aria-label="{% trans 'Retirer un' %}"><i class="material-icons" aria-hidden="true">remove</i></button><span class="q">{{ l.quantity }}</span><button type="button" class="vz-icon-btn" onclick="rsLine({{ l.id }}, 1)" aria-label="{% trans 'Ajouter un' %}"><i class="material-icons" aria-hidden="true">add</i></button>
                     </div>
@@ -37,12 +37,12 @@
         {% endfor %}
         </div>
         <div class="rs-totals">
-            <div class="rs-total-row"><span>{% trans "Sous-total" %}</span><span id="rs-sub">{{ cart_summary.subtotal|vz_ariary }}</span></div>
+            <div class="rs-total-row"><span>{% trans "Sous-total" %}</span><span id="rs-sub">{{ cart_summary.subtotal|vz_money:cart_summary.currency }}</span></div>
             <div class="rs-total-row rs-muted"><span>{% trans "Livraison (si livraison)" %}</span><span>{{ cart.restaurant.formatted_delivery_fee }}</span></div>
-            <div class="rs-total-row rs-total-row--grand"><span>{% trans "Total" %}</span><span id="rs-total">{{ cart_summary.total|vz_ariary }}</span></div>
+            <div class="rs-total-row rs-total-row--grand"><span>{% trans "Total" %}</span><span id="rs-total">{{ cart_summary.total|vz_money:cart_summary.currency }}</span></div>
         </div>
         {% if cart.restaurant.min_order and cart_summary.subtotal < cart.restaurant.min_order %}
-        <p class="rs-form err rs-mt" role="alert">{% blocktrans with m=cart.restaurant.min_order|vz_ariary %}Commande minimum : {{ m }}{% endblocktrans %}</p>
+        <p class="rs-form err rs-mt" role="alert">{% blocktrans with m=cart.restaurant.min_order|vz_money:cart_summary.currency %}Commande minimum : {{ m }}{% endblocktrans %}</p>
         {% endif %}
         <div class="vz-actions vz-actions--between">
             <form method="post" action="{% url 'resto:cart_clear' %}" data-vz-confirm="{% trans 'Vider le panier ?' %}" data-vz-confirm-label="{% trans 'Vider' %}" data-vz-danger>{% csrf_token %}
@@ -57,6 +57,7 @@
     {% endif %}
 </div>
 
+<span id="rs-currency" data-symbol="{{ cart_summary.symbol }}" hidden></span>
 <script>
 (function(){
 const CSRF = document.cookie.match(/csrftoken=([^;]+)/)?.[1] || '';

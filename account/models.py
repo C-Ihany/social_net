@@ -1,4 +1,5 @@
 from django.db import models
+from django.utils.translation import gettext as _
 from functools import cached_property
 from django.contrib.auth.models import AbstractBaseUser, BaseUserManager
 from django.core.files.storage import FileSystemStorage
@@ -101,9 +102,16 @@ class Account(AbstractBaseUser):
 	location = models.CharField(max_length=100, blank=True)
 	region = models.CharField(
 		max_length=30, blank=True, default='',
-		verbose_name='Région',
-		help_text='Pays ou région (pour le filtre "Près de chez moi")',
+		verbose_name='Pays de résidence',
+		help_text='Où vit le membre : pays d\'Afrique, région, ou diaspora (pour le filtre "Près de chez moi")',
 		db_index=True,
+	)
+	# Pays d'origine : distinct de `region` (où l'on vit). Un membre né au Sénégal
+	# qui vit en Europe a region='diaspora' et origin_country='sn' : il retrouve
+	# la communauté de son pays d'origine.
+	origin_country = models.CharField(
+		max_length=2, blank=True, default='',
+		verbose_name="Pays d'origine", db_index=True,
 	)
 	cgu_accepted_at = models.DateTimeField(
 		null=True, blank=True,
@@ -184,23 +192,16 @@ class Account(AbstractBaseUser):
 
 	@cached_property
 	def score_fihavanana(self):
-		"""Score de solidarité communautaire (Fihavanana).
+		"""Score de solidarité communautaire.
 		Calculé en une passe SQL par instance — mis en cache pour la durée de la requête
 		(cached_property évite de recalculer si le template l'appelle plusieurs fois).
 		"""
 		try:
-			from django.db.models import Case, When, IntegerField, Sum
 			from post.models import Post, Comment, Reaction, Repost
 			from friend.models import FriendList
 
-			# Posts publiés : +10 par Kabary, +5 par post standard — une seule requête SQL
-			post_score = Post.objects.filter(author=self).aggregate(
-				s=Sum(Case(
-					When(post_type='kabary', then=10),
-					default=5,
-					output_field=IntegerField(),
-				))
-			)['s'] or 0
+			# Posts publiés : +5 chacun, quel que soit leur type
+			post_score = Post.objects.filter(author=self).count() * 5
 
 			# Commentaires (+2), réactions reçues (+3) — 2 COUNT SQL
 			comment_score  = Comment.objects.filter(author=self).count() * 2
@@ -233,18 +234,18 @@ class Account(AbstractBaseUser):
 
 	@property
 	def fihavanana_level(self):
-		"""Niveau Fihavanana basé sur le score."""
+		"""Niveau de solidarité basé sur le score."""
 		score = self.score_fihavanana
 		if score >= 500:
-			return ('Mpitarika', '🌟', '#f59e0b')   # Leader
+			return (_('Leader'), '🌟', '#f59e0b')
 		elif score >= 200:
-			return ('Mpiahy', '💛', '#10b981')       # Bienfaiteur
+			return (_('Bienfaiteur'), '💛', '#10b981')
 		elif score >= 80:
-			return ('Mpiray tsipy', '💙', '#3b82f6') # Solidaire
+			return (_('Solidaire'), '💙', '#3b82f6')
 		elif score >= 30:
-			return ('Mpankafy', '💚', '#22c55e')     # Ami
+			return (_('Ami'), '💚', '#22c55e')
 		else:
-			return ('Vahiny', '🤍', '#94a3b8')       # Visiteur
+			return (_('Visiteur'), '🤍', '#94a3b8')
 
 
 @receiver(post_save, sender=Account)

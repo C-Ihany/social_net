@@ -60,7 +60,7 @@
                 {% endif %}
                 {% if guide.prix_jour %}
                 <div class="gp-stat">
-                    <div class="gp-stat-num">{{ guide.prix_jour|vz_ariary }}</div>
+                    <div class="gp-stat-num">{{ guide.formatted_prix_jour }}</div>
                     <div class="gp-stat-label">{% trans "Par jour" %}</div>
                 </div>
                 {% endif %}

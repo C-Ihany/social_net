@@ -100,7 +100,7 @@
                             {% endif %}
                         </div>
                         {% if guide.prix_jour %}
-                        <span class="vz-card__price">{{ guide.prix_jour|vz_ariary }}<small>/ {% trans "jour" %}</small></span>
+                        <span class="vz-card__price">{{ guide.formatted_prix_jour }}<small>/ {% trans "jour" %}</small></span>
                         {% endif %}
                     </div>
                 </div>
@@ -160,7 +160,7 @@
     if (!input) return;
     var I18N = {
         verified: "{% trans 'Vérifié' as t_v %}{{ t_v|escapejs }}",
-        perDay:   "{% trans 'Ar/j' as t_d %}{{ t_d|escapejs }}"
+        perDay:   "{% trans '/ jour' as t_d %}{{ t_d|escapejs }}"
     };
 
     /* Liste déroulante en position:fixed pour échapper aux overflow:hidden */
@@ -179,8 +179,6 @@
     function esc(s) {
         return String(s == null ? '' : s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');
     }
-    /* Même rendu que le filtre serveur vz_ariary : milliers séparés par une espace */
-    function money(n) { return String(n).replace(/\B(?=(\d{3})+(?!\d))/g, ' '); }
     function hide() { drop.hidden = true; }
 
     var timer = null;
@@ -207,7 +205,7 @@
                     }
                     html += '</div>';
                     if (g.prix_jour) {
-                        html += '<div class="guides-ac-price">' + esc(money(g.prix_jour)) + ' ' + esc(I18N.perDay) + '</div>';
+                        html += '<div class="guides-ac-price">' + esc(g.prix_jour) + ' ' + esc(I18N.perDay) + '</div>';
                     }
                     html += '</a>';
                 });

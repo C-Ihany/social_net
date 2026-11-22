@@ -358,6 +358,7 @@ def edit_account_view(request, *args, **kwargs):
 				'bio':        account.bio,
 				'location':   account.location,
 				'region':     account.region,
+				'origin_country': account.origin_country,
 				'region_label': __import__('regions').REGION_LABELS.get(account.region or '', ''),
 			}
 		)

@@ -47,7 +47,8 @@ class ProductLinkTests(TestCase):
         html = r.json()['html']
         self.assertIn('pc-product', html)
         self.assertIn('Vélo Peugeot', html)
-        self.assertIn('250 000 Ar', html)
+        # format_money (bazar) : espaces fines insécables entre milliers et devise
+        self.assertIn('250\u202f000\xa0Ar', html)
         self.assertIn(reverse('bazar:detail', args=[self.annonce.pk]), html)
 
     def test_cannot_link_someone_elses_annonce(self):

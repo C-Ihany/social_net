@@ -68,3 +68,23 @@ class GroupCorrectionsTests(TestCase):
         self.assertTemplateUsed(r, 'group/group_private.html')
         r = self.client.post(reverse('group:join', args=[self.group.slug]), follow=True)
         self.assertEqual(r.status_code, 200)
+
+    def test_charter_tab_and_route_are_gone(self):
+        from django.urls import NoReverseMatch
+        self.client.force_login(self.admin)
+        html = self.client.get(reverse('group:detail', args=[self.group.slug])).content.decode()
+        self.assertNotIn('Dina', html)
+        self.assertNotIn('gd-tab-dina', html)
+        self.assertNotIn('Dina', self.client.get(reverse('group:edit', args=[self.group.slug])).content.decode())
+        with self.assertRaises(NoReverseMatch):
+            reverse('group:dina-save', args=[self.group.slug])
+
+    def test_local_tab_uses_origin_country_for_diaspora(self):
+        self.out.region, self.out.origin_country = 'diaspora', 'sn'
+        self.out.save(update_fields=['region', 'origin_country'])
+        Group.objects.create(name='Dakar ensemble', creator=self.admin, region='sn')
+        Group.objects.create(name='Nairobi ensemble', creator=self.admin, region='ke')
+        self.client.force_login(self.out)
+        html = self.client.get(reverse('group:list') + '?tab=local').content.decode()
+        self.assertIn('Dakar ensemble', html)
+        self.assertNotIn('Nairobi ensemble', html)

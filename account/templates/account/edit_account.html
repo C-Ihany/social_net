@@ -102,7 +102,7 @@
                 </div>
 
                 <div class="edit-field">
-                    <label for="id_input_region">{% trans "Pays ou région (Près de chez moi)" %}</label>
+                    <label for="id_input_region">{% trans "Où vivez-vous ?" %}</label>
                     <div class="edit-input-wrap edit-input-wrap--select">
                         <span class="material-icons">map</span>
                         <select name="region" id="id_input_region">
@@ -113,6 +113,21 @@
                     </div>
                     <small class="edit-help">
                         {% trans "Permet de filtrer le fil, les groupes et le Bazar par pays ou par région." %}
+                    </small>
+                </div>
+
+                <div class="edit-field">
+                    <label for="id_input_origin">{% trans "Pays d'origine" %}</label>
+                    <div class="edit-input-wrap edit-input-wrap--select">
+                        <span class="material-icons">public</span>
+                        <select name="origin_country" id="id_input_origin">
+                            {% for code, label in form.fields.origin_country.choices %}
+                            <option value="{{ code }}" {% if form.origin_country.value == code %}selected{% endif %}>{{ label }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <small class="edit-help">
+                        {% trans "Si vous vivez hors d'Afrique ou dans un autre pays que le vôtre, indiquez d'où vous venez : vous retrouverez la communauté de votre pays." %}
                     </small>
                 </div>
 

@@ -109,7 +109,7 @@
         {% for l in items %}
         <div class="rs-order-line">
             <div>{{ l.quantity }} × {{ l.name }}
-                {% for o in l.options.all %}<small>{{ o.group_name }} : {{ o.name }}{% if o.extra_price %} (+{{ o.extra_price|vz_ariary }}){% endif %}</small>{% endfor %}
+                {% for o in l.options.all %}<small>{{ o.group_name }} : {{ o.name }}{% if o.extra_price %} (+{{ o.extra_price|vz_money:order.currency }}){% endif %}</small>{% endfor %}
                 {% if l.included_ingredients %}<small><i class="material-icons rs-ico" aria-hidden="true">check_circle</i> {% trans "Avec" %} : {{ l.included_label }}</small>{% endif %}
                 {% if l.removed_ingredients %}<small><i class="material-icons rs-ico" aria-hidden="true">block</i> {% trans "Sans" %} : {{ l.removed_label }}</small>{% endif %}
                 {% if l.note %}<small><i class="material-icons rs-ico" aria-hidden="true">edit_note</i> {{ l.note }}</small>{% endif %}

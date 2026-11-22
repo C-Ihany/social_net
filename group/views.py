@@ -238,17 +238,16 @@ def group_list(request):
     user_region = ''
     user_region_label = ''
     if request.user.is_authenticated:
-        from regions import REGION_SHORT as REGION_LABELS
-        user_region = getattr(request.user, 'region', '') or ''
-        user_region_label = REGION_LABELS.get(user_region, '')
+        from regions import nearby_q, nearby_label
+        near = nearby_q(request.user, 'region', 'creator')
+        user_region = near is not None          # onglet local affiché dès qu'un filtre est possible
+        user_region_label = nearby_label(request.user)
 
     if tab == 'mine' and request.user.is_authenticated:
         qs = qs.filter(id__in=my_group_ids)
     elif tab == 'local' and request.user.is_authenticated and user_region:
-        # Groupes de la région de l'utilisateur (publics + ses groupes privés locaux)
-        qs = qs.filter(
-            Q(region=user_region),
-        ).filter(Q(privacy=Group.PUBLIC) | Q(id__in=my_group_ids))
+        # Groupes « près de chez moi » (publics + ses groupes privés locaux)
+        qs = qs.filter(near).filter(Q(privacy=Group.PUBLIC) | Q(id__in=my_group_ids))
     elif tab == 'recommended' and request.user.is_authenticated:
         recommended = _get_recommended_groups(request.user, exclude_ids=my_group_ids, limit=30)
         # already a queryset / list with num_members
@@ -737,25 +736,6 @@ def group_invite_member(request, slug):
             'message': (_("%(name)s a été ajouté au groupe.") if created else _("%(name)s est déjà membre.")) % {'name': target.username},
         })
     return JsonResponse({'ok': False, 'error': 'Méthode non autorisée'}, status=405)
-
-
-@login_required
-def group_dina_save(request, slug):
-    """Sauvegarder le Dina du groupe (admin seulement) en AJAX."""
-    group = get_object_or_404(Group, slug=slug)
-    is_admin = GroupMembership.objects.filter(
-        group=group, user=request.user, role=GroupMembership.ADMIN
-    ).exists()
-    if not is_admin and request.user != group.creator:
-        return JsonResponse({'ok': False, 'error': 'Non autorisé'}, status=403)
-    if request.method != 'POST':
-        return JsonResponse({'ok': False, 'error': 'Méthode non autorisée'}, status=405)
-    dina = request.POST.get('dina', '').strip()
-    if len(dina) > 3000:
-        return JsonResponse({'ok': False, 'error': _('Le Dina est trop long (3000 caractères au maximum).')})
-    group.dina = dina
-    group.save(update_fields=['dina'])
-    return JsonResponse({'ok': True, 'message': _('Dina enregistré.')})
 
 
 @login_required

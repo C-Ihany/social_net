@@ -7,7 +7,7 @@
    • vzPostRepost(id)       : republier / annuler
    • vzPostHide(id)         : masquer la carte avec « Annuler »
    • vzPostDelete(btn)      : supprimer (POST après confirmation)
-   • compte à rebours Vintana : une seule boucle pour toutes les capsules
+   • compte à rebours des capsules temporelles : une seule boucle pour toutes les capsules
    • réactions, commentaires, réponses, « Voir plus », hashtags/mentions :
      une seule implémentation pour toutes les pages qui incluent
      post/_post_card_assets.html (qui fournit window.VZ_CARD)
@@ -147,8 +147,8 @@
         window.vzMenu(btn, items, { title: d.authorName ? '@' + d.authorName : '' });
     };
 
-    /* ── Compte à rebours Vintana : une seule boucle ─────────────────── */
-    function tickVintana() {
+    /* ── Compte à rebours des capsules : une seule boucle ─────────────────── */
+    function tickCapsules() {
         var nodes = document.querySelectorAll('.vt-cntdwn[data-target]');
         if (!nodes.length) return;
         var now = Date.now();
@@ -162,8 +162,8 @@
             nodes[i].textContent = (dd > 0 ? dd + 'j ' : '') + (h > 0 ? h + 'h ' : '') + (m > 0 ? m + 'min ' : '') + s + 's';
         }
     }
-    setInterval(tickVintana, 1000);
-    if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', tickVintana); else tickVintana();
+    setInterval(tickCapsules, 1000);
+    if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', tickCapsules); else tickCapsules();
 })();
 
 /* ════════════════════════════════════════════════════════════════════════

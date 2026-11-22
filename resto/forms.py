@@ -16,7 +16,7 @@ class RestaurantForm(forms.ModelForm):
             'name', 'category', 'description', 'logo', 'banner',
             'phone', 'address', 'region', 'latitude', 'longitude',
             'opening_hours', 'offers_delivery', 'offers_pickup',
-            'delivery_fee', 'min_order', 'avg_prep_minutes',
+            'currency', 'delivery_fee', 'min_order', 'avg_prep_minutes',
         ]
         widgets = {
             'name':        forms.TextInput(attrs={**_INPUT, 'placeholder': _('Le nom de votre établissement')}),
@@ -32,10 +32,16 @@ class RestaurantForm(forms.ModelForm):
             'opening_hours':   forms.TextInput(attrs={**_INPUT, 'placeholder': _('Ex : Lun–Sam 10h–22h')}),
             'offers_delivery': forms.CheckboxInput(attrs=_CHECK),
             'offers_pickup':   forms.CheckboxInput(attrs=_CHECK),
+            'currency':        forms.Select(attrs=_INPUT),
             'delivery_fee':    forms.NumberInput(attrs={**_INPUT, 'min': 0, 'step': 100}),
             'min_order':       forms.NumberInput(attrs={**_INPUT, 'min': 0, 'step': 500}),
             'avg_prep_minutes': forms.NumberInput(attrs={**_INPUT, 'min': 5, 'max': 180}),
         }
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        # Devise absente de l'envoi : la valeur en place est gardée
+        self.fields['currency'].required = False
 
     def clean(self):
         data = super().clean()

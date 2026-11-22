@@ -3,7 +3,7 @@ from django.conf import settings
 from django.utils.translation import gettext_lazy as _
 
 
-from regions import AFRICA_COUNTRIES
+from regions import AFRICA_COUNTRIES, CURRENCY_CHOICES, DEFAULT_CURRENCY, currency_symbol, format_money
 
 # Les 54 pays d'Afrique, puis les régions de Madagascar sous leur code d'origine
 # (des lieux déjà publiés les portent).
@@ -175,7 +175,10 @@ class GuideTouristique(models.Model):
                                    help_text=_('Prix journalier, inclusions, exclusions…'))
     prix_jour   = models.DecimalField(max_digits=10, decimal_places=0,
                                       null=True, blank=True,
-                                      verbose_name=_('Prix indicatif / jour (Ar)'))
+                                      verbose_name=_('Prix indicatif / jour'))
+    # Devise du tarif journalier (proposée d'après le pays du guide ; l'existant reste en MGA)
+    currency    = models.CharField(max_length=3, choices=CURRENCY_CHOICES, default=DEFAULT_CURRENCY,
+                                   verbose_name=_('Devise'))
     phone       = models.CharField(max_length=30, blank=True, default='',
                                    verbose_name=_('Téléphone / WhatsApp'))
     years_experience = models.PositiveSmallIntegerField(default=0,
@@ -200,6 +203,14 @@ class GuideTouristique(models.Model):
     def __str__(self):
         # Account étend AbstractBaseUser (pas AbstractUser) → pas de get_full_name()
         return f'Guide: {self.user.username}'
+
+    @property
+    def formatted_prix_jour(self):
+        return format_money(self.prix_jour, self.currency) if self.prix_jour else ''
+
+    @property
+    def currency_symbol(self):
+        return currency_symbol(self.currency)
 
     @property
     def display_name(self):

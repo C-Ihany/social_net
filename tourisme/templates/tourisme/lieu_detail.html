@@ -186,7 +186,7 @@
                     <p class="vz-card__subtitle">{{ guide.specialities|truncatechars:50 }}</p>
                     {% endif %}
                     {% if guide.prix_jour %}
-                    <span class="vz-card__price">{{ guide.prix_jour|vz_ariary }}<small>/ {% trans "jour" %}</small></span>
+                    <span class="vz-card__price">{{ guide.formatted_prix_jour }}<small>/ {% trans "jour" %}</small></span>
                     {% endif %}
                 </div>
             </a>

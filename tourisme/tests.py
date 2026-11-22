@@ -209,3 +209,25 @@ class TourismeTests(TestCase):
                             esprima.parseScript(script)
                         except Exception as exc:        # pragma: no cover
                             self.fail(f'script invalide ({lang} {url}) : {exc}')
+
+    # ── Devise par pays ───────────────────────────────────────────────────────
+    def test_tarif_du_guide_dans_sa_devise(self):
+        User.objects.filter(pk=self.author.pk).update(region='ke')
+        self.author.refresh_from_db()
+        self.client.force_login(self.author)
+        url = reverse('tourisme:guide_register')
+        self.assertContains(self.client.get(url), '<option value="KES" selected>')   # proposée d'après le pays
+        self.client.post(url, {'bio': 'Guide de safari', 'prix_jour': '4500', 'currency': 'KES'})
+        g = GuideTouristique.objects.get(user=self.author)
+        self.assertEqual(g.currency, 'KES')
+        self.assertEqual(g.formatted_prix_jour, '4 500 KSh')
+        for name, args in [('tourisme:guides_list', []), ('tourisme:guide_profile', [g.pk])]:
+            r = self.client.get(reverse(name, args=args))
+            self.assertContains(r, 'KSh')
+            self.assertNotContains(r, ' Ar')
+        r = self.client.get(reverse('tourisme:guides_autocomplete'), {'q': 'safari'})
+        self.assertIn('KSh', r.json()['results'][0]['prix_jour'])
+        # Une devise inconnue est ignorée : celle en place est gardée
+        self.client.post(url, {'bio': 'Guide de safari', 'prix_jour': '5000', 'currency': 'ZZZ'})
+        g.refresh_from_db()
+        self.assertEqual(g.currency, 'KES')

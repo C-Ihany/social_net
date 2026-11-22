@@ -87,6 +87,13 @@ def vz_ariary(value):
     return f"{amount:,}".replace(',', ' ') + ' Ar'
 
 
+@register.filter(name='vz_money')
+def vz_money(value, currency=''):
+    """{{ prix|vz_money:objet.currency }} → « 12 500 FCFA ». Sans devise : la devise historique (Ar)."""
+    from regions import format_money, DEFAULT_CURRENCY
+    return format_money(value, currency or DEFAULT_CURRENCY)
+
+
 @register.filter(name='vz_notif_verb')
 def vz_notif_verb(value):
     """Libellé de notification dans la langue active (voir notification/verbs.py)."""

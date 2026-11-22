@@ -5,12 +5,12 @@
 <article class="post-card{% if post.post_type == 'kabary' %} post-card-kabary{% endif %}{% if post.post_type == 'vintana' %} post-card-vintana{% endif %}{% if detail %} post-card--detail{% endif %}" id="post-{{ post.id }}">
     {% if post.post_type == 'kabary' %}
     <div class="pc-kabary-badge">
-        <span class="material-icons" aria-hidden="true">record_voice_over</span> {% trans "Kabary" %}
+        <span class="material-icons" aria-hidden="true">record_voice_over</span> {% trans "Discours" %}
     </div>
     {% endif %}
     {% if post.post_type == 'vintana' %}
     <div class="pc-vintana-badge">
-        <span class="material-icons" aria-hidden="true">lock_clock</span> {% trans "Capsule Vintana" %}
+        <span class="material-icons" aria-hidden="true">lock_clock</span> {% trans "Capsule temporelle" %}
     </div>
     {% endif %}
 
@@ -36,7 +36,8 @@
             <img src="{% static 'logo/vazimba_icon.png' %}" alt="Vazimba"
                  class="pc-vintana-logo">
         </div>
-        {% trans "Capsule Vintana" as vt_default_title %}<div class="pc-vintana-lock-title">{{ post.title|default:vt_default_title }}</div>
+        {% trans "Capsule temporelle" as vt_default_title %}{# Les anciennes capsules sans titre saisi portent l'ancien libellé par défaut #}
+        <div class="pc-vintana-lock-title">{% if not post.title or post.title == 'Capsule Vintana' %}{{ vt_default_title }}{% else %}{{ post.title }}{% endif %}</div>
         <p class="pc-vintana-lock-sub">
             {% trans "Ce message est scellé et sera révélé le" %}<br>
             <strong>{{ post.reveal_date|date:"DATETIME_FORMAT" }}</strong>.

@@ -11,6 +11,7 @@ from django.shortcuts import get_object_or_404, redirect, render
 from django.utils.translation import gettext as _
 
 from bazar.uploads import clean_image, clean_images
+from regions import CURRENCIES, CURRENCY_CHOICES, currency_for_user
 
 from .models import (
     LIEU_CATEGORY_CHOICES, LIEU_CATEGORY_ICONS, REGION_CHOICES, REGION_CODES, REGION_LABELS,
@@ -377,7 +378,7 @@ def guides_autocomplete(request):
                 'is_verified': g.is_verified,
                 'specialities': (g.specialities or '')[:60],
                 'avatar':      avatar,
-                'prix_jour':   int(g.prix_jour) if g.prix_jour else None,
+                'prix_jour':   g.formatted_prix_jour or None,     # déjà formaté, dans la devise du guide
             })
         return JsonResponse({'results': results})
     except Exception:
@@ -446,6 +447,8 @@ def guide_register(request):
         is_new = guide is None
         if is_new:
             guide = GuideTouristique(user=request.user)
+        currency = (data.get('currency') or '').strip().upper()
+        guide.currency = currency if currency in CURRENCIES else (guide.currency if not is_new else currency_for_user(request.user))
 
         guide.bio              = text('bio')
         guide.languages        = text('languages', 250)
@@ -483,4 +486,6 @@ def guide_register(request):
         'is_new':   guide is None or guide.pk is None,
         'regions':  REGION_CHOICES,
         'error':    error,
+        'currencies': CURRENCY_CHOICES,
+        'sel_currency': guide.currency if guide else currency_for_user(request.user),
     })

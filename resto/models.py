@@ -19,17 +19,15 @@ from django.utils import timezone
 from django.utils.text import slugify
 from django.utils.translation import gettext_lazy as _
 
-from regions import REGION_CHOICES
+from regions import CURRENCY_CHOICES, DEFAULT_CURRENCY, REGION_CHOICES, currency_symbol, format_money
 from ZOOT.storage import private_storage
 
 
-def _fmt_ar(value):
-    """12500 → '12 500 Ar' (même rendu que Annonce.formatted_price)."""
+def _fmt(value, currency):
+    """12500, 'XOF' → « 12 500 FCFA » (même rendu que le filtre vz_money)."""
     if value is None:
         return ''
-    # Même rendu que le filtre vz_ariary : espace fine insécable entre les milliers,
-    # espace insécable avant l'unité (le montant ne se coupe jamais en fin de ligne).
-    return f'{int(value):,}'.replace(',', '\u202f') + '\u00a0Ar'
+    return format_money(value, currency)
 
 
 def identity_upload_to(instance, filename):
@@ -100,11 +98,15 @@ class Restaurant(models.Model):
     offers_delivery = models.BooleanField(default=True, verbose_name=_('Propose la livraison'))
     offers_pickup   = models.BooleanField(default=True, verbose_name=_('Propose le retrait sur place'))
     delivery_fee = models.DecimalField(
-        max_digits=12, decimal_places=0, default=0, verbose_name=_('Frais de livraison (Ar)'),
+        max_digits=12, decimal_places=0, default=0, verbose_name=_('Frais de livraison'),
     )
     min_order = models.DecimalField(
-        max_digits=12, decimal_places=0, default=0, verbose_name=_('Commande minimum (Ar)'),
+        max_digits=12, decimal_places=0, default=0, verbose_name=_('Commande minimum'),
     )
+    # Devise de tous les montants du restaurant (plats, options, frais, commandes).
+    # Proposée d'après le pays du propriétaire ; l'existant reste en MGA.
+    currency = models.CharField(max_length=3, choices=CURRENCY_CHOICES, default=DEFAULT_CURRENCY,
+                                verbose_name=_('Devise'))
     avg_prep_minutes = models.PositiveSmallIntegerField(
         default=30, verbose_name=_('Temps de préparation moyen (min)'),
     )
@@ -159,7 +161,15 @@ class Restaurant(models.Model):
 
     @property
     def formatted_delivery_fee(self):
-        return _('Livraison gratuite') if not self.delivery_fee else _fmt_ar(self.delivery_fee)
+        return _('Livraison gratuite') if not self.delivery_fee else _fmt(self.delivery_fee, self.currency)
+
+    @property
+    def formatted_min_order(self):
+        return _fmt(self.min_order, self.currency) if self.min_order else ''
+
+    @property
+    def currency_symbol(self):
+        return currency_symbol(self.currency)
 
     def increment_views(self):
         Restaurant.objects.filter(pk=self.pk).update(views_count=models.F('views_count') + 1)
@@ -196,7 +206,7 @@ class MenuItem(models.Model):
     name        = models.CharField(max_length=120, verbose_name=_('Nom du plat'))
     description = models.TextField(blank=True, default='', verbose_name=_('Description'),
                                    help_text=_('Ingrédients, portion, accompagnement…'))
-    price = models.DecimalField(max_digits=12, decimal_places=0, verbose_name=_('Prix (Ar)'))
+    price = models.DecimalField(max_digits=12, decimal_places=0, verbose_name=_('Prix'))
     image = models.ImageField(upload_to='resto/items/%Y/%m/', null=True, blank=True, verbose_name=_('Photo'))
     # Ingrédients, un par ligne. Le client peut en décocher (« sans oignons ») ;
     # un « ! » devant un ingrédient le rend obligatoire (non retirable) : « !Riz ».
@@ -219,17 +229,17 @@ class MenuItem(models.Model):
         verbose_name_plural = _('Plats')
 
     def __str__(self):
-        return f'{self.name} — {_fmt_ar(self.price)}'
+        return f'{self.name} — {self.formatted_price}'
 
     @property
     def formatted_price(self):
-        return _fmt_ar(self.price)
+        return _fmt(self.price, self.restaurant.currency)
 
     @property
     def ingredient_list(self):
         """
         Un ingrédient par ligne, format « Nom|prix|inclus|choix » :
-            prix   : supplément en Ar (0 = compris dans le prix du plat)
+            prix   : supplément, dans la devise du restaurant (0 = compris dans le prix du plat)
             inclus : 1 = coché par défaut, 0 = décoché par défaut
             choix  : 1 = le client choisit (Avec / Sans), 0 = toujours inclus
         Compatibilité : « Nom » seul = 0|1|1 ; « !Nom » = 0|1|0 (toujours inclus).
@@ -303,12 +313,12 @@ class OptionGroup(models.Model):
 
 
 class Option(models.Model):
-    """Un choix dans un groupe : « Sauce piment », « Fromage en plus (+1 000 Ar) »…"""
+    """Un choix dans un groupe : « Sauce piment », « Fromage en plus (+1 000) »…"""
     group = models.ForeignKey(OptionGroup, on_delete=models.CASCADE,
                               related_name='options', verbose_name=_('Groupe'))
     name = models.CharField(max_length=100, verbose_name=_('Nom'))
     extra_price = models.DecimalField(
-        max_digits=12, decimal_places=0, default=0, verbose_name=_('Supplément (Ar)'),
+        max_digits=12, decimal_places=0, default=0, verbose_name=_('Supplément'),
     )
     is_available = models.BooleanField(default=True, verbose_name=_('Disponible'))
     order = models.PositiveSmallIntegerField(default=0, verbose_name=_('Ordre'))
@@ -319,12 +329,12 @@ class Option(models.Model):
         verbose_name_plural = _('Options')
 
     def __str__(self):
-        extra = f' (+{_fmt_ar(self.extra_price)})' if self.extra_price else ''
+        extra = f' ({self.formatted_extra})' if self.extra_price else ''
         return f'{self.name}{extra}'
 
     @property
     def formatted_extra(self):
-        return f'+{_fmt_ar(self.extra_price)}' if self.extra_price else ''
+        return f'+{_fmt(self.extra_price, self.group.item.restaurant.currency)}' if self.extra_price else ''
 
 
 # ═══════════════════════════════════════════════════════════════════════════════
@@ -642,6 +652,9 @@ class Order(models.Model):
     subtotal     = models.DecimalField(max_digits=12, decimal_places=0, default=0)
     delivery_fee = models.DecimalField(max_digits=12, decimal_places=0, default=0)
     total        = models.DecimalField(max_digits=12, decimal_places=0, default=0)
+    # Devise figée à la commande (copie de celle du restaurant : la changer ensuite ne réécrit pas l'historique)
+    currency     = models.CharField(max_length=3, choices=CURRENCY_CHOICES, default=DEFAULT_CURRENCY,
+                                    verbose_name=_('Devise'))
 
     # ── Horodatage du parcours ────────────────────────────────────────────────
     created_at   = models.DateTimeField(auto_now_add=True, db_index=True)
@@ -722,15 +735,15 @@ class Order(models.Model):
 
     @property
     def formatted_total(self):
-        return _fmt_ar(self.total)
+        return _fmt(self.total, self.currency)
 
     @property
     def formatted_subtotal(self):
-        return _fmt_ar(self.subtotal)
+        return _fmt(self.subtotal, self.currency)
 
     @property
     def formatted_delivery_fee(self):
-        return _('Gratuite') if not self.delivery_fee else _fmt_ar(self.delivery_fee)
+        return _('Gratuite') if not self.delivery_fee else _fmt(self.delivery_fee, self.currency)
 
     # Libellés d'ACTION des boutons (différents des libellés d'état) : « Je pars livrer » plutôt que « En cours de livraison »
     ACTION_LABELS = {
@@ -838,7 +851,7 @@ class OrderItem(models.Model):
 
     @property
     def formatted_line_total(self):
-        return _fmt_ar(self.line_total)
+        return _fmt(self.line_total, self.order.currency)
 
     @property
     def options_label(self):

@@ -53,7 +53,7 @@ def visible_posts(qs, viewer, author=None):
 
 
 def unsealed(qs):
-    """Écarte les capsules Vintana encore scellées (reveal_date dans le futur).
+    """Écarte les capsules temporelles encore scellées (reveal_date dans le futur).
 
     À utiliser partout où le **corps** d'un post est lu ou cherché en dehors de
     sa carte (recherche, hashtags, tendances) : la carte sait afficher l'état

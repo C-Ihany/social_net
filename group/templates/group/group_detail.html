@@ -205,9 +205,6 @@
         <button class="vz-seg gd-tab" role="tab" aria-selected="false" data-tab="events" onclick="gdSwitchTab('events', this)" type="button">
             <span class="material-icons" aria-hidden="true">event</span> <span class="gd-tab-label">{% trans "Events" %}</span>
         </button>
-        <button class="vz-seg gd-tab" role="tab" aria-selected="false" data-tab="dina" onclick="gdSwitchTab('dina', this)" type="button">
-            <span class="material-icons" aria-hidden="true">gavel</span> <span class="gd-tab-label">{% trans "Dina" %}</span>
-        </button>
         <button class="vz-seg gd-tab" role="tab" aria-selected="false" data-tab="members" onclick="gdSwitchTab('members', this)" type="button">
             <span class="material-icons" aria-hidden="true">group</span> <span class="gd-tab-label">{% trans "Members" %}</span>
             <span class="gd-tab-badge">{{ member_count }}</span>
@@ -383,82 +380,6 @@
         {% endif %}
 
     </div><!-- /gd-tab-events -->
-
-    <!-- ── Onglet Dina ── -->
-    <div id="gd-tab-dina" class="gd-tab-pane" hidden>
-
-        <!-- En-tête Dina -->
-        <div class="gd-dina-card">
-            <div class="gd-dina-head">
-                <span class="material-icons">gavel</span>
-                <div>
-                    <h2>{% trans "Dina" %} — {% trans "Community Charter" %}</h2>
-                    <p>
-                        {% trans "Agreements, rules and traditions that govern this community." %}
-                    </p>
-                </div>
-            </div>
-
-            <!-- Affichage du Dina actuel -->
-            <div id="gd-dina-display">
-                {% if group.dina %}
-                <div class="gd-dina-text">{{ group.dina }}</div>
-                {% else %}
-                <div class="vz-empty gd-empty-state gd-empty-state--compact">
-                    <span class="material-icons" aria-hidden="true">article</span>
-                    <p class="vz-empty-title">{% trans "No Dina defined yet for this group." %}</p>
-                    {% if is_admin or request.user == group.creator %}
-                    <p class="vz-empty-text">{% trans "As admin, you can write the community charter below." %}</p>
-                    {% endif %}
-                </div>
-                {% endif %}
-            </div>
-
-            <!-- Formulaire d'édition (admin/créateur seulement) -->
-            {% if is_admin or request.user == group.creator %}
-            <div class="gd-dina-edit-wrap">
-                <button type="button"
-                        id="gd-dina-edit-btn"
-                        onclick="gdShowDinaEditor()"
-                        class="vz-btn vz-btn--secondary vz-btn--sm">
-                    <span class="material-icons">edit</span>
-                    {% trans "Edit Dina" %}
-                </button>
-            </div>
-
-            <div id="gd-dina-editor" hidden>
-                <textarea id="gd-dina-textarea"
-                          placeholder="{% trans 'Write the Dina — rules, commitments, traditions of your community…' %}"
-                          maxlength="3000">{{ group.dina }}</textarea>
-                <div class="gd-form-foot gd-form-foot--editor">
-                    <span id="gd-dina-feedback"></span>
-                    <div class="gd-btn-row">
-                        <button type="button" onclick="gdCancelDinaEdit()" class="vz-btn vz-btn--muted vz-btn--sm">
-                            {% trans "Annuler" %}
-                        </button>
-                        <button type="button" onclick="gdSaveDina()" id="gd-dina-save-btn" class="vz-btn vz-btn--primary vz-btn--sm">
-                            <span class="material-icons" aria-hidden="true">save</span>
-                            {% trans "Enregistrer" %}
-                        </button>
-                    </div>
-                </div>
-            </div>
-            {% endif %}
-
-        </div>
-
-        <!-- Info culturelle -->
-        <div class="gd-dina-info">
-            <p>
-                <span class="material-icons">info</span>
-                <span>
-                    <strong>{% trans "What is a Dina?" %}</strong><br>
-                    {% trans "The Dina is a community agreement — a set of rules and commitments freely accepted by all members of a community to live together with respect and solidarity." %}
-                </span>
-            </p>
-        </div>
-
-    </div><!-- /gd-tab-dina -->
 
     <!-- ── Onglet Membres ── -->
     <div id="gd-tab-members" class="gd-tab-pane" hidden>
@@ -709,7 +630,7 @@ function gdSwitchTab(tab, btn) {
         b.classList.toggle('active', b === btn);
         b.setAttribute('aria-selected', b === btn ? 'true' : 'false');
     });
-    ['posts', 'media', 'events', 'dina', 'members'].forEach(function(t){
+    ['posts', 'media', 'events', 'members'].forEach(function(t){
         var el = document.getElementById('gd-tab-' + t);
         if (el) el.hidden = (t !== tab);
     });
@@ -880,69 +801,6 @@ function gdAddMember(userId, btn) {
             btn.closest('.gd-invite-user-row').remove();
         }
     }).catch(function(e) { btn.disabled = false; console.error(e); });
-}
-
-/* ── Dina (charte communautaire) ── */
-var GD_DINA_URL = '{% url "group:dina-save" group.slug %}';
-
-function gdShowDinaEditor() {
-    document.getElementById('gd-dina-editor').hidden = false;
-    document.getElementById('gd-dina-edit-btn').hidden = true;
-    var ta = document.getElementById('gd-dina-textarea');
-    if (ta) { ta.focus(); ta.setSelectionRange(ta.value.length, ta.value.length); }
-}
-
-function gdCancelDinaEdit() {
-    document.getElementById('gd-dina-editor').hidden = true;
-    document.getElementById('gd-dina-edit-btn').hidden = false;
-    var fb = document.getElementById('gd-dina-feedback');
-    if (fb) { fb.textContent = ''; fb.className = ''; }
-}
-
-function gdSaveDina() {
-    var ta = document.getElementById('gd-dina-textarea');
-    var saveBtn = document.getElementById('gd-dina-save-btn');
-    var fb = document.getElementById('gd-dina-feedback');
-    if (!ta) return;
-
-    var dina = ta.value.trim();
-    if (saveBtn) saveBtn.disabled = true;
-    if (fb) { fb.textContent = '{% trans "Saving…"|escapejs %}'; fb.className = ''; }
-
-    var fd = new FormData();
-    fd.append('dina', dina);
-
-    fetch(GD_DINA_URL, {
-        method: 'POST',
-        headers: {'X-CSRFToken': GD_CSRF, 'X-Requested-With': 'XMLHttpRequest'},
-        body: fd,
-    })
-    .then(function(r) { return r.json(); })
-    .then(function(data) {
-        if (saveBtn) saveBtn.disabled = false;
-        if (data.ok) {
-            if (fb) { fb.textContent = data.message || '{% trans "Saved!"|escapejs %}'; fb.className = 'is-ok'; }
-            // Mettre à jour l'affichage en direct
-            var display = document.getElementById('gd-dina-display');
-            if (display) {
-                if (dina) {
-                    display.innerHTML = '<div class="gd-dina-text">' + gdEscapeHtml(dina) + '</div>';
-                } else {
-                    display.innerHTML = '<div class="vz-empty gd-empty-state gd-empty-state--compact"><span class="material-icons" aria-hidden="true">article</span><p class="vz-empty-title">{% trans "No Dina defined yet for this group."|escapejs %}</p></div>';
-                }
-            }
-            setTimeout(function() {
-                gdCancelDinaEdit();
-            }, 1200);
-        } else {
-            if (fb) { fb.textContent = data.error || '{% trans "Error."|escapejs %}'; fb.className = 'is-error'; }
-        }
-    })
-    .catch(function(err) {
-        if (saveBtn) saveBtn.disabled = false;
-        if (fb) { fb.textContent = '{% trans "Server error."|escapejs %}'; fb.className = 'is-error'; }
-        console.error('Dina save error:', err);
-    });
 }
 
 function gdEscapeHtml(text) {

@@ -2140,8 +2140,8 @@ msgstr "Group title (e.g. Sauce, Extras)"
 msgid "Option (ex : Fromage)"
 msgstr "Option (e.g. Cheese)"
 
-msgid "Suppl. Ar"
-msgstr "Extra Ar"
+msgid "Supplément"
+msgstr "Extra"
 
 msgid "Supprimer le groupe"
 msgstr "Delete group"
@@ -2269,11 +2269,11 @@ msgstr "Offers delivery"
 msgid "Propose le retrait sur place"
 msgstr "Offers pickup"
 
-msgid "Frais de livraison (Ar)"
-msgstr "Delivery fee (Ar)"
+msgid "Frais de livraison"
+msgstr "Delivery fee"
 
-msgid "Commande minimum (Ar)"
-msgstr "Minimum order (Ar)"
+msgid "Commande minimum"
+msgstr "Minimum order"
 
 msgid "Temps de préparation moyen (min)"
 msgstr "Average preparation time (min)"
@@ -2440,8 +2440,8 @@ msgstr "\"%(g)s\": %(n)d choice(s) maximum."
 msgid "%(r)s n'accepte pas de commande pour le moment."
 msgstr "%(r)s is not taking orders right now."
 
-msgid "Commande minimum : %(m)s Ar."
-msgstr "Minimum order: %(m)s Ar."
+msgid "Commande minimum : %(m)s."
+msgstr "Minimum order: %(m)s."
 
 msgid "Nouvelle commande %(n)s chez %(r)s (%(t)s)"
 msgstr "New order %(n)s at %(r)s (%(t)s)"
@@ -3576,8 +3576,8 @@ msgstr "Full screen"
 msgid "Principal"
 msgstr "Main"
 
-msgid "Prix indicatif / jour (Ariary)"
-msgstr "Indicative price / day (Ariary)"
+msgid "Prix indicatif / jour"
+msgstr "Indicative price / day"
 
 msgid "Proposer un lieu"
 msgstr "Suggest a place"
@@ -3900,11 +3900,11 @@ msgstr "More"
 msgid "Posts sauvegardés"
 msgstr "Saved posts"
 
-msgid "Prix max (Ar)"
-msgstr "Max price (Ar)"
+msgid "Prix max"
+msgstr "Max price"
 
-msgid "Prix min (Ar)"
-msgstr "Min price (Ar)"
+msgid "Prix min"
+msgstr "Min price"
 
 msgid "Pro"
 msgstr "Pro"
@@ -4663,20 +4663,20 @@ msgstr "You can bump this ad again in %(h)d h."
 msgid "Titre de l'annonce"
 msgstr "Ad title"
 
-msgid "Prix (Ariary)"
-msgstr "Price (Ariary)"
+msgid "Prix"
+msgstr "Price"
 
 msgid "Prix négociable"
 msgstr "Negotiable price"
 
-msgid "Prix de location (Ariary)"
-msgstr "Rental price (Ariary)"
+msgid "Prix de location"
+msgstr "Rental price"
 
 msgid "Période"
 msgstr "Period"
 
-msgid "Caution (Ariary)"
-msgstr "Deposit (Ariary)"
+msgid "Caution"
+msgstr "Deposit"
 
 msgid "Durée minimale (jours)"
 msgstr "Minimum duration (days)"
@@ -4921,8 +4921,8 @@ msgstr "Vazimba Tourism"
 msgid "Guide touristique"
 msgstr "Tour guide"
 
-msgid "Ar/j"
-msgstr "Ar/day"
+msgid "/ jour"
+msgstr "/ day"
 
 msgid "Jusqu'à %(n)s pers."
 msgstr "Up to %(n)s people"
@@ -5281,8 +5281,8 @@ msgstr "Incoming call"
 msgid "Changer la photo de profil"
 msgstr "Change profile photo"
 
-msgid "Score Fihavanana — solidarité et engagement dans la communauté"
-msgstr "Fihavanana score — solidarity and community involvement"
+msgid "Score de solidarité — entraide et engagement dans la communauté"
+msgstr "Solidarity score — mutual help and community involvement"
 
 msgid "Sections du profil"
 msgstr "Profile sections"
@@ -5290,8 +5290,8 @@ msgstr "Profile sections"
 msgid "À propos"
 msgstr "About"
 
-msgid "Score Fihavanana"
-msgstr "Fihavanana score"
+msgid "Score de solidarité"
+msgstr "Solidarity score"
 
 msgid "Voir tous les amis"
 msgstr "See all friends"
@@ -5798,8 +5798,8 @@ msgstr "No views yet."
 msgid "Bravo"
 msgstr "Applause"
 
-msgid "Capsule Vintana"
-msgstr "Vintana Capsule"
+msgid "Capsule temporelle"
+msgstr "Time capsule"
 
 msgid "Capsule Vintana créée ! Elle sera révélée le %(date)s."
 msgstr "Vintana Capsule created! It will be revealed on %(date)s."
@@ -5909,8 +5909,8 @@ msgstr "Group deleted."
 msgid "Impossible de retirer le créateur du groupe."
 msgstr "The group's creator cannot be removed."
 
-msgid "Kabary"
-msgstr "Kabary"
+msgid "Discours"
+msgstr "Speech"
 
 msgid "La capsule sera révélée dans %s, le %d."
 msgstr "The capsule will be revealed in %s, on %d."
@@ -5930,8 +5930,8 @@ msgstr "Start a live"
 msgid "Le Dina est trop long (3000 caractères au maximum)."
 msgstr "The Dina is too long (3000 characters maximum)."
 
-msgid "Le contenu principal (Vato misaina) est obligatoire."
-msgstr "The main content (Vato misaina) is required."
+msgid "Le contenu principal est obligatoire."
+msgstr "The main content is required."
 
 msgid "Le créateur ne peut pas quitter son propre groupe."
 msgstr "The creator cannot leave their own group."
@@ -6203,3 +6203,81 @@ msgstr[1] "%(n)s posts"
 
 msgid "Post supprimé"
 msgstr "Post deleted"
+
+msgid "Respected elders, dear friends and family…"
+msgstr "Respected elders, dear friends and family…"
+
+msgid "Sweet words are like honey…"
+msgstr "Sweet words are like honey…"
+
+msgid "The main content is required."
+msgstr "The main content is required."
+
+msgid "Salutation"
+msgstr "Greeting"
+
+msgid "Introduction"
+msgstr "Introduction"
+
+msgid "Cœur du discours"
+msgstr "Heart of the speech"
+
+msgid "Proverbe"
+msgstr "Proverb"
+
+msgid "Conclusion"
+msgstr "Closing"
+
+msgid "Solidarité"
+msgstr "Solidarity"
+
+msgid "Solidaire"
+msgstr "Supportive"
+
+msgid "Bienfaiteur"
+msgstr "Benefactor"
+
+msgid "Leader"
+msgstr "Leader"
+
+msgid "Visiteur"
+msgstr "Visitor"
+
+msgid "en trois langues"
+msgstr "in three languages"
+
+msgid "Choisir…"
+msgstr "Choose…"
+
+msgid "Hors d'Afrique (diaspora)"
+msgstr "Outside Africa (diaspora)"
+
+msgid "Le même pays"
+msgstr "Same country"
+
+msgid "Vous vivez hors d'Afrique : indiquez votre pays d'origine."
+msgstr "You live outside Africa: please tell us your country of origin."
+
+msgid "Où vivez-vous ?"
+msgstr "Where do you live?"
+
+msgid "Indiquez le pays où vous vivez."
+msgstr "Please tell us the country you live in."
+
+msgid "Pays d'origine"
+msgstr "Country of origin"
+
+msgid "Pays de résidence"
+msgstr "Country of residence"
+
+msgid "Si vous vivez hors d'Afrique ou dans un autre pays que le vôtre, indiquez d'où vous venez : vous retrouverez la communauté de votre pays."
+msgstr "If you live outside Africa or in a country other than your own, tell us where you are from: you will find your home community."
+
+msgid "Devise"
+msgstr "Currency"
+
+msgid "Prix en %(c)s : seules les annonces dans cette devise sont affichées."
+msgstr "Prices in %(c)s: only listings in this currency are shown."
+
+msgid "Vaut pour le prix, le loyer et la caution."
+msgstr "Applies to the price, the rent and the deposit."

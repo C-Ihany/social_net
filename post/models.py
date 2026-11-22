@@ -54,8 +54,8 @@ class Post(models.Model):
     VINTANA = 'vintana'
     TYPE_CHOICES = [
         (DEFAULT, 'Post standard'),
-        (KABARY,  'Kabary numérique'),
-        (VINTANA, 'Capsule Vintana'),
+        (KABARY,  'Discours'),
+        (VINTANA, 'Capsule temporelle'),
     ]
 
     title        = models.CharField(max_length=255, blank=True, default='')
@@ -85,7 +85,7 @@ class Post(models.Model):
     reveal_date  = models.DateTimeField(
         null=True, blank=True,
         verbose_name='Date de révélation',
-        help_text='Pour les Capsules Vintana : date à laquelle le contenu devient visible.',
+        help_text='Pour les capsules temporelles : date à laquelle le contenu devient visible.',
     )
     region = models.CharField(
         max_length=30, blank=True, default='',
@@ -139,7 +139,7 @@ class Post(models.Model):
 
     @property
     def is_locked(self):
-        """Retourne True si c'est une capsule Vintana non encore révélée."""
+        """Retourne True si c'est une capsule temporelle non encore révélée."""
         if self.post_type != Post.VINTANA:
             return False
         if self.reveal_date is None:

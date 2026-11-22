@@ -7,7 +7,7 @@
             aria-label="{% trans 'Options' %}" aria-haspopup="menu" aria-expanded="false"
             data-post-id="{{ post.id }}"
             data-post-url="{% url 'post:post-detail' post.id %}"
-            data-post-title="{{ post.title|default:''|truncatechars:80 }}"
+            data-post-title="{% if post.title == 'Capsule Vintana' %}{% trans 'Capsule temporelle' %}{% else %}{{ post.title|default:''|truncatechars:80 }}{% endif %}"
             data-owner="{% if request.user.id == post.author.id %}1{% else %}0{% endif %}"
             data-bookmarked="{% if post.is_bookmarked %}1{% else %}0{% endif %}"
             data-reposted="{% if post.user_reposted %}1{% else %}0{% endif %}"

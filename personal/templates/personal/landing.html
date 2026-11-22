@@ -197,6 +197,10 @@
     .hero.has-bg h1, .hero.has-bg .hero-sub, .hero.has-bg .hero-note { color: #fff; }
     .hero.has-bg .hero-sub, .hero.has-bg .hero-note { opacity: .92; }
     .hero.has-bg .lp-textlink { color: #fff; }
+    /* Mot mis en valeur du titre : sur la photo teintée, l'accent vert se
+       confondait avec le fond. Ambre clair (3e couleur de la charte) + ombre. */
+    .hero.has-bg h1 { text-shadow: 0 2px 18px rgba(0,0,0,.28); }
+    .hero.has-bg h1 span { color: #fcd34d !important; }
 
     /* ────────────────────── Chiffres réels ──────────────────────── */
     .stats {
@@ -382,7 +386,7 @@
         <a href="{% url 'register' %}" class="btn btn-primary btn-lg">{% trans "Créer un compte gratuit" %}</a>
         <a href="{% url 'login' %}" class="lp-textlink">{% trans "J'ai déjà un compte" %}</a>
       </div>
-      <p class="hero-note">{% trans "Gratuit" %} · Français, Malagasy, English</p>
+      <p class="hero-note">{% trans "Gratuit" %} · {% trans "en trois langues" %}</p>
     </div>
   </section>
 

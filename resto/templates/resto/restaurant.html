@@ -27,7 +27,7 @@
                 {% if restaurant.offers_delivery %}<i class="material-icons rs-ico" aria-hidden="true">delivery_dining</i> {{ restaurant.formatted_delivery_fee }} · {% endif %}
                 {% if restaurant.offers_pickup %}<i class="material-icons rs-ico" aria-hidden="true">storefront</i> {% trans "Retrait sur place" %} · {% endif %}
                 <i class="material-icons rs-ico" aria-hidden="true">timer</i> ~{{ restaurant.avg_prep_minutes }} min
-                {% if restaurant.min_order %} · {% trans "Commande min." %} {{ restaurant.min_order|vz_ariary }}{% endif %}
+                {% if restaurant.min_order %} · {% trans "Commande min." %} {{ restaurant.formatted_min_order }}{% endif %}
                 {% if restaurant.phone %} · <i class="material-icons rs-ico" aria-hidden="true">call</i> <a href="tel:{{ restaurant.phone }}" class="rs-link">{{ restaurant.phone }}</a>{% endif %}
             </p>
             {% if is_owner %}
@@ -91,8 +91,10 @@
 <a href="{% url 'resto:cart' %}" class="rs-cartbar {% if cart_summary.count %}show{% endif %}" id="rs-cartbar">
     <span class="material-icons" aria-hidden="true">shopping_basket</span>
     <span id="rs-cartbar-count">{% blocktrans count n=cart_summary.count %}{{ n }} article{% plural %}{{ n }} articles{% endblocktrans %}</span>
-    <span id="rs-cartbar-total">{{ cart_summary.total|vz_ariary }}</span> <i class="material-icons rs-ico" aria-hidden="true">arrow_forward</i>
+    <span id="rs-cartbar-total">{{ cart_summary.total|vz_money:restaurant.currency }}</span> <i class="material-icons rs-ico" aria-hidden="true">arrow_forward</i>
 </a>
+
+<span id="rs-currency" data-symbol="{{ restaurant.currency_symbol }}" hidden></span>
 
 <!-- ── Dialogue d'options ── -->
 <div class="vz-overlay" id="rs-item-dialog" data-rs-dialog hidden>

@@ -34,7 +34,7 @@ class ProfilVisibiliteTests(TestCase):
 
 class CompteTests(TestCase):
     def test_pseudo_html_refuse_a_l_inscription(self):
-        data = {'email': 'x@test.mg', 'password1': 'Azerty!2345', 'password2': 'Azerty!2345'}
+        data = {'email': 'x@test.mg', 'password1': 'Azerty!2345', 'password2': 'Azerty!2345', 'region': 'mg'}
         self.assertIn('username', RegistrationForm({**data, 'username': '<img src=x onerror=1>'}).errors)
         self.assertTrue(RegistrationForm({**data, 'username': 'Rasoa_Be-2 é'}).is_valid())
 

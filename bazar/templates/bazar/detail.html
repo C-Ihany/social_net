@@ -117,7 +117,7 @@
                 {% if annonce.caution %}
                 <div class="loc-item">
                   <span class="loc-label">{% trans "Caution" %}</span>
-                  <span class="loc-val">{{ annonce.caution|vz_ariary }}</span>
+                  <span class="loc-val">{{ annonce.formatted_caution }}</span>
                 </div>
                 {% endif %}
                 {% if annonce.duree_min %}

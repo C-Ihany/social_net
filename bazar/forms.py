@@ -20,7 +20,7 @@ class AnnonceForm(forms.ModelForm):
         fields = [
             'listing_type',
             'title', 'category', 'condition',
-            'price', 'price_negotiable',
+            'price', 'price_negotiable', 'currency',
             # Location-specific
             'prix_location', 'periode_location',
             'caution', 'duree_min',
@@ -48,6 +48,7 @@ class AnnonceForm(forms.ModelForm):
                 'min': 0,
             }),
             'price_negotiable': forms.CheckboxInput(attrs={'class': 'form-check-input'}),
+            'currency': forms.Select(attrs={'class': 'form-control'}),
             # Location-specific widgets
             'prix_location': forms.NumberInput(attrs={
                 'class': 'form-control',
@@ -115,11 +116,12 @@ class AnnonceForm(forms.ModelForm):
             'title':             _('Titre de l\'annonce'),
             'category':          _('Catégorie'),
             'condition':         _('État'),
-            'price':             _('Prix (Ariary)'),
+            'price':             _('Prix'),
             'price_negotiable':  _('Prix négociable'),
-            'prix_location':     _('Prix de location (Ariary)'),
+            'currency':          _('Devise'),
+            'prix_location':     _('Prix de location'),
             'periode_location':  _('Période'),
-            'caution':           _('Caution (Ariary)'),
+            'caution':           _('Caution'),
             'duree_min':         _('Durée minimale (jours)'),
             'nb_pieces':         _('Nombre de pièces'),
             'surface_m2':        _('Surface (m²)'),
@@ -139,6 +141,8 @@ class AnnonceForm(forms.ModelForm):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
+        # Devise absente de l'envoi (ancien client, API) : la valeur en place est gardée
+        self.fields['currency'].required = False
         # Une annonce expirée garde son statut tant que le vendeur n'en choisit pas un autre :
         # sans cette option, la liste retomberait d'elle-même sur « Active ».
         self._was_expired = bool(self.instance.pk and self.instance.status == 'expiree')

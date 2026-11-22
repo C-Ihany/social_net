@@ -368,22 +368,6 @@
                     <span class="cs-label">{% trans "Vidéo" %}</span>
                 </a>
 
-                <!-- Kabary -->
-                <a class="cs-item" href="{% url 'post:kabary-create' %}" onclick="closeCreateSheet()">
-                    <div class="cs-icon cs-icon--kabary">
-                        <span class="material-icons">campaign</span>
-                    </div>
-                    <span class="cs-label">Kabary</span>
-                </a>
-
-                <!-- Vintana -->
-                <a class="cs-item" href="{% url 'post:vintana-create' %}" onclick="closeCreateSheet()">
-                    <div class="cs-icon cs-icon--vintana">
-                        <span class="material-icons">auto_awesome</span>
-                    </div>
-                    <span class="cs-label">Vintana</span>
-                </a>
-
                 <!-- Story : ouvre le créateur directement si disponible (feed/profil),
                      sinon navigue vers /stories/ (pages sans story_bar.html) -->
                 <a class="cs-item" href="{% url 'stories:page' %}"

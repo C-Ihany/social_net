@@ -1,4 +1,4 @@
-"""Capsules Vintana encore scellées : retire les titres recopiés du message.
+"""Capsules temporelles encore scellées : retire les titres recopiés du message.
 
 Sans titre saisi, l'ancienne création utilisait les 80 premiers caractères du
 message comme titre — visible sur la carte scellée, en recherche et dans les
@@ -10,7 +10,7 @@ import re
 from django.db import migrations
 from django.utils import timezone
 
-NEUTRAL = 'Capsule Vintana'
+NEUTRAL = 'Capsule temporelle'
 
 
 def seal_titles(apps, schema_editor):

@@ -1,5 +1,5 @@
 """
-Corrections de l'audit 2026-11 (fil) : brouillons publiables, capsules Vintana
+Corrections de l'audit 2026-11 (fil) : brouillons publiables, capsules temporelles
 réellement scellées, tendances sans fuite, carte de post commune.
 """
 from datetime import timedelta
@@ -105,14 +105,30 @@ class VintanaSealTests(Base):
         tags = get_trending_hashtags(limit=25, hours=24, with_preview=True)
         self.assertFalse([t for t in tags if t['slug'] == 'scelle'])
 
-    def test_default_title_is_neutral(self):
-        when = (timezone.localtime() + timedelta(days=3)).strftime('%Y-%m-%dT%H:%M')
-        r = self.client.post(reverse('post:vintana-create'), {'message': SECRET + ' <b>x</b>', 'reveal_date': when},
-                             HTTP_X_REQUESTED_WITH='XMLHttpRequest')
-        self.assertTrue(r.json()['ok'])
-        post = Post.objects.get(author=self.me, post_type=Post.VINTANA)
-        self.assertNotIn(SECRET, post.title)
-        self.assertIn('&lt;b&gt;', post.body)        # saisie échappée
+    def test_creation_pages_are_gone(self):
+        # Pages de création retirées : les anciens noms de route renvoient à « Créer un post »
+        for name in ('post:kabary-create', 'post:vintana-create'):
+            r = self.client.get(reverse(name))
+            self.assertRedirects(r, reverse('post:addPost'), fetch_redirect_response=False)
+            self.assertEqual(self.client.post(reverse(name), {'message': 'x', 'vato': 'x'}).status_code, 302)
+        self.assertFalse(Post.objects.filter(post_type__in=[Post.VINTANA, Post.KABARY]).exists())
+
+    def test_old_capsule_and_speech_keep_working_with_new_labels(self):
+        self._capsule(title='Capsule Vintana', author=self.other)
+        Post.objects.create(author=self.other, title='Mon discours', post_type=Post.KABARY,
+                            body='<div class="kbr-body"><div class="kbr-section"><p>Bonjour</p></div></div>')
+        from friend.models import FriendList
+        fl, _c = FriendList.objects.get_or_create(user=self.me)
+        fl.friends.add(self.other)
+        html = self.client.get(reverse('post:post-view') + '?tab=feed').content.decode()
+        self.assertIn('Capsule temporelle', html)
+        self.assertIn('pc-vintana-locked', html)
+        self.assertIn('kbr-body', html)
+        self.assertNotIn('Capsule Vintana', html)
+        # (le menu « Créer » de base.html cite encore Kabary : hors de ce module)
+        feed = html.split('id="cb-post-list-anchor"')[1].split('feed-right-col')[0]
+        self.assertNotIn('Kabary', feed)
+        self.assertNotIn('Vintana', feed)
 
 
 class TrendsLeakTests(Base):
@@ -194,9 +210,43 @@ class PagesRenderTests(Base):
         Post.objects.create(author=self.me, title='B', body='corps', status='draft')
         mine = Post.objects.create(author=self.me, title='À moi', body='x')
         names = ['post:mes-brouillons', 'post:mes-favoris-posts', 'post:tendances', 'post:addPost',
-                 'post:kabary-create', 'post:vintana-create', 'post:video-feed', 'post:index', 'recherche']
+                 'post:video-feed', 'post:index', 'recherche']
         for name in names:
             self.assertEqual(self.client.get(reverse(name)).status_code, 200, name)
         self.assertEqual(self.client.get(reverse('recherche'), {'q': 'moi'}).status_code, 200)
         self.assertEqual(self.client.get(reverse('post:edit-post', args=[mine.pk])).status_code, 200)
         self.assertEqual(self.client.get(reverse('post:delete-post', args=[mine.pk])).status_code, 200)
+
+
+class NearbyTabTests(Base):
+    """Onglet « près de chez moi » : pays où l'on vit, ou pays d'origine pour la diaspora."""
+    def test_diaspora_member_sees_origin_country(self):
+        me = self.me
+        me.region, me.origin_country = 'diaspora', 'sn'
+        me.save(update_fields=['region', 'origin_country'])
+        cousin = User.objects.create_user(email='c@test.mg', username='cousin', password='x')
+        cousin.region, cousin.origin_country = 'diaspora', 'sn'
+        cousin.save(update_fields=['region', 'origin_country'])
+        Post.objects.create(author=self.other, title='Depuis Dakar', body='x', region='sn')
+        Post.objects.create(author=cousin, title='Diaspora du Sénégal', body='x', region='diaspora')
+        Post.objects.create(author=self.other, title='Depuis Nairobi', body='x', region='ke')
+        Post.objects.create(author=self.other, title='Autre diaspora', body='x', region='diaspora')
+        html = self.client.get(reverse('post:post-view') + '?tab=region').content.decode()
+        self.assertIn('Depuis Dakar', html)
+        self.assertIn('Diaspora du Sénégal', html)
+        self.assertNotIn('Depuis Nairobi', html)
+        self.assertNotIn('Autre diaspora', html)
+        self.assertIn('?tab=region', html)          # l'onglet est proposé
+
+    def test_resident_sees_own_country_only(self):
+        self.me.region = 'ke'
+        self.me.save(update_fields=['region'])
+        Post.objects.create(author=self.other, title='Depuis Dakar', body='x', region='sn')
+        Post.objects.create(author=self.other, title='Depuis Nairobi', body='x', region='ke')
+        html = self.client.get(reverse('post:post-view') + '?tab=region').content.decode()
+        self.assertIn('Depuis Nairobi', html)
+        self.assertNotIn('Depuis Dakar', html)
+
+    def test_no_tab_without_location(self):
+        html = self.client.get(reverse('post:post-view') + '?tab=feed').content.decode()
+        self.assertNotIn('?tab=region', html)

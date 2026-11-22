@@ -870,8 +870,8 @@ msgstr "Donnez un titre mémorable à votre Kabary."
 msgid "Opening salutation. Address your audience respectfully."
 msgstr "Salutation d'ouverture. Adressez-vous respectueusement à votre auditoire."
 
-msgid "Tompokolahy, Tompokovavy, ry havana… (Respected men, respected women, dear kin…)"
-msgstr "Tompokolahy, Tompokovavy, ry havana… (Honorables messieurs, honorables dames, chers proches…)"
+msgid "Respected elders, dear friends and family…"
+msgstr "Honorables aînés, chers amis, chère famille…"
 
 msgid "Introduction — set the context and purpose of your speech."
 msgstr "Introduction — posez le contexte et l'objet de votre discours."
@@ -888,8 +888,8 @@ msgstr "Développez vos pensées, idées, récits…"
 msgid "A proverb to illuminate your message."
 msgstr "Un proverbe pour éclairer votre message."
 
-msgid "Ny teny mamy, toy ny tantely… (Sweet words, like honey…)"
-msgstr "Ny teny mamy, toy ny tantely… (Les mots doux, comme le miel…)"
+msgid "Sweet words are like honey…"
+msgstr "Les paroles douces sont comme le miel…"
 
 msgid "Closing words, blessing for all…"
 msgstr "Mots de clôture, bénédiction pour tous…"
@@ -903,8 +903,8 @@ msgstr "Publier le Kabary"
 msgid "Preview"
 msgstr "Aperçu"
 
-msgid "The main content (Vato misaina) is required."
-msgstr "Le contenu principal (Vato misaina) est obligatoire."
+msgid "The main content is required."
+msgstr "Le contenu principal est obligatoire."
 
 # ── Actions post ──
 msgid "Repost"

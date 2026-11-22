@@ -119,17 +119,30 @@ def bazar_index(request):
     if region:
         qs = qs.filter(region=region)
 
-    if price_min:
-        try:
-            qs = qs.filter(Q(price__gte=int(price_min)) | Q(price__isnull=True))
-        except ValueError:
-            pass
+    # « Près de chez moi » : le pays où l'on vit (toutes les régions de Madagascar si c'est
+    # le pays choisi) ; pour la diaspora, le pays d'origine et les vendeurs de même origine.
+    from regions import currency_for_user, currency_symbol, nearby_label, nearby_q
+    near_q = nearby_q(request.user, 'region', 'seller') if request.user.is_authenticated else None
+    near = bool(request.GET.get('near')) and near_q is not None
+    if near:
+        qs = qs.filter(near_q)
 
-    if price_max:
+    # Un prix n'a de sens que dans une devise : dès qu'un filtre ou un tri par prix est
+    # demandé, on ne garde que les annonces dans la devise du visiteur (et on le lui dit).
+    def _amount(raw):
         try:
-            qs = qs.filter(price__lte=int(price_max))
+            return max(0, int(raw))
         except ValueError:
-            pass
+            return None
+    pmin, pmax = (_amount(price_min) if price_min else None), (_amount(price_max) if price_max else None)
+    price_currency = ''
+    if pmin is not None or pmax is not None or sort in ('price_asc', 'price_desc'):
+        price_currency = currency_for_user(request.user)
+        qs = qs.filter(currency=price_currency)
+    if pmin is not None:
+        qs = qs.filter(Q(price__gte=pmin) | Q(price__isnull=True))
+    if pmax is not None:
+        qs = qs.filter(price__lte=pmax)
 
     # Filtre vendeurs vérifiés
     if only_verified:
@@ -164,11 +177,7 @@ def bazar_index(request):
     params.pop('type', None)
     qs_tabs = params.urlencode()
 
-    from regions import REGION_CHOICES, REGION_LABELS, REGION_SHORT
-    # Région courante de l'utilisateur (pour pré-sélectionner "Ma région")
-    user_region = ''
-    if request.user.is_authenticated:
-        user_region = getattr(request.user, 'region', '') or ''
+    from regions import REGION_CHOICES
 
     context = {
         'page_obj':        page_obj,
@@ -186,12 +195,14 @@ def bazar_index(request):
         'listing_type':    listing_type,
         'total':           paginator.count,
         'region_choices':  REGION_CHOICES,
-        'user_region':     user_region,
-        'user_region_label': REGION_SHORT.get(user_region, ''),
+        'near':            near,
+        'near_label':      nearby_label(request.user) if near_q is not None else '',
+        'price_currency_symbol': currency_symbol(price_currency) if price_currency else '',
+        'user_currency_symbol':  currency_symbol(currency_for_user(request.user)),
         'sel_cat_label':   dict(Annonce.CATEGORY_CHOICES).get(category, ''),
         'qs_page':         qs_page,
         'qs_tabs':         qs_tabs,
-        'has_filters':     bool(q or category or condition or region or listing_type or only_verified
+        'has_filters':     bool(q or category or condition or region or near or listing_type or only_verified
                                 or price_min or price_max or sort != 'recent'),
     }
     return render(request, 'bazar/index.html', context)
@@ -267,6 +278,9 @@ def annonce_create(request):
         if form.is_valid():
             annonce = form.save(commit=False)
             annonce.seller = request.user
+            if not request.POST.get('currency'):
+                from regions import currency_for_user
+                annonce.currency = currency_for_user(request.user)
             # Auto-remplir la région depuis le profil du vendeur
             if not annonce.region:
                 annonce.region = getattr(request.user, 'region', '') or ''
@@ -291,7 +305,8 @@ def annonce_create(request):
         else:
             messages.error(request, _('Vérifiez les champs signalés.'))
     else:
-        form = AnnonceForm()
+        from regions import currency_for_user
+        form = AnnonceForm(initial={'currency': currency_for_user(request.user)})
 
     return render(request, 'bazar/create.html', {
         'form':       form,

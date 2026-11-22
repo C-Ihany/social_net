@@ -10,7 +10,7 @@ class GroupForm(forms.ModelForm):
 
     class Meta:
         model = Group
-        fields = ['name', 'category', 'region', 'description', 'cover', 'privacy', 'dina']
+        fields = ['name', 'category', 'region', 'description', 'cover', 'privacy']
         widgets = {
             'name': forms.TextInput(attrs={
                 'class': 'gp-input',
@@ -27,12 +27,6 @@ class GroupForm(forms.ModelForm):
             'category': forms.Select(attrs={'class': 'gp-input'}),
             'region':   forms.Select(attrs={'class': 'gp-input'}, choices=REGION_CHOICES),
             'privacy':  forms.Select(attrs={'class': 'gp-input'}),
-            'dina': forms.Textarea(attrs={
-                'class': 'gp-input',
-                'rows': 6,
-                'placeholder': _('Rédigez le Dina du groupe — règles, engagements et traditions de la communauté…'),
-                'maxlength': 3000,
-            }),
         }
         labels = {
             'name':     'Nom',
@@ -41,7 +35,6 @@ class GroupForm(forms.ModelForm):
             'description': _('Description'),
             'cover':    'Image de couverture',
             'privacy':  'Confidentialité',
-            'dina':     'Dina (charte communautaire)',
         }
 
     def clean_name(self):

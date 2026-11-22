@@ -24,12 +24,62 @@ def validate_new_username(username):
     return username
 
 
+def residence_choices():
+    """Où vit le membre, à l'inscription : un pays d'Afrique, ou ailleurs (diaspora).
+    (Les régions de Madagascar se choisissent ensuite dans le profil.)"""
+    from regions import AFRICA_COUNTRIES, DIASPORA
+    return [('', _('Choisir…'))] + list(AFRICA_COUNTRIES) + [(DIASPORA[0], _("Hors d'Afrique (diaspora)"))]
+
+
+def origin_choices():
+    from regions import AFRICA_COUNTRIES
+    return [('', _('Le même pays'))] + list(AFRICA_COUNTRIES)
+
+
+def clean_origin(region, origin):
+    """Pays d'origine cohérent avec le lieu de vie : repris du pays où l'on vit
+    s'il n'est pas précisé, exigé quand on vit hors d'Afrique."""
+    from regions import country_of, DIASPORA
+    if not origin:
+        origin = country_of(region)
+    if region == DIASPORA[0] and not origin:
+        raise forms.ValidationError(_("Vous vivez hors d'Afrique : indiquez votre pays d'origine."))
+    return origin
+
+
 class RegistrationForm(UserCreationForm):
     email = forms.EmailField(max_length=254, help_text=_('Obligatoire. Indiquez une adresse e-mail valide.'))
+    # Où l'on vit, et d'où l'on vient : un membre né au Sénégal qui vit en Europe
+    # choisit « Hors d'Afrique » puis « Sénégal ».
+    region = forms.ChoiceField(label=_('Où vivez-vous ?'), choices=[], required=True,
+                               error_messages={'required': _('Indiquez le pays où vous vivez.')})
+    origin_country = forms.ChoiceField(label=_("Pays d'origine"), choices=[], required=False)
 
     class Meta:
         model = Account
-        fields = ('email', 'username', 'password1', 'password2', )
+        fields = ('email', 'username', 'region', 'origin_country', 'password1', 'password2', )
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields['region'].choices = residence_choices()
+        self.fields['origin_country'].choices = origin_choices()
+
+    def clean(self):
+        data = super().clean()
+        if data.get('region'):
+            try:
+                data['origin_country'] = clean_origin(data['region'], data.get('origin_country', ''))
+            except forms.ValidationError as exc:
+                self.add_error('origin_country', exc)
+        return data
+
+    def save(self, commit=True):
+        account = super().save(commit=False)
+        account.region = self.cleaned_data.get('region', '')
+        account.origin_country = self.cleaned_data.get('origin_country', '')
+        if commit:
+            account.save()
+        return account
 
     def clean_email(self):
         email = self.cleaned_data['email'].lower()
@@ -87,19 +137,21 @@ class AccountUpdateForm(forms.ModelForm):
     )
     region = forms.ChoiceField(
         required=False,
-        label=_('Région'),
+        label=_('Pays de résidence'),
         choices=[],  # rempli dynamiquement dans __init__
         widget=forms.Select(),
     )
+    origin_country = forms.ChoiceField(required=False, label=_("Pays d'origine"), choices=[])
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         from regions import REGION_CHOICES
         self.fields['region'].choices = REGION_CHOICES
+        self.fields['origin_country'].choices = origin_choices()
 
     class Meta:
         model = Account
-        fields = ('username', 'email', 'profile_image', 'hide_email', 'bio', 'location', 'region')
+        fields = ('username', 'email', 'profile_image', 'hide_email', 'bio', 'location', 'region', 'origin_country')
         widgets = {
             'profile_image': forms.FileInput(attrs={
                 'accept': ACCEPTED_IMAGE_EXTENSIONS,
@@ -124,6 +176,14 @@ class AccountUpdateForm(forms.ModelForm):
             return username
         raise forms.ValidationError(_('Ce nom d’utilisateur est déjà pris.'))
 
+    def clean(self):
+        data = super().clean()
+        try:
+            data['origin_country'] = clean_origin(data.get('region', ''), data.get('origin_country', ''))
+        except forms.ValidationError as exc:
+            self.add_error('origin_country', exc)
+        return data
+
     def save(self, commit=True):
         account = super(AccountUpdateForm, self).save(commit=False)
         account.username   = self.cleaned_data['username']
@@ -132,6 +192,7 @@ class AccountUpdateForm(forms.ModelForm):
         account.bio        = self.cleaned_data.get('bio', '')
         account.location   = self.cleaned_data.get('location', '')
         account.region     = self.cleaned_data.get('region', '')
+        account.origin_country = self.cleaned_data.get('origin_country', '')
         # Ne remplace la photo que si un nouveau fichier est uploadé
         new_image = self.cleaned_data.get('profile_image')
         if new_image:

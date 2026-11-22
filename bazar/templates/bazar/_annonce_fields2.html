@@ -16,6 +16,8 @@
     <div class="bazar-price-row">
         {% trans "Laisser vide = « Prix à discuter »" as price_help %}
         {% include 'bazar/_field.html' with field=form.price help=price_help %}
+        {% trans "Vaut pour le prix, le loyer et la caution." as currency_help %}
+        {% include 'bazar/_field.html' with field=form.currency help=currency_help %}
         <div class="form-check bazar-check bazar-price-check">
             {{ form.price_negotiable }}
             <label class="form-check-label bazar-check-label" for="{{ form.price_negotiable.id_for_label }}">{{ form.price_negotiable.label }}</label>

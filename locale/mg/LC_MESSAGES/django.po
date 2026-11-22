@@ -870,8 +870,8 @@ msgstr "Omeo lohateny tsy hadinoina ny Kabarynao."
 msgid "Opening salutation. Address your audience respectfully."
 msgstr "Fiarahabana fanombohana. Miteny amin'ny maneho fanajana amin'ny mpifanatrika."
 
-msgid "Tompokolahy, Tompokovavy, ry havana… (Respected men, respected women, dear kin…)"
-msgstr "Tompokolahy, Tompokovavy, ry havana…"
+msgid "Respected elders, dear friends and family…"
+msgstr "Ry olon-kaja, ry namana sy havana malala…"
 
 msgid "Introduction — set the context and purpose of your speech."
 msgstr "Fampidirana — asehoy ny tontolon-kevitra sy ny tanjona ny resaka."
@@ -888,7 +888,7 @@ msgstr "Ampitomboy ny sainao, hevitrao, tantaranao…"
 msgid "A proverb to illuminate your message."
 msgstr "Ohabolana mampihazava ny hafatrao."
 
-msgid "Ny teny mamy, toy ny tantely… (Sweet words, like honey…)"
+msgid "Sweet words are like honey…"
 msgstr "Ny teny mamy, toy ny tantely…"
 
 msgid "Closing words, blessing for all…"
@@ -903,8 +903,8 @@ msgstr "Hamoaka Kabary"
 msgid "Preview"
 msgstr "Fijery mialoha"
 
-msgid "The main content (Vato misaina) is required."
-msgstr "Ny votoatin-dresaka (Vato misaina) dia ilaina."
+msgid "The main content is required."
+msgstr "Ilaina ny votoatiny fototra."
 
 # ── Hetsika lahatsoratra ──
 msgid "Repost"
@@ -2270,8 +2270,8 @@ msgstr "Lohatenin'ny vondrona (ohatra : Lasaosy, Fanampiny)"
 msgid "Option (ex : Fromage)"
 msgstr "Safidy (ohatra : Fromazy)"
 
-msgid "Suppl. Ar"
-msgstr "Fanampiny Ar"
+msgid "Supplément"
+msgstr "Fanampiny"
 
 msgid "Min"
 msgstr "Ambany"
@@ -2405,11 +2405,11 @@ msgstr "Manolotra fanaterana"
 msgid "Propose le retrait sur place"
 msgstr "Azo alaina eo an-toerana"
 
-msgid "Frais de livraison (Ar)"
-msgstr "Saran'ny fanaterana (Ar)"
+msgid "Frais de livraison"
+msgstr "Saram-panaterana"
 
-msgid "Commande minimum (Ar)"
-msgstr "Kaomandy farany ambany (Ar)"
+msgid "Commande minimum"
+msgstr "Kaomandy kely indrindra"
 
 msgid "Temps de préparation moyen (min)"
 msgstr "Fotoana fanomanana antonony (min)"
@@ -2585,8 +2585,8 @@ msgstr "« %(g)s » : safidy %(n)d farany ambony."
 msgid "%(r)s n'accepte pas de commande pour le moment."
 msgstr "Tsy mandray kaomandy aloha i %(r)s."
 
-msgid "Commande minimum : %(m)s Ar."
-msgstr "Kaomandy farany ambany : %(m)s Ar."
+msgid "Commande minimum : %(m)s."
+msgstr "Kaomandy kely indrindra: %(m)s."
 
 msgid "Nouvelle commande %(n)s chez %(r)s (%(t)s)"
 msgstr "Kaomandy vaovao %(n)s ao amin'ny %(r)s (%(t)s)"
@@ -3703,8 +3703,8 @@ msgstr "Efijery feno"
 msgid "Principal"
 msgstr "Fototra"
 
-msgid "Prix indicatif / jour (Ariary)"
-msgstr "Vidiny isan'andro (Ariary)"
+msgid "Prix indicatif / jour"
+msgstr "Vidiny tombanana / andro"
 
 msgid "Proposer un lieu"
 msgstr "Hanolotra toerana"
@@ -4027,11 +4027,11 @@ msgstr "Bebe kokoa"
 msgid "Posts sauvegardés"
 msgstr "Lahatsoratra voatahiry"
 
-msgid "Prix max (Ar)"
-msgstr "Vidiny ambony (Ar)"
+msgid "Prix max"
+msgstr "Vidiny be indrindra"
 
-msgid "Prix min (Ar)"
-msgstr "Vidiny ambany (Ar)"
+msgid "Prix min"
+msgstr "Vidiny kely indrindra"
 
 msgid "Pro"
 msgstr "Pro"
@@ -4750,20 +4750,20 @@ msgstr "Afaka manandratra ity fivarotana ity indray ianao afaka %(h)d ora."
 msgid "Titre de l'annonce"
 msgstr "Lohatenin'ny fivarotana"
 
-msgid "Prix (Ariary)"
-msgstr "Vidiny (Ariary)"
+msgid "Prix"
+msgstr "Vidiny"
 
 msgid "Prix négociable"
 msgstr "Vidiny azo dinihana"
 
-msgid "Prix de location (Ariary)"
-msgstr "Hofany (Ariary)"
+msgid "Prix de location"
+msgstr "Vidin'ny hofany"
 
 msgid "Période"
 msgstr "Fe-potoana"
 
-msgid "Caution (Ariary)"
-msgstr "Antoka (Ariary)"
+msgid "Caution"
+msgstr "Antoka"
 
 msgid "Durée minimale (jours)"
 msgstr "Faharetany kely indrindra (andro)"
@@ -5008,8 +5008,8 @@ msgstr "Vazimba Fizahantany"
 msgid "Guide touristique"
 msgstr "Mpitari-dalana mpizaha tany"
 
-msgid "Ar/j"
-msgstr "Ar/andro"
+msgid "/ jour"
+msgstr "/ andro"
 
 msgid "Jusqu'à %(n)s pers."
 msgstr "Hatramin'ny olona %(n)s"
@@ -5377,8 +5377,8 @@ msgstr "Antso miditra"
 msgid "Changer la photo de profil"
 msgstr "Hanova ny sarin'ny mombamomba"
 
-msgid "Score Fihavanana — solidarité et engagement dans la communauté"
-msgstr "Isa Fihavanana — firaisankina sy fandraisana anjara eo amin'ny fiaraha-monina"
+msgid "Score de solidarité — entraide et engagement dans la communauté"
+msgstr "Isa firaisankina — fifanampiana sy fandraisana anjara eo amin'ny fiaraha-monina"
 
 msgid "Sections du profil"
 msgstr "Fizarana amin'ny mombamomba"
@@ -5386,8 +5386,8 @@ msgstr "Fizarana amin'ny mombamomba"
 msgid "À propos"
 msgstr "Momba"
 
-msgid "Score Fihavanana"
-msgstr "Isa Fihavanana"
+msgid "Score de solidarité"
+msgstr "Isa firaisankina"
 
 msgid "Voir tous les amis"
 msgstr "Hijery ny namana rehetra"
@@ -5894,8 +5894,8 @@ msgstr "Mbola tsy misy nijery."
 msgid "Bravo"
 msgstr "Arahabaina"
 
-msgid "Capsule Vintana"
-msgstr "Kapsily Vintana"
+msgid "Capsule temporelle"
+msgstr "Capsule temporelle"
 
 msgid "Capsule Vintana créée ! Elle sera révélée le %(date)s."
 msgstr "Capsule Vintana créée ! Elle sera révélée le %(date)s."
@@ -6005,8 +6005,8 @@ msgstr "Voafafa ny vondrona."
 msgid "Impossible de retirer le créateur du groupe."
 msgstr "Impossible de retirer le créateur du groupe."
 
-msgid "Kabary"
-msgstr "Kabary"
+msgid "Discours"
+msgstr "Lahateny"
 
 msgid "La capsule sera révélée dans %s, le %d."
 msgstr "La capsule sera révélée dans %s, le %d."
@@ -6026,8 +6026,8 @@ msgstr "Hanomboka live"
 msgid "Le Dina est trop long (3000 caractères au maximum)."
 msgstr "Le Dina est trop long (3000 caractères au maximum)."
 
-msgid "Le contenu principal (Vato misaina) est obligatoire."
-msgstr "Le contenu principal (Vato misaina) est obligatoire."
+msgid "Le contenu principal est obligatoire."
+msgstr "Ilaina ny votoatiny fototra."
 
 msgid "Le créateur ne peut pas quitter son propre groupe."
 msgstr "Le créateur ne peut pas quitter son propre groupe."
@@ -6299,3 +6299,72 @@ msgstr[1] "Lahatsoratra %(n)s"
 
 msgid "Post supprimé"
 msgstr "Voafafa ny lahatsoratra"
+
+msgid "Salutation"
+msgstr "Fiarahabana"
+
+msgid "Introduction"
+msgstr "Fampidirana"
+
+msgid "Cœur du discours"
+msgstr "Votoatin'ny lahateny"
+
+msgid "Proverbe"
+msgstr "Ohabolana"
+
+msgid "Conclusion"
+msgstr "Famaranana"
+
+msgid "Solidarité"
+msgstr "Firaisankina"
+
+msgid "Solidaire"
+msgstr "Mpiray tsipy"
+
+msgid "Bienfaiteur"
+msgstr "Mpiahy"
+
+msgid "Leader"
+msgstr "Mpitarika"
+
+msgid "Visiteur"
+msgstr "Vahiny"
+
+msgid "en trois langues"
+msgstr "amin'ny fiteny telo"
+
+msgid "Choisir…"
+msgstr "Safidio…"
+
+msgid "Hors d'Afrique (diaspora)"
+msgstr "Ivelan'i Afrika (am-pielezana)"
+
+msgid "Le même pays"
+msgstr "Io firenena io ihany"
+
+msgid "Vous vivez hors d'Afrique : indiquez votre pays d'origine."
+msgstr "Mipetraka ivelan'i Afrika ianao : lazao ny firenena niavianao."
+
+msgid "Où vivez-vous ?"
+msgstr "Aiza ianao no mipetraka ?"
+
+msgid "Indiquez le pays où vous vivez."
+msgstr "Lazao ny firenena onenanao."
+
+msgid "Pays d'origine"
+msgstr "Firenena niaviana"
+
+msgid "Pays de résidence"
+msgstr "Firenena onenana"
+
+msgid "Si vous vivez hors d'Afrique ou dans un autre pays que le vôtre, indiquez d'où vous venez : vous retrouverez la communauté de votre pays."
+msgstr "Raha mipetraka ivelan'i Afrika na any amin'ny firenena hafa ianao, lazao ny niavianao : ho hitanao ny fiaraha-monin'ny firenenao."
+
+msgid "Devise"
+msgstr "Vola ampiasaina"
+
+msgid "Prix en %(c)s : seules les annonces dans cette devise sont affichées."
+msgstr "Vidiny amin'ny %(c)s: ny filazana amin'io vola io ihany no aseho."
+
+msgid "Vaut pour le prix, le loyer et la caution."
+msgstr "Mihatra amin'ny vidiny, ny hofany ary ny antoka."

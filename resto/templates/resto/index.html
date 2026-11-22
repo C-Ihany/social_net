@@ -43,9 +43,12 @@
             <option value="{{ val }}" {% if val == sel_region %}selected{% endif %}>{{ label }}</option>
             {% endfor %}
         </select>
-        {% if user_region and not sel_region %}
-        <a class="vz-chip" href="?region={{ user_region }}{% if sel_cat %}&cat={{ sel_cat }}{% endif %}{% if q %}&q={{ q }}{% endif %}">
-            <i class="material-icons" aria-hidden="true">my_location</i> {% trans "Près de moi" %}
+        {% if near %}
+        <input type="hidden" name="near" value="1">
+        <span class="vz-chip vz-chip--accent vz-chip--static"><i class="material-icons" aria-hidden="true">my_location</i> {{ near_label }}</span>
+        {% elif near_label and not sel_region %}
+        <a class="vz-chip" href="?near=1{% if sel_cat %}&amp;cat={{ sel_cat }}{% endif %}{% if q %}&amp;q={{ q|urlencode }}{% endif %}{% if sort != 'open' %}&amp;sort={{ sort }}{% endif %}">
+            <i class="material-icons" aria-hidden="true">my_location</i> {% trans "Près de moi" %} · {{ near_label }}
         </a>
         {% endif %}
         <select name="sort" class="rs-select" onchange="this.form.submit()">
@@ -54,7 +57,7 @@
             <option value="recent"  {% if sort == 'recent' %}selected{% endif %}>{% trans "Nouveaux" %}</option>
             <option value="fee"     {% if sort == 'fee' %}selected{% endif %}>{% trans "Livraison la moins chère" %}</option>
         </select>
-        {% if q or sel_cat or sel_region or sort != 'open' %}
+        {% if q or sel_cat or sel_region or near or sort != 'open' %}
         <a href="{% url 'resto:index' %}" class="vz-chip"><i class="material-icons" aria-hidden="true">close</i> {% trans "Réinitialiser" %}</a>
         {% endif %}
     </form>
@@ -86,7 +89,7 @@
                 <div class="vz-card__meta">
                     <span class="vz-card__meta-item"><i class="material-icons" aria-hidden="true">delivery_dining</i><span>{{ r.formatted_delivery_fee }}</span></span>
                     <span class="vz-card__meta-item"><i class="material-icons" aria-hidden="true">schedule</i><span>~{{ r.avg_prep_minutes }} min</span></span>
-                    {% if r.min_order %}<span class="vz-card__meta-item"><i class="material-icons" aria-hidden="true">shopping_bag</i><span>{% trans "min." %} {{ r.min_order|vz_ariary }}</span></span>{% endif %}
+                    {% if r.min_order %}<span class="vz-card__meta-item"><i class="material-icons" aria-hidden="true">shopping_bag</i><span>{% trans "min." %} {{ r.formatted_min_order }}</span></span>{% endif %}
                 </div>
             </div>
         </a>
@@ -95,9 +98,9 @@
 
     {% if page_obj.has_other_pages %}
     <nav class="vz-pager" aria-label="{% trans 'Pagination' %}">
-        {% if page_obj.has_previous %}<a href="?{% if q %}q={{ q|urlencode }}&{% endif %}{% if sel_cat %}cat={{ sel_cat }}&{% endif %}{% if sel_region %}region={{ sel_region }}&{% endif %}sort={{ sort }}&page={{ page_obj.previous_page_number }}" aria-label="{% trans 'Page précédente' %}"><i class="material-icons" aria-hidden="true">chevron_left</i></a>{% else %}<span class="is-disabled" aria-hidden="true"><i class="material-icons">chevron_left</i></span>{% endif %}
+        {% if page_obj.has_previous %}<a href="?{% if q %}q={{ q|urlencode }}&{% endif %}{% if sel_cat %}cat={{ sel_cat }}&{% endif %}{% if sel_region %}region={{ sel_region }}&{% endif %}{% if near %}near=1&{% endif %}sort={{ sort }}&page={{ page_obj.previous_page_number }}" aria-label="{% trans 'Page précédente' %}"><i class="material-icons" aria-hidden="true">chevron_left</i></a>{% else %}<span class="is-disabled" aria-hidden="true"><i class="material-icons">chevron_left</i></span>{% endif %}
         <span class="is-current" aria-current="page">{{ page_obj.number }} / {{ page_obj.paginator.num_pages }}</span>
-        {% if page_obj.has_next %}<a href="?{% if q %}q={{ q|urlencode }}&{% endif %}{% if sel_cat %}cat={{ sel_cat }}&{% endif %}{% if sel_region %}region={{ sel_region }}&{% endif %}sort={{ sort }}&page={{ page_obj.next_page_number }}" aria-label="{% trans 'Page suivante' %}"><i class="material-icons" aria-hidden="true">chevron_right</i></a>{% else %}<span class="is-disabled" aria-hidden="true"><i class="material-icons">chevron_right</i></span>{% endif %}
+        {% if page_obj.has_next %}<a href="?{% if q %}q={{ q|urlencode }}&{% endif %}{% if sel_cat %}cat={{ sel_cat }}&{% endif %}{% if sel_region %}region={{ sel_region }}&{% endif %}{% if near %}near=1&{% endif %}sort={{ sort }}&page={{ page_obj.next_page_number }}" aria-label="{% trans 'Page suivante' %}"><i class="material-icons" aria-hidden="true">chevron_right</i></a>{% else %}<span class="is-disabled" aria-hidden="true"><i class="material-icons">chevron_right</i></span>{% endif %}
     </nav>
     {% endif %}
 
@@ -117,7 +120,7 @@
 <a href="{% url 'resto:cart' %}" class="rs-cartbar show">
     <span class="material-icons" aria-hidden="true">shopping_basket</span>
     <span>{% blocktrans count n=cart_summary.count %}{{ n }} article{% plural %}{{ n }} articles{% endblocktrans %} · {{ cart_summary.restaurant.name }}</span>
-    <span>{{ cart_summary.total|vz_ariary }} <i class="material-icons rs-ico" aria-hidden="true">arrow_forward</i></span>
+    <span>{{ cart_summary.total|vz_money:cart_summary.currency }} <i class="material-icons rs-ico" aria-hidden="true">arrow_forward</i></span>
 </a>
 {% endif %}
 {% endblock %}

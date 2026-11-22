@@ -27,6 +27,4 @@ urlpatterns = [
     # Invitations
     path('<slug:slug>/invite/search/', views.group_invite_search, name='invite-search'),
     path('<slug:slug>/invite/', views.group_invite_member, name='invite-member'),
-    # Dina (charte communautaire)
-    path('<slug:slug>/dina/save/', views.group_dina_save, name='dina-save'),
 ]

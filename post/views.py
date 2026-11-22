@@ -69,7 +69,7 @@ def get_trending_hashtags(limit=10, days=7, hours=None, with_preview=False):
     # Récupérer les posts récents avec leur id pour les previews
     # Post utilise post_date (DateField), pas created_at
     # Uniquement ce que tout le monde peut voir : ni brouillon, ni post de
-    # groupe privé, ni capsule Vintana encore scellée (l'extrait affiché sur
+    # groupe privé, ni capsule temporelle encore scellée (l'extrait affiché sur
     # la page Tendances en divulguait le contenu).
     from django.contrib.auth.models import AnonymousUser
     posts_qs = unsealed(visible_posts(
@@ -275,10 +275,18 @@ def get_profile_suggestions(user, limit=12):
     # 2. Complément : même région, puis comptes les plus récents
     if len(suggestions) < limit:
         taken = excluded | {a.id for a in suggestions}
-        region = getattr(user, 'region', '')
-        if region:
+        # Même lieu de vie, ou même pays d'origine (diaspora comprise)
+        from django.db.models import Q as _Q
+        region = getattr(user, 'region', '') or ''
+        origin = getattr(user, 'origin_country', '') or ''
+        near = _Q()
+        if region and region != 'diaspora':
+            near |= _Q(region=region)
+        if origin:
+            near |= _Q(origin_country=origin) | _Q(region=origin)
+        if near:
             fill = (
-                Account.objects.filter(is_active=True, region=region)
+                Account.objects.filter(is_active=True).filter(near)
                 .exclude(id__in=taken).exclude(pola_mode=Account.POLA_ONLY)
                 .order_by('-date_joined')[:limit - len(suggestions)]
             )
@@ -324,10 +332,12 @@ def _feed_page(user, tab, page_number, friends):
     Renvoie (page, tab_normalisé). Toutes les listes passent par visible_posts().
     """
     from .foryou import foryou_page
-    user_region = getattr(user, 'region', '') or ''
-    if tab == 'region' and user_region:
+    # « Près de chez moi » : pays où l'on vit, ou pays d'origine pour la diaspora
+    from regions import nearby_q
+    near = nearby_q(user, 'region', 'author')
+    if tab == 'region' and near is not None:
         qs = visible_posts(
-            Post.objects.filter(region=user_region).select_related('author', 'group').order_by('-id'),
+            Post.objects.filter(near).select_related('author', 'group').order_by('-id'),
             user,
         )
         return Paginator(qs, 5).get_page(page_number), 'region'
@@ -398,7 +408,7 @@ def post_feed_view(request):
             .distinct()[:6]
         )
 
-    from regions import REGION_LABELS, REGION_SHORT
+    from regions import nearby_q, nearby_label
     from video.models import LiveRoom
     active_lives = LiveRoom.objects.visible_to(user).filter(
         host__in=list(friends) + [user],
@@ -424,8 +434,9 @@ def post_feed_view(request):
         "recent_bazar":       recent_bazar,
         # onglets
         "active_tab":         tab,
-        "user_region":        user_region,
-        "user_region_label":  REGION_SHORT.get(user_region, ''),
+        # onglet « près de chez moi » : affiché dès qu'un filtre est possible
+        "user_region":        nearby_q(user, 'region', 'author') is not None,
+        "user_region_label":  nearby_label(user),
         # lives actifs des amis/soi
         "active_lives":       active_lives,
         # carrousel « Suggestions pour vous »
@@ -1293,162 +1304,6 @@ def post_detail(request, post_id):
     return render(request, 'post/post_detail.html', {
         'post': post,
         'posts_of_the_page': [post],
-    })
-
-
-# ── Kabary numérique ──────────────────────────────────────────────────────────
-
-@login_required(login_url='login')
-def kabary_create(request):
-    """Page de création d'un Kabary numérique."""
-    if request.method == 'POST':
-        # La page utilise TOUJOURS fetch() — on retourne toujours du JSON pour les POST.
-        # Ne pas dépendre de X-Requested-With (peut être supprimé par Cloudflare).
-
-        raw_vato       = request.POST.get('vato', '').strip()
-        raw_fanafahana = request.POST.get('fanafahana', '').strip()
-        # La saisie est du texte brut : on l'échappe avant de l'assembler en HTML.
-        fisaorana   = escape(request.POST.get('fisaorana', '').strip())
-        fanafahana  = escape(raw_fanafahana)
-        vato        = escape(raw_vato)
-        ohabolana   = escape(request.POST.get('ohabolana', '').strip())
-        famaranana  = escape(request.POST.get('famaranana', '').strip())
-
-        if not vato and not fanafahana:
-            return JsonResponse({'ok': False, 'error': _('Le contenu principal (Vato misaina) est obligatoire.')})
-
-        # Assembler le body structuré en HTML
-        parts = []
-        if fisaorana:
-            parts.append(
-                f'<div class="kbr-fisaorana"><span class="kbr-label">Fisaorana</span>'
-                f'<p>{fisaorana}</p></div>'
-            )
-        if fanafahana:
-            parts.append(
-                f'<div class="kbr-section"><span class="kbr-label">Fanafahana</span>'
-                f'<p>{fanafahana}</p></div>'
-            )
-        if vato:
-            parts.append(
-                f'<div class="kbr-section kbr-vato"><span class="kbr-label">Vato misaina</span>'
-                f'<p>{vato}</p></div>'
-            )
-        if ohabolana:
-            parts.append(
-                f'<div class="kbr-ohabolana"><span class="kbr-label">Ohabolana</span>'
-                f'<blockquote>« {ohabolana} »</blockquote></div>'
-            )
-        if famaranana:
-            parts.append(
-                f'<div class="kbr-famaranana"><span class="kbr-label">Famaranana</span>'
-                f'<p>{famaranana}</p></div>'
-            )
-
-        body = '<div class="kbr-body">' + ''.join(parts) + '</div>'
-        title_text = request.POST.get('title', '').strip() or (raw_vato or raw_fanafahana)[:80]
-
-        try:
-            post = Post.objects.create(
-                title=title_text,
-                body=body,
-                author=request.user,
-                post_type=Post.KABARY,
-            )
-        except Exception as e:
-            _logger.exception("Kabary create failed: %s", e)
-            from django.conf import settings as _s
-            err = (f'Erreur technique : {type(e).__name__}: {e}'
-                   if _s.DEBUG
-                   else _('Erreur lors de la création du Kabary. Réessayez dans quelques instants.'))
-            return JsonResponse({'ok': False, 'error': err})
-
-        return JsonResponse({'ok': True, 'redirect': post.get_absolute_url()})
-
-    return render(request, 'post/kabary_create.html', {})
-
-
-@login_required(login_url='login')
-def vintana_create(request):
-    """Crée une Capsule Vintana (time-capsule post)."""
-    from django.utils import timezone
-
-    if request.method == 'POST':
-        is_ajax = request.headers.get('X-Requested-With') == 'XMLHttpRequest'
-
-        title    = request.POST.get('title', '').strip()
-        message  = request.POST.get('message', '').strip()
-        reveal_s = request.POST.get('reveal_date', '').strip()
-
-        # Validation
-        if not message:
-            err = _('Le message de la capsule est obligatoire.')
-            if is_ajax:
-                return JsonResponse({'ok': False, 'error': err})
-            messages.error(request, err)
-            return redirect('post:vintana-create')
-
-        if not reveal_s:
-            err = _('La date de révélation est obligatoire.')
-            if is_ajax:
-                return JsonResponse({'ok': False, 'error': err})
-            messages.error(request, err)
-            return redirect('post:vintana-create')
-
-        # Parsing de la date (format HTML datetime-local : YYYY-MM-DDTHH:MM)
-        try:
-            from datetime import datetime
-            naive_dt = datetime.strptime(reveal_s, '%Y-%m-%dT%H:%M')
-            tz = timezone.get_current_timezone()
-            reveal_dt = timezone.make_aware(naive_dt, tz)
-        except ValueError:
-            err = _('Format de date invalide.')
-            if is_ajax:
-                return JsonResponse({'ok': False, 'error': err})
-            messages.error(request, err)
-            return redirect('post:vintana-create')
-
-        if reveal_dt <= timezone.now():
-            err = _('La date de révélation doit être dans le futur.')
-            if is_ajax:
-                return JsonResponse({'ok': False, 'error': err})
-            messages.error(request, err)
-            return redirect('post:vintana-create')
-
-        # Corps HTML de la capsule
-        body = (
-            f'<div class="vintana-body">'
-            f'<p class="vintana-message">{escape(message)}</p>'
-            f'</div>'
-        )
-        # Sans titre, on ne recopie pas le début du message : le titre reste
-        # visible sur la carte scellée, en recherche et dans les favoris.
-        title_text = title or _('Capsule Vintana')
-
-        try:
-            post = Post.objects.create(
-                title=title_text,
-                body=body,
-                author=request.user,
-                post_type=Post.VINTANA,
-                reveal_date=reveal_dt,
-            )
-        except Exception as e:
-            logging.getLogger(__name__).exception("Vintana create failed: %s", e)
-            err = _('Erreur lors de la création de la capsule.')
-            if is_ajax:
-                return JsonResponse({'ok': False, 'error': err})
-            messages.error(request, err)
-            return redirect('post:vintana-create')
-
-        if is_ajax:
-            return JsonResponse({'ok': True, 'redirect': post.get_absolute_url()})
-        messages.success(request, _('Capsule Vintana créée ! Elle sera révélée le %(date)s.') % {'date': reveal_dt.strftime('%d/%m/%Y %H:%M')})
-        return redirect('post:post-detail', post_id=post.id)
-
-    now_plus_1day = __import__('datetime').datetime.now() + __import__('datetime').timedelta(days=1)
-    return render(request, 'post/vintana_create.html', {
-        'min_reveal': now_plus_1day.strftime('%Y-%m-%dT%H:%M'),
     })
 
 

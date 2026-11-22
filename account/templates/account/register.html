@@ -53,6 +53,29 @@
                 </div>
             </div>
             <div class="auth-field">
+                <label for="inputRegion">{% trans "Où vivez-vous ?" %}</label>
+                <div class="auth-input-wrap">
+                    <span class="material-icons" aria-hidden="true">place</span>
+                    <select name="region" id="inputRegion" required autocomplete="country-name">
+                        {% for code, label in registration_form.fields.region.choices %}
+                        <option value="{{ code }}"{% if registration_form.region.value == code %} selected{% endif %}>{{ label }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+            </div>
+            <div class="auth-field">
+                <label for="inputOrigin">{% trans "Pays d'origine" %}</label>
+                <div class="auth-input-wrap">
+                    <span class="material-icons" aria-hidden="true">public</span>
+                    <select name="origin_country" id="inputOrigin">
+                        {% for code, label in registration_form.fields.origin_country.choices %}
+                        <option value="{{ code }}"{% if registration_form.origin_country.value == code %} selected{% endif %}>{{ label }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <small class="auth-hint" id="originHelp">{% trans "Si vous vivez hors d'Afrique ou dans un autre pays que le vôtre, indiquez d'où vous venez : vous retrouverez la communauté de votre pays." %}</small>
+            </div>
+            <div class="auth-field">
                 <label for="inputPassword1">{% trans "Password" %}</label>
                 <div class="auth-input-wrap">
                     <span class="material-icons" aria-hidden="true">lock_outline</span>

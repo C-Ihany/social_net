@@ -479,3 +479,43 @@ class RestoFlowTests(TestCase):
                                     esprima.parseScript(js, tolerant=False)
                                 except Exception as e:      # pragma: no cover
                                     self.fail(f'{lang} {name} : script en ligne invalide — {e}')
+
+    # ── Devise par pays ───────────────────────────────────────────────────────
+    def test_cart_and_order_use_the_restaurant_currency(self):
+        Restaurant.objects.filter(pk=self.resto.pk).update(currency='XOF')
+        self.client.login(email='client@test.mg', password='pass12345')
+        r = self._add([self.sauce_a.pk])
+        self.assertEqual(r.json()['cart']['currency'], 'XOF')
+        for name in ('resto:cart', 'resto:checkout'):
+            r = self.client.get(reverse(name))
+            self.assertContains(r, 'FCFA')
+            self.assertContains(r, 'data-symbol="FCFA"')         # symbole lu par rsMoney()
+            self.assertNotContains(r, ' Ar<')
+        r = self.client.get(reverse('resto:restaurant', args=[self.resto.slug]))
+        self.assertContains(r, '8 000 FCFA')
+        self.client.post(reverse('resto:checkout'), {
+            'mode': 'delivery', 'customer_name': 'Client', 'customer_phone': '033', 'delivery_address': 'Ici',
+            'payment_method': 'cash'})
+        order = Order.objects.get()
+        self.assertEqual(order.currency, 'XOF')
+        # La devise de la commande est figée : le restaurant peut en changer sans réécrire l'historique
+        Restaurant.objects.filter(pk=self.resto.pk).update(currency='MGA')
+        order.refresh_from_db()
+        self.assertTrue(order.formatted_total.endswith('FCFA'))
+        self.assertContains(self.client.get(reverse('resto:order', args=[order.number])), 'FCFA')
+
+    def test_new_restaurant_gets_the_owner_currency_and_near_me(self):
+        User.objects.filter(pk=self.owner.pk).update(region='diaspora', origin_country='sn')
+        self.client.login(email='owner@test.mg', password='pass12345')
+        r = self.client.get(reverse('resto:restaurant_create'))
+        self.assertContains(r, '<option value="EUR" selected>')      # diaspora → euro par défaut
+        self.client.post(reverse('resto:restaurant_create'), {
+            'name': 'Chez Awa', 'category': 'restaurant', 'address': 'Plateau', 'region': 'sn',
+            'offers_delivery': 'on', 'delivery_fee': 500, 'min_order': 0, 'avg_prep_minutes': 20, 'currency': 'XOF'})
+        awa = Restaurant.objects.get(name='Chez Awa')
+        self.assertEqual(awa.currency, 'XOF')
+        self.assertTrue(awa.formatted_delivery_fee.endswith('FCFA'))
+        # « Près de moi » : un membre de la diaspora retrouve les restaurants de son pays d'origine
+        Restaurant.objects.filter(pk=awa.pk).update(is_approved=True)
+        r = self.client.get(reverse('resto:index'), {'near': '1'})
+        self.assertContains(r, 'Chez Awa'); self.assertNotContains(r, 'Hotely Mamy')

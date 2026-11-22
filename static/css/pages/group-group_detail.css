@@ -390,41 +390,8 @@
 .gd-form-foot--editor { margin-top: .6rem; }
 .gd-btn-row { display: flex; gap: .5rem; }
 
-/* Onglet Dina */
-.gd-dina-card {
-    background: linear-gradient(135deg, var(--accent-glow), var(--bg-card));
-    border: 1.5px solid var(--accent); border-radius: 18px;
-    padding: 1.4rem 1.5rem 1.5rem; margin-bottom: 1.5rem;
-    box-shadow: var(--shadow-sm);
-}
-.gd-dina-head { display: flex; align-items: center; gap: .65rem; margin-bottom: 1rem; }
-.gd-dina-head .material-icons { font-size: 1.6rem; color: var(--accent); }
-.gd-dina-head h2 { margin: 0; font-size: 1.15rem; font-weight: 800; color: var(--text); }
-.gd-dina-head p  { margin: 0; font-size: .8rem; color: var(--text-muted); }
-.gd-dina-text {
-    background: var(--bg-card); border: 1px solid var(--border); border-radius: 12px;
-    padding: 1rem 1.2rem; font-size: .92rem; color: var(--text);
-    line-height: 1.75; white-space: pre-wrap;
-}
+
 .gd-empty-state--compact { padding: 2rem 1rem; }
-.gd-dina-edit-wrap { margin-top: 1rem; }
-#gd-dina-editor { margin-top: 1rem; }
-#gd-dina-textarea {
-    width: 100%; min-height: 200px; resize: vertical;
-    background: var(--btn-bg); border: 1.5px solid var(--border);
-    border-radius: 12px; padding: .8rem 1rem;
-    font-size: .9rem; color: var(--text); line-height: 1.7;
-    font-family: inherit; outline: none; transition: border-color .2s;
-}
-#gd-dina-textarea:focus { border-color: var(--accent); }
-#gd-dina-feedback { font-size: .82rem; font-weight: 600; flex: 1; min-height: 1.2em; }
-.gd-dina-info {
-    background: var(--bg-card); border: 1px solid var(--border); border-radius: 14px;
-    padding: 1rem 1.2rem; font-size: .84rem; color: var(--text-muted); line-height: 1.65;
-}
-.gd-dina-info p { margin: 0; display: flex; align-items: flex-start; gap: .5rem; }
-.gd-dina-info .material-icons { font-size: 1rem; color: var(--accent); flex-shrink: 0; margin-top: .1rem; }
-.gd-dina-info strong { color: var(--text); }
 
 /* Onglet Membres */
 .gd-members-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 1rem; flex-wrap: wrap; gap: .5rem; }
@@ -445,7 +412,7 @@
     /* 5 onglets : icônes seules sur petit écran, le libellé reste lu par les lecteurs d'écran */
     .gd-tabs .gd-tab-label { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); }
 }
-.gd-tab-pane[hidden], #gd-dina-editor[hidden], #gd-dina-edit-btn[hidden] { display: none !important; }
+.gd-tab-pane[hidden] { display: none !important; }
 .gd-media-item { border: 0; padding: 0; background: var(--btn-bg); font: inherit; cursor: zoom-in; }
 .gd-preview-item video { width: 100%; height: 100%; object-fit: cover; }
 .gd-preview-del { position: absolute; top: 2px; right: 2px; width: 28px; height: 28px; }
@@ -453,6 +420,4 @@
 .gd-member-card-actions { display: flex; align-items: center; gap: .15rem; }
 .gd-see-all { margin-left: auto; }
 .gd-wrapper .vz-pager { margin: 1rem 0; }
-#gd-dina-feedback.is-ok { color: var(--success); }
-#gd-dina-feedback.is-error { color: var(--danger); }
 .gd-wrapper > .vz-back { margin-bottom: .75rem; }

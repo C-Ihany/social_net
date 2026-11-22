@@ -102,10 +102,12 @@ def _user_cart(user):
 
 def _cart_summary(cart):
     if cart is None:
-        return {'restaurant': None, 'count': 0, 'subtotal': 0, 'total': 0, 'lines': []}
+        return {'restaurant': None, 'count': 0, 'subtotal': 0, 'total': 0, 'lines': [], 'currency': '', 'symbol': ''}
     lines = list(cart.lines.select_related('item').prefetch_related('options'))
     return {
         'restaurant': {'name': cart.restaurant.name, 'slug': cart.restaurant.slug},
+        # Tout le panier est dans la devise de son restaurant
+        'currency': cart.restaurant.currency, 'symbol': cart.restaurant.currency_symbol,
         'count': sum(l.quantity for l in lines),
         'subtotal': int(sum(l.line_total for l in lines)),
         'delivery_fee': int(cart.delivery_fee),
@@ -210,6 +212,12 @@ def resto_index(request):
         qs = qs.filter(category=cat)
     if region:
         qs = qs.filter(region=region)
+    # « Près de moi » : le pays où l'on vit ; pour la diaspora, le pays d'origine
+    from regions import nearby_label, nearby_q
+    near_q = nearby_q(request.user, 'region', 'owner') if request.user.is_authenticated else None
+    near = bool(request.GET.get('near')) and near_q is not None
+    if near:
+        qs = qs.filter(near_q)
 
     if sort == 'popular':
         qs = qs.order_by('-views_count', '-created_at')
@@ -227,10 +235,6 @@ def resto_index(request):
     paginator = Paginator(qs, PAGE_SIZE)
     page_obj = paginator.get_page(request.GET.get('page'))
 
-    user_region = ''
-    if request.user.is_authenticated:
-        user_region = getattr(request.user, 'region', '') or ''
-
     cart = _user_cart(request.user) if request.user.is_authenticated else None
 
     return render(request, 'resto/index.html', {
@@ -238,7 +242,7 @@ def resto_index(request):
         'q': q, 'sel_cat': cat, 'sel_region': region, 'sort': sort,
         'categories': Restaurant.CATEGORY_CHOICES,
         'regions': [r for r in REGION_CHOICES if r[0]], 'sel_region_label': REGION_LABELS.get(region, ''),
-        'user_region': user_region,
+        'near': near, 'near_label': nearby_label(request.user) if near_q is not None else '',
         'cart_summary': _cart_summary(cart),
         'my_restaurants': request.user.restaurants.exists() if request.user.is_authenticated else False,
     })
@@ -440,7 +444,7 @@ def checkout(request):
 
     summary = _cart_summary(cart)
     if restaurant.min_order and summary['subtotal'] < restaurant.min_order:
-        messages.error(request, _('Commande minimum : %(m)s Ar.') % {'m': int(restaurant.min_order)})
+        messages.error(request, _('Commande minimum : %(m)s.') % {'m': restaurant.formatted_min_order})
         return redirect('resto:cart')
 
     initial = {
@@ -459,6 +463,7 @@ def checkout(request):
                 order = form.save(commit=False)
                 order.customer = request.user
                 order.restaurant = restaurant
+                order.currency = restaurant.currency
                 order.pickup_address = restaurant.address
                 order.pickup_latitude, order.pickup_longitude = restaurant.latitude, restaurant.longitude
                 order.subtotal = summary['subtotal']
@@ -690,6 +695,9 @@ def restaurant_create(request):
         if form.is_valid():
             r = form.save(commit=False)
             r.owner = request.user
+            if not request.POST.get('currency'):
+                from regions import currency_for_user
+                r.currency = currency_for_user(request.user)
             if not r.region:
                 r.region = getattr(request.user, 'region', '') or ''
             for f in ('logo', 'banner'):
@@ -699,7 +707,9 @@ def restaurant_create(request):
             messages.success(request, _('Restaurant créé. Ajoutez votre menu, puis Vazimba validera votre page.'))
             return redirect('resto:menu_manage', slug=r.slug)
     else:
+        from regions import currency_for_user
         form = RestaurantForm(initial={'region': getattr(request.user, 'region', '') or '',
+                                       'currency': currency_for_user(request.user),
                                        'phone': getattr(request.user, 'phone_number', '') or ''})
     return render(request, 'resto/vendor/restaurant_form.html', {'form': form, 'restaurant': None})
 

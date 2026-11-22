@@ -5,11 +5,14 @@
 /* Outils communs aux pages Resto : montants, dialogues, rafraîchissement partiel. */
 (function(){
   if (window.rsMoney) return;
-  // Même rendu que le filtre vz_ariary côté serveur : « 12 500 Ar »
-  // (espace fine insécable entre les milliers, espace insécable avant l'unité).
+  // Même rendu que le filtre vz_money côté serveur : « 12 500 FCFA » (espace fine insécable
+  // entre les milliers, espace insécable avant le symbole). Le symbole est celui du restaurant
+  // de la page, posé par le gabarit : <span id="rs-currency" data-symbol="…" hidden>.
   window.rsMoney = function(n){
     var v = Math.round(Number(n) || 0);
-    return String(v).replace(/\B(?=(\d{3})+(?!\d))/g, ' ') + ' Ar';
+    var holder = document.getElementById('rs-currency');
+    var symbol = holder ? (holder.getAttribute('data-symbol') || '') : '';
+    return String(v).replace(/\B(?=(\d{3})+(?!\d))/g, ' ') + (symbol ? '\u00a0' + symbol : '');
   };
 
   // Dialogues .vz-overlay/.vz-dialog présents dans la page (attribut hidden quand fermés).

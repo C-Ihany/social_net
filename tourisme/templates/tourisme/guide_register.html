@@ -160,12 +160,20 @@
                 <span class="material-icons" aria-hidden="true">receipt_long</span>
                 {% trans "Conditions &amp; Tarifs" %}
             </h2>
-            <div class="vz-field">
-                <label for="id_prix">{% trans "Prix indicatif / jour (Ariary)" %}</label>
-                <input type="number" name="prix_jour" id="id_prix" inputmode="numeric"
-                       min="0" max="9999999999" placeholder="100000"
-                       value="{{ guide.prix_jour|default:''|floatformat:0 }}">
-                <span class="vz-field-help">{% trans "Tarif journalier approximatif. Laissez vide si variable." %}</span>
+            <div class="form-row">
+                <div class="vz-field">
+                    <label for="id_prix">{% trans "Prix indicatif / jour" %}</label>
+                    <input type="number" name="prix_jour" id="id_prix" inputmode="numeric"
+                           min="0" max="9999999999"
+                           value="{{ guide.prix_jour|default:''|floatformat:0 }}">
+                    <span class="vz-field-help">{% trans "Tarif journalier approximatif. Laissez vide si variable." %}</span>
+                </div>
+                <div class="vz-field">
+                    <label for="id_currency">{% trans "Devise" %}</label>
+                    <select name="currency" id="id_currency">
+                        {% for code, label in currencies %}<option value="{{ code }}"{% if code == sel_currency %} selected{% endif %}>{{ label }}</option>{% endfor %}
+                    </select>
+                </div>
             </div>
             <div class="vz-field">
                 <label for="id_conditions">{% trans "Conditions détaillées" %}</label>
