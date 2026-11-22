@@ -13,10 +13,12 @@
             data-reposted="{% if post.user_reposted %}1{% else %}0{% endif %}"
             data-edit-url="{% url 'post:edit-post' post.pk %}"
             data-delete-url="{% url 'post:delete-post' post.pk %}"
+            data-delete-now-url="{% url 'post:delete-post-now' post.pk %}"
+            {% if in_group and is_mod and post.group %}data-pin-url="{% url 'group:pin-post' post.group.slug post.id %}" data-pin-label="{% if post.is_pinned %}{% trans 'Désépingler' %}{% else %}{% trans 'Épingler' %}{% endif %}"{% endif %}
             data-author-id="{{ post.author.id }}"
             data-author-name="{{ post.author.username }}"
             data-block-url="{% url 'account:block' post.author.id %}"
             onclick="vzPostMenu(this)">
-        <span class="material-icons">more_horiz</span>
+        <span class="material-icons" aria-hidden="true">more_horiz</span>
     </button>
 </div>

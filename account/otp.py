@@ -24,6 +24,7 @@ from datetime import timedelta
 from django.conf import settings
 from django.core.mail import send_mail
 from django.utils import timezone
+from django.utils.translation import gettext as _
 
 from account.models import Account, PhoneVerification
 from account.sms import normalize_phone, otp_channels, region_of, send_otp, sms_allowed
@@ -71,12 +72,12 @@ def channel_refused(phone, channel):
     if channel != 'sms':
         return None
     if not sms_allowed(phone):
-        return "Le SMS n'est pas proposé vers ce pays : choisissez un autre moyen de recevoir le code."
+        return _("Le SMS n'est pas proposé vers ce pays : choisissez un autre moyen de recevoir le code.")
     since = timezone.now() - timedelta(days=1)
     if PhoneVerification.objects.filter(channel='sms', created_at__gte=since).count() \
             >= getattr(settings, 'SMS_MAX_PER_DAY', 500):
         logger.warning('[OTP] Plafond quotidien de SMS atteint')
-        return "Les SMS sont momentanément indisponibles : choisissez un autre moyen de recevoir le code."
+        return _("Les SMS sont momentanément indisponibles : choisissez un autre moyen de recevoir le code.")
     return None
 
 
@@ -117,7 +118,7 @@ def issue_code(user, phone, purpose, channel):
     except Exception as exc:  # noqa: BLE001 - le fournisseur a refusé ou ne répond pas
         logger.error('[OTP] Envoi par %s échoué vers %s : %s', channel, phone, exc)
         otp.delete()          # (ne pas garder un code qui n'est pas parti)
-        return "L'envoi du code a échoué. Vérifiez le numéro et réessayez."
+        return _("L'envoi du code a échoué. Vérifiez le numéro et réessayez.")
     return None
 
 
@@ -141,23 +142,23 @@ def check_code(phone, purpose, code, user=None):
     Un essai raté est compté ; au 5e, le code est perdu."""
     code = (code or '').strip()
     if not code.isdigit() or len(code) != 6:
-        return None, 'Le code doit comporter 6 chiffres.'
+        return None, _('Le code doit comporter 6 chiffres.')
     pending = PhoneVerification.objects.filter(phone=phone, purpose=purpose, verified=False,
                                                attempts__lt=PhoneVerification.MAX_ATTEMPTS)
     if user is not None:
         pending = pending.filter(user=user)
     otp = pending.order_by('-created_at').first()
     if otp is None:
-        return None, 'Aucun code en cours pour ce numéro. Demandez-en un nouveau.'
+        return None, _('Aucun code en cours pour ce numéro. Demandez-en un nouveau.')
     if otp.is_expired:
-        return None, 'Code expiré. Demandez un nouveau code.'
+        return None, _('Code expiré. Demandez un nouveau code.')
     otp.attempts += 1
     otp.save(update_fields=['attempts'])
     if not otp.matches(code):
         left = PhoneVerification.MAX_ATTEMPTS - otp.attempts
         if left <= 0:
-            return None, 'Trop de tentatives incorrectes. Demandez un nouveau code.'
-        return None, f'Code incorrect. {left} tentative(s) restante(s).'
+            return None, _('Trop de tentatives incorrectes. Demandez un nouveau code.')
+        return None, _('Code incorrect. %(left)s tentative(s) restante(s).') % {'left': left}
     otp.verified = True
     otp.save(update_fields=['verified'])
     return otp, None

@@ -1,40 +1,32 @@
 {% extends 'base.html' %}
 {% load static i18n %}
 
+{% block page_title %}{% trans "Proposer un lieu" %} — {% trans "Tourisme" %} Vazimba{% endblock %}
+
 {% block extra_head %}
 <link rel="stylesheet" href="{% static 'css/pages/tourisme-lieu_submit.css' %}">
 {% endblock %}
 
 {% block content %}
-<main>
 <div class="lieu-submit-wrap">
 
-    <!-- Breadcrumb -->
-    <nav class="tour-breadcrumb">
-        <a href="{% url 'tourisme:home' %}">{% trans "Tourisme" %}</a>
-        <span class="material-icons">chevron_right</span>
-        <a href="{% url 'tourisme:lieux_list' %}">{% trans "Lieux" %}</a>
-        <span class="material-icons">chevron_right</span>
-        <span>{% trans "Proposer un lieu" %}</span>
-    </nav>
+    <div class="vz-page-head">
+        <a class="vz-back" href="{% url 'tourisme:lieux_list' %}"><span class="material-icons" aria-hidden="true">arrow_back</span>{% trans "Lieux" %}</a>
+        <div class="vz-page-head__main">
+            <h1 class="vz-page-title"><span class="material-icons" aria-hidden="true">add_location_alt</span>{% trans "Proposer un lieu touristique" %}</h1>
+            <p class="vz-page-sub">{% trans "Partagez un lieu que vous connaissez et aidez les voyageurs à découvrir l'Afrique." %}</p>
+        </div>
+    </div>
 
-    <div class="ls-card">
-        <h1 class="ls-title">
-            <span class="material-icons">add_location_alt</span>
-            {% trans "Proposer un lieu touristique" %}
-        </h1>
-        <p class="ls-subtitle">
-            {% trans "Partagez un lieu que vous connaissez et aidez les voyageurs à découvrir Madagascar." %}
-        </p>
-
+    <div class="vz-card vz-card--block ls-card">
         <div class="ls-info-banner">
-            <span class="material-icons">info</span>
-            {% trans "Votre soumission sera vérifiée par un administrateur avant d'être publiée. Vous recevrez une notification dès qu'elle sera approuvée." %}
+            <span class="material-icons" aria-hidden="true">info</span>
+            {% trans "Votre proposition sera vérifiée par un administrateur avant d'être publiée. Vous recevrez une notification dès qu'elle sera approuvée." %}
         </div>
 
         {% if error %}
-        <div class="ls-error">
-            <span class="material-icons">error_outline</span>
+        <div class="ls-error" role="alert">
+            <span class="material-icons" aria-hidden="true">error_outline</span>
             {{ error }}
         </div>
         {% endif %}
@@ -42,131 +34,23 @@
         <form method="post" enctype="multipart/form-data">
             {% csrf_token %}
 
-            <!-- Infos principales -->
-            <div class="ls-section-label">
-                <span class="material-icons">info</span>
-                {% trans "Informations principales" %}
-            </div>
+            {% include 'tourisme/_lieu_fields.html' %}
 
-            <div class="ls-field">
-                <label class="ls-label" for="id_name">{% trans "Nom du lieu" %} <span class="req">*</span></label>
-                <input class="ls-input" type="text" id="id_name" name="name"
-                       placeholder="{% trans 'Ex: Tsingy de Bemaraha, Nosy Be, Isalo…' %}"
-                       required maxlength="200">
-            </div>
-
-            <div class="ls-row">
-                <div class="ls-field">
-                    <label class="ls-label" for="id_category">{% trans "Catégorie" %} <span class="req">*</span></label>
-                    <select class="ls-select" id="id_category" name="category">
-                        {% for val, label in categories %}
-                        <option value="{{ val }}">{{ label }}</option>
-                        {% endfor %}
-                    </select>
-                </div>
-                <div class="ls-field">
-                    <label class="ls-label" for="id_region">{% trans "Région" %}</label>
-                    <select class="ls-select" id="id_region" name="region">
-                        <option value="">{% trans "— Choisir —" %}</option>
-                        {% for val, label in regions %}
-                        <option value="{{ val }}">{{ label }}</option>
-                        {% endfor %}
-                    </select>
-                </div>
-            </div>
-
-            <div class="ls-field">
-                <label class="ls-label" for="id_description">{% trans "Description" %} <span class="req">*</span></label>
-                <textarea class="ls-textarea ls-textarea--tall" id="id_description" name="description"
-                          placeholder="{% trans 'Décrivez ce lieu : paysage, histoire, ce qui le rend unique…' %}"
-                          required></textarea>
-            </div>
-
-            <!-- Infos pratiques -->
-            <div class="ls-section-label">
-                <span class="material-icons">directions</span>
-                {% trans "Informations pratiques" %}
-            </div>
-
-            <div class="ls-field">
-                <label class="ls-label" for="id_address">{% trans "Adresse / Coordonnées GPS" %}</label>
-                <input class="ls-input" type="text" id="id_address" name="address"
-                       placeholder="{% trans 'Ex: -18.9249, 44.8237 ou nom du village' %}">
-            </div>
-
-            <div class="ls-row">
-                <div class="ls-field">
-                    <label class="ls-label" for="id_best_period">{% trans "Meilleure période" %}</label>
-                    <input class="ls-input" type="text" id="id_best_period" name="best_period"
-                           placeholder="{% trans 'Ex: Avril à Novembre' %}">
-                </div>
-                <div class="ls-field">
-                    <label class="ls-label" for="id_entry_fee">{% trans "Tarif d'entrée" %}</label>
-                    <input class="ls-input" type="text" id="id_entry_fee" name="entry_fee"
-                           placeholder="{% trans 'Ex: Gratuit, 5 000 Ar…' %}">
-                </div>
-            </div>
-
-            <div class="ls-field">
-                <label class="ls-label" for="id_tips">{% trans "Conseils pratiques" %}</label>
-                <textarea class="ls-textarea ls-textarea--short" id="id_tips" name="tips"
-                          placeholder="{% trans 'Conseils pour les visiteurs : transport, hébergement, précautions…' %}"
-></textarea>
-            </div>
-
-            <!-- Photos -->
-            <div class="ls-section-label">
-                <span class="material-icons">photo_library</span>
+            <h2 class="ls-section-label">
+                <span class="material-icons" aria-hidden="true">photo_library</span>
                 {% trans "Photos (jusqu'à 8)" %}
-            </div>
+            </h2>
+            {% include 'tourisme/_lieu_photos.html' with room=8 show_primary=1 %}
 
-            <div class="ls-upload-zone" id="uploadZone">
-                <input type="file" name="images" id="imgInput"
-                       accept="image/*" multiple
-                       onchange="previewImages(this)">
-                <div class="ls-upload-icon">
-                    <span class="material-icons" aria-hidden="true">add_photo_alternate</span>
-                </div>
-                <div class="ls-upload-label">{% trans "Cliquez ou glissez vos photos ici" %}</div>
-                <div class="ls-upload-hint">{% trans "JPG, PNG, WEBP — max 8 photos. La première sera la photo principale." %}</div>
+            <div class="vz-actions">
+                <a href="{% url 'tourisme:lieux_list' %}" class="vz-btn vz-btn--muted">{% trans "Annuler" %}</a>
+                <button type="submit" class="vz-btn vz-btn--primary">
+                    <span class="material-icons" aria-hidden="true">send</span>
+                    {% trans "Envoyer la proposition" %}
+                </button>
             </div>
-            <div class="ls-preview-grid" id="previewGrid"></div>
-
-            <button type="submit" class="ls-submit-btn">
-                <span class="material-icons">send</span>
-                {% trans "Proposer ce lieu" %}
-            </button>
         </form>
     </div>
 
 </div>
-</main>
-
-<script>
-function previewImages(input) {
-    var grid = document.getElementById('previewGrid');
-    grid.innerHTML = '';
-    var files = Array.from(input.files).slice(0, 8);
-    files.forEach(function(file, i) {
-        var reader = new FileReader();
-        reader.onload = function(e) {
-            var div = document.createElement('div');
-            div.className = 'ls-preview-thumb';
-            div.innerHTML = '<img src="' + e.target.result + '" alt="">'
-                + (i === 0 ? '<span class="ls-preview-primary-badge">Principal</span>' : '');
-            grid.appendChild(div);
-        };
-        reader.readAsDataURL(file);
-    });
-}
-
-// Drag & drop feedback
-var zone = document.getElementById('uploadZone');
-zone.addEventListener('dragover', function(e) { e.preventDefault(); zone.classList.add('drag-over'); });
-zone.addEventListener('dragleave', function() { zone.classList.remove('drag-over'); });
-zone.addEventListener('drop', function(e) {
-    e.preventDefault(); zone.classList.remove('drag-over');
-    // Handled by input change event
-});
-</script>
 {% endblock %}

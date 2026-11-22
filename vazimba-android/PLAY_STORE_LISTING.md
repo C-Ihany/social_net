@@ -2,7 +2,7 @@
 
 ## Titre de l'application (max 30 caractères)
 ```
-Vazimba — Réseau Malgache
+Vazimba — Réseau africain
 ```
 *(25 caractères)*
 
@@ -10,7 +10,7 @@ Vazimba — Réseau Malgache
 
 ## Description courte (max 80 caractères)
 ```
-Le réseau social malgache : posts, stories, chat, appels vidéo et bazar.
+Le réseau social africain : posts, stories, chat, appels vidéo et bazar.
 ```
 *(73 caractères)*
 
@@ -19,9 +19,9 @@ Le réseau social malgache : posts, stories, chat, appels vidéo et bazar.
 ## Description complète (max 4000 caractères)
 
 ```
-🇲🇬 Vazimba, le réseau social fait par et pour les Malgaches.
+🌍 Vazimba, le réseau social fait par et pour les Africains.
 
-Restez connecté avec vos amis et votre famille, partagez vos moments, achetez et vendez localement — tout en malgache, français ou anglais.
+Restez connecté avec vos amis et votre famille, partagez vos moments, achetez et vendez localement — en trois langues.
 
 ═══════════════════════════════
 📰 FIL D'ACTUALITÉ
@@ -66,11 +66,11 @@ Vos données restent sur nos serveurs sécurisés. Nous ne vendons jamais vos in
 ═══════════════════════════════
 🌐 MULTILINGUE
 ═══════════════════════════════
-Interface disponible en français, malgache et anglais.
+Interface disponible en trois langues.
 
 ---
 
-Vazimba est un projet indépendant, développé à Madagascar, pour Madagascar.
+Vazimba est un projet indépendant, né en Afrique, pour l'Afrique.
 
 Rejoignez la communauté Vazimba dès aujourd'hui !
 ```
@@ -115,7 +115,7 @@ Rejoignez la communauté Vazimba dès aujourd'hui !
 ### Feature Graphic (obligatoire) :
 - Taille exacte : **1 024 × 500 px**
 - Format : JPEG ou PNG 24 bits (pas d'alpha)
-- Suggestion : fond `#1a1a2e` avec logo Vazimba centré + slogan "Le réseau social malgache"
+- Suggestion : fond `#1a1a2e` avec logo Vazimba centré + slogan "Le réseau social africain"
 
 ---
 

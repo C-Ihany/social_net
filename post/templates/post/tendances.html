@@ -9,16 +9,16 @@
 
     <!-- Hero -->
     <div class="td-hero">
-        <h1 class="td-hero-title"><i class="material-icons">local_fire_department</i>{% trans "Tendances Malgaches" %}</h1>
+        <h1 class="td-hero-title"><i class="material-icons">local_fire_department</i>{% trans "Tendances en Afrique" %}</h1>
         <p class="td-hero-sub">{% blocktrans with hours_label=hours_label %}Les hashtags les plus utilisés sur Vazimba — {{ hours_label }}{% endblocktrans %}</p>
     </div>
 
     <!-- Filtres temps -->
-    <div class="td-filters">
+    <nav class="vz-segmented td-filters" aria-label="{% trans 'Période' %}">
         {% for h, label in valid_hours.items %}
-        <a href="?h={{ h }}" class="vz-chip {% if h == hours %}active{% endif %}">{{ label }}</a>
+        <a href="?h={{ h }}" class="vz-seg{% if h == hours %} active{% endif %}"{% if h == hours %} aria-current="page"{% endif %}>{{ label }}</a>
         {% endfor %}
-    </div>
+    </nav>
 
     <!-- Liste des hashtags -->
     {% if hashtags %}
@@ -36,9 +36,9 @@
         <!-- Contenu -->
         <div class="vz-card__body">
             <div class="td-tag-row">
-                <h3 class="vz-card__title vz-card__title--1 td-tag">{{ ht.tag }}</h3>
+                <h2 class="vz-card__title vz-card__title--1 td-tag">{{ ht.tag }}</h2>
                 <span class="vz-chip vz-chip--sm vz-chip--accent td-count">
-                    <i class="material-icons">post_add</i>{{ ht.count }} {% trans "post" %}{{ ht.count|pluralize }}
+                    <i class="material-icons" aria-hidden="true">post_add</i>{% blocktrans count n=ht.count %}{{ n }} post{% plural %}{{ n }} posts{% endblocktrans %}
                 </span>
             </div>
 
@@ -69,12 +69,13 @@
 
     {% else %}
 
-    <div class="td-empty">
-        <i class="material-icons td-empty-icon">inbox</i>
-        <h3>{% blocktrans with hours_label=hours_label %}Aucune tendance sur les {{ hours_label }}{% endblocktrans %}</h3>
-        <p>{% trans "Publiez des posts avec des hashtags pour alimenter les tendances !" %}<br>
-        {% trans "Essayez sur une période plus longue →" %}
-        <a href="?h=168">7 jours</a></p>
+    <div class="vz-empty">
+        <i class="material-icons" aria-hidden="true">inbox</i>
+        <p class="vz-empty-title">{% blocktrans with hours_label=hours_label %}Aucune tendance sur {{ hours_label }}{% endblocktrans %}</p>
+        <p class="vz-empty-text">{% trans "Publiez des posts avec des hashtags pour alimenter les tendances." %}</p>
+        {% if hours != 720 %}
+        <a class="vz-btn vz-btn--secondary vz-btn--sm" href="?h=720">{% trans "Voir sur 30 jours" %}</a>
+        {% endif %}
     </div>
 
     {% endif %}

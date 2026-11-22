@@ -1,35 +1,36 @@
 {% extends 'base.html' %}
 {% load static i18n %}
 
+{% block page_title %}{{ guide.display_name }} — {% trans "Guide touristique" %} · Vazimba{% endblock %}
+
 {% block extra_head %}
 <link rel="stylesheet" href="{% static 'css/pages/tourisme-guide_profile.css' %}">
 {% endblock %}
 
 {% block content %}
-<main>
 <div class="guide-profile-wrap">
 
     <!-- Breadcrumb -->
     <nav class="tour-breadcrumb">
         <a href="{% url 'tourisme:home' %}">{% trans "Tourisme" %}</a>
-        <span class="material-icons">chevron_right</span>
+        <span class="material-icons" aria-hidden="true">chevron_right</span>
         <a href="{% url 'tourisme:guides_list' %}">{% trans "Guides" %}</a>
-        <span class="material-icons">chevron_right</span>
+        <span class="material-icons" aria-hidden="true">chevron_right</span>
         <span>{{ guide.display_name }}</span>
     </nav>
 
     <!-- ── Header ── -->
-    <div class="guide-profile-header">
+    <div class="vz-card vz-card--block guide-profile-header">
         <div class="guide-profile-avatar" id="guide-avatar-wrap">
             {% if guide.photo %}
                 <img src="{{ guide.photo.url }}" alt="{{ guide.display_name }}"
-                     onerror="this.remove(); document.getElementById('guide-avatar-fallback').style.display='flex';">
+                     onerror="this.remove(); document.getElementById('guide-avatar-fallback').removeAttribute('hidden');">
             {% elif guide.user.profile_image %}
                 <img src="{{ guide.user.profile_image.url }}" alt="{{ guide.display_name }}"
-                     onerror="this.remove(); document.getElementById('guide-avatar-fallback').style.display='flex';">
+                     onerror="this.remove(); document.getElementById('guide-avatar-fallback').removeAttribute('hidden');">
             {% endif %}
             {# Fallback lettre initiale — visible si aucune photo ou photo cassée #}
-            <span id="guide-avatar-fallback" class="guide-avatar-fallback"{% if guide.photo or guide.user.profile_image %} style="display:none"{% endif %}>
+            <span id="guide-avatar-fallback" class="guide-avatar-fallback"{% if guide.photo or guide.user.profile_image %} hidden{% endif %}>
                 {{ guide.display_name|first|upper }}
             </span>
         </div>
@@ -37,14 +38,14 @@
             <h1 class="guide-profile-name">
                 {{ guide.display_name }}
                 {% if guide.is_verified %}
-                <span class="badge-verifie">
-                    <span class="material-icons">verified</span>
+                <span class="vz-chip vz-chip--sm vz-chip--static vz-chip--success">
+                    <span class="material-icons" aria-hidden="true">verified</span>
                     {% trans "Guide vérifié" %}
                 </span>
                 {% endif %}
                 {% if not guide.is_active %}
-                <span class="badge-unavailable">
-                    <span class="material-icons">pause_circle</span>
+                <span class="vz-chip vz-chip--sm vz-chip--static vz-chip--warning">
+                    <span class="material-icons" aria-hidden="true">pause_circle</span>
                     {% trans "Indisponible" %}
                 </span>
                 {% endif %}
@@ -54,13 +55,13 @@
                 {% if guide.years_experience %}
                 <div class="gp-stat">
                     <div class="gp-stat-num">{{ guide.years_experience }}</div>
-                    <div class="gp-stat-label">An{{ guide.years_experience|pluralize }} d'expérience</div>
+                    <div class="gp-stat-label">{% blocktrans count n=guide.years_experience %}An d'expérience{% plural %}Ans d'expérience{% endblocktrans %}</div>
                 </div>
                 {% endif %}
                 {% if guide.prix_jour %}
                 <div class="gp-stat">
-                    <div class="gp-stat-num">{{ guide.prix_jour|floatformat:0 }}</div>
-                    <div class="gp-stat-label">Ar / jour</div>
+                    <div class="gp-stat-num">{{ guide.prix_jour|vz_ariary }}</div>
+                    <div class="gp-stat-label">{% trans "Par jour" %}</div>
                 </div>
                 {% endif %}
                 {% if guide.max_group_size %}
@@ -69,34 +70,34 @@
                     <div class="gp-stat-label">{% trans "Pers. max." %}</div>
                 </div>
                 {% endif %}
-                {% with nb=guide.lieux_favoris.count %}
-                {% if nb %}
+                {% if lieux %}
                 <div class="gp-stat">
-                    <div class="gp-stat-num">{{ nb }}</div>
-                    <div class="gp-stat-label">Lieu{{ nb|pluralize }} couvert{{ nb|pluralize }}</div>
+                    <div class="gp-stat-num">{{ lieux|length }}</div>
+                    <div class="gp-stat-label">{% blocktrans count n=lieux|length %}Lieu couvert{% plural %}Lieux couverts{% endblocktrans %}</div>
                 </div>
                 {% endif %}
-                {% endwith %}
             </div>
 
-            <div class="guide-profile-actions">
-                {% if guide.phone %}
-                <a href="https://wa.me/{{ guide.phone|cut:' '|cut:'+'|cut:'-' }}"
-                   target="_blank" rel="noopener" class="btn-contact">
+            <div class="vz-btn-row guide-profile-actions">
+                {% if guide.whatsapp_number %}
+                <a href="https://wa.me/{{ guide.whatsapp_number }}"
+                   target="_blank" rel="noopener" class="vz-btn vz-btn--whatsapp">
                     <span class="material-icons" aria-hidden="true">chat</span>
                     {% trans "Contacter sur WhatsApp" %}
                 </a>
-                <a href="tel:{{ guide.phone }}" class="btn-edit">
+                {% endif %}
+                {% if guide.phone %}
+                <a href="tel:{{ guide.phone|cut:' ' }}" class="vz-btn {% if guide.whatsapp_number %}vz-btn--secondary{% else %}vz-btn--primary{% endif %}">
                     <span class="material-icons" aria-hidden="true">call</span>
                     {{ guide.phone }}
                 </a>
                 {% endif %}
                 {% if is_owner %}
-                <a href="{% url 'tourisme:guide_register' %}" class="btn-edit">
+                <a href="{% url 'tourisme:guide_register' %}" class="vz-btn vz-btn--secondary">
                     <span class="material-icons" aria-hidden="true">edit</span>
                     {% trans "Modifier mon profil" %}
                 </a>
-                <a href="{% url 'tourisme:lieu_submit' %}" class="vz-btn vz-btn--primary vz-btn--pill">
+                <a href="{% url 'tourisme:lieu_submit' %}" class="vz-btn vz-btn--ghost">
                     <span class="material-icons" aria-hidden="true">add_location_alt</span>
                     {% trans "Proposer un lieu" %}
                 </a>
@@ -107,26 +108,26 @@
 
     <!-- ── Bio ── -->
     {% if guide.bio %}
-    <div class="gp-section">
-        <div class="gp-section-title">
-            <span class="material-icons">person</span>
+    <section class="vz-card vz-card--block gp-section">
+        <h2 class="gp-section-title">
+            <span class="material-icons" aria-hidden="true">person</span>
             {% trans "Présentation" %}
-        </div>
+        </h2>
         <div class="gp-bio">{{ guide.bio|linebreaksbr }}</div>
-    </div>
+    </section>
     {% endif %}
 
     <!-- ── Informations ── -->
-    <div class="gp-section">
-        <div class="gp-section-title">
-            <span class="material-icons">info</span>
+    <section class="vz-card vz-card--block gp-section">
+        <h2 class="gp-section-title">
+            <span class="material-icons" aria-hidden="true">info</span>
             {% trans "Informations pratiques" %}
-        </div>
+        </h2>
         <div class="gp-info-grid">
             {% if guide.languages %}
             <div class="gp-info-row">
                 <div class="gp-info-label">
-                    <span class="material-icons">translate</span>
+                    <span class="material-icons" aria-hidden="true">translate</span>
                     {% trans "Langues parlées" %}
                 </div>
                 <div class="gp-tags">
@@ -139,13 +140,13 @@
             {% if guide.transport_modes %}
             <div class="gp-info-row">
                 <div class="gp-info-label">
-                    <span class="material-icons">directions_car</span>
+                    <span class="material-icons" aria-hidden="true">directions_car</span>
                     {% trans "Transports" %}
                 </div>
                 <div class="gp-tags">
                     {% for t in guide.transport_list %}
                     <span class="gp-tag">
-                        <span class="material-icons">check_circle</span>
+                        <span class="material-icons" aria-hidden="true">check_circle</span>
                         {{ t }}
                     </span>
                     {% endfor %}
@@ -155,7 +156,7 @@
             {% if guide.specialities %}
             <div class="gp-info-row">
                 <div class="gp-info-label">
-                    <span class="material-icons">star</span>
+                    <span class="material-icons" aria-hidden="true">star</span>
                     {% trans "Spécialités" %}
                 </div>
                 <div class="gp-info-value">{{ guide.specialities }}</div>
@@ -164,43 +165,42 @@
             {% if guide.max_group_size %}
             <div class="gp-info-row">
                 <div class="gp-info-label">
-                    <span class="material-icons">group</span>
+                    <span class="material-icons" aria-hidden="true">group</span>
                     {% trans "Taille du groupe" %}
                 </div>
-                <div class="gp-info-value">Jusqu'à {{ guide.max_group_size }} personnes</div>
+                <div class="gp-info-value">{% blocktrans count n=guide.max_group_size %}Jusqu'à {{ n }} personne{% plural %}Jusqu'à {{ n }} personnes{% endblocktrans %}</div>
             </div>
             {% endif %}
             {% if guide.regions_covered %}
             <div class="gp-info-row gp-info-row--full">
                 <div class="gp-info-label">
-                    <span class="material-icons">map</span>
+                    <span class="material-icons" aria-hidden="true">map</span>
                     {% trans "Régions couvertes" %}
                 </div>
                 <div class="gp-info-value">{{ guide.regions_covered }}</div>
             </div>
             {% endif %}
         </div>
-    </div>
+    </section>
 
     <!-- ── Conditions & Tarifs ── -->
     {% if guide.conditions %}
-    <div class="gp-section">
-        <div class="gp-section-title">
-            <span class="material-icons">receipt_long</span>
+    <section class="vz-card vz-card--block gp-section">
+        <h2 class="gp-section-title">
+            <span class="material-icons" aria-hidden="true">receipt_long</span>
             {% trans "Conditions &amp; Tarifs" %}
-        </div>
+        </h2>
         <div class="gp-conditions">{{ guide.conditions|linebreaksbr }}</div>
-    </div>
+    </section>
     {% endif %}
 
     <!-- ── Lieux couverts ── -->
-    {% with lieux=guide.lieux_favoris.all %}
     {% if lieux %}
-    <div class="gp-section">
-        <div class="gp-section-title">
-            <span class="material-icons">place</span>
-            Lieux couverts ({{ lieux.count }})
-        </div>
+    <section class="vz-card vz-card--block gp-section">
+        <h2 class="gp-section-title">
+            <span class="material-icons" aria-hidden="true">place</span>
+            {% trans "Lieux couverts" %} ({{ lieux|length }})
+        </h2>
         <div class="vz-grid">
             {% for lieu in lieux %}
             <a href="{% url 'tourisme:lieu_detail' lieu.slug %}" class="vz-card vz-card--flat">
@@ -211,11 +211,11 @@
                         <img src="{{ img.image.url }}" alt="{{ lieu.name }}" loading="lazy"
                              onerror="this.remove(); this.parentElement.querySelector('.vz-card__media-ph').removeAttribute('hidden');">
                         <div class="vz-card__media-ph vz-card__media-ph--accent" hidden>
-                            <i class="material-icons">landscape</i>
+                            <i class="material-icons" aria-hidden="true">landscape</i>
                         </div>
                     {% else %}
                         <div class="vz-card__media-ph vz-card__media-ph--accent">
-                            <i class="material-icons">landscape</i>
+                            <i class="material-icons" aria-hidden="true">landscape</i>
                         </div>
                     {% endif %}
                     {% endwith %}
@@ -227,18 +227,16 @@
             </a>
             {% endfor %}
         </div>
-    </div>
+    </section>
     {% endif %}
-    {% endwith %}
 
     <!-- ── CTA contact si pas de téléphone ── -->
     {% if not guide.phone %}
-    <div class="gp-nophone">
-        <span class="material-icons" aria-hidden="true">phone_disabled</span>
-        <div class="gp-nophone-text">{% trans "Ce guide n'a pas renseigné de numéro de contact." %}</div>
+    <div class="vz-empty">
+        <i class="material-icons" aria-hidden="true">phone_disabled</i>
+        <p class="vz-empty-text">{% trans "Ce guide n'a pas renseigné de numéro de contact." %}</p>
     </div>
     {% endif %}
 
 </div>
-</main>
 {% endblock %}

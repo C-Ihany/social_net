@@ -6,7 +6,7 @@
    ============================================================ */
 .guides-hero {
     background: linear-gradient(120deg, var(--accent-dark) 0%, var(--accent2) 100%);
-    color: #fff;
+    color: var(--on-accent);
     padding: 2.5rem 1.5rem 2rem;
     text-align: center;
 }
@@ -14,6 +14,7 @@
     background:
         linear-gradient(120deg, rgba(var(--accent-rgb), .28) 0%, transparent 100%),
         var(--bg-card);
+    color: var(--text);
 }
 .guides-hero h1 { font-size: 1.8rem; font-weight: 800; letter-spacing: -.03em; margin: 0 0 .3rem; }
 .guides-hero p { font-size: .9rem; opacity: .8; margin: 0; }
@@ -36,7 +37,7 @@
     flex: 1; min-width: 180px;
     display: flex; align-items: center;
     background: var(--input-bg); border: 1.5px solid var(--border);
-    border-radius: 50px; padding: .45rem 1rem .45rem .8rem; gap: .4rem;
+    border-radius: var(--radius-pill); padding: 0 1rem 0 .8rem; min-height: 44px; gap: .4rem;
     transition: border-color .15s;
 }
 .guide-search-field:focus-within { border-color: var(--accent); }
@@ -49,7 +50,7 @@
 
 .guide-select {
     background: var(--input-bg); border: 1.5px solid var(--border);
-    border-radius: 50px; padding: .45rem 2rem .45rem 1rem;
+    border-radius: var(--radius-pill); padding: .45rem 2rem .45rem 1rem; min-height: 44px;
     font-size: .88rem; color: var(--text); outline: none; cursor: pointer;
     -webkit-appearance: none; appearance: none;
     background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24'%3E%3Cpath fill='%23888' d='M7 10l5 5 5-5z'/%3E%3C/svg%3E");
@@ -58,28 +59,12 @@
 }
 .guide-select:focus { border-color: var(--accent); }
 
-.verified-toggle {
-    display: inline-flex; align-items: center; gap: .4rem;
-    background: var(--bg-card); border: 1.5px solid var(--border);
-    border-radius: 50px; padding: .4rem 1rem;
-    font-size: .82rem; font-weight: 600; color: var(--text-muted);
-    cursor: pointer; text-decoration: none; white-space: nowrap;
-    transition: all .15s;
+/* Bascule « vérifiés » : .vz-chip ; l'état actif prend la teinte de réussite */
+.verified-toggle { min-height: 44px; padding: 0 1rem; }
+.verified-toggle.active {
+    border-color: rgba(var(--success-rgb), .4); color: var(--success);
+    background: rgba(var(--success-rgb), .12);
 }
-.verified-toggle:hover, .verified-toggle.active {
-    border-color: var(--success); color: var(--success);
-    background: rgba(var(--success-rgb), .12); text-decoration: none;
-}
-.verified-toggle .material-icons { font-size: 1rem; }
-
-.guides-filter-btn {
-    background: var(--accent); color: var(--on-accent); border: none;
-    border-radius: 50px; padding: .5rem 1.4rem;
-    font-size: .88rem; font-weight: 700; cursor: pointer;
-    transition: opacity .18s; flex-shrink: 0;
-}
-.guides-filter-btn:hover { opacity: .88; }
-.guides-filter-btn .material-icons { font-size: 1rem; vertical-align: middle; }
 .guides-container { max-width: 1100px; padding: 1.5rem 1rem 3rem; }
 
 /* ── Grille guides ── : cartes via le composant partagé .vz-card / .vz-grid (zoot-base.css).
@@ -99,44 +84,10 @@
 }
 .become-guide-banner .text-wrap { text-align: left; }
 .become-guide-icon { font-size: 2.5rem; color: var(--accent); flex-shrink: 0; }
-.become-guide-banner h3 {
+.become-guide-banner h2 {
     font-size: 1.05rem; font-weight: 800; color: var(--text); margin: 0 0 .3rem;
 }
 .become-guide-banner p { font-size: .85rem; color: var(--text-muted); margin: 0; }
-.btn-become {
-    display: inline-flex; align-items: center; gap: .4rem;
-    background: var(--accent); color: var(--on-accent); border-radius: var(--radius-pill);
-    padding: .65rem 1.6rem; font-weight: 700; font-size: .9rem; min-height: 44px;
-    text-decoration: none; white-space: nowrap; transition: opacity .18s;
-    flex-shrink: 0;
-}
-.btn-become:hover { opacity: .88; text-decoration: none; color: var(--on-accent); }
-.btn-become .material-icons { font-size: 1.1rem; }
-
-/* ── Pagination ── */
-.tour-pagination {
-    display: flex; justify-content: center; gap: .5rem; flex-wrap: wrap; margin-top: 2rem;
-}
-.tour-page-btn {
-    display: inline-flex; align-items: center; justify-content: center;
-    min-width: 36px; height: 36px; padding: 0 .7rem;
-    border: 1.5px solid var(--border); border-radius: var(--radius);
-    font-size: .88rem; font-weight: 700; color: var(--text-muted);
-    text-decoration: none; background: var(--bg-card); transition: all .15s;
-}
-.tour-page-btn:hover, .tour-page-btn.active {
-    border-color: var(--accent); color: var(--accent);
-    background: var(--accent-glow); text-decoration: none;
-}
-
-/* ── Empty ── */
-.guides-empty { text-align: center; padding: 4rem 1rem; color: var(--text-muted); }
-.guides-empty > .material-icons { font-size: 4rem; opacity: .25; display: block; margin-bottom: .8rem; }
-.guides-empty-title { font-size: 1.05rem; font-weight: 700; margin-bottom: .4rem; }
-.guides-empty-text  { font-size: .88rem; }
-.guides-link { color: var(--accent); }
-.tour-page-btn .material-icons { font-size: 1rem; }
-
 /* ── Autocomplétion (liste injectée par le script de la page) ── */
 .guides-ac {
     position: fixed; z-index: 9999;

@@ -106,29 +106,6 @@
     border-color: var(--danger);
     background: rgba(255,255,255,.12);
 }
-.live-btn-start {
-    display: inline-flex;
-    align-items: center;
-    gap: .5rem;
-    padding: .75rem 1.5rem;
-    background: linear-gradient(135deg, var(--danger), var(--danger));
-    color: #fff;
-    border: none;
-    border-radius: 14px;
-    font-size: 1rem;
-    font-weight: 700;
-    cursor: pointer;
-    white-space: nowrap;
-    box-shadow: 0 4px 20px rgba(var(--danger-rgb),.45);
-    transition: opacity .2s, transform .15s, box-shadow .2s;
-    font-family: inherit;
-}
-.live-btn-start:hover {
-    opacity: .88;
-    transform: translateY(-2px);
-    box-shadow: 0 8px 28px rgba(var(--danger-rgb),.55);
-}
-.live-btn-start .material-icons { font-size: 1.1rem; }
 
 /* ── Active lives section ── */
 .live-section-title {
@@ -174,10 +151,5 @@
 .live-card .vz-card__actions { margin-top: auto; padding-top: .5rem; }
 
 /* ── Empty state ── */
-.live-empty {
-    text-align: center;
-    padding: 3rem 1rem;
-    color: var(--text-muted);
-}
-.live-empty .material-icons { font-size: 3.5rem; opacity: .35; display: block; margin-bottom: .75rem; }
-.live-empty p { font-size: .95rem; margin: 0; }
+.live-btn-start { flex-shrink: 0; }
+.live-grid[hidden], .live-empty[hidden] { display: none; }

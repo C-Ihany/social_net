@@ -6,35 +6,33 @@
 {% include 'resto/_style.html' %}
 <link rel="stylesheet" href="{% static 'css/pages/resto-menu.css' %}">
 <div class="rs-wrap rs-wrap--xl">
-    <div class="rs-page-head">
-        <h1 class="rs-h1"><i class="material-icons" aria-hidden="true">restaurant_menu</i> {% trans "Menu" %} · {{ restaurant.name }}</h1>
-        <div class="rs-actions rs-actions--sm">
-            <a class="vz-btn vz-btn--sm vz-btn--secondary" href="{% url 'resto:vendor_dashboard' %}"><i class="material-icons" aria-hidden="true">arrow_back</i> {% trans "Mes restaurants" %}</a>
-            <a class="vz-btn vz-btn--sm vz-btn--muted" href="{% url 'resto:restaurant' restaurant.slug %}"><i class="material-icons" aria-hidden="true">visibility</i> {% trans "Aperçu" %}</a>
-        </div>
+    <div class="vz-page-head">
+        <a class="vz-back" href="{% url 'resto:vendor_dashboard' %}" aria-label="{% trans 'Mes restaurants' %}"><i class="material-icons" aria-hidden="true">arrow_back</i></a>
+        <div class="vz-page-head__main"><h1 class="vz-page-title"><i class="material-icons" aria-hidden="true">restaurant_menu</i> {% trans "Menu" %}</h1><p class="vz-page-sub">{{ restaurant.name }}</p></div>
+        <div class="vz-page-head__actions"><a class="vz-btn vz-btn--sm vz-btn--secondary" href="{% url 'resto:restaurant' restaurant.slug %}"><i class="material-icons" aria-hidden="true">visibility</i> {% trans "Aperçu" %}</a></div>
     </div>
 
     <!-- ── Rubriques ── -->
-    <div class="rs-card rs-card--pad rs-card--mb">
+    <div class="vz-card rs-box rs-card--pad rs-card--mb">
         <p class="rs-card-title">{% trans "Rubriques" %} <span class="rs-muted">({% trans "Entrées, Plats, Boissons…" %})</span></p>
         <div class="rs-actions rs-actions--sm rs-mb">
             {% for c in categories %}
             <form method="post" action="{% url 'resto:category_save' restaurant.slug %}" class="rs-cat-form">{% csrf_token %}
                 <input type="hidden" name="pk" value="{{ c.pk }}"><input type="hidden" name="order" value="{{ c.order }}">
-                <input class="form-control rs-cat-name" name="name" value="{{ c.name }}">
-                <button class="vz-btn vz-btn--sm vz-btn--secondary vz-btn--icon" type="submit" aria-label="{% trans 'Enregistrer' %}" title="{% trans 'Enregistrer' %}"><i class="material-icons" aria-hidden="true">save</i></button>
-                <button class="vz-btn vz-btn--sm vz-btn--muted vz-btn--icon" type="submit" name="delete" value="1" data-vz-confirm="{% trans 'Supprimer cette rubrique ?' %}" data-vz-danger aria-label="{% trans 'Supprimer' %}" title="{% trans 'Supprimer' %}"><i class="material-icons" aria-hidden="true">close</i></button>
+                <input class="form-control rs-cat-name" name="name" value="{{ c.name }}" aria-label="{% trans 'Nom de la rubrique' %}">
+                <button class="vz-icon-btn vz-icon-btn--solid" type="submit" aria-label="{% trans 'Enregistrer' %}" title="{% trans 'Enregistrer' %}"><i class="material-icons" aria-hidden="true">save</i></button>
+                <button class="vz-icon-btn vz-icon-btn--danger" type="submit" name="delete" value="1" data-vz-confirm="{% trans 'Supprimer cette rubrique ?' %}" data-vz-confirm-label="{% trans 'Supprimer' %}" data-vz-danger aria-label="{% trans 'Supprimer' %}" title="{% trans 'Supprimer' %}"><i class="material-icons" aria-hidden="true">close</i></button>
             </form>
             {% endfor %}
         </div>
         <form method="post" action="{% url 'resto:category_save' restaurant.slug %}" class="rs-form rs-inline-form rs-inline-form--wrap">{% csrf_token %}
             {{ cat_form.name }} <input type="hidden" name="order" value="{{ categories|length }}">
-            <button class="vz-btn vz-btn--sm vz-btn--primary" type="submit"><i class="material-icons" aria-hidden="true">add</i> {% trans "Ajouter" %}</button>
+            <button class="vz-btn vz-btn--sm vz-btn--secondary" type="submit"><i class="material-icons" aria-hidden="true">add</i> {% trans "Ajouter" %}</button>
         </form>
     </div>
 
     <!-- ── Plats ── -->
-    <div class="rs-card rs-card--mb">
+    <div class="vz-card rs-box rs-card--mb" id="rs-items-list" data-rs-live>
         <p class="rs-card-title rs-items-title">{% trans "Plats" %} ({{ items|length }})</p>
         {% for it in items %}
         <div class="rs-mi">
@@ -42,34 +40,34 @@
             <div class="rs-fill">
                 <strong>{{ it.name }}</strong> <span class="rs-price">{{ it.formatted_price }}</span>
                 {% if not it.is_available %}<span class="vz-chip vz-chip--sm vz-chip--static vz-chip--danger">{% trans "Indisponible" %}</span>{% endif %}
-                <div class="rs-muted">{{ it.category.name|default:_("Sans rubrique") }} · {{ it.option_groups.all|length }} {% trans "groupe(s) d'options" %}{% if it.ingredients %} · <i class="material-icons rs-ico" aria-hidden="true">eco</i> {{ it.ingredient_names }}{% endif %}</div>
+                <div class="rs-muted">{{ it.category.name|default:_("Sans rubrique") }} · {% blocktrans count n=it.option_groups.all|length %}{{ n }} groupe d'options{% plural %}{{ n }} groupes d'options{% endblocktrans %}{% if it.ingredients %} · <i class="material-icons rs-ico" aria-hidden="true">eco</i> {{ it.ingredient_names }}{% endif %}</div>
             </div>
             <div class="rs-actions rs-actions--sm rs-actions--end rs-mi-actions">
-                <button class="vz-btn vz-btn--sm vz-btn--secondary vz-btn--icon" type="button" aria-label="{% trans 'Modifier' %}" title="{% trans 'Modifier' %}" onclick="rsEditItem({{ it.pk }}, {{ it.category_id|default:'null' }}, '{{ it.name|escapejs }}', '{{ it.description|escapejs }}', {{ it.price|floatformat:0 }}, {{ it.is_available|yesno:'true,false' }}, {{ it.order }}, '{{ it.ingredients|escapejs }}', '{{ it.preparation|escapejs }}')"><i class="material-icons" aria-hidden="true">edit</i></button>
+                <button class="vz-icon-btn vz-icon-btn--solid" type="button" aria-label="{% trans 'Modifier' %}" title="{% trans 'Modifier' %}" onclick="rsEditItem({{ it.pk }}, {{ it.category_id|default:'null' }}, '{{ it.name|escapejs }}', '{{ it.description|escapejs }}', {{ it.price|floatformat:0 }}, {{ it.is_available|yesno:'true,false' }}, {{ it.order }}, '{{ it.ingredients|escapejs }}', '{{ it.preparation|escapejs }}')"><i class="material-icons" aria-hidden="true">edit</i></button>
                 <button class="vz-btn vz-btn--sm vz-btn--secondary" type="button" onclick="rsEditOptions({{ it.pk }}, '{{ it.name|escapejs }}')"><i class="material-icons" aria-hidden="true">extension</i> {% trans "Options" %}</button>
-                <form method="post" action="{% url 'resto:item_delete' restaurant.slug it.pk %}" data-vz-confirm="{% trans 'Supprimer ce plat ?' %}" data-vz-danger>{% csrf_token %}<button class="vz-btn vz-btn--sm vz-btn--muted vz-btn--icon" type="submit" aria-label="{% trans 'Supprimer' %}" title="{% trans 'Supprimer' %}"><i class="material-icons" aria-hidden="true">delete</i></button></form>
+                <form method="post" action="{% url 'resto:item_delete' restaurant.slug it.pk %}" data-vz-confirm="{% trans 'Supprimer ce plat ?' %}" data-vz-confirm-label="{% trans 'Supprimer' %}" data-vz-danger>{% csrf_token %}<button class="vz-icon-btn vz-icon-btn--danger" type="submit" aria-label="{% trans 'Supprimer' %}" title="{% trans 'Supprimer' %}"><i class="material-icons" aria-hidden="true">delete</i></button></form>
             </div>
         </div>
         {% empty %}
-        <p class="rs-muted rs-pad">{% trans "Aucun plat. Ajoutez votre premier plat ci-dessous." %}</p>
+        <div class="vz-empty"><i class="material-icons" aria-hidden="true">restaurant_menu</i><p class="vz-empty-text">{% trans "Aucun plat. Ajoutez votre premier plat ci-dessous." %}</p></div>
         {% endfor %}
     </div>
 
     <!-- ── Ajouter / modifier un plat ── -->
-    <div class="rs-card rs-form rs-card--pad" id="rs-item-form-card">
+    <div class="vz-card rs-box rs-form rs-card--pad" id="rs-item-form-card">
         <p class="rs-card-title" id="rs-item-form-title"><i class="material-icons rs-ico" aria-hidden="true">add</i> {% trans "Ajouter un plat" %}</p>
         <form method="post" enctype="multipart/form-data" id="rs-item-form" action="{% url 'resto:item_save' restaurant.slug %}">{% csrf_token %}
             <div class="rs-row">
-                <div><label>{% trans "Nom" %} *</label>{{ item_form.name }}</div>
-                <div><label>{% trans "Prix (Ar)" %} *</label>{{ item_form.price }}</div>
+                <div><label for="{{ item_form.name.id_for_label }}">{% trans "Nom" %} <span class="vz-req">*</span></label>{{ item_form.name }}</div>
+                <div><label for="{{ item_form.price.id_for_label }}">{% trans "Prix (Ar)" %} <span class="vz-req">*</span></label>{{ item_form.price }}</div>
             </div>
             <div class="rs-row rs-mt">
-                <div><label>{% trans "Rubrique" %}</label>{{ item_form.category }}</div>
-                <div><label>{% trans "Ordre" %}</label>{{ item_form.order }}</div>
+                <div><label for="{{ item_form.category.id_for_label }}">{% trans "Rubrique" %}</label>{{ item_form.category }}</div>
+                <div><label for="{{ item_form.order.id_for_label }}">{% trans "Ordre" %}</label>{{ item_form.order }}</div>
             </div>
-            <div class="rs-mt"><label>{% trans "Description" %}</label>{{ item_form.description }}</div>
+            <div class="rs-mt"><label for="{{ item_form.description.id_for_label }}">{% trans "Description" %}</label>{{ item_form.description }}</div>
             <div class="rs-mt">
-                <label><i class="material-icons rs-ico" aria-hidden="true">eco</i> {% trans "Ingrédients" %}</label>
+                <label for="rs-ing-new"><i class="material-icons rs-ico" aria-hidden="true">eco</i> {% trans "Ingrédients" %}</label>
                 <p class="help rs-mb-s">{% trans "Listez les ingrédients du plat, un par un. Le client verra la liste et cochera ce qu'il ne veut pas (« sans œuf »). « Coché par défaut » = dans le plat ; décoché = proposé en plus (avec un prix si supplément). Décochez « au choix du client » pour un ingrédient qu'on ne peut pas enlever." %}</p>
                 <div hidden id="rs-ing-head"></div>
                 <div id="rs-ing-rows"></div>
@@ -80,33 +78,38 @@
                 <textarea name="ingredients" id="id_ingredients" hidden></textarea>
             </div>
             <div class="rs-mt">
-                <label><i class="material-icons rs-ico" aria-hidden="true">soup_kitchen</i> {% trans "Préparation" %}</label>{{ item_form.preparation }}
+                <label for="{{ item_form.preparation.id_for_label }}"><i class="material-icons rs-ico" aria-hidden="true">soup_kitchen</i> {% trans "Préparation" %}</label>{{ item_form.preparation }}
                 <p class="help rs-mt-xxs">{{ item_form.preparation.help_text }}</p>
             </div>
             <div class="rs-row rs-mt rs-row--center">
-                <div><label>{% trans "Photo" %}</label>{{ item_form.image }}</div>
-                <div class="rs-check-row">{{ item_form.is_available }} <label>{% trans "Disponible" %}</label></div>
+                <div><label for="{{ item_form.image.id_for_label }}">{% trans "Photo" %}</label>{{ item_form.image }}</div>
+                <div class="rs-check-row">{{ item_form.is_available }} <label for="{{ item_form.is_available.id_for_label }}">{% trans "Disponible" %}</label></div>
             </div>
-            <div class="rs-actions rs-actions--mt">
-                <button class="vz-btn vz-btn--primary" type="submit" id="rs-item-submit">{% trans "Enregistrer le plat" %}</button>
-                <button class="vz-btn vz-btn--muted" type="button" id="rs-item-cancel" style="display:none;" onclick="rsResetItem()">{% trans "Annuler" %}</button>
+            <div class="vz-actions">
+                <button class="vz-btn vz-btn--muted" type="button" id="rs-item-cancel" hidden onclick="rsResetItem()">{% trans "Annuler" %}</button>
+                <button class="vz-btn vz-btn--primary" type="submit" id="rs-item-submit"><i class="material-icons" aria-hidden="true">save</i> {% trans "Enregistrer le plat" %}</button>
             </div>
         </form>
     </div>
 </div>
 
 <!-- ── Éditeur d'options ── -->
-<div class="rs-modal-bg" id="rs-opt-modal" onclick="if(event.target===this)this.classList.remove('show')">
-    <div class="rs-modal">
-        <div class="rs-between">
-            <h3><i class="material-icons rs-ico" aria-hidden="true">extension</i> <span id="rs-opt-title"></span></h3>
-            <button class="vz-btn vz-btn--sm vz-btn--muted vz-btn--icon" type="button" onclick="document.getElementById('rs-opt-modal').classList.remove('show')" aria-label="{% trans 'Fermer' %}"><i class="material-icons" aria-hidden="true">close</i></button>
+<div class="vz-overlay" id="rs-opt-dialog" data-rs-dialog hidden>
+    <div class="vz-dialog rs-dialog" role="dialog" aria-modal="true" aria-labelledby="rs-opt-title">
+        <div class="vz-dialog-handle"></div>
+        <div class="vz-dialog-head">
+            <span class="material-icons" aria-hidden="true">extension</span>
+            <h3 class="vz-dialog-title" id="rs-opt-title"></h3>
+            <button class="vz-icon-btn" type="button" onclick="rsDialog.close('rs-opt-dialog')" aria-label="{% trans 'Fermer' %}"><i class="material-icons" aria-hidden="true">close</i></button>
         </div>
-        <p class="rs-muted rs-opt-intro">{% trans "Comme sur Uber Eats : un groupe = une question posée au client (« Sauce ? », « Suppléments ? »). Minimum 1 = choix obligatoire. Maximum 1 = un seul choix, 0 = illimité." %}</p>
+        <p class="rs-muted rs-opt-intro">{% trans "Un groupe = une question posée au client (« Sauce ? », « Suppléments ? »). Minimum 1 = choix obligatoire. Maximum 1 = un seul choix, 0 = illimité." %}</p>
         <div id="rs-og-list"></div>
         <button class="vz-btn vz-btn--sm vz-btn--secondary" type="button" onclick="rsAddGroup()"><i class="material-icons" aria-hidden="true">add</i> {% trans "Ajouter un groupe" %}</button>
-        <p class="rs-form err rs-opt-err" id="rs-opt-err"></p>
-        <button class="vz-btn vz-btn--primary vz-btn--block rs-mt-m" type="button" onclick="rsSaveOptions()"><i class="material-icons" aria-hidden="true">save</i> {% trans "Enregistrer les options" %}</button>
+        <p class="rs-form err rs-opt-err" id="rs-opt-err" role="alert"></p>
+        <div class="vz-actions">
+            <button class="vz-btn vz-btn--muted" type="button" onclick="rsDialog.close('rs-opt-dialog')">{% trans "Annuler" %}</button>
+            <button class="vz-btn vz-btn--primary" type="button" id="rs-opt-save" onclick="rsSaveOptions()"><i class="material-icons" aria-hidden="true">save</i> {% trans "Enregistrer les options" %}</button>
+        </div>
     </div>
 </div>
 
@@ -116,10 +119,10 @@ const OPTIONS = JSON.parse(document.getElementById('menu-options').textContent);
 const CSRF = document.cookie.match(/csrftoken=([^;]+)/)?.[1] || '';
 const SLUG = "{{ restaurant.slug }}";
 const I18N = {group:"{% trans 'Titre du groupe (ex : Sauce, Suppléments)'|escapejs %}", opt:"{% trans 'Option (ex : Fromage)'|escapejs %}", extra:"{% trans 'Suppl. Ar'|escapejs %}",
-              min:"{% trans 'Min'|escapejs %}", max:"{% trans 'Max'|escapejs %}", addopt:"{% trans '+ option'|escapejs %}", del:"{% trans 'Supprimer le groupe'|escapejs %}",
+              min:"{% trans 'Min'|escapejs %}", max:"{% trans 'Max'|escapejs %}", addopt:"{% trans 'Ajouter une option'|escapejs %}", del:"{% trans 'Supprimer le groupe'|escapejs %}", error:"{% trans 'Une erreur est survenue. Réessayez.'|escapejs %}",
               saved:"{% trans 'Options enregistrées'|escapejs %}", edit:"{% trans 'Modifier le plat'|escapejs %}", add:"{% trans 'Ajouter un plat'|escapejs %}",
               removable:"{% trans 'retirable'|escapejs %}", price:"{% trans 'Suppl. Ar'|escapejs %}", defaultOn:"{% trans 'coché par défaut'|escapejs %}", choice:"{% trans 'au choix du client'|escapejs %}",
-              remove:"{% trans 'Retirer'|escapejs %}"};
+              remove:"{% trans 'Retirer'|escapejs %}", ingName:"{% trans 'Ingrédient'|escapejs %}"};
 let curItem = null;
 const ico = name => `<i class="material-icons" aria-hidden="true">${name}</i>`;
 
@@ -134,11 +137,11 @@ function rsAddIng(name, price, defaultOn, choice){
   if(defaultOn === undefined) defaultOn = true;
   if(choice === undefined) choice = true;
   const row = document.createElement('div'); row.className = 'rs-ing-row';
-  row.innerHTML = `<input class="form-control ing-name" value="${esc(name)}">
+  row.innerHTML = `<input class="form-control ing-name" value="${esc(name)}" aria-label="${I18N.ingName}">
     <input class="form-control ing-price" type="number" min="0" step="100" value="${price}" title="${I18N.price}" placeholder="${I18N.price}">
     <label><input type="checkbox" class="ing-def" ${defaultOn ? 'checked' : ''}> ${I18N.defaultOn}</label>
     <label><input type="checkbox" class="ing-choice" ${choice ? 'checked' : ''}> ${I18N.choice}</label>
-    <button class="vz-btn vz-btn--sm vz-btn--muted vz-btn--icon" type="button" aria-label="${I18N.remove}" title="${I18N.remove}" onclick="this.parentNode.remove();rsSyncIng()">${ico('close')}</button>`;
+    <button class="vz-icon-btn vz-icon-btn--danger" type="button" aria-label="${I18N.remove}" title="${I18N.remove}" onclick="this.parentNode.remove();rsSyncIng()">${ico('close')}</button>`;
   document.getElementById('rs-ing-rows').appendChild(row);
   rsSyncIng();
   if(name === input.value) input.focus();
@@ -176,33 +179,33 @@ function rsEditItem(pk, cat, name, desc, price, avail, order, ingredients, prepa
   f.querySelector('[name=price]').value = price; f.querySelector('[name=order]').value = order;
   f.querySelector('[name=category]').value = cat === null ? '' : cat; f.querySelector('[name=is_available]').checked = avail;
   document.getElementById('rs-item-form-title').innerHTML = `<i class="material-icons rs-ico" aria-hidden="true">edit</i> ${I18N.edit} : ${esc(name)}`;
-  document.getElementById('rs-item-cancel').style.display = '';
+  document.getElementById('rs-item-cancel').hidden = false;
   document.getElementById('rs-item-form-card').scrollIntoView({behavior:'smooth'});
 }
 function rsResetItem(){
   const f = document.getElementById('rs-item-form'); f.reset(); f.action = `/resto/vendeur/${SLUG}/menu/plat/`;
   rsLoadIng('');
   document.getElementById('rs-item-form-title').innerHTML = `<i class="material-icons rs-ico" aria-hidden="true">add</i> ${I18N.add}`;
-  document.getElementById('rs-item-cancel').style.display = 'none';
+  document.getElementById('rs-item-cancel').hidden = true;
 }
 function esc(s){ return String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
 function rsEditOptions(pk, name){
   curItem = pk; document.getElementById('rs-opt-title').textContent = name; document.getElementById('rs-opt-err').textContent = '';
   const list = document.getElementById('rs-og-list'); list.innerHTML = '';
   (OPTIONS[pk] || []).forEach(g => rsAddGroup(g));
-  document.getElementById('rs-opt-modal').classList.add('show');
+  rsDialog.open('rs-opt-dialog');
 }
 function rsAddGroup(g){
   g = g || {name:'', min:0, max:1, options:[{name:'', extra_price:0}]};
   const div = document.createElement('div'); div.className = 'rs-og';
-  div.innerHTML = `<input class="form-control g-name" placeholder="${I18N.group}" value="${esc(g.name)}">
+  div.innerHTML = `<input class="form-control g-name" placeholder="${I18N.group}" aria-label="${I18N.group}" value="${esc(g.name)}">
     <div class="rs-og-limits">
       <label>${I18N.min} <input class="form-control g-min" type="number" min="0" value="${g.min}"></label>
       <label>${I18N.max} <input class="form-control g-max" type="number" min="0" value="${g.max}"></label>
     </div>
     <div class="opts"></div>
-    <div class="rs-og-actions"><button class="vz-btn vz-btn--sm vz-btn--secondary" type="button" onclick="rsAddOpt(this)">${I18N.addopt}</button>
-    <button class="vz-btn vz-btn--sm vz-btn--muted" type="button" onclick="this.closest('.rs-og').remove()">${ico('delete')} ${I18N.del}</button></div>`;
+    <div class="rs-og-actions"><button class="vz-btn vz-btn--sm vz-btn--secondary" type="button" onclick="rsAddOpt(this)">${ico('add')} ${I18N.addopt}</button>
+    <button class="vz-btn vz-btn--sm vz-btn--danger-soft" type="button" onclick="this.closest('.rs-og').remove()">${ico('delete')} ${I18N.del}</button></div>`;
   document.getElementById('rs-og-list').appendChild(div);
   g.options.forEach(o => rsAddOpt(div.querySelector('.opts'), o));
 }
@@ -210,9 +213,9 @@ function rsAddOpt(el, o){
   o = o || {name:'', extra_price:0};
   const box = el.classList ? (el.classList.contains('opts') ? el : el.closest('.rs-og').querySelector('.opts')) : el;
   const row = document.createElement('div'); row.className = 'opt';
-  row.innerHTML = `<input class="form-control o-name" placeholder="${I18N.opt}" value="${esc(o.name)}">
-    <input class="form-control o-price" type="number" min="0" step="100" placeholder="${I18N.extra}" value="${o.extra_price || 0}">
-    <button class="vz-btn vz-btn--sm vz-btn--muted vz-btn--icon" type="button" aria-label="${I18N.remove}" title="${I18N.remove}" onclick="this.parentNode.remove()">${ico('close')}</button>`;
+  row.innerHTML = `<input class="form-control o-name" placeholder="${I18N.opt}" aria-label="${I18N.opt}" value="${esc(o.name)}">
+    <input class="form-control o-price" type="number" min="0" step="100" placeholder="${I18N.extra}" aria-label="${I18N.extra}" value="${o.extra_price || 0}">
+    <button class="vz-icon-btn vz-icon-btn--danger" type="button" aria-label="${I18N.remove}" title="${I18N.remove}" onclick="this.parentNode.remove()">${ico('close')}</button>`;
   box.appendChild(row);
 }
 async function rsSaveOptions(){
@@ -220,13 +223,21 @@ async function rsSaveOptions(){
     name: g.querySelector('.g-name').value, min: parseInt(g.querySelector('.g-min').value||0), max: parseInt(g.querySelector('.g-max').value||0),
     options: [...g.querySelectorAll('.opt')].map(o => ({name: o.querySelector('.o-name').value, extra_price: parseInt(o.querySelector('.o-price').value||0)})),
   }));
-  const r = await fetch(`/resto/vendeur/${SLUG}/menu/plat/${curItem}/options/`, {method:'POST', credentials:'same-origin',
-    headers:{'Content-Type':'application/json','X-CSRFToken':CSRF}, body: JSON.stringify({groups})});
-  const data = await r.json().catch(()=>({}));
-  if(!r.ok){ document.getElementById('rs-opt-err').textContent = data.error || 'Erreur'; return; }
+  const errEl = document.getElementById('rs-opt-err'), btn = document.getElementById('rs-opt-save');
+  errEl.textContent = ''; btn.disabled = true;
+  let r;
+  try {
+    r = await fetch(`/resto/vendeur/${SLUG}/menu/plat/${curItem}/options/`, {method:'POST', credentials:'same-origin',
+      headers:{'Content-Type':'application/json','X-CSRFToken':CSRF}, body: JSON.stringify({groups})});
+  } catch(e) { r = null; }
+  btn.disabled = false;
+  const data = r ? await r.json().catch(()=>({})) : {};
+  if(!r || !r.ok){ errEl.textContent = data.error || I18N.error; return; }
   OPTIONS[curItem] = groups.filter(g => g.name.trim() && g.options.some(o => o.name.trim()));
-  document.getElementById('rs-opt-modal').classList.remove('show');
-  window.location.reload();
+  rsDialog.close('rs-opt-dialog');
+  vzToast(I18N.saved, 'success');
+  // Le compteur « n groupes d'options » de la ligne : seule la liste des plats est rechargée
+  rsRefresh();
 }
 </script>
 {% endblock %}

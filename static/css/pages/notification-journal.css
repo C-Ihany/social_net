@@ -1,25 +1,11 @@
-/* Généré depuis notification/templates/notification/journal.html — styles de page servis en statique (cache navigateur + service worker)
-   au lieu d'être renvoyés dans chaque réponse HTML. Modifier ICI, plus dans le gabarit.
-   Chaque notification est une .vz-card--row partagée (zoot-base.css) ; non lue → .vz-card--unread. */
+/* Journal des notifications (notification/journal.html).
+   En-tête : .vz-page-head ; chaque notification : .vz-card--row (non lue → .vz-card--unread) ;
+   état vide : .vz-empty — tous partagés (zoot-base.css). */
 
-.nj-wrapper { max-width:700px; margin:2rem auto; padding:0 1rem 4rem; }
-.nj-header { display:flex; align-items:center; gap:.8rem; margin-bottom:1.8rem; }
-.nj-header-icon {
-    width:46px; height:46px; border-radius:var(--radius);
-    background:var(--accent); color:var(--on-accent);
-    display:flex; align-items:center; justify-content:center; flex-shrink:0;
-    box-shadow:0 4px 16px var(--accent-glow);
-}
-.nj-header-icon .material-icons { font-size:1.4rem; }
-.nj-title { font-size:1.5rem; font-weight:800; margin:0; color:var(--text); letter-spacing:-.03em; }
-.nj-subtitle { font-size:.82rem; color:var(--text-muted); margin:.1rem 0 0; }
+.nj-wrapper { max-width:700px; margin:0 auto; padding:1.5rem 1rem 4rem; }
 .nj-list { gap:.5rem; }
 
 /* Le texte de la notification : normal une fois lue, gras tant qu'elle ne l'est pas */
 .vz-card .nj-verb { font-size:.9rem; font-weight:500; line-height:1.4; }
 .vz-card--unread .nj-verb { font-weight:700; }
 .nj-unread-dot { width:9px; height:9px; border-radius:50%; background:var(--accent); flex-shrink:0; }
-
-.nj-empty { display:flex; flex-direction:column; align-items:center; padding:4rem 2rem; color:var(--text-muted); gap:.75rem; text-align:center; }
-.nj-empty .material-icons { font-size:3rem; opacity:.3; }
-.nj-empty p { margin:0; font-size:.9rem; }

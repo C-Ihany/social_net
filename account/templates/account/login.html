@@ -1,12 +1,11 @@
 {% extends 'base.html' %}
-{% load static %}
-{% load i18n %}
+{% load static i18n %}
+{% block page_title %}{% trans "Se connecter" %} — Vazimba{% endblock %}
 
 {% block content %}
 <link rel="stylesheet" href="{% static 'css/pages/account-login.css' %}">
 
 <div class="auth-page">
-    <!-- Particules flottantes (dark mode) -->
     <span class="auth-particle"></span>
     <span class="auth-particle"></span>
     <span class="auth-particle"></span>
@@ -15,68 +14,61 @@
 
     <div class="auth-card">
 
-        <!-- Brand -->
-        <a href="{% url 'landing' %}" class="auth-brand">
-            <img src="{% static 'logo/Vazi_logo003.jpeg' %}" alt="VAZIMBA" class="auth-brand-logo"
-                 onerror="this.style.display='none'">
+        <a href="{% url 'landing' %}" class="auth-brand" aria-label="Vazimba">
+            <img src="{% static 'logo/Vazi_logo003.jpeg' %}" alt="Vazimba" class="auth-brand-logo"
+                 onerror="this.remove()">
         </a>
 
         <h1 class="auth-heading">{% trans "Welcome!" %}</h1>
         <p class="auth-sub">{% trans "Sign in to your account" %}</p>
 
-        <!-- Errors -->
         {% if login_form.non_field_errors %}
-        <div class="auth-errors">
-            <span class="material-icons">error_outline</span>
-            <span>{{ login_form.non_field_errors }}</span>
+        <div class="auth-errors" role="alert">
+            <span class="material-icons" aria-hidden="true">error_outline</span>
+            <span>{% for error in login_form.non_field_errors %}{{ error }}{% if not forloop.last %}<br>{% endif %}{% endfor %}</span>
         </div>
         {% endif %}
         {% for field in login_form %}{% for error in field.errors %}
-        <div class="auth-errors">
-            <span class="material-icons">warning_amber</span>
+        <div class="auth-errors" role="alert">
+            <span class="material-icons" aria-hidden="true">warning_amber</span>
             <span>{{ error }}</span>
         </div>
         {% endfor %}{% endfor %}
 
-        <!-- Form -->
         <form method="post">{% csrf_token %}
-
             <div class="auth-field">
                 <label for="inputEmail">{% trans "Email address" %}</label>
                 <div class="auth-input-wrap">
-                    <span class="material-icons">mail_outline</span>
-                    <input type="email" name="email" id="inputEmail"
-                           placeholder="votre@email.com" required autofocus autocomplete="email">
+                    <span class="material-icons" aria-hidden="true">mail_outline</span>
+                    <input type="email" name="email" id="inputEmail" value="{{ login_form.email.value|default:'' }}"
+                           placeholder="{% trans 'vous@exemple.com' %}" required autofocus autocomplete="email">
                 </div>
             </div>
-
             <div class="auth-field">
                 <label for="inputPassword">{% trans "Password" %}</label>
                 <div class="auth-input-wrap">
-                    <span class="material-icons">lock_outline</span>
-                    <input type="password" name="password" id="inputPassword"
-                           placeholder="••••••••" required autocomplete="current-password">
+                    <span class="material-icons" aria-hidden="true">lock_outline</span>
+                    <input type="password" name="password" id="inputPassword" required autocomplete="current-password">
                 </div>
             </div>
-
-            <button class="auth-btn" type="submit">
-                {% trans "Login" %}
-            </button>
+            <button class="vz-btn vz-btn--primary vz-btn--lg vz-btn--block" type="submit">{% trans "Se connecter" %}</button>
         </form>
 
         <div class="auth-links">
             <a href="{% url 'password_reset' %}">{% trans "Forgot password?" %}</a>
         </div>
 
-        <div class="auth-divider">ou</div>
+        <div class="auth-divider">{% trans "ou" %}</div>
 
-        <a class="auth-btn auth-btn-phone" href="{% url 'phone-login' %}{% if request.GET.next %}?next={{ request.GET.next|urlencode }}{% endif %}">
-            <span class="material-icons">smartphone</span> {% trans "Sign in with my phone number" %}
+        <a class="vz-btn vz-btn--secondary vz-btn--lg vz-btn--block auth-alt-btn" href="{% url 'phone-login' %}{% if request.GET.next %}?next={{ request.GET.next|urlencode }}{% endif %}">
+            <span class="material-icons" aria-hidden="true">smartphone</span> {% trans "Sign in with my phone number" %}
         </a>
+
+        <div class="auth-divider">{% trans "ou" %}</div>
 
         <div class="auth-register-link">
             {% trans "Don't have an account?" %}
-            <a href="{% url 'register' %}">{% trans "Create account" %}</a>
+            <a href="{% url 'register' %}{% if request.GET.next %}?next={{ request.GET.next|urlencode }}{% endif %}">{% trans "Create account" %}</a>
         </div>
 
     </div>

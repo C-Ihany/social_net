@@ -1,0 +1,174 @@
+/* Pages d'erreur 404, 500 et « formulaire expiré » (403 CSRF) : feuille commune.
+   Avant, chacune embarquait ~200 lignes de <style> quasi identiques. Boutons : .vz-btn (zoot-base.css). */
+
+.error-page {
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 2rem 1rem;
+    background: var(--bg);
+    font-family: var(--font-primary, 'Space Grotesk', sans-serif);
+    position: relative;
+    overflow: hidden;
+}
+
+/* Orbe de fond en dark mode */
+[data-theme="dark"] .error-page::before {
+    content: '';
+    position: fixed;
+    width: 700px; height: 700px;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(var(--accent-rgb),.07) 0%, transparent 65%);
+    top: -200px; left: -200px;
+    pointer-events: none;
+}
+[data-theme="dark"] .error-page::after {
+    content: '';
+    position: fixed;
+    width: 500px; height: 500px;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(var(--accent-rgb),.06) 0%, transparent 65%);
+    bottom: -150px; right: -150px;
+    pointer-events: none;
+}
+
+.error-card {
+    text-align: center;
+    max-width: 540px;
+    width: 100%;
+    position: relative;
+    z-index: 1;
+    animation: fadeInUp .6s ease both;
+}
+
+@keyframes fadeInUp {
+    from { opacity: 0; transform: translateY(30px); }
+    to   { opacity: 1; transform: translateY(0); }
+}
+
+.error-code {
+    font-size: clamp(6rem, 20vw, 10rem);
+    font-weight: 900;
+    line-height: 1;
+    letter-spacing: -.05em;
+    background: linear-gradient(135deg, var(--accent) 0%, var(--accent2) 50%, var(--accent3) 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    margin-bottom: .25rem;
+    display: block;
+    filter: drop-shadow(0 0 30px rgba(var(--accent-rgb),.3));
+}
+
+[data-theme="dark"] .error-code {
+    filter: drop-shadow(0 0 40px rgba(var(--accent-rgb),.5));
+    animation: pulseGlow 3s ease-in-out infinite;
+}
+
+@keyframes pulseGlow {
+    0%,100% { filter: drop-shadow(0 0 30px rgba(var(--accent-rgb),.4)); }
+    50%      { filter: drop-shadow(0 0 60px rgba(var(--accent-rgb),.55)); }
+}
+
+.error-icon {
+    font-size: 3.5rem;
+    margin: .5rem 0 1rem;
+    display: block;
+    color: var(--accent);
+    animation: float 3s ease-in-out infinite;
+}
+.error-logo-wrap { margin-bottom: 1rem; }
+.error-logo { width: 64px; height: 64px; object-fit: contain; }
+
+@keyframes float {
+    0%,100% { transform: translateY(0); }
+    50%      { transform: translateY(-12px); }
+}
+
+.error-title {
+    font-size: 1.6rem;
+    font-weight: 800;
+    color: var(--text);
+    margin-bottom: .6rem;
+}
+
+.error-subtitle {
+    font-size: 1rem;
+    color: var(--text-muted);
+    margin-bottom: 2rem;
+    line-height: 1.6;
+}
+
+.error-actions {
+    display: flex;
+    gap: .75rem;
+    justify-content: center;
+    flex-wrap: wrap;
+}
+
+.error-suggestions {
+    margin-top: 2.5rem;
+    padding-top: 1.5rem;
+    border-top: 1px solid var(--border);
+}
+.error-suggestions p {
+    font-size: .85rem;
+    color: var(--text-muted);
+    margin-bottom: .75rem;
+}
+.error-sugg-links {
+    display: flex;
+    gap: .5rem;
+    justify-content: center;
+    flex-wrap: wrap;
+}
+.error-sugg-link {
+    font-size: .82rem;
+    font-weight: 600;
+    color: var(--accent);
+    text-decoration: none;
+    padding: .25rem .7rem;
+    border-radius: 20px;
+    background: var(--btn-bg);
+    border: 1px solid var(--border);
+    transition: background .15s, color .15s;
+}
+.error-sugg-link:hover {
+    background: var(--accent);
+    color: var(--on-accent);
+    text-decoration: none;
+}
+.error-sugg-link { display: inline-flex; align-items: center; gap: .3rem; }
+.error-sugg-link .material-icons { font-size: 1rem; }
+
+/* Grille déco dark */
+[data-theme="dark"] body {
+    background-image:
+        linear-gradient(rgba(var(--accent-rgb),.015) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(var(--accent-rgb),.015) 1px, transparent 1px);
+    background-size: 48px 48px;
+}
+
+/* Encadré d'explication (page 500) */
+.error-status {
+    margin-top: 2.5rem;
+    padding: 1rem 1.25rem;
+    border-radius: 12px;
+    background: var(--btn-bg);
+    border: 1px solid var(--border);
+    font-size: .85rem;
+    color: var(--text-muted);
+    line-height: 1.6;
+}
+.error-status a { color: var(--accent); font-weight: 600; }
+
+/* L'icône de la page 500 tremble au lieu de flotter */
+.error-icon--shake { animation: shake 2.5s ease-in-out infinite; }
+@keyframes shake {
+    0%,100% { transform: rotate(-5deg) scale(1); }
+    25%      { transform: rotate(5deg) scale(1.05); }
+    50%      { transform: rotate(-3deg) scale(.97); }
+    75%      { transform: rotate(4deg) scale(1.03); }
+}
+.error-actions .vz-btn { min-width: 10rem; }

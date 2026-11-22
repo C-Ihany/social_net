@@ -1,0 +1,6 @@
+{% comment %}Un champ de formulaire : libellé, saisie, aide, erreurs. Paramètres : field, required, hint, help.{% endcomment %}<div class="vz-field{% if field.errors %} has-error{% endif %}">
+    <label for="{{ field.id_for_label }}">{% if icon %}<i class="material-icons" aria-hidden="true">{{ icon }}</i>{% endif %}{{ field.label }}{% if required %} <span class="vz-req" aria-hidden="true">*</span>{% endif %}{% if hint %} <small class="text-muted">{{ hint }}</small>{% endif %}</label>
+    {{ field }}
+    {% if help %}<small class="vz-field-help">{{ help }}</small>{% endif %}
+    {% for e in field.errors %}<div class="vz-field-error">{{ e }}</div>{% endfor %}
+</div>

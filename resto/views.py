@@ -22,6 +22,7 @@ from django.http import Http404, JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse
 from django.utils import timezone
+from django.utils.http import url_has_allowed_host_and_scheme
 from django.utils.translation import gettext as _
 from django.views.decorators.http import require_POST
 
@@ -48,10 +49,48 @@ def _heic(upload):
 
 
 def _json_body(request):
+    """Corps JSON de la requête, toujours sous forme de dict ({} si absent, invalide ou d'un autre type)."""
     try:
-        return json.loads(request.body.decode('utf-8') or '{}')
+        data = json.loads(request.body.decode('utf-8') or '{}')
     except (ValueError, UnicodeDecodeError):
         return {}
+    return data if isinstance(data, dict) else {}
+
+
+def _safe_next(request, fallback):
+    """Adresse de retour `next` du formulaire, seulement si elle reste sur le site."""
+    nxt = request.POST.get('next') or ''
+    if nxt and url_has_allowed_host_and_scheme(nxt, allowed_hosts={request.get_host()}, require_https=request.is_secure()):
+        return nxt
+    return fallback
+
+
+def _as_list(value):
+    return value if isinstance(value, (list, tuple)) else []
+
+
+def _to_int(value, default=0):
+    try:
+        return int(value)
+    except (TypeError, ValueError):
+        return default
+
+
+def _customer_ratings(orders):
+    """
+    Pose `customer_rating` sur chaque commande en UNE requête groupée
+    (au lieu d'un agrégat par commande).
+    """
+    ids = {o.customer_id for o in orders}
+    stats = {}
+    if ids:
+        rows = (OrderReview.objects.filter(target_user_id__in=ids, target_role=OrderReview.ROLE_CUSTOMER)
+                .order_by().values('target_user_id')
+                .annotate(count=Count('id'), avg=Avg('rating'), issues=Count('id', filter=Q(payment_ok=False))))
+        stats = {r['target_user_id']: {'count': r['count'], 'avg': round(r['avg'] or 0, 1),
+                                       'payment_issues': r['issues']} for r in rows}
+    for o in orders:
+        o.customer_rating = stats.get(o.customer_id, {'count': 0, 'avg': 0, 'payment_issues': 0})
 
 
 def _user_cart(user):
@@ -198,7 +237,7 @@ def resto_index(request):
         'page_obj': page_obj, 'total': paginator.count,
         'q': q, 'sel_cat': cat, 'sel_region': region, 'sort': sort,
         'categories': Restaurant.CATEGORY_CHOICES,
-        'regions': [r for r in REGION_CHOICES if r[0]], 'region_labels': REGION_LABELS,
+        'regions': [r for r in REGION_CHOICES if r[0]], 'sel_region_label': REGION_LABELS.get(region, ''),
         'user_region': user_region,
         'cart_summary': _cart_summary(cart),
         'my_restaurants': request.user.restaurants.exists() if request.user.is_authenticated else False,
@@ -297,14 +336,14 @@ def cart_add(request, item_pk):
         quantity = max(1, min(20, int(body.get('quantity', 1))))
     except (TypeError, ValueError):
         quantity = 1
-    note = (body.get('note') or '')[:200]
-    option_ids = {int(x) for x in body.get('options', []) if str(x).isdigit()}
+    note = str(body.get('note') or '')[:200]
+    option_ids = {int(x) for x in _as_list(body.get('options')) if str(x).isdigit()}
     # Ingrédients : le client compose (Avec / Sans) parmi ceux que le restaurant laisse au choix
     ing_list = item.ingredient_list
     if 'ingredients' in body:
-        chosen = {str(x).strip() for x in (body.get('ingredients') or [])}
+        chosen = {str(x).strip() for x in _as_list(body.get('ingredients'))}
     else:  # ancien client : liste des décochés
-        removed_old = {str(x).strip() for x in (body.get('removed') or [])}
+        removed_old = {str(x).strip() for x in _as_list(body.get('removed'))}
         chosen = {i['name'] for i in ing_list if i['default_on'] and i['name'] not in removed_old}
     included = [i for i in ing_list if i['locked'] or i['name'] in chosen]
     removed  = [i['name'] for i in ing_list if not i['locked'] and i['name'] not in chosen]
@@ -447,7 +486,7 @@ def checkout(request):
             url = reverse('resto:vendor_orders', kwargs={'slug': restaurant.slug})
             _notify(restaurant.owner, request.user,
                     _('Nouvelle commande %(n)s chez %(r)s (%(t)s)') % {'n': order.number, 'r': restaurant.name, 't': order.formatted_total},
-                    url, order, push_title=_('🍽️ Nouvelle commande'))
+                    url, order, push_title=_('Nouvelle commande'))
             messages.success(request, _('Commande %(n)s envoyée ! Le restaurant va la confirmer.') % {'n': order.number})
             return redirect('resto:order', number=order.number)
     else:
@@ -455,6 +494,8 @@ def checkout(request):
 
     return render(request, 'resto/checkout.html', {
         'form': form, 'cart': cart, 'cart_summary': summary, 'restaurant': restaurant,
+        'checkout_data': {'subtotal': summary['subtotal'], 'fee': int(restaurant.delivery_fee),
+                          'lat': restaurant.latitude, 'lng': restaurant.longitude, 'name': restaurant.name},
     })
 
 
@@ -562,7 +603,7 @@ def order_review(request, number):
     if target_user and target_user != request.user:
         _notify(target_user, request.user,
                 _('Nouvel avis %(s)s sur la commande %(n)s') % {'s': review.stars, 'n': order.number},
-                url, order, push_title=_('⭐ Vazimba Resto'))
+                url, order, push_title=_('Vazimba Resto'))
     messages.success(request, _('Merci pour votre avis !'))
     return redirect(url)
 
@@ -605,7 +646,7 @@ def order_set_status(request, number):
     if actor != 'customer':
         _notify(order.customer, request.user,
                 _('Commande %(n)s : %(s)s') % {'n': order.number, 's': order.get_status_display()},
-                url, order, push_title=_('🍽️ %(r)s') % {'r': order.restaurant.name})
+                url, order, push_title=order.restaurant.name)
     else:
         # Le client confirme la réception : prévenir le restaurant et le livreur
         _notify(order.restaurant.owner, request.user,
@@ -616,15 +657,15 @@ def order_set_status(request, number):
                     _('Commande %(n)s : réception confirmée par le client') % {'n': order.number},
                     reverse('resto:courier_dashboard'), order)
     if new_status == Order.STATUS_READY and order.is_delivery and order.courier is None:
-        for c in Courier.objects.filter(restaurant=order.restaurant, is_approved=True, is_available=True).select_related('user'):
+        for c in Courier.objects.filter(restaurant=order.restaurant, is_available=True).select_related('user'):
             _notify(c.user, request.user,
                     _('Commande %(n)s prête à récupérer chez %(r)s') % {'n': order.number, 'r': order.restaurant.name},
-                    reverse('resto:courier_dashboard'), order, push_title=_('🛵 Livraison disponible'))
+                    reverse('resto:courier_dashboard'), order, push_title=_('Livraison disponible'))
 
     if request.content_type == 'application/json':
         return JsonResponse({'success': True, 'state': _order_payload(order)})
     messages.success(request, _('Commande %(n)s → %(s)s') % {'n': order.number, 's': order.get_status_display()})
-    return redirect(request.POST.get('next') or url)
+    return redirect(_safe_next(request, url))
 
 
 # ═══════════════════════════════════════════════════════════════════════════════
@@ -690,7 +731,7 @@ def toggle_open(request, slug):
     if request.content_type == 'application/json':
         return JsonResponse({'success': True, 'is_open': restaurant.is_open})
     messages.success(request, _('Restaurant ouvert aux commandes.') if restaurant.is_open else _('Commandes suspendues.'))
-    return redirect(request.POST.get('next') or 'resto:vendor_dashboard')
+    return redirect(_safe_next(request, reverse('resto:vendor_dashboard')))
 
 
 @login_required
@@ -779,20 +820,21 @@ def item_options_save(request, slug, item_pk):
     with transaction.atomic():
         item.option_groups.all().delete()
         for gi, g in enumerate(groups):
-            name = (g.get('name') or '').strip()[:100]
-            opts = [o for o in (g.get('options') or []) if (o.get('name') or '').strip()][:30]
+            if not isinstance(g, dict):
+                continue
+            name = str(g.get('name') or '').strip()[:100]
+            opts = [o for o in _as_list(g.get('options'))
+                    if isinstance(o, dict) and str(o.get('name') or '').strip()][:30]
             if not name or not opts:
                 continue
-            try:
-                mn = max(0, int(g.get('min', 0))); mx = max(0, int(g.get('max', 1)))
-            except (TypeError, ValueError):
-                mn, mx = 0, 1
+            mn = max(0, min(30, _to_int(g.get('min'), 0)))
+            mx = max(0, min(30, _to_int(g.get('max'), 1)))
             if mx and mn > mx:
                 mn = mx
             og = OptionGroup.objects.create(item=item, name=name, min_select=mn, max_select=mx, order=gi)
             Option.objects.bulk_create([
-                Option(group=og, name=(o.get('name') or '').strip()[:100],
-                       extra_price=max(0, int(o.get('extra_price') or 0)), order=oi)
+                Option(group=og, name=str(o.get('name') or '').strip()[:100],
+                       extra_price=max(0, min(10 ** 9, _to_int(o.get('extra_price'), 0))), order=oi)
                 for oi, o in enumerate(opts)
             ])
     return JsonResponse({'success': True, 'groups': item.option_groups.count()})
@@ -821,7 +863,7 @@ def vendor_orders(request, slug):
     orders = list(qs)
     for o in orders:
         o.next_steps = o.actions_for(['restaurant'])
-        o.customer_rating = OrderReview.for_customer(o.customer)
+    _customer_ratings(orders)
     return render(request, 'resto/vendor/orders.html', {
         'restaurant': restaurant, 'orders': orders, 'tab': tab,
         'pending_count': restaurant.orders.filter(status=Order.STATUS_PENDING).count(),
@@ -834,26 +876,33 @@ def vendor_couriers(request, slug):
     """Livreurs rattachés au restaurant : ajout par nom d'utilisateur, retrait."""
     restaurant = _owner_restaurant(request, slug)
     if request.method == 'POST':
-        username = (request.POST.get('username') or '').strip()
+        username = (request.POST.get('username') or '').strip().lstrip('@')
         remove_pk = request.POST.get('remove')
         if remove_pk:
-            Courier.objects.filter(pk=remove_pk, restaurant=restaurant).update(restaurant=None)
-            messages.success(request, _('Livreur retiré.'))
+            if str(remove_pk).isdigit():
+                Courier.objects.filter(pk=int(remove_pk), restaurant=restaurant).update(restaurant=None)
+                messages.success(request, _('Livreur retiré.'))
         elif username:
-            from django.contrib.auth import get_user_model
-            user = get_user_model().objects.filter(username__iexact=username).first()
-            if not user:
-                messages.error(request, _('Utilisateur introuvable : %(u)s') % {'u': username})
+            # Le compte doit déjà avoir créé SON profil livreur (rien n'est créé à sa place),
+            # ne pas livrer pour un autre restaurant, et sa validation par Vazimba (is_approved)
+            # n'est jamais modifiée ici : le restaurant ne se porte garant que de ses propres commandes.
+            courier = (Courier.objects.select_related('user', 'restaurant')
+                       .filter(user__username__iexact=username).first())
+            if courier is None:
+                messages.error(request, _('%(u)s n\'a pas encore de profil livreur. Demandez-lui de le créer '
+                                          'depuis « Espace livreur », puis ajoutez-le ici.') % {'u': username})
+            elif courier.restaurant_id == restaurant.pk:
+                messages.info(request, _('%(u)s est déjà livreur de %(r)s.') % {'u': courier.user.username, 'r': restaurant.name})
+            elif courier.restaurant_id:
+                messages.error(request, _('%(u)s livre déjà pour un autre restaurant. Il doit d\'abord '
+                                          'le quitter.') % {'u': courier.user.username})
             else:
-                courier, _created = Courier.objects.get_or_create(
-                    user=user, defaults={'phone': getattr(user, 'phone_number', '') or '', 'region': restaurant.region})
                 courier.restaurant = restaurant
-                courier.is_approved = True   # le restaurant se porte garant de ses livreurs
-                courier.save(update_fields=['restaurant', 'is_approved'])
-                _notify(user, request.user,
+                courier.save(update_fields=['restaurant'])
+                _notify(courier.user, request.user,
                         _('%(r)s vous a ajouté comme livreur') % {'r': restaurant.name},
-                        reverse('resto:courier_dashboard'), restaurant, push_title=_('🛵 Vazimba Resto'))
-                messages.success(request, _('%(u)s est maintenant livreur de %(r)s.') % {'u': user.username, 'r': restaurant.name})
+                        reverse('resto:courier_dashboard'), restaurant, push_title=_('Vazimba Resto'))
+                messages.success(request, _('%(u)s est maintenant livreur de %(r)s.') % {'u': courier.user.username, 'r': restaurant.name})
         return redirect('resto:vendor_couriers', slug=slug)
     couriers = list(restaurant.couriers.select_related('user'))
     for c in couriers:
@@ -892,7 +941,7 @@ def courier_signup(request):
                 c.verified_at = None
             c.save()
             messages.success(request, _('Profil livreur enregistré.') if courier else
-                             _('Demande envoyée. Un restaurant peut vous rattacher, ou Vazimba validera votre profil.'))
+                             _('Profil créé. Un restaurant peut vous rattacher pour ses commandes ; les livreurs indépendants sont validés par Vazimba.'))
             return redirect('resto:courier_dashboard')
         messages.error(request, _('Vérifiez les champs signalés.'))
     else:
@@ -907,7 +956,8 @@ def courier_profile(request, username):
     """Page publique du livreur : identité vérifiée, véhicule, zone, réputation, avis."""
     courier = get_object_or_404(Courier.objects.select_related('user', 'restaurant'), user__username__iexact=username)
     is_me = request.user.is_authenticated and courier.user_id == request.user.pk
-    if not (courier.is_approved or is_me or request.user.is_staff):
+    # Visible : validé par Vazimba, ou rattaché à un restaurant (qui répond de lui pour ses commandes)
+    if not (courier.is_approved or courier.restaurant_id or is_me or request.user.is_staff):
         raise Http404
     level, level_label = courier.trust_level()
     reviews = (OrderReview.objects.filter(target_courier=courier).select_related('author', 'order')
@@ -946,23 +996,22 @@ def courier_dashboard(request):
             .exclude(status__in=Order.FINAL_STATUSES)
             .select_related('restaurant', 'customer').prefetch_related('items'))
     available = Order.objects.none()
-    if courier.is_approved:
+    if courier.can_deliver:
         available = (Order.objects.filter(status=Order.STATUS_READY, mode=Order.MODE_DELIVERY, courier__isnull=True)
                      .select_related('restaurant').prefetch_related('items'))
         if courier.restaurant_id:
+            # Rattaché : uniquement les commandes de son restaurant (qui répond de lui)
             available = available.filter(restaurant=courier.restaurant)
         elif courier.region:
-            # Indépendant : commandes de sa région dont le restaurant n'a pas de livreur attitré disponible
+            # Indépendant (validé par Vazimba) : commandes de sa région
             available = available.filter(restaurant__region=courier.region)
     history = Order.objects.filter(courier=courier, status=Order.STATUS_DELIVERED).select_related('restaurant')[:20]
 
     orders = list(mine)
     for o in orders:
         o.next_steps = o.actions_for(['courier'])
-        o.customer_rating = OrderReview.for_customer(o.customer)
     available = list(available)
-    for o in available:
-        o.customer_rating = OrderReview.for_customer(o.customer)
+    _customer_ratings(orders + available)
     level, level_label = courier.trust_level()
     return render(request, 'resto/courier/dashboard.html', {
         'courier': courier, 'orders': orders, 'available': available, 'history': history,
@@ -1005,7 +1054,7 @@ def courier_position(request):
 @require_POST
 def courier_take(request, number):
     courier = _courier(request.user)
-    if courier is None or not courier.is_approved:
+    if courier is None or not courier.can_deliver:
         messages.error(request, _('Profil livreur non validé.'))
         return redirect('resto:courier_dashboard')
     with transaction.atomic():
@@ -1017,6 +1066,9 @@ def courier_take(request, number):
         if courier.restaurant_id and courier.restaurant_id != order.restaurant_id:
             messages.error(request, _('Cette commande appartient à un autre restaurant.'))
             return redirect('resto:courier_dashboard')
+        if not courier.restaurant_id and courier.region and order.restaurant.region != courier.region:
+            messages.error(request, _('Cette commande n\'est pas dans votre zone.'))
+            return redirect('resto:courier_dashboard')
         order.courier = courier
         order.save(update_fields=['courier'])
         order.set_status(Order.STATUS_PICKED_UP, by=request.user, note=_('Prise en charge par %(c)s') % {'c': courier.display_name})
@@ -1024,7 +1076,7 @@ def courier_take(request, number):
     url = reverse('resto:order', kwargs={'number': order.number})
     _notify(order.customer, request.user,
             _('%(c)s a récupéré votre commande %(n)s') % {'c': courier.display_name, 'n': order.number},
-            url, order, push_title=_('🛵 En route !'))
+            url, order, push_title=_('En route !'))
     _notify(order.restaurant.owner, request.user,
             _('Commande %(n)s prise par %(c)s') % {'n': order.number, 'c': courier.display_name},
             reverse('resto:vendor_orders', kwargs={'slug': order.restaurant.slug}), order)

@@ -1,22 +1,21 @@
 {% extends 'base.html' %}
 {% load static i18n %}
+{% block page_title %}{% trans "Mes annonces" %} — {% trans "Bazar" %} Vazimba{% endblock %}
 
 {% block content %}
 <link rel="stylesheet" href="{% static 'css/pages/bazar-mes_annonces.css' %}">
 
 <div class="bazar-mes-wrap">
-    <div class="bazar-mes-header">
-        <div>
-            <nav class="bazar-crumb">
-                <a href="{% url 'bazar:index' %}">{% trans "Bazar" %}</a>
-                <span> › </span>{% trans "Mes annonces" %}
-            </nav>
-            <h1 class="bazar-mes-title"><i class="material-icons" aria-hidden="true">inventory_2</i> {% trans "Mes annonces" %}</h1>
+    <a class="vz-back" href="{% url 'bazar:index' %}"><i class="material-icons" aria-hidden="true">arrow_back</i>{% trans "Bazar" %}</a>
+    <div class="vz-page-head">
+        <div class="vz-page-head__main">
+            <h1 class="vz-page-title"><i class="material-icons" aria-hidden="true">inventory_2</i> {% trans "Mes annonces" %}</h1>
         </div>
-        <a href="{% url 'bazar:create' %}" class="vz-btn vz-btn--primary vz-btn--sm">
-            <i class="material-icons" aria-hidden="true">add</i>
-            {% trans "Nouvelle annonce" %}
-        </a>
+        <div class="vz-page-head__actions">
+            <a href="{% url 'bazar:create' %}" class="vz-btn vz-btn--primary">
+                <i class="material-icons" aria-hidden="true">add</i>{% trans "Nouvelle annonce" %}
+            </a>
+        </div>
     </div>
 
     <!-- Stats -->
@@ -27,11 +26,11 @@
         </div>
         <div class="bazar-stat-pill">
             <span class="num num--active">{{ count_active }}</span>
-            {% trans "active" %}{{ count_active|pluralize }}
+            {% blocktrans count n=count_active %}active{% plural %}actives{% endblocktrans %}
         </div>
         <div class="bazar-stat-pill">
             <span class="num num--sold">{{ count_sold }}</span>
-            {% trans "vendue" %}{{ count_sold|pluralize }}
+            {% blocktrans count n=count_sold %}clôturée{% plural %}clôturées{% endblocktrans %}
         </div>
     </div>
 
@@ -43,22 +42,22 @@
             <div class="bazar-notice__title">{% trans "Devenez Vendeur Vérifié ou Boutique Pro" %}</div>
             <div class="bazar-notice__text">{% trans "Badge, priorité dans les résultats, plus de photos — et une page boutique dédiée pour les pros." %}</div>
         </div>
-        <a href="{% url 'bazar:request_verification' %}" class="vz-btn vz-btn--primary vz-btn--sm bazar-notice__btn">
-            {% trans "Faire une demande →" %}
+        <a href="{% url 'bazar:request_verification' %}" class="vz-btn vz-btn--secondary vz-btn--sm vz-tap bazar-notice__btn">
+            {% trans "Faire une demande" %}<i class="material-icons" aria-hidden="true">arrow_forward</i>
         </a>
     </div>
     {% elif verification.status == 'pending' %}
     <div class="bazar-notice bazar-notice--warning bazar-notice--compact">
         <i class="material-icons bazar-notice__icon" aria-hidden="true">schedule</i>
-        <span class="bazar-notice__body"><strong>{% trans "Demande de vérification en attente" %}</strong> — {% trans "l'admin examinera votre compte prochainement." %}</span>
-        <a href="{% url 'bazar:request_verification' %}" class="bazar-notice__link">{% trans "Voir" %}</a>
+        <span class="bazar-notice__body"><strong>{% trans "Demande de vérification en attente" %}</strong> — {% trans "l'équipe de modération examinera votre compte prochainement." %}</span>
+        <a href="{% url 'bazar:request_verification' %}" class="vz-btn vz-btn--ghost vz-btn--sm vz-tap bazar-notice__btn">{% trans "Voir" %}</a>
     </div>
     {% elif verification.status == 'approved' %}
     {% if verification.seller_type == 'pro' %}
     <div class="bazar-notice bazar-notice--warning bazar-notice--compact">
         <i class="material-icons bazar-notice__icon" aria-hidden="true">star</i>
         <span class="bazar-notice__body"><strong>{% trans "Boutique Pro active" %}</strong> — {% trans "badge doré, page boutique publique, 20 photos par annonce." %}</span>
-        <a href="{% url 'bazar:boutique' username=request.user.username %}" class="vz-btn vz-btn--primary vz-btn--sm bazar-notice__btn">
+        <a href="{% url 'bazar:boutique' username=request.user.username %}" class="vz-btn vz-btn--secondary vz-btn--sm vz-tap bazar-notice__btn">
             <i class="material-icons" aria-hidden="true">storefront</i>{% trans "Ma boutique" %}
         </a>
     </div>
@@ -72,18 +71,13 @@
     <div class="bazar-notice bazar-notice--danger bazar-notice--compact">
         <i class="material-icons bazar-notice__icon" aria-hidden="true">cancel</i>
         <span class="bazar-notice__body"><strong>{% trans "Demande refusée." %}</strong>{% if verification.admin_notes %} {% trans "Motif :" %} {{ verification.admin_notes }}{% endif %}</span>
-        <a href="{% url 'bazar:request_verification' %}" class="vz-btn vz-btn--danger vz-btn--sm bazar-notice__btn">
-            {% trans "Réessayer" %}
+        <a href="{% url 'bazar:request_verification' %}" class="vz-btn vz-btn--secondary vz-btn--sm vz-tap bazar-notice__btn">
+            {% trans "Refaire une demande" %}
         </a>
     </div>
     {% endif %}
 
-    <!-- Messages -->
-    {% if messages %}
-    {% for msg in messages %}
-    <div class="alert alert-{{ msg.tags }} mb-3 bazar-alert">{{ msg }}</div>
-    {% endfor %}
-    {% endif %}
+    {% comment %}Les messages Django sont rendus en toasts par base.html (#vz-flash) : pas de second affichage ici.{% endcomment %}
 
     <!-- Liste -->
     {% if annonces %}
@@ -91,10 +85,10 @@
     {% for annonce in annonces %}
     <div class="vz-card vz-card--row bazar-annonce-row">
         <!-- Miniature -->
-        <a href="{% url 'bazar:detail' annonce.pk %}" class="bazar-annonce-thumb-link">
+        <a href="{% url 'bazar:detail' annonce.pk %}" class="bazar-annonce-thumb-link" tabindex="-1" aria-hidden="true">
             {% with img=annonce.get_primary_image %}
             {% if img %}
-            <img class="vz-card__avatar vz-card__avatar--lg vz-card__avatar--sq" src="{{ img.image.url }}" alt="{{ annonce.title }}" loading="lazy">
+            <img class="vz-card__avatar vz-card__avatar--lg vz-card__avatar--sq" src="{{ img.image.url }}" alt="" loading="lazy">
             {% else %}
             <div class="vz-card__avatar vz-card__avatar--lg vz-card__avatar--sq bazar-annonce-no-thumb"><i class="material-icons" aria-hidden="true">sell</i></div>
             {% endif %}
@@ -108,54 +102,57 @@
                 <span class="vz-card__meta-item"><span>{{ annonce.get_category_display }}</span></span>
                 {% if annonce.location %}<span class="vz-card__meta-item"><i class="material-icons" aria-hidden="true">place</i><span>{{ annonce.location }}</span></span>{% endif %}
                 <span class="vz-card__meta-item"><i class="material-icons" aria-hidden="true">event</i><span>{{ annonce.created_at|date:"d/m/Y" }}</span></span>
-                <span class="vz-card__meta-item"><i class="material-icons" aria-hidden="true">visibility</i><span>{{ annonce.views_count }} {% trans "vue" %}{{ annonce.views_count|pluralize }}</span></span>
+                <span class="vz-card__meta-item"><i class="material-icons" aria-hidden="true">visibility</i><span>{% blocktrans count n=annonce.views_count %}{{ n }} vue{% plural %}{{ n }} vues{% endblocktrans %}</span></span>
             </div>
-            <span class="vz-card__price">{{ annonce.formatted_price }}</span>
+            <span class="vz-card__price">{{ annonce.display_price }}</span>
         </div>
 
-        <!-- Badge statut (cliquable pour toggle active↔pause) -->
-        {% if annonce.status != 'vendue' %}
-        <span class="vz-chip vz-chip--sm bazar-row-status toggleable {% if annonce.status == 'active' %}vz-chip--success{% else %}vz-chip--warning{% endif %}"
-              id="status-badge-{{ annonce.pk }}"
-              onclick="toggleStatus({{ annonce.pk }}, this)"
-              title="{% if annonce.status == 'active' %}Cliquer pour mettre en pause{% else %}Cliquer pour réactiver{% endif %}">
-            {% if annonce.status == 'active' %}<i class="material-icons" aria-hidden="true">check</i>{% trans "Active" %}
-            {% else %}<i class="material-icons" aria-hidden="true">pause</i>{% trans "En pause" %}{% endif %}
-        </span>
-        {% else %}
-        <span class="vz-chip vz-chip--sm vz-chip--danger bazar-row-status"><i class="material-icons" aria-hidden="true">close</i>{% trans "Vendue" %}</span>
-        {% endif %}
-
-        <!-- Actions -->
-        <div class="vz-card__actions vz-card__actions--end bazar-row-actions">
-            <a href="{% url 'bazar:detail' annonce.pk %}" class="bazar-action-btn" title="{% trans 'Voir' %}">
-                <i class="material-icons" aria-hidden="true">visibility</i>
-            </a>
-            <a href="{% url 'bazar:edit' annonce.pk %}" class="bazar-action-btn" title="{% trans 'Modifier' %}">
-                <i class="material-icons" aria-hidden="true">edit</i>
-            </a>
-            {% if annonce.status == 'active' %}
-            <!-- Bump / Rafraîchir -->
+        <div class="bazar-row-end">
+            <!-- Statut : bouton bascule active ↔ pause ; simple pastille pour une annonce clôturée -->
+            {% if annonce.status == 'active' or annonce.status == 'pause' %}
             <button type="button"
-                    class="bazar-action-btn bazar-action-accent"
-                    title="{% trans 'Remonter en tête (1×/24h)' %}"
-                    onclick="bumpAnnonce({{ annonce.pk }}, this)">
-                <i class="material-icons" aria-hidden="true">keyboard_double_arrow_up</i>
+                    class="vz-chip vz-chip--sm bazar-row-status vz-tap {% if annonce.status == 'active' %}vz-chip--success{% else %}vz-chip--warning{% endif %}"
+                    data-toggle-url="{% url 'bazar:toggle_status' annonce.pk %}"
+                    aria-pressed="{% if annonce.status == 'active' %}true{% else %}false{% endif %}"
+                    title="{% if annonce.status == 'active' %}{% trans 'Mettre en pause' %}{% else %}{% trans 'Réactiver' %}{% endif %}">
+                {% if annonce.status == 'active' %}<i class="material-icons" aria-hidden="true">check</i>{% trans "Active" %}
+                {% else %}<i class="material-icons" aria-hidden="true">pause</i>{% trans "En pause" %}{% endif %}
             </button>
-            <!-- Marquer vendue -->
-            <form method="post" action="{% url 'bazar:mark_sold' annonce.pk %}" data-vz-confirm="{% trans 'Marquer comme vendue ?' %}">
-                {% csrf_token %}
-                <button type="submit" class="bazar-action-btn bazar-action-ok" title="{% trans 'Marquer vendue' %}">
-                    <i class="material-icons" aria-hidden="true">check</i>
-                </button>
-            </form>
+            {% elif annonce.status == 'vendue' %}
+            <span class="vz-chip vz-chip--sm vz-chip--static vz-chip--danger bazar-row-status"><i class="material-icons" aria-hidden="true">close</i>{% trans "Vendue" %}</span>
+            {% elif annonce.status == 'louee' %}
+            <span class="vz-chip vz-chip--sm vz-chip--static vz-chip--danger bazar-row-status"><i class="material-icons" aria-hidden="true">close</i>{% trans "Louée" %}</span>
+            {% else %}
+            <span class="vz-chip vz-chip--sm vz-chip--static vz-chip--warning bazar-row-status"><i class="material-icons" aria-hidden="true">event_busy</i>{% trans "Expirée" %}</span>
             {% endif %}
-            <form method="post" action="{% url 'bazar:delete' annonce.pk %}" data-vz-confirm="{% trans 'Supprimer définitivement ?' %}" data-vz-danger>
-                {% csrf_token %}
-                <button type="submit" class="bazar-action-btn bazar-action-del" title="{% trans 'Supprimer' %}">
-                    <i class="material-icons" aria-hidden="true">delete</i>
+
+            <!-- Actions -->
+            <div class="bazar-row-actions">
+                <a href="{% url 'bazar:edit' annonce.pk %}" class="vz-icon-btn vz-icon-btn--lg" title="{% trans 'Modifier' %}" aria-label="{% trans 'Modifier' %}">
+                    <i class="material-icons" aria-hidden="true">edit</i>
+                </a>
+                {% if annonce.status == 'active' %}
+                <button type="button" class="vz-icon-btn vz-icon-btn--lg bazar-bump-btn"
+                        data-bump-url="{% url 'bazar:bump' annonce.pk %}"
+                        title="{% trans 'Remonter en tête (1×/24h)' %}" aria-label="{% trans 'Remonter en tête (1×/24h)' %}">
+                    <i class="material-icons" aria-hidden="true">keyboard_double_arrow_up</i>
                 </button>
-            </form>
+                <form method="post" action="{% url 'bazar:mark_sold' annonce.pk %}"
+                      data-vz-confirm="{% if annonce.is_location %}{% trans 'Marquer cette annonce comme louée ?' %}{% else %}{% trans 'Marquer cette annonce comme vendue ?' %}{% endif %}">
+                    {% csrf_token %}
+                    {% if annonce.is_location %}{% trans "Marquer comme louée" as sold_label %}{% else %}{% trans "Marquer comme vendue" as sold_label %}{% endif %}
+                    <button type="submit" class="vz-icon-btn vz-icon-btn--lg" title="{{ sold_label }}" aria-label="{{ sold_label }}">
+                        <i class="material-icons" aria-hidden="true">check_circle</i>
+                    </button>
+                </form>
+                {% endif %}
+                <form method="post" action="{% url 'bazar:delete' annonce.pk %}" data-vz-confirm="{% trans 'Supprimer définitivement cette annonce ?' %}" data-vz-danger>
+                    {% csrf_token %}
+                    <button type="submit" class="vz-icon-btn vz-icon-btn--lg vz-icon-btn--danger" title="{% trans 'Supprimer' %}" aria-label="{% trans 'Supprimer' %}">
+                        <i class="material-icons" aria-hidden="true">delete</i>
+                    </button>
+                </form>
+            </div>
         </div>
     </div>
     {% endfor %}
@@ -164,88 +161,54 @@
     {% else %}
     <div class="vz-empty bazar-mes-empty">
         <i class="material-icons" aria-hidden="true">inventory_2</i>
-        <h4 class="vz-empty-title">{% trans "Vous n'avez aucune annonce" %}</h4>
-        <p class="vz-empty-text">{% trans "Publiez votre première annonce et touchez des milliers de Malgaches." %}</p>
-        <a href="{% url 'bazar:create' %}" class="vz-btn vz-btn--primary mt-2">
-            {% trans "Publier maintenant" %}
+        <h2 class="vz-empty-title">{% trans "Vous n'avez aucune annonce" %}</h2>
+        <p class="vz-empty-text">{% trans "Publiez votre première annonce et touchez des milliers de personnes à travers l'Afrique." %}</p>
+        <a href="{% url 'bazar:create' %}" class="vz-btn vz-btn--secondary">
+            {% trans "Publier une annonce" %}
         </a>
     </div>
     {% endif %}
 </div>
 
 <script>
-const CSRF_TOKEN = document.querySelector('[name=csrfmiddlewaretoken]') ? document.querySelector('[name=csrfmiddlewaretoken]').value : '';
+(function () {
+    var I18N = {
+        error:    "{% trans 'Une erreur est survenue. Réessayez.'|escapejs %}",
+        network:  "{% trans 'Erreur réseau. Vérifiez votre connexion et réessayez.'|escapejs %}",
+        bumped:   "{% trans 'Annonce remontée en tête.'|escapejs %}"
+    };
+    var CSRF = (document.cookie.match(/csrftoken=([^;]+)/) || [])[1] || '';
+    function post(url) {
+        return fetch(url, { method: 'POST', credentials: 'same-origin', headers: { 'X-CSRFToken': CSRF } })
+            .then(function (r) { return r.json().catch(function () { return {}; }); });
+    }
 
-// ── Toggle statut active ↔ pause ──────────────────────────────────────────────
-function toggleStatus(pk, badgeEl) {
-    fetch(`/bazar/${pk}/toggle-statut/`, {
-        method: 'POST',
-        headers: { 'X-CSRFToken': CSRF_TOKEN, 'Content-Type': 'application/json' },
-    })
-    .then(r => r.json())
-    .then(data => {
-        if (!data.success) { vzAlert(data.error || 'Erreur'); return; }
-        badgeEl.className = 'vz-chip vz-chip--sm bazar-row-status toggleable ' +
-            (data.new_status === 'active' ? 'vz-chip--success' : 'vz-chip--warning');
-        badgeEl.innerHTML = data.new_status === 'active'
-            ? '<i class="material-icons" aria-hidden="true">check</i>Active'
-            : '<i class="material-icons" aria-hidden="true">pause</i>En pause';
-        badgeEl.title = data.new_status === 'active'
-            ? 'Cliquer pour mettre en pause'
-            : 'Cliquer pour réactiver';
-        // Afficher/masquer les boutons Bump et Marquer-vendue
-        _refreshRowActions(pk, data.new_status);
-    })
-    .catch(() => vzAlert('Erreur réseau.'));
-}
-
-function _refreshRowActions(pk, newStatus) {
-    // Recharge la page pour simplifier (les boutons Bump et Vendue dépendent du statut)
-    location.reload();
-}
-
-// ── Bump — remonter en tête ───────────────────────────────────────────────────
-function bumpAnnonce(pk, btn) {
-    btn.disabled = true;
-    btn.style.opacity = '.5';
-    fetch(`/bazar/${pk}/bump/`, {
-        method: 'POST',
-        headers: { 'X-CSRFToken': CSRF_TOKEN, 'Content-Type': 'application/json' },
-    })
-    .then(r => r.json())
-    .then(data => {
-        if (data.cooldown) {
-            vzAlert(`Vous pouvez rafraîchir à nouveau dans ${data.remaining_h}h.`);
-            btn.disabled = false;
-            btn.style.opacity = '';
+    document.addEventListener('click', function (e) {
+        // ── Bascule active ↔ pause ──
+        var st = e.target.closest('[data-toggle-url]');
+        if (st) {
+            st.disabled = true;
+            post(st.dataset.toggleUrl).then(function (data) {
+                if (!data.success) { st.disabled = false; vzToast(data.error || I18N.error, {type: 'error'}); return; }
+                // Les actions « Remonter » et « Marquer vendue » dépendent du statut : on recharge la ligne
+                window.location.reload();
+            }).catch(function () { st.disabled = false; vzToast(I18N.network, {type: 'error'}); });
             return;
         }
-        if (!data.success) {
-            vzAlert(data.error || 'Erreur');
-            btn.disabled = false;
-            btn.style.opacity = '';
-            return;
+        // ── Remonter en tête ──
+        var bump = e.target.closest('[data-bump-url]');
+        if (bump) {
+            bump.disabled = true;
+            post(bump.dataset.bumpUrl).then(function (data) {
+                if (!data.success) {
+                    bump.disabled = false;
+                    vzToast(data.error || I18N.error, {type: data.cooldown ? 'info' : 'error'});
+                    return;
+                }
+                vzToast(I18N.bumped, {type: 'success'});   // le bouton reste désactivé : 1 fois par 24 h
+            }).catch(function () { bump.disabled = false; vzToast(I18N.network, {type: 'error'}); });
         }
-        // Succès : changer l'apparence du bouton
-        btn.title = 'Remontée !';
-        btn.classList.add('bazar-action-ok');
-        btn.style.opacity = '1';
-        btn.innerHTML = '<i class="material-icons" aria-hidden="true">check</i>';
-        setTimeout(() => {
-            btn.title = 'Remonter en tête (1×/24h)';
-            btn.classList.remove('bazar-action-ok');
-            btn.innerHTML = '<i class="material-icons" aria-hidden="true">keyboard_double_arrow_up</i>';
-            // Désactiver pendant 24h (pas de reload pour l'UX)
-            btn.disabled = true;
-            btn.style.opacity = '.35';
-            btn.title = 'Rafraîchi — disponible dans 24h';
-        }, 1200);
-    })
-    .catch(() => {
-        vzAlert('Erreur réseau.');
-        btn.disabled = false;
-        btn.style.opacity = '';
     });
-}
+})();
 </script>
 {% endblock %}

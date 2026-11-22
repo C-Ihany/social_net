@@ -8,30 +8,30 @@
 <div class="gp-private-wrapper">
     <div class="gp-private-card">
         <span class="material-icons gp-private-icon">lock</span>
-        <h2>{{ group.name }}</h2>
+        <h1 class="gp-private-title">{{ group.name }}</h1>
         <p>{% trans "This group is private. You need to be a member to view its content." %}</p>
         {% if join_pending %}
-        <p class="gp-private-btn gp-private-btn--static">
-            <span class="material-icons">hourglass_top</span>
+        <p><span class="vz-chip vz-chip--static">
+            <span class="material-icons" aria-hidden="true">hourglass_top</span>
             {% trans "Request pending" %}
-        </p>
+        </span></p>
         {% elif user.is_authenticated %}
         <form method="post" action="{% url 'group:join' group.slug %}">
             {% csrf_token %}
-            <button type="submit" class="gp-private-btn">
-                <span class="material-icons">person_add</span>
+            <button type="submit" class="vz-btn vz-btn--primary">
+                <span class="material-icons" aria-hidden="true">person_add</span>
                 {% trans "Request to join" %}
             </button>
         </form>
         {% else %}
-        <a href="{% url 'login' %}?next={{ request.path }}" class="gp-private-btn">
-            <span class="material-icons">login</span>
+        <a href="{% url 'login' %}?next={{ request.path|urlencode }}" class="vz-btn vz-btn--primary">
+            <span class="material-icons" aria-hidden="true">login</span>
             {% trans "Sign in to join" %}
         </a>
         {% endif %}
     </div>
-    <a class="gp-back" href="{% url 'group:list' %}">
-        <span class="material-icons">arrow_back</span> {% trans "Back to groups" %}
+    <a class="vz-back gp-back" href="{% url 'group:list' %}">
+        <span class="material-icons" aria-hidden="true">arrow_back</span> {% trans "Back to groups" %}
     </a>
 </div>
 {% endblock %}

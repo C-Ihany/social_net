@@ -6,11 +6,11 @@
 {% include 'resto/_style.html' %}
 <link rel="stylesheet" href="{% static 'css/pages/resto-profile.css' %}">
 <div class="rs-wrap rs-wrap--md">
-    <div class="rs-card rs-cp-card">
+    <div class="vz-card rs-box rs-cp-card">
         <div class="rs-cp-head">
             <div class="rs-cp-photo">{% if courier.photo %}<img src="{{ courier.photo.url }}" alt="">{% else %}<i class="material-icons" aria-hidden="true">delivery_dining</i>{% endif %}</div>
             <div class="rs-fill">
-                <h1 class="rs-h1 rs-h1--sm">{{ courier.display_name }}</h1>
+                <h1 class="vz-page-title">{{ courier.display_name }}</h1>
                 <div class="rs-cp-tags">
                     {% include 'resto/_courier_badge.html' with level=level %}
                     {% include 'resto/_rating.html' with r=rating show_empty=1 %}
@@ -36,7 +36,7 @@
         {% endif %}
     </div>
 
-    <div class="rs-card rs-card--pad rs-card--mt">
+    <div class="vz-card rs-box rs-card--pad rs-card--mt">
         <div class="rs-cp-row rs-cp-row--first"><span class="k"><i class="material-icons rs-ico" aria-hidden="true">two_wheeler</i> {% trans "Véhicule" %}</span><span>{{ courier.get_vehicle_display }}{% if courier.vehicle_plate %} · <strong>{{ courier.vehicle_plate }}</strong>{% endif %}</span></div>
         {% if courier.vehicle_photo %}<img src="{{ courier.vehicle_photo.url }}" alt="" class="rs-cp-vehicle">{% endif %}
         <div class="rs-cp-row"><span class="k"><i class="material-icons rs-ico" aria-hidden="true">place</i> {% trans "Zone" %}</span><span>{{ courier.get_region_display|default:"—" }}{% if courier.zone_list %}<br>{% for z in courier.zone_list %}<span class="vz-chip vz-chip--sm vz-chip--static vz-chip--soft rs-cp-zone">{{ z }}</span>{% endfor %}{% endif %}</span></div>
@@ -45,7 +45,7 @@
         <div class="rs-cp-row"><span class="k"><i class="material-icons rs-ico" aria-hidden="true">payments</i> {% trans "Paiement des frais" %}</span><span>{% if courier.mm_provider %}{{ courier.get_mm_provider_display }}{% if show_phone and courier.mm_number %} · {{ courier.mm_number }}{% endif %} · {% endif %}{% trans "Espèces" %}</span></div>
         <div class="rs-cp-row"><span class="k"><i class="material-icons rs-ico" aria-hidden="true">badge</i> {% trans "Identité" %}</span>
             <span>
-                {% if courier.cin_verified %}<span class="rs-check"><i class="material-icons rs-ico" aria-hidden="true">check</i> {% trans "CIN contrôlée par l'équipe Vazimba" %}</span>{% else %}<span class="rs-cross"><i class="material-icons rs-ico" aria-hidden="true">close</i> {% trans "Identité pas encore contrôlée par Vazimba" %}</span>{% endif %}<br>
+                {% if courier.cin_verified %}<span class="rs-check"><i class="material-icons rs-ico" aria-hidden="true">check</i> {% trans "Pièce d'identité contrôlée par l'équipe Vazimba" %}</span>{% else %}<span class="rs-cross"><i class="material-icons rs-ico" aria-hidden="true">close</i> {% trans "Identité pas encore contrôlée par Vazimba" %}</span>{% endif %}<br>
                 {% if courier.phone_verified %}<span class="rs-check"><i class="material-icons rs-ico" aria-hidden="true">check</i> {% trans "Téléphone vérifié" %}</span>{% else %}<span class="rs-cross"><i class="material-icons rs-ico" aria-hidden="true">close</i> {% trans "Téléphone vérifié" %}</span>{% endif %}<br>
                 {% if courier.guarantor_name %}<span class="rs-check"><i class="material-icons rs-ico" aria-hidden="true">check</i> {% trans "Garant" %}</span>{% else %}<span class="rs-cross"><i class="material-icons rs-ico" aria-hidden="true">close</i> {% trans "Garant" %}</span>{% endif %}
             </span>
@@ -58,7 +58,7 @@
         {% if is_me %}<a class="vz-btn vz-btn--sm vz-btn--secondary rs-mt-m" href="{% url 'resto:courier_signup' %}"><i class="material-icons" aria-hidden="true">edit</i> {% trans "Modifier mon profil" %}</a>{% endif %}
     </div>
 
-    <div class="rs-card rs-card--pad rs-card--mt">
+    <div class="vz-card rs-box rs-card--pad rs-card--mt">
         <p class="rs-card-title rs-card-title--tight"><i class="material-icons rs-ico rs-star" aria-hidden="true">star</i> {% trans "Derniers avis" %}</p>
         {% for r in reviews %}
         <div class="rs-review">{% include 'resto/_stars.html' with n=r.rating %} <span class="who">{{ r.get_author_role_display }}</span> <span class="rs-muted">· {{ r.created_at|date:"d/m/Y" }}</span>

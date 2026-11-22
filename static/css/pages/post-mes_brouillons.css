@@ -1,69 +1,9 @@
-/* Généré depuis post/templates/post/mes_brouillons.html — styles de page servis en statique (cache navigateur + service worker)
-   au lieu d'être renvoyés dans chaque réponse HTML. Modifier ICI, plus dans le gabarit. */
-
-body { background: var(--bg); }
-.draft-wrapper {
-    max-width: 700px;
-    margin: 80px auto 3rem;
-    padding: 0 .75rem;
+/* Brouillons et posts programmés : cartes, puces et boutons viennent du socle. */
+.draft-wrapper { max-width: 700px; margin: 80px auto 3rem; padding: 0 .75rem; }
+.draft-head { display: flex; align-items: center; gap: .5rem; flex-wrap: wrap; margin-bottom: .25rem; }
+.draft-title { margin: 0; min-width: 0; }
+.draft-actions { margin-top: .75rem; justify-content: flex-end; }
+.draft-flash {
+    margin: 0 0 .75rem; padding: .6rem .9rem; border-radius: var(--radius);
+    background: rgba(var(--accent-rgb), .1); color: var(--text); font-size: .9rem;
 }
-.draft-hero {
-    background: linear-gradient(135deg,var(--vintana),var(--accent2));
-    border-radius:16px;
-    padding:1.5rem;
-    margin-bottom:1.5rem;
-    color:#fff;
-    display:flex;
-    align-items:center;
-    gap:1rem;
-}
-.draft-hero .material-icons { font-size:2.5rem; opacity:.9; }
-.draft-hero h1 { font-size:1.4rem;font-weight:800;margin:0 0 .2rem; }
-.draft-hero p  { margin:0;font-size:.88rem;opacity:.85; }
-.draft-card {
-    background:var(--bg-card);
-    border-radius:14px;
-    border:1px solid var(--border);
-    padding:1rem 1.25rem;
-    margin-bottom:.75rem;
-    display:flex;
-    align-items:flex-start;
-    gap:1rem;
-    transition:box-shadow .15s;
-}
-.draft-card:hover { box-shadow: var(--shadow); }
-.draft-badge {
-    display:inline-flex;
-    align-items:center;
-    gap:.25rem;
-    padding:.18rem .55rem;
-    border-radius:20px;
-    font-size:.72rem;
-    font-weight:700;
-    letter-spacing:.04em;
-    flex-shrink:0;
-}
-.badge-draft     { background: var(--btn-bg); color: var(--text-muted); }
-.badge-scheduled { background: var(--btn-bg); color: var(--warning); }
-.draft-badge .material-icons { font-size: .85rem; }
-.draft-head { display: flex; align-items: center; gap: .5rem; margin-bottom: .35rem; flex-wrap: wrap; }
-.draft-body { flex:1; min-width:0; }
-.draft-title { font-weight:700;font-size:1rem;margin-bottom:.2rem;color:var(--text); }
-.draft-meta  { font-size:.78rem;color:var(--text-muted); }
-.draft-actions { display:flex;gap:.4rem;margin-top:.65rem;flex-wrap:wrap; }
-.draft-btn {
-    display:inline-flex;align-items:center;gap:.25rem;
-    padding:.3rem .75rem;border-radius: var(--radius-sm);border:none;cursor:pointer;
-    font-size: .88rem;font-weight: 700;text-decoration:none;transition:background .15s;
-  min-height: 36px; display: inline-flex; align-items: center; justify-content: center; gap: .4rem;
-}
-.draft-btn-edit    { background:var(--btn-bg);color:var(--text); }
-.draft-btn-publish { background:var(--accent);color:var(--on-accent); }
-.draft-btn-delete  { background: rgba(var(--danger-rgb),.12); color: var(--danger); }
-.draft-btn .material-icons { font-size: .9rem; }
-.draft-inline-form { display: inline; }
-.draft-btn:hover { opacity:.85; }
-.draft-empty { text-align:center;padding:3rem 1rem;color:var(--text-muted); }
-.draft-empty .material-icons { font-size:3rem;display:block;margin-bottom:.75rem;opacity:.4; }
-.draft-empty .draft-btn { margin-top: .5rem; }
-.draft-empty .draft-btn .material-icons { font-size: .9rem; display: inline; margin: 0; opacity: 1; }

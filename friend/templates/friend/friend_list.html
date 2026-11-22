@@ -1,116 +1,106 @@
 {% extends 'base.html' %}
 {% load static %}
 {% load i18n %}
+{% block page_title %}{% if is_own_list %}{% trans "My friends" %}{% else %}{% blocktrans with name=this_user.username %}Amis de {{ name }}{% endblocktrans %}{% endif %} — Vazimba{% endblock %}
 
 {% block content %}
 <link rel="stylesheet" href="{% static 'css/pages/friend-friend_list.css' %}">
 
 <div class="fl-wrapper">
 
-    <!-- Header -->
-    <div class="fl-header">
-        <div class="fl-title">
-            <div class="fl-title-icon">
-                <span class="material-icons">group</span>
-            </div>
-            <div>
-                <h1>{% trans "My friends" %}</h1>
-            </div>
-        </div>
-        <div class="fl-head-actions">
+    <div class="vz-page-head">
+        {% if not is_own_list %}
+        <a class="vz-back" href="{% url 'account:view' user_id=this_user.pk %}"><span class="material-icons" aria-hidden="true">arrow_back</span>{% trans "Profile" %}</a>
+        {% endif %}
+        <div class="vz-page-head__main">
+            <h1 class="vz-page-title">
+                <span class="material-icons" aria-hidden="true">group</span>
+                {% if is_own_list %}{% trans "My friends" %}{% else %}{% blocktrans with name=this_user.username %}Amis de {{ name }}{% endblocktrans %}{% endif %}
+            </h1>
             {% if friends %}
-            <span class="fl-count-badge">{{ friends|length }} {% trans "friends" %}</span>
+            <p class="vz-page-sub">{% blocktrans count n=friends|length %}{{ n }} ami{% plural %}{{ n }} amis{% endblocktrans %}</p>
             {% endif %}
-            <div class="fl-search-bar">
-                <span class="material-icons">search</span>
-                <input type="text" id="fl-search-input" placeholder="{% trans "Search friends…" %}" autocomplete="off">
-            </div>
         </div>
-    </div>
-
-    <!-- Filter chips -->
-    <div class="fl-filters">
-        <button class="fl-chip active" data-filter="all" type="button">{% trans "All" %}</button>
-        <button class="fl-chip" data-filter="friend" type="button">{% trans "Friends" %}</button>
-        <button class="fl-chip" data-filter="not-friend" type="button">{% trans "Not friends" %}</button>
-    </div>
-
-    <!-- Grid -->
-    <div class="fl-grid" id="fl-grid">
-
-        {% if friends %}
-            {% for friend in friends %}
-            <div class="fl-card anim-fade-up"
-                 data-username="{{ friend.0.username|lower }}"
-                 data-status="{% if friend.0 == request.user %}me{% elif friend.1 %}friend{% else %}not-friend{% endif %}"
-                 style="animation-delay: {{ forloop.counter0 }}0ms;">
-
-                <!-- Banner -->
-                <div class="fl-card-banner"></div>
-
-                <div class="fl-card-body">
-                    <!-- Avatar -->
-                    <a href="{% url 'account:view' user_id=friend.0.pk %}" class="fl-avatar-wrap">
-                        <img class="fl-avatar" src="{{ friend.0.profile_image.url }}" alt="{{ friend.0.username }}">
-                    </a>
-
-                    <!-- Name -->
-                    <a class="fl-username" href="{% url 'account:view' user_id=friend.0.pk %}">
-                        {{ friend.0.username|truncatechars:24 }}
-                    </a>
-
-                    <!-- Status badge -->
-                    {% if friend.0 == request.user %}
-                    <span class="fl-badge me">
-                        <span class="material-icons">person_pin</span>
-                        {% trans "Me" %}
-                    </span>
-                    {% elif friend.1 %}
-                    <span class="fl-badge friend">
-                        <span class="material-icons">check_circle</span>
-                        {% trans "Friends" %}
-                    </span>
-                    {% else %}
-                    <span class="fl-badge not-friend">
-                        <span class="material-icons">person_off</span>
-                        {% trans "Not friends" %}
-                    </span>
-                    {% endif %}
-
-                    <!-- Actions -->
-                    <div class="fl-actions">
-                        <a class="fl-btn fl-btn-profile" href="{% url 'account:view' user_id=friend.0.pk %}">
-                            <span class="material-icons">person</span>
-                            {% trans "Profile" %}
-                        </a>
-                        {% if friend.1 and friend.0 != request.user %}
-                        <a class="fl-btn fl-btn-msg" href="#" onclick="createOrReturnPrivateChat('{{ friend.0.id }}'); return false;">
-                            <span class="material-icons">chat_bubble</span>
-                            {% trans "Message" %}
-                        </a>
-                        {% endif %}
-                    </div>
-                </div>
-
-            </div>
-            {% endfor %}
-
-        {% else %}
-        <!-- Empty state -->
-        <div class="fl-empty">
-            <div class="fl-empty-icon">
-                <span class="material-icons">group_off</span>
-            </div>
-            <h3>{% trans "No friends yet" %}</h3>
-            <p>{% trans "Looking for friends? Search here and start connecting!" %}</p>
-            <a href="{% url 'search' %}?q=" class="fl-empty-cta">
-                <span class="material-icons">person_search</span>
-                {% trans "Find people" %}
+        {% if is_own_list %}
+        <div class="vz-page-head__actions">
+            <a class="vz-btn vz-btn--secondary vz-btn--sm" href="{% url 'friend:friend-requests' user_id=request.user.id %}">
+                <span class="material-icons" aria-hidden="true">person_add_alt</span>{% trans "Friend requests" %}
             </a>
         </div>
         {% endif %}
+    </div>
 
-    </div><!-- /fl-grid -->
+    {% if friends %}
+    <div class="fl-tools">
+        <div class="vz-field fl-search">
+            <label class="vz-sr-only" for="fl-search-input">{% trans "Search friends…" %}</label>
+            <input type="search" id="fl-search-input" placeholder="{% trans "Search friends…" %}" autocomplete="off">
+        </div>
+        {% if not is_own_list %}
+        {# Filtre utile seulement sur la liste d'un autre membre : sur la sienne, tout le monde est ami #}
+        <div class="vz-segmented" role="group" aria-label="{% trans 'Filtrer' %}">
+            <button class="vz-seg active" data-filter="all" type="button" aria-pressed="true">{% trans "All" %}</button>
+            <button class="vz-seg" data-filter="friend" type="button" aria-pressed="false">{% trans "Amis communs" %}</button>
+            <button class="vz-seg" data-filter="not-friend" type="button" aria-pressed="false">{% trans "Not friends" %}</button>
+        </div>
+        {% endif %}
+    </div>
+
+    <div class="vz-stack" id="fl-grid">
+        {% for friend in friends %}
+        <div class="vz-card vz-card--row fl-card"
+             data-username="{{ friend.0.username|lower }}"
+             data-status="{% if friend.0 == request.user %}me{% elif friend.1 %}friend{% else %}not-friend{% endif %}">
+            <a class="vz-card__avatar-wrap" href="{% url 'account:view' user_id=friend.0.pk %}">
+                <img class="vz-card__avatar" src="{{ friend.0.profile_image.url }}" alt="" loading="lazy">
+            </a>
+            <div class="vz-card__body">
+                <h2 class="vz-card__title vz-card__title--1">
+                    <a href="{% url 'account:view' user_id=friend.0.pk %}">{{ friend.0.username }}</a>
+                </h2>
+                {% if not is_own_list %}
+                <div class="vz-card__meta">
+                    {% if friend.0 == request.user %}
+                    <span class="vz-chip vz-chip--sm vz-chip--accent vz-chip--static"><i class="material-icons" aria-hidden="true">person_pin</i>{% trans "You" %}</span>
+                    {% elif friend.1 %}
+                    <span class="vz-chip vz-chip--sm vz-chip--success vz-chip--static"><i class="material-icons" aria-hidden="true">check</i>{% trans "Friend" %}</span>
+                    {% else %}
+                    <span class="vz-chip vz-chip--sm vz-chip--soft vz-chip--static"><i class="material-icons" aria-hidden="true">person_outline</i>{% trans "Not friends" %}</span>
+                    {% endif %}
+                </div>
+                {% endif %}
+            </div>
+            <div class="vz-card__actions vz-card__actions--end">
+                {% if friend.1 and friend.0 != request.user %}
+                <button type="button" class="vz-btn vz-btn--secondary vz-btn--sm" onclick="createOrReturnPrivateChat('{{ friend.0.id }}')">
+                    <span class="material-icons" aria-hidden="true">chat_bubble_outline</span>{% trans "Message" %}
+                </button>
+                {% else %}
+                <a class="vz-btn vz-btn--secondary vz-btn--sm" href="{% url 'account:view' user_id=friend.0.pk %}">
+                    <span class="material-icons" aria-hidden="true">person</span>{% trans "Profile" %}
+                </a>
+                {% endif %}
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    <div class="vz-empty fl-no-match" id="fl-no-match" hidden>
+        <span class="material-icons" aria-hidden="true">search_off</span>
+        <div class="vz-empty-title">{% trans "No results" %}</div>
+    </div>
+
+    {% else %}
+    <div class="vz-empty">
+        <span class="material-icons" aria-hidden="true">group_off</span>
+        <div class="vz-empty-title">{% trans "No friends yet" %}</div>
+        {% if is_own_list %}
+        <p class="vz-empty-text">{% trans "Looking for friends? Search here and start connecting!" %}</p>
+        <a href="{% url 'recherche' %}" class="vz-btn vz-btn--primary">
+            <span class="material-icons" aria-hidden="true">person_search</span>{% trans "Find people" %}
+        </a>
+        {% endif %}
+    </div>
+    {% endif %}
 
 </div>
 
@@ -118,32 +108,30 @@
 
 <script>
 (function() {
-    /* ── Recherche en temps réel ── */
+    /* ── Recherche en temps réel + filtre ── */
     var searchInput = document.getElementById('fl-search-input');
     var cards = document.querySelectorAll('.fl-card');
+    var noMatch = document.getElementById('fl-no-match');
     var activeFilter = 'all';
 
     function filterCards() {
         var q = searchInput ? searchInput.value.toLowerCase().trim() : '';
+        var shown = 0;
         cards.forEach(function(card) {
-            var username = (card.dataset.username || '').toLowerCase();
-            var status   = card.dataset.status || '';
-            var matchQ    = !q || username.includes(q);
-            var matchF    = activeFilter === 'all' || status === activeFilter;
-            card.style.display = (matchQ && matchF) ? '' : 'none';
+            var ok = (!q || (card.dataset.username || '').indexOf(q) >= 0)
+                  && (activeFilter === 'all' || card.dataset.status === activeFilter);
+            card.hidden = !ok;
+            if (ok) shown++;
         });
+        if (noMatch) noMatch.hidden = shown > 0 || !cards.length;
     }
+    if (searchInput) searchInput.addEventListener('input', filterCards);
 
-    if (searchInput) {
-        searchInput.addEventListener('input', filterCards);
-    }
-
-    /* ── Filter chips ── */
-    document.querySelectorAll('.fl-chip').forEach(function(chip) {
-        chip.addEventListener('click', function() {
-            document.querySelectorAll('.fl-chip').forEach(function(c){ c.classList.remove('active'); });
-            chip.classList.add('active');
-            activeFilter = chip.dataset.filter;
+    document.querySelectorAll('.fl-tools .vz-seg').forEach(function(seg) {
+        seg.addEventListener('click', function() {
+            document.querySelectorAll('.fl-tools .vz-seg').forEach(function(c){ c.classList.remove('active'); c.setAttribute('aria-pressed', 'false'); });
+            seg.classList.add('active'); seg.setAttribute('aria-pressed', 'true');
+            activeFilter = seg.dataset.filter;
             filterCards();
         });
     });

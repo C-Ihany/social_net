@@ -10,23 +10,26 @@
 {% include 'resto/_style.html' %}
 <link rel="stylesheet" href="{% static 'css/pages/resto-restaurant_form.css' %}">
 <div class="rs-wrap rs-wrap--md">
-    <h1 class="rs-h1 rs-h1--top">{% if restaurant %}<i class="material-icons" aria-hidden="true">settings</i> {{ restaurant.name }}{% else %}<i class="material-icons" aria-hidden="true">storefront</i> {% trans "Créer mon restaurant" %}{% endif %}</h1>
+    <div class="vz-page-head">
+        <a class="vz-back" href="{% url 'resto:vendor_dashboard' %}" aria-label="{% trans 'Mes restaurants' %}"><i class="material-icons" aria-hidden="true">arrow_back</i></a>
+        <div class="vz-page-head__main"><h1 class="vz-page-title">{% if restaurant %}<i class="material-icons" aria-hidden="true">settings</i> {{ restaurant.name }}{% else %}<i class="material-icons" aria-hidden="true">storefront</i> {% trans "Créer mon restaurant" %}{% endif %}</h1></div>
+    </div>
 
-    <form method="post" enctype="multipart/form-data" class="rs-form rs-card rs-card--pad" novalidate>{% csrf_token %}
+    <form method="post" enctype="multipart/form-data" class="rs-form vz-card rs-box rs-card--pad" novalidate>{% csrf_token %}
         {% if form.non_field_errors %}<p class="err">{{ form.non_field_errors|join:" " }}</p>{% endif %}
         {% for field in form.visible_fields %}
         {% if field.name in 'offers_delivery offers_pickup' %}
-        <div class="rs-check-row">{{ field }} <label>{{ field.label }}</label></div>
+        <div class="rs-check-row">{{ field }} <label for="{{ field.id_for_label }}">{{ field.label }}</label></div>
         {% else %}
         <div>
-            <label>{{ field.label }}{% if field.field.required %} *{% endif %}</label>
+            <label for="{{ field.id_for_label }}">{{ field.label }}{% if field.field.required %} <span class="vz-req">*</span>{% endif %}</label>
             {{ field }}
             {% if field.help_text %}<p class="help rs-mt-xxs">{{ field.help_text }}</p>{% endif %}
             {% if field.errors %}<p class="err">{{ field.errors|join:" " }}</p>{% endif %}
         </div>
         {% if field.name == 'address' %}
         <div>
-            <label>{% trans "Position sur la carte" %}</label>
+            <span class="rs-label">{% trans "Position sur la carte" %}</span>
             <p class="help rs-mb-xs">{% trans "Touchez la carte pour placer votre restaurant : les livreurs et les clients le verront sur le plan de livraison." %}</p>
             <button type="button" class="vz-btn vz-btn--sm vz-btn--secondary" onclick="rsLocate()"><i class="material-icons" aria-hidden="true">my_location</i> {% trans "Ma position" %}</button>
             <div id="rs-pickmap"></div>
@@ -35,7 +38,10 @@
         {% endif %}
         {% endfor %}
         {{ form.latitude }}{{ form.longitude }}
-        <button class="vz-btn vz-btn--primary vz-btn--block" type="submit">{% if restaurant %}{% trans "Enregistrer" %}{% else %}{% trans "Créer et passer au menu" %} <i class="material-icons" aria-hidden="true">arrow_forward</i>{% endif %}</button>
+        <div class="vz-actions">
+            <a class="vz-btn vz-btn--muted" href="{% url 'resto:vendor_dashboard' %}">{% trans "Annuler" %}</a>
+            <button class="vz-btn vz-btn--primary" type="submit">{% if restaurant %}<i class="material-icons" aria-hidden="true">save</i> {% trans "Enregistrer" %}{% else %}{% trans "Créer et passer au menu" %} <i class="material-icons" aria-hidden="true">arrow_forward</i>{% endif %}</button>
+        </div>
     </form>
     {% if not restaurant %}
     <p class="rs-muted rs-mt-m">{% trans "Après création, votre page reste invisible au public jusqu'à validation par l'équipe Vazimba. Vous pouvez déjà préparer votre menu." %}</p>
@@ -46,8 +52,9 @@
 (function(){
   const latEl = document.getElementById('id_latitude'), lngEl = document.getElementById('id_longitude');
   if(!window.L) { window.rsLocate = () => {}; return; }
-  const start = (latEl.value && lngEl.value) ? [parseFloat(latEl.value), parseFloat(lngEl.value)] : [-18.8792, 47.5079];
-  const map = L.map('rs-pickmap').setView(start, latEl.value ? 15 : 12);
+  // Pas encore de position : vue d'ensemble du continent (« Ma position » ou un toucher place le repère)
+  const start = (latEl.value && lngEl.value) ? [parseFloat(latEl.value), parseFloat(lngEl.value)] : [1.5, 17.5];
+  const map = L.map('rs-pickmap').setView(start, latEl.value ? 15 : 3);
   L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {maxZoom: 19, attribution: '© OpenStreetMap'}).addTo(map);
   let marker = null;
   function setPoint(ll){

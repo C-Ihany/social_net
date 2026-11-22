@@ -7,6 +7,8 @@
 }
 .del-card .vz-dialog-head { margin-bottom: .8rem; }
 .del-card .vz-dialog-head .material-icons { color: var(--danger); }
+/* Page « Se déconnecter » : même carte, icône neutre */
+.del-card .vz-dialog-head .material-icons.del-icon--neutral { color: var(--accent); }
 .del-card .vz-dialog-title { font-size: 1.25rem; }
 .del-card .vz-field-error { margin-bottom: .8rem; }
 .del-done { margin-top: 6rem; }

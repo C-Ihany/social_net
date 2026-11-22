@@ -10,12 +10,15 @@
 {% include 'resto/_style.html' %}
 <link rel="stylesheet" href="{% static 'css/pages/resto-checkout.css' %}">
 <div class="rs-wrap rs-wrap--md">
-    <h1 class="rs-h1 rs-h1--top"><i class="material-icons" aria-hidden="true">check_circle</i> {% trans "Finaliser la commande" %}</h1>
+    <div class="vz-page-head">
+        <a class="vz-back" href="{% url 'resto:cart' %}" aria-label="{% trans 'Retour au panier' %}"><i class="material-icons" aria-hidden="true">arrow_back</i></a>
+        <div class="vz-page-head__main"><h1 class="vz-page-title"><i class="material-icons" aria-hidden="true">check_circle</i> {% trans "Finaliser la commande" %}</h1></div>
+    </div>
 
     <form method="post" class="rs-form" novalidate>{% csrf_token %}
         {% if form.non_field_errors %}<p class="err">{{ form.non_field_errors|join:" " }}</p>{% endif %}
 
-        <div class="rs-card rs-card--pad rs-card--mb">
+        <div class="vz-card rs-box rs-card--pad rs-card--mb">
             <label>{% trans "Comment recevoir la commande ?" %}</label>
             <div class="rs-radio" id="rs-modes">
                 {% for radio in form.mode %}<label>{{ radio.tag }} <i class="material-icons rs-ico" aria-hidden="true">{% if radio.choice_value == 'delivery' %}delivery_dining{% else %}storefront{% endif %}</i> {{ radio.choice_label }}</label>{% endfor %}
@@ -23,12 +26,12 @@
             {% if form.mode.errors %}<p class="err">{{ form.mode.errors|join:" " }}</p>{% endif %}
 
             <div class="rs-row rs-mt-m">
-                <div><label>{% trans "Votre nom" %}</label>{{ form.customer_name }}{% if form.customer_name.errors %}<p class="err">{{ form.customer_name.errors|join:" " }}</p>{% endif %}</div>
-                <div><label>{% trans "Téléphone (le livreur vous appellera)" %}</label>{{ form.customer_phone }}{% if form.customer_phone.errors %}<p class="err">{{ form.customer_phone.errors|join:" " }}</p>{% endif %}</div>
+                <div><label for="{{ form.customer_name.id_for_label }}">{% trans "Votre nom" %}</label>{{ form.customer_name }}{% if form.customer_name.errors %}<p class="err">{{ form.customer_name.errors|join:" " }}</p>{% endif %}</div>
+                <div><label for="{{ form.customer_phone.id_for_label }}">{% trans "Téléphone (le livreur vous appellera)" %}</label>{{ form.customer_phone }}{% if form.customer_phone.errors %}<p class="err">{{ form.customer_phone.errors|join:" " }}</p>{% endif %}</div>
             </div>
 
             <div id="rs-delivery-block" class="rs-mt-m">
-                <label>{% trans "Adresse de livraison" %}</label>
+                <label for="{{ form.delivery_address.id_for_label }}">{% trans "Adresse de livraison" %}</label>
                 {{ form.delivery_address }}
                 {% if form.delivery_address.errors %}<p class="err">{{ form.delivery_address.errors|join:" " }}</p>{% endif %}
                 <p class="help rs-mt-xs">{% trans "Placez le repère sur la carte pour guider le livreur (touchez la carte ou utilisez « Ma position »)." %}</p>
@@ -43,10 +46,10 @@
                 <p class="help rs-mt-xs">{% trans "Le paiement se fait directement avec le restaurant ou le livreur. Vazimba ne prélève rien." %}</p>
             </div>
 
-            <div class="rs-mt-m"><label>{% trans "Message au restaurant" %}</label>{{ form.note }}</div>
+            <div class="rs-mt-m"><label for="{{ form.note.id_for_label }}">{% trans "Message au restaurant" %}</label>{{ form.note }}</div>
         </div>
 
-        <div class="rs-card rs-card--pad">
+        <div class="vz-card rs-box rs-card--pad">
             <p class="rs-card-title">{{ restaurant.name }}</p>
             {% for l in cart_summary.lines %}
             <div class="rs-order-line"><div>{{ l.quantity }} × {{ l.name }}{% if l.options %}<small>{{ l.options }}</small>{% endif %}{% if l.included %}<small><i class="material-icons rs-ico" aria-hidden="true">check_circle</i> {% trans "Avec" %} : {{ l.included }}</small>{% endif %}{% if l.removed %}<small><i class="material-icons rs-ico" aria-hidden="true">block</i> {% trans "Sans" %} : {{ l.removed }}</small>{% endif %}{% if l.note %}<small><i class="material-icons rs-ico" aria-hidden="true">edit_note</i> {{ l.note }}</small>{% endif %}</div><div>{{ l.line_total|vz_ariary }}</div></div>
@@ -55,32 +58,40 @@
             <div class="rs-total-row rs-muted" id="rs-fee-row"><span>{% trans "Livraison" %}</span><span>{{ restaurant.formatted_delivery_fee }}</span></div>
             <div class="rs-total-row rs-total-row--grand"><span>{% trans "Total" %}</span><span id="rs-total">{{ cart_summary.total|vz_ariary }}</span></div>
             <p class="rs-muted rs-mt-s"><i class="material-icons rs-ico" aria-hidden="true">timer</i> {% trans "Délai estimé" %} : ~{{ restaurant.avg_prep_minutes }} min {% trans "de préparation" %}</p>
-            <button class="vz-btn vz-btn--primary vz-btn--block rs-mt-l" type="submit">{% trans "Envoyer la commande" %} <i class="material-icons" aria-hidden="true">restaurant</i></button>
+            <div class="vz-actions">
+                <a class="vz-btn vz-btn--muted" href="{% url 'resto:cart' %}">{% trans "Annuler" %}</a>
+                <button class="vz-btn vz-btn--primary" type="submit"><i class="material-icons" aria-hidden="true">send</i> {% trans "Envoyer la commande" %}</button>
+            </div>
         </div>
     </form>
 </div>
 
+{{ checkout_data|json_script:"rs-checkout-data" }}
 <script>
 (function(){
-  const SUB = {{ cart_summary.subtotal }}, FEE = {{ restaurant.delivery_fee|floatformat:0 }};
+  // Nombres passés en JSON : un flottant rendu dans le gabarit prend une virgule en français.
+  const DATA = JSON.parse(document.getElementById('rs-checkout-data').textContent);
+  const SUB = DATA.subtotal, FEE = DATA.fee;
   const latEl = document.getElementById('id_delivery_latitude'), lngEl = document.getElementById('id_delivery_longitude');
-  const RESTO = [{{ restaurant.latitude|default_if_none:'null' }}, {{ restaurant.longitude|default_if_none:'null' }}];
+  const RESTO = [DATA.lat, DATA.lng];
   function modeChanged(){
     const m = document.querySelector('input[name="mode"]:checked')?.value || 'delivery';
     document.getElementById('rs-delivery-block').style.display = m === 'delivery' ? '' : 'none';
     document.getElementById('rs-fee-row').style.display = m === 'delivery' ? '' : 'none';
-    document.getElementById('rs-total').textContent = (m === 'delivery' ? SUB + FEE : SUB) + ' Ar';
+    document.getElementById('rs-total').textContent = rsMoney(m === 'delivery' ? SUB + FEE : SUB);
     if(m === 'delivery' && map) setTimeout(() => map.invalidateSize(), 50);
   }
   document.querySelectorAll('input[name="mode"]').forEach(i => i.addEventListener('change', modeChanged));
 
   let map = null, marker = null;
   if(window.L){
+    // Ni le client ni le restaurant n'ont de position : vue d'ensemble du continent
+    const hasPoint = (latEl.value && lngEl.value) || RESTO[0] !== null;
     const start = (latEl.value && lngEl.value) ? [parseFloat(latEl.value), parseFloat(lngEl.value)]
-                : (RESTO[0] !== null ? RESTO : [-18.8792, 47.5079]);   // Antananarivo par défaut
-    map = L.map('rs-pickmap').setView(start, 14);
+                : (RESTO[0] !== null ? RESTO : [1.5, 17.5]);
+    map = L.map('rs-pickmap').setView(start, hasPoint ? 14 : 3);
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {maxZoom: 19, attribution: '© OpenStreetMap'}).addTo(map);
-    if(RESTO[0] !== null) L.marker(RESTO, {opacity:.7}).addTo(map).bindTooltip('{{ restaurant.name|escapejs }}');
+    if(RESTO[0] !== null) L.marker(RESTO, {opacity:.7}).addTo(map).bindTooltip(DATA.name);
     function setPoint(ll){
       if(marker) marker.setLatLng(ll); else marker = L.marker(ll, {draggable:true}).addTo(map).on('dragend', e => setPoint(e.target.getLatLng()));
       latEl.value = ll.lat.toFixed(6); lngEl.value = ll.lng.toFixed(6);

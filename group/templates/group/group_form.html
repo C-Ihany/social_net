@@ -27,14 +27,14 @@
             </div>
             {% endfor %}
 
-            <div class="gp-actions">
-                <button type="submit" class="gp-submit">
-                    <span class="material-icons">{% if is_create %}add{% else %}save{% endif %}</span>
-                    {% if is_create %}{% trans "Create" %}{% else %}{% trans "Save" %}{% endif %}
-                </button>
-                <a class="gp-cancel" href="{% if is_create %}{% url 'group:list' %}{% else %}{% url 'group:detail' group.slug %}{% endif %}">
-                    {% trans "Cancel" %}
+            <div class="vz-actions">
+                <a class="vz-btn vz-btn--muted" href="{% if is_create %}{% url 'group:list' %}{% else %}{% url 'group:detail' group.slug %}{% endif %}">
+                    {% trans "Annuler" %}
                 </a>
+                <button type="submit" class="vz-btn vz-btn--primary">
+                    <span class="material-icons" aria-hidden="true">{% if is_create %}add{% else %}save{% endif %}</span>
+                    {% if is_create %}{% trans "Créer le groupe" %}{% else %}{% trans "Enregistrer" %}{% endif %}
+                </button>
             </div>
         </form>
     </div>

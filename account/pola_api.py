@@ -23,7 +23,9 @@ import re
 import secrets
 
 from django.contrib.auth import login, logout
-from django.db.models import Q
+from django.db import IntegrityError, transaction
+from django.db.models import Max, Q
+from django.utils import timezone
 from django.http import JsonResponse
 from django.views.decorators.csrf import ensure_csrf_cookie
 from django.views.decorators.http import require_GET, require_POST
@@ -143,7 +145,21 @@ def verify_code(request):
                                  'code': 'EMAIL'}, status=400)
         # Sans e-mail : une adresse interne, qui ne sert jamais à se connecter (seulement le numéro).
         email = email or f'pola-{secrets.token_hex(8)}@pola.vazimba.invalid'
-        account = Account.objects.create_user(email, _free_username(name))
+        # Deux inscriptions simultanées peuvent choisir le même pseudo libre : la contrainte
+        # d'unicité tranche, et on réessaie avec un autre suffixe (au lieu d'une erreur 500).
+        account = None
+        for _attempt in range(5):
+            try:
+                with transaction.atomic():
+                    account = Account.objects.create_user(email, _free_username(name))
+                break
+            except IntegrityError:
+                if Account.objects.filter(email__iexact=email).exists():
+                    break                                   # c'est l'e-mail qui vient d'être pris, pas le pseudo
+        if account is None:
+            otp.verified = False
+            otp.save(update_fields=['verified'])
+            return JsonResponse({'error': 'La création du compte a échoué. Réessayez.'}, status=409)
         account.set_unusable_password()
         account.phone_number, account.phone_verified = phone, True
         mode = data.get('mode')
@@ -195,11 +211,25 @@ def find_by_phone(request):
     if not room.is_active:
         room.is_active = True
         changed.append('is_active')
-    if not room.encrypted:
+    became_secret = not room.encrypted
+    if became_secret:
         room.encrypted = True          # entre utilisateurs de Pola : toujours chiffré
-        changed.append('encrypted')
+        # (gardé : l'autre personne verra qui a rendu la conversation secrète, et quand)
+        room.secret_changed_by, room.secret_changed_at = request.user, timezone.now()
+        changed += ['encrypted', 'secret_changed_by', 'secret_changed_at']
     if changed:
         room.save(update_fields=changed)
+    if became_secret:
+        # Prévenir ceux qui ont la conversation ouverte (même message que chat.views.set_secret)
+        try:
+            from asgiref.sync import async_to_sync
+            from channels.layers import get_channel_layer
+            async_to_sync(get_channel_layer().group_send)(room.group_name, {
+                'type': 'chat.secret', 'encrypted': True,
+                'username': request.user.username, 'user_id': request.user.id,
+            })
+        except Exception:
+            logger.exception('find_by_phone : diffusion du passage en secret')
     return JsonResponse({'found': True, 'person': _person(other), 'room_id': room.pk})
 
 
@@ -214,11 +244,22 @@ def conversations(request):
         # « Pola seulement » : seulement les conversations avec des utilisateurs de Pola ;
         # celles avec les membres de Vazimba restent sur le site, rien n'est effacé.
         rooms = rooms.filter((Q(user1=me) & ~Q(user2__pola_mode='')) | (Q(user2=me) & ~Q(user1__pola_mode='')))
+    # Dernier message de chaque conversation en UNE requête (avant : une par salon) —
+    # même technique que chat.views : l'horodatage du dernier message est annoté sur le salon.
+    rooms = list(rooms.annotate(last_ts=Max('roomchatmessage__timestamp')))
     unread = dict(UnreadChatRoomMessages.objects.filter(user=me, room__in=rooms).values_list('room_id', 'count'))
+    last_msgs = {}
+    pairs = Q()
+    for room in rooms:
+        if room.last_ts is not None:
+            pairs |= Q(room_id=room.pk, timestamp=room.last_ts)
+    if pairs:
+        for m in RoomChatMessage.objects.filter(pairs).order_by('-id'):
+            last_msgs.setdefault(m.room_id, m)
     result = []
     for room in rooms:
         other = room.user2 if room.user1_id == me.pk else room.user1
-        last = RoomChatMessage.objects.filter(room=room).order_by('-timestamp').first()
+        last = last_msgs.get(room.pk)
         result.append({'room_id': room.pk, 'person': _person(other), 'encrypted': room.encrypted,
                        'unread': unread.get(room.pk, 0),
                        'last': (last.preview or '')[:80] if last else '',

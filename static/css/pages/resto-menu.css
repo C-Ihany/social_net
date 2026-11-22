@@ -8,10 +8,10 @@
 .rs-og input { margin-bottom: .3rem; }
 .rs-og .opt { display: flex; gap: .4rem; margin-bottom: .3rem; }
 .rs-og .opt input:first-child { flex: 2; } .rs-og .opt input:nth-child(2) { flex: 1; }
-.rs-og .opt .vz-btn { flex: none; }
+.rs-og .opt .vz-icon-btn { flex: none; }
 .rs-og-limits { display: flex; gap: .4rem; margin-bottom: .4rem; }
 .rs-og-limits label { font-size: .75rem; flex: 1; }
-.rs-og-actions { display: flex; gap: .4rem; }
+.rs-og-actions { display: flex; gap: .4rem; flex-wrap: wrap; }
 /* Ex-styles en ligne du gabarit */
 .rs-mi-ph { width: 56px; height: 56px; border-radius: var(--radius-sm); background: var(--btn-bg); display: flex; align-items: center; justify-content: center; color: var(--text-subtle); flex: none; }
 .rs-mi-actions { flex: none; }

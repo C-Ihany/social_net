@@ -39,13 +39,13 @@
       <div class="lfc-title">{{ live.title }}</div>
 
       {# Bouton rejoindre #}
-      <a href="{% url 'video:live-room' live.id %}" class="lfc-join-btn">
+      <a href="{% url 'video:live-room' live.id %}" class="vz-btn vz-btn--primary vz-btn--sm lfc-join-btn">
         <span class="material-icons" aria-hidden="true">play_circle_filled</span>
         {% trans "Rejoindre le live" %}
       </a>
 
       {% if live.replay_available and live.replay_url %}
-      <a href="{{ live.replay_url }}" target="_blank" rel="noopener" class="lfc-replay-btn">
+      <a href="{{ live.replay_url }}" target="_blank" rel="noopener" class="vz-btn vz-btn--secondary vz-btn--sm lfc-replay-btn">
           <span class="material-icons" aria-hidden="true">play_circle</span>
           {% trans "Voir le replay" %}
       </a>
@@ -55,5 +55,3 @@
   </div>
 
 </article>
-
-<link rel="stylesheet" href="{% static 'css/pages/video-live_feed_card.css' %}">

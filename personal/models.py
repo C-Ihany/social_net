@@ -8,16 +8,16 @@ from django.utils import timezone
 class HeroSettings(models.Model):
     title         = models.CharField(
         max_length=200,
-        default="Le réseau social qui parle *malagasy*.",
+        default="Le réseau social qui rassemble *l'Afrique*.",
         verbose_name="Titre principal (H1)",
         help_text=(
             "Saut de ligne possible avec \\n. "
             "Un mot entre *astérisques* s'affiche dans le serif italique de la "
-            "charte — par exemple : Le réseau social qui parle *malagasy*."
+            "charte — par exemple : Le réseau social qui rassemble *l'Afrique*."
         ),
     )
     subtitle      = models.TextField(
-        default="Un fil d'actualité, une place de marché et un guide du pays — au même endroit.",
+        default="Un fil d'actualité, une place de marché et un guide du continent — au même endroit.",
         verbose_name="Texte d'accroche",
         help_text="Une phrase, affichée sous le titre. Les phrases courtes rendent mieux.",
     )

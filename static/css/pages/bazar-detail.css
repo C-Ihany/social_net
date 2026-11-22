@@ -22,12 +22,12 @@
 
 /* ── Galerie photos ── */
 .bazar-gallery { border-radius: var(--radius-lg); overflow: hidden; background: var(--bg-card); border: 1px solid var(--border); }
+.bazar-main-btn { display: block; width: 100%; padding: 0; border: 0; background: none; cursor: zoom-in; }
 .bazar-main-img {
     width: 100%;
     aspect-ratio: 4/3;
     object-fit: cover;
     display: block;
-    cursor: zoom-in;
 }
 .bazar-main-placeholder {
     width: 100%;
@@ -50,15 +50,18 @@
 .bazar-thumb {
     width: 68px;
     height: 68px;
-    object-fit: cover;
-    border-radius: 8px;
+    padding: 0;
+    background: none;
+    border-radius: var(--radius-sm);
+    overflow: hidden;
     cursor: pointer;
     border: 2.5px solid transparent;
     opacity: .7;
     transition: opacity .18s, border-color .18s;
     flex-shrink: 0;
 }
-.bazar-thumb.active, .bazar-thumb:hover { opacity: 1; border-color: var(--accent); }
+.bazar-thumb img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.bazar-thumb.active, .bazar-thumb:hover, .bazar-thumb:focus-visible { opacity: 1; border-color: var(--accent); }
 
 /* ── Infos : surface .vz-card (fond, bordure, rayon, ombre partagés) ── */
 .bazar-info-card {
@@ -125,51 +128,10 @@
     color: var(--text-muted);
 }
 
-/* Boutons contact */
-.bazar-contact-btn {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: .5rem;
-    width: 100%;
-    padding: .7rem 1rem;
-    border-radius: var(--radius);
-    font-weight: 700;
-    font-size: .92rem;
-    border: none;
-    cursor: pointer;
-    text-decoration: none;
-    transition: all .2s;
-    margin-bottom: .55rem;
-  min-height: 44px; display: inline-flex; align-items: center; justify-content: center; gap: .4rem;
-}
-.bazar-contact-btn .material-icons { font-size: 1rem; }
-.bazar-btn-primary {
-    background: var(--accent);
-    color: var(--on-accent);
-}
-.bazar-btn-primary:hover {
-    opacity: .9;
-    transform: translateY(-1px);
-    text-decoration: none;
-    color: var(--on-accent);
-}
-.bazar-btn-outline {
-    background: transparent;
-    border: 1.5px solid var(--accent);
-    color: var(--accent);
-  min-height: 40px; display: inline-flex; align-items: center; justify-content: center; gap: .4rem;
-}
-.bazar-btn-outline:hover {
-    background: var(--accent);
-    color: var(--on-accent);
-    text-decoration: none;
-}
-.bazar-btn-outline--success { border-color: var(--success); color: var(--success); }
-.bazar-btn-outline--success:hover { background: var(--success); color: #fff; }
-.bazar-btn-report { border-color: rgba(var(--danger-rgb), .35); color: var(--danger); }
-.bazar-btn-report:hover { background: var(--danger); color: #fff; }
-.bazar-fav-count { font-size: .78rem; font-weight: 400; opacity: .7; margin-left: .25rem; }
+/* Actions : boutons .vz-btn--block empilés (WhatsApp ou Appeler en tête) */
+.bazar-actions { display: flex; flex-direction: column; gap: .55rem; }
+.bazar-actions form { margin: 0; }
+.bazar-fav-count { font-size: .78rem; font-weight: 400; opacity: .7; }
 .bazar-unavailable {
     background: var(--bg-secondary);
     border-radius: var(--radius);
@@ -177,31 +139,12 @@
     text-align: center;
     font-size: .88rem;
     color: var(--text-muted);
-    margin-bottom: .75rem;
 }
-.bazar-btn-danger {
-    background: transparent;
-    border: 1.5px solid var(--danger);
-    color: var(--danger);
-    font-size: .85rem;
-    padding: .5rem 1rem;
-}
-.bazar-btn-danger:hover { background: var(--danger); color: #fff; text-decoration: none; }
-.bazar-btn-fav-saved {
-    background: rgba(var(--danger-rgb), .10);
-    border: 1.5px solid var(--danger);
-    color: var(--danger);
-    font-size: .85rem;
-    padding: .5rem 1rem;
-}
-.bazar-btn-fav-saved:hover { background: var(--danger); color: #fff; text-decoration: none; }
 
 /* Partage */
 .bazar-share { border-top: 1px solid var(--border); margin-top: .85rem; padding-top: .85rem; }
 .bazar-share-title { font-size: .75rem; color: var(--text-muted); margin-bottom: .5rem; font-weight: 600; text-transform: uppercase; letter-spacing: .06em; }
-.bazar-share-row { display: flex; gap: .5rem; flex-wrap: wrap; }
-.bazar-share-wa { background: #25d366; color: #fff; }           /* couleur de marque WhatsApp (tiers) */
-.bazar-share-wa:hover { background: #25d366; color: #fff; opacity: .85; }
+.bazar-report-btn { margin-left: auto; }
 .vz-btn.is-copied { border-color: var(--success); color: var(--success); }
 
 /* ── Description / Détails : surfaces .vz-card ── */
@@ -214,7 +157,7 @@
 .bazar-details-table tr + tr { border-top: 1px solid var(--border); }
 .bazar-details-label { padding: .45rem 0; color: var(--text-muted); width: 40%; }
 .bazar-details-value { font-weight: 600; color: var(--text); }
-.bazar-desc-section h4 {
+.bazar-desc-section h2 {
     font-weight: 800;
     font-size: .95rem;
     margin-bottom: .85rem;
@@ -249,33 +192,22 @@
     margin: 2.5rem auto;
     padding: 0 1rem;
 }
-.bazar-similaires h3 {
+.bazar-similaires h2 {
     font-size: 1.1rem;
     font-weight: 800;
     margin-bottom: 1rem;
 }
 /* .bazar-similaires-grid : colonnes gérées par .vz-grid, cartes = .vz-card (zoot-base.css) */
 
-/* ── Flèches de navigation sur la photo principale ── */
+/* ── Flèches de navigation sur la photo principale (.vz-icon-btn--over, 44 px) ── */
 .gallery-wrap { position: relative; }
-.gallery-arrow {
-    position: absolute; top: 50%; transform: translateY(-50%);
-    background: rgba(0,0,0,.45); border: none; color: #fff;
-    font-size: 2rem; font-weight: 300;
-    width: 44px; height: 44px; border-radius: 50%;
-    cursor: pointer; display: flex; align-items: center; justify-content: center;
-    z-index: 5; transition: background .18s; line-height: 1;
-    user-select: none;
-}
-.gallery-arrow:hover { background: rgba(0,0,0,.75); }
+.gallery-arrow { position: absolute; top: 50%; transform: translateY(-50%); z-index: 5; }
 .gallery-prev-arrow { left: 10px; }
 .gallery-next-arrow { right: 10px; }
-@media (max-width: 575px) {
-    .gallery-arrow { width: 36px; height: 36px; font-size: 1.5rem; }
-}
 
-/* Lightbox */
+/* Lightbox : fond toujours sombre, encre claire fixe */
 #lightbox {
+    --bz-lb-ink-rgb: 255, 255, 255;
     display: none;
     position: fixed;
     inset: 0;
@@ -285,57 +217,36 @@
     justify-content: center;
 }
 #lightbox.open { display: flex; }
-#lightbox-img { max-width: 88vw; max-height: 88vh; border-radius: 8px; object-fit: contain; user-select: none; }
-#lightbox-close {
-    position: absolute;
-    top: 16px; right: 20px;
-    color: #fff; font-size: 2rem; cursor: pointer; line-height: 1;
-    background: none; border: none;
-    display: flex; align-items: center; justify-content: center;
-}
-#lightbox-close .material-icons { font-size: 2rem; }
-/* Message « image non disponible » (display basculé en JS) */
+#lightbox-img { max-width: 88vw; max-height: 88vh; border-radius: var(--radius-sm); object-fit: contain; user-select: none; }
+#lightbox-img[hidden] { display: none; }
+#lightbox-close { position: absolute; top: 14px; right: 14px; z-index: 11; }
 .lb-error {
-    color: #fff; flex-direction: column; align-items: center;
-    gap: .75rem; font-size: .95rem; opacity: .7;
+    display: flex; color: rgba(var(--bz-lb-ink-rgb), .7); flex-direction: column; align-items: center;
+    gap: .75rem; font-size: .95rem;
 }
+.lb-error[hidden] { display: none; }
 .lb-error-icon { font-size: 2.5rem; }
-.lb-nav-btn {
-    position: absolute;
-    top: 50%; transform: translateY(-50%);
-    background: rgba(255,255,255,.15);
-    border: none; color: #fff;
-    font-size: 2.5rem; font-weight: 300;
-    width: 56px; height: 56px;
-    border-radius: 50%;
-    cursor: pointer;
-    display: flex; align-items: center; justify-content: center;
-    transition: background .18s;
-    z-index: 10;
-    line-height: 1;
-}
-.lb-nav-btn:hover { background: rgba(255,255,255,.32); }
+.lb-nav-btn { position: absolute; top: 50%; transform: translateY(-50%); z-index: 10; }
 #lightbox-prev { left: 14px; }
 #lightbox-next { right: 14px; }
 #lightbox-counter {
     position: absolute;
     bottom: 18px; left: 50%; transform: translateX(-50%);
-    color: rgba(255,255,255,.85);
+    color: rgba(var(--bz-lb-ink-rgb), .85);
     font-size: .82rem; font-weight: 600;
     background: rgba(0,0,0,.45);
-    padding: .22rem .85rem; border-radius: 20px;
+    padding: .22rem .85rem; border-radius: var(--radius-pill);
     pointer-events: none;
 }
 @media (max-width: 575px) {
-    .lb-nav-btn { width: 44px; height: 44px; font-size: 2rem; }
     #lightbox-prev { left: 6px; }
     #lightbox-next { right: 6px; }
 }
 
 /* ── Conditions de location ── */
-.location-details-card { background:var(--bg-secondary); border-radius:12px; padding:1.2rem 1.5rem; margin: 1rem 0; }
-.location-details-card h4 { font-size:1rem; font-weight:700; margin:0 0 .8rem; display:flex; align-items:center; gap:.35rem; }
-.location-details-card h4 .material-icons { font-size:1.1rem; color:var(--accent); }
+.location-details-card { background:var(--bg-secondary); border-radius:var(--radius); padding:1.2rem 1.5rem; margin: 1rem 0; }
+.location-details-card h2 { font-size:1rem; font-weight:700; margin:0 0 .8rem; display:flex; align-items:center; gap:.35rem; }
+.location-details-card h2 .material-icons { font-size:1.1rem; color:var(--accent); }
 .loc-grid { display:grid; grid-template-columns: repeat(auto-fill,minmax(140px,1fr)); gap:.6rem; }
 .loc-item { background:var(--bg-card); border-radius:var(--radius-sm); padding:.5rem .75rem; }
 .loc-label { display:block; font-size:.7rem; color:var(--text-muted); font-weight:600; text-transform:uppercase; letter-spacing:.04em; }

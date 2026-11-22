@@ -1,49 +1,41 @@
 {% extends 'base.html' %}
 {% load static i18n %}
 
+{% block page_title %}{% trans "Guides touristiques" %} — Vazimba{% endblock %}
+
 {% block extra_head %}
 <link rel="stylesheet" href="{% static 'css/pages/tourisme-guides_list.css' %}">
 {% endblock %}
 
 {% block content %}
-<main>
-
 <!-- ── Hero ── -->
 <div class="guides-hero">
     <h1>{% trans "Guides touristiques" %}</h1>
-    <p>{{ total }} guide{{ total|pluralize }} disponible{{ total|pluralize }} à Madagascar</p>
+    <p>{% blocktrans count n=total %}{{ n }} guide disponible en Afrique{% plural %}{{ n }} guides disponibles en Afrique{% endblocktrans %}</p>
 </div>
 
 <!-- ── Filtres ── -->
 <div class="guides-filter-bar">
-    <form method="get" action="{% url 'tourisme:guides_list' %}">
+    <form method="get" action="{% url 'tourisme:guides_list' %}" role="search">
         <div class="guides-filter-inner">
             <div class="guide-search-field">
-                <span class="material-icons">search</span>
-                <input type="text" name="q" value="{{ q }}" placeholder="{% trans 'Rechercher un guide…' %}">
+                <span class="material-icons" aria-hidden="true">search</span>
+                <input type="search" name="q" value="{{ q }}" placeholder="{% trans 'Rechercher un guide…' %}" aria-label="{% trans 'Rechercher un guide…' %}" autocomplete="off">
             </div>
-            <select name="region" class="guide-select">
-                <option value="">{% trans "Toutes les régions" %}</option>
+            <select name="region" class="guide-select" aria-label="{% trans 'Pays ou région' %}">
+                <option value="">{% trans "Tous les pays" %}</option>
                 {% for r_key, r_label in regions %}
                 <option value="{{ r_key }}" {% if sel_region == r_key %}selected{% endif %}>{{ r_label }}</option>
                 {% endfor %}
             </select>
-            {% if verified_only %}
-            <input type="hidden" name="verified" value="1">
-            <a href="?{% if q %}q={{ q }}&{% endif %}{% if sel_region %}region={{ sel_region }}{% endif %}"
-               class="verified-toggle active">
-                <span class="material-icons">verified</span>
+            {% if verified_only %}<input type="hidden" name="verified" value="1">{% endif %}
+            <a href="{{ verified_toggle_url }}" class="vz-chip verified-toggle {% if verified_only %}active{% endif %}" {% if verified_only %}aria-current="true"{% endif %}>
+                <span class="material-icons" aria-hidden="true">verified</span>
                 {% trans "Vérifiés seulement" %}
             </a>
-            {% else %}
-            <a href="?verified=1{% if q %}&q={{ q }}{% endif %}{% if sel_region %}&region={{ sel_region }}{% endif %}"
-               class="verified-toggle">
-                <span class="material-icons">verified</span>
-                {% trans "Vérifiés" %}
-            </a>
-            {% endif %}
-            <button type="submit" class="guides-filter-btn" aria-label="{% trans 'Filtrer' %}">
-                <span class="material-icons" aria-hidden="true">filter_list</span>
+            <button type="submit" class="vz-btn vz-btn--primary vz-btn--pill">
+                <span class="material-icons" aria-hidden="true">search</span>
+                {% trans "Rechercher" %}
             </button>
         </div>
     </form>
@@ -55,18 +47,18 @@
     <div class="become-guide-banner">
         <span class="material-icons become-guide-icon" aria-hidden="true">explore</span>
         <div class="text-wrap">
-            <h3>{% trans "Vous guidez des voyageurs à Madagascar ?" %}</h3>
+            <h2>{% trans "Vous guidez des voyageurs en Afrique ?" %}</h2>
             <p>{% trans "Inscrivez-vous gratuitement et soyez trouvé par des milliers de voyageurs." %}</p>
         </div>
         {% if user.is_authenticated %}
-        <a href="{% url 'tourisme:guide_register' %}" class="btn-become">
+        <a href="{% url 'tourisme:guide_register' %}" class="vz-btn vz-btn--tonal vz-btn--pill">
             <span class="material-icons" aria-hidden="true">add</span>
             {% trans "Devenir guide" %}
         </a>
         {% else %}
-        <a href="{% url 'login' %}?next={% url 'tourisme:guide_register' %}" class="btn-become">
+        <a href="{% url 'login' %}?next={% url 'tourisme:guide_register' %}" class="vz-btn vz-btn--tonal vz-btn--pill">
             <span class="material-icons" aria-hidden="true">login</span>
-            {% trans "S'inscrire comme guide" %}
+            {% trans "Se connecter" %}
         </a>
         {% endif %}
     </div>
@@ -88,7 +80,7 @@
                                  onerror="this.remove(); this.parentElement.querySelector('.vz-card__avatar--initial').removeAttribute('hidden');">
                         {% endif %}
                         {% if guide.is_verified %}
-                        <span class="vz-card__avatar-dot" title="{% trans 'Vérifié' %}"><i class="material-icons">check</i></span>
+                        <span class="vz-card__avatar-dot" title="{% trans 'Vérifié' %}"><i class="material-icons" aria-hidden="true">check</i></span>
                         {% endif %}
                     </div>
                     <div class="guide-head-info">
@@ -96,14 +88,14 @@
                         <div class="vz-card__meta">
                             {% if guide.is_verified %}
                             <span class="vz-chip vz-chip--sm vz-chip--success">
-                                <i class="material-icons">verified</i>
+                                <i class="material-icons" aria-hidden="true">verified</i>
                                 {% trans "Vérifié" %}
                             </span>
                             {% endif %}
                             {% if guide.years_experience %}
                             <span class="vz-card__meta-item">
-                                <i class="material-icons">work_history</i>
-                                <span>{{ guide.years_experience }} an{{ guide.years_experience|pluralize }} d'expérience</span>
+                                <i class="material-icons" aria-hidden="true">work_history</i>
+                                <span>{% blocktrans count n=guide.years_experience %}{{ n }} an d'expérience{% plural %}{{ n }} ans d'expérience{% endblocktrans %}</span>
                             </span>
                             {% endif %}
                         </div>
@@ -117,20 +109,20 @@
                 <div class="vz-card__tags">
                     {% if guide.languages %}
                     <span class="vz-chip vz-chip--sm vz-chip--soft">
-                        <i class="material-icons">translate</i>
+                        <i class="material-icons" aria-hidden="true">translate</i>
                         {{ guide.languages|truncatechars:30 }}
                     </span>
                     {% endif %}
                     {% if guide.transport_modes %}
                     <span class="vz-chip vz-chip--sm vz-chip--soft">
-                        <i class="material-icons">directions_car</i>
+                        <i class="material-icons" aria-hidden="true">directions_car</i>
                         {{ guide.transport_modes|truncatechars:30 }}
                     </span>
                     {% endif %}
                     {% if guide.max_group_size %}
                     <span class="vz-chip vz-chip--sm vz-chip--soft">
-                        <i class="material-icons">group</i>
-                        Jusqu'à {{ guide.max_group_size }} pers.
+                        <i class="material-icons" aria-hidden="true">group</i>
+                        {% blocktrans with n=guide.max_group_size %}Jusqu'à {{ n }} pers.{% endblocktrans %}
                     </span>
                     {% endif %}
                 </div>
@@ -148,89 +140,66 @@
         {% endfor %}
     </div>
 
-    <!-- Pagination -->
-    {% if page_obj.has_other_pages %}
-    <nav class="tour-pagination">
-        {% if page_obj.has_previous %}
-        <a href="?page={{ page_obj.previous_page_number }}{% if q %}&q={{ q }}{% endif %}{% if sel_region %}&region={{ sel_region }}{% endif %}{% if verified_only %}&verified=1{% endif %}"
-           class="tour-page-btn">
-            <span class="material-icons" aria-hidden="true">chevron_left</span>
-        </a>
-        {% endif %}
-
-        {% for num in page_obj.paginator.page_range %}
-        {% if page_obj.number == num %}
-        <span class="tour-page-btn active">{{ num }}</span>
-        {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %}
-        <a href="?page={{ num }}{% if q %}&q={{ q }}{% endif %}{% if sel_region %}&region={{ sel_region }}{% endif %}{% if verified_only %}&verified=1{% endif %}"
-           class="tour-page-btn">{{ num }}</a>
-        {% endif %}
-        {% endfor %}
-
-        {% if page_obj.has_next %}
-        <a href="?page={{ page_obj.next_page_number }}{% if q %}&q={{ q }}{% endif %}{% if sel_region %}&region={{ sel_region }}{% endif %}{% if verified_only %}&verified=1{% endif %}"
-           class="tour-page-btn">
-            <span class="material-icons" aria-hidden="true">chevron_right</span>
-        </a>
-        {% endif %}
-    </nav>
-    {% endif %}
+    {% include 'tourisme/_pager.html' with page_obj=page_obj filters_qs=filters_qs %}
 
     {% else %}
-    <div class="guides-empty">
-        <span class="material-icons">person_search</span>
-        <div class="guides-empty-title">{% trans "Aucun guide trouvé" %}</div>
-        <div class="guides-empty-text">
-            {% trans "Essayez d'autres termes ou" %}
-            <a href="{% url 'tourisme:guides_list' %}" class="guides-link">{% trans "réinitialisez les filtres" %}</a>.
-        </div>
+    <div class="vz-empty">
+        <i class="material-icons" aria-hidden="true">person_search</i>
+        <p class="vz-empty-title">{% trans "Aucun guide trouvé" %}</p>
+        <p class="vz-empty-text">{% trans "Essayez d'autres termes ou effacez les filtres." %}</p>
+        <a href="{% url 'tourisme:guides_list' %}" class="vz-btn vz-btn--secondary">{% trans "Effacer les filtres" %}</a>
     </div>
     {% endif %}
 
 </div>
-</main>
 
 <script>
 (function() {
     var input     = document.querySelector('.guide-search-field input');
     var regionSel = document.querySelector('select[name="region"]');
     if (!input) return;
+    var I18N = {
+        verified: "{% trans 'Vérifié' as t_v %}{{ t_v|escapejs }}",
+        perDay:   "{% trans 'Ar/j' as t_d %}{{ t_d|escapejs }}"
+    };
 
-    /* Dropdown positionné en position:fixed pour bypasser overflow:hidden */
+    /* Liste déroulante en position:fixed pour échapper aux overflow:hidden */
     var drop = document.createElement('div');
     drop.className = 'guides-ac';
-    drop.style.display = 'none';
+    drop.hidden = true;
     document.body.appendChild(drop);
 
     function pos() {
         var r = input.getBoundingClientRect();
-        drop.style.left  = r.left + 'px';
+        var w = Math.min(Math.max(r.width, 280), window.innerWidth - 16);
+        drop.style.left  = Math.max(8, Math.min(r.left, window.innerWidth - w - 8)) + 'px';
         drop.style.top   = (r.bottom + 6) + 'px';
-        drop.style.width = Math.max(r.width, 280) + 'px';
+        drop.style.width = w + 'px';
     }
     function esc(s) {
-        return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+        return String(s == null ? '' : s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');
     }
+    /* Même rendu que le filtre serveur vz_ariary : milliers séparés par une espace */
+    function money(n) { return String(n).replace(/\B(?=(\d{3})+(?!\d))/g, ' '); }
+    function hide() { drop.hidden = true; }
 
     var timer = null;
     function search(q) {
         var region = regionSel ? regionSel.value : '';
-        var url = '/tourisme/guides/autocomplete/?q=' + encodeURIComponent(q);
+        var url = "{% url 'tourisme:guides_autocomplete' %}?q=" + encodeURIComponent(q);
         if (region) url += '&region=' + encodeURIComponent(region);
         fetch(url)
             .then(function(r) { return r.json(); })
             .then(function(d) {
-                if (!d.results || d.results.length === 0) { drop.style.display = 'none'; return; }
+                if (!d.results || d.results.length === 0) { hide(); return; }
                 var html = '';
                 d.results.forEach(function(g) {
-                    html += '<a href="/tourisme/guides/' + g.id + '/" class="guides-ac-item">';
-                    html += '<img src="' + esc(g.avatar) + '" class="guides-ac-avatar" '
-                          + 'onerror="this.style.display=\'none\'" alt="">';
+                    html += '<a href="/tourisme/guides/' + encodeURIComponent(g.id) + '/" class="guides-ac-item">';
+                    html += '<img src="' + esc(g.avatar) + '" class="guides-ac-avatar" onerror="this.hidden=true" alt="">';
                     html += '<div class="guides-ac-body">';
-                    html += '<div class="guides-ac-name">'
-                          + esc(g.name);
+                    html += '<div class="guides-ac-name">' + esc(g.name);
                     if (g.is_verified) {
-                        html += '<span class="vz-chip vz-chip--sm vz-chip--success"><span class="material-icons">verified</span>Vérifié</span>';
+                        html += '<span class="vz-chip vz-chip--sm vz-chip--success"><span class="material-icons" aria-hidden="true">verified</span>' + esc(I18N.verified) + '</span>';
                     }
                     html += '</div>';
                     if (g.specialities) {
@@ -238,34 +207,34 @@
                     }
                     html += '</div>';
                     if (g.prix_jour) {
-                        html += '<div class="guides-ac-price">' + esc(g.prix_jour) + ' Ar/j</div>';
+                        html += '<div class="guides-ac-price">' + esc(money(g.prix_jour)) + ' ' + esc(I18N.perDay) + '</div>';
                     }
                     html += '</a>';
                 });
                 drop.innerHTML = html;
                 pos();
-                drop.style.display = 'block';
+                drop.hidden = false;
             })
-            .catch(function() { drop.style.display = 'none'; });
+            .catch(hide);
     }
 
     input.addEventListener('input', function() {
         clearTimeout(timer);
         var q = input.value.trim();
-        if (q.length < 2) { drop.style.display = 'none'; return; }
+        if (q.length < 2) { hide(); return; }
         timer = setTimeout(function() { search(q); }, 280);
     });
     input.addEventListener('focus', function() {
         if (input.value.trim().length >= 2) search(input.value.trim());
     });
     document.addEventListener('click', function(e) {
-        if (!drop.contains(e.target) && e.target !== input) drop.style.display = 'none';
+        if (!drop.contains(e.target) && e.target !== input) hide();
     });
     document.addEventListener('keydown', function(e) {
-        if (e.key === 'Escape') drop.style.display = 'none';
+        if (e.key === 'Escape') hide();
     });
-    window.addEventListener('scroll', function() { if (drop.style.display !== 'none') pos(); }, true);
-    window.addEventListener('resize', function() { if (drop.style.display !== 'none') pos(); });
+    window.addEventListener('scroll', function() { if (!drop.hidden) pos(); }, true);
+    window.addEventListener('resize', function() { if (!drop.hidden) pos(); });
 })();
 </script>
 {% endblock %}

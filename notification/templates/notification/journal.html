@@ -1,46 +1,45 @@
 {% extends 'base.html' %}
 {% load static i18n %}
+{% block page_title %}{% trans "Notifications" %} — Vazimba{% endblock %}
 
 {% block content %}
 <link rel="stylesheet" href="{% static 'css/pages/notification-journal.css' %}">
 
 <div class="nj-wrapper">
-    <div class="nj-header">
-        <div class="nj-header-icon"><span class="material-icons">notifications</span></div>
-        <div>
-            <h1 class="nj-title">{% trans "Notifications" %}</h1>
-            <p class="nj-subtitle">{% trans "Votre activité récente" %}</p>
+    <div class="vz-page-head">
+        <div class="vz-page-head__main">
+            <h1 class="vz-page-title"><span class="material-icons" aria-hidden="true">notifications</span>{% trans "Notifications" %}</h1>
+            <p class="vz-page-sub">{% trans "Votre activité récente" %}</p>
         </div>
     </div>
 
     {% if notifications %}
     <div class="vz-stack nj-list">
         {% for notif in notifications %}
-        {% with co=notif.content_object %}{% with cname=co.get_cname|default:"" %}
         <a class="vz-card vz-card--row {% if not notif.read %}vz-card--unread{% endif %}" href="{{ notif.redirect_url|default:'#' }}">
             <div class="vz-card__avatar-wrap">
                 {% if notif.from_user %}
-                <img class="vz-card__avatar" src="{{ notif.from_user.profile_image.url }}" alt="{{ notif.from_user.username }}" onerror="this.src='{% static "images/profile_pic.png" %}'">
+                <img class="vz-card__avatar" src="{{ notif.from_user.profile_image.url }}" alt="{{ notif.from_user.username }}" onerror="this.onerror=null;this.src='{% static "images/profile_pic.png" %}'">
                 {% else %}
                 <img class="vz-card__avatar" src="{% static 'images/profile_pic.png' %}" alt="">
                 {% endif %}
                 <span class="vz-card__avatar-dot">
-                    <i class="material-icons">{% if cname == 'FriendRequest' %}person_add{% elif cname == 'FriendList' %}how_to_reg{% elif cname == 'Post' %}article{% elif cname == 'Live' %}videocam{% else %}chat{% endif %}</i>
+                    <i class="material-icons" aria-hidden="true">{% if notif.kind == 'FriendRequest' %}person_add{% elif notif.kind == 'FriendList' %}how_to_reg{% elif notif.kind == 'Post' %}article{% elif notif.kind == 'Live' %}videocam{% else %}chat{% endif %}</i>
                 </span>
             </div>
             <div class="vz-card__body">
-                <h3 class="vz-card__title nj-verb">{{ notif.verb|vz_notif_verb }}</h3>
+                <h2 class="vz-card__title nj-verb">{{ notif.verb|vz_notif_verb }}</h2>
                 <p class="vz-card__subtitle">{{ notif.timestamp|vz_since }}</p>
             </div>
             {% if not notif.read %}<span class="nj-unread-dot" aria-hidden="true"></span>{% endif %}
         </a>
-        {% endwith %}{% endwith %}
         {% endfor %}
     </div>
     {% else %}
-    <div class="nj-empty">
-        <span class="material-icons">notifications_off</span>
-        <p>{% trans "No notifications yet" %}</p>
+    <div class="vz-empty">
+        <span class="material-icons" aria-hidden="true">notifications_off</span>
+        <div class="vz-empty-title">{% trans "Aucune notification" %}</div>
+        <p class="vz-empty-text">{% trans "Les demandes d’ami, réactions et commentaires apparaîtront ici." %}</p>
     </div>
     {% endif %}
 </div>

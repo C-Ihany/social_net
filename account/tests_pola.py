@@ -86,7 +86,7 @@ class PolaApiTests(TestCase):
         web.force_login(self.member)
         self.assertEqual(web.get(f'/account/{hidden.pk}/').status_code, 404)           # profil
         self.assertEqual(web.get(f'/account/{self.member.pk}/').status_code, 200)      # (l'adresse est la bonne)
-        self.assertNotIn('Miora', web.get('/search/?q=Mio').content.decode())         # recherche
+        self.assertNotIn('Miora', web.get('/recherche/?q=Mio').content.decode())         # recherche
         self.assertEqual(web.post('/chat/create_or_return_private_chat', {'user2_id': hidden.pk}).status_code, 403)
         self.assertEqual(web.post('/friend/friend_request/', {'receiver_user_id': hidden.pk}).status_code, 404)
         rado = Account.objects.create_user('rado@example.com', 'rado', 'motdepasse-solide-789')

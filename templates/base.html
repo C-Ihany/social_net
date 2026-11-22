@@ -10,7 +10,7 @@
          « Vazimba », ce qui rend les onglets et l'historique du navigateur
          indistinguables et dessert le référencement. -->
     <title>{% block page_title %}Vazimba{% endblock %}</title>
-    <meta name="description" content="{% block meta_description %}Vazimba — le réseau social malgache : fil d'actualité, stories, Bazar, groupes et découverte de Madagascar.{% endblock %}">
+    <meta name="description" content="{% block meta_description %}Vazimba — le réseau social africain : fil d'actualité, stories, Bazar, groupes et découverte du continent.{% endblock %}">
     <link rel="icon" type="image/png" href="{% static 'logo/vazimba_icon.png' %}">
     <link rel="apple-touch-icon" href="{% static 'logo/vazimba_v2_icon.png' %}">
 
@@ -42,7 +42,8 @@
     <script>
     (function() {
         /* Mode économie : uniquement si l'utilisateur l'a explicitement activé (jamais auto) */
-        var ds = localStorage.getItem('vzb-data-saver');
+        var ds = null;
+        try { ds = localStorage.getItem('vzb-data-saver'); } catch (e) {}
         if (ds === '1') {
             document.documentElement.classList.add('data-saver');
         }
@@ -66,6 +67,7 @@
     {% trans "Annuler" as vzc_cancel %}{% trans "Confirmer" as vzc_confirm %}{% trans "Fermer" as vzc_close %}{% trans "Êtes-vous sûr ?" as vzc_title %}
     {% trans "à l'instant" as vzc_now %}{% trans "Lien copié" as vzc_copied %}{% trans "Copier le lien" as vzc_copy %}{% trans "Partager" as vzc_share %}
     window.VZ_I18N = {
+        postDeleted: "{% trans 'Post supprimé'|escapejs %}",
         cancel: "{{ vzc_cancel|escapejs }}", confirm: "{{ vzc_confirm|escapejs }}",
         close: "{{ vzc_close|escapejs }}", confirmTitle: "{{ vzc_title|escapejs }}",
         justNow: "{{ vzc_now|escapejs }}", copied: "{{ vzc_copied|escapejs }}",
@@ -107,7 +109,7 @@
             var ddIcon  = document.getElementById('dd-theme-icon');
             var ddLabel = document.getElementById('dd-theme-label');
             if (ddIcon)  ddIcon.textContent  = theme === 'dark' ? 'light_mode' : 'dark_mode';
-            if (ddLabel) ddLabel.textContent = theme === 'dark' ? 'Mode clair'  : 'Mode sombre';
+            if (ddLabel) ddLabel.textContent = theme === 'dark' ? "{% trans 'Mode clair'|escapejs %}" : "{% trans 'Dark mode'|escapejs %}";
         }
 
         /* Barre système / barre d'adresse accordée au thème choisi (et non au
@@ -273,8 +275,8 @@
         <div class="ds-banner-sub">{% trans "Activer le mode économie pour réduire la consommation de données ?" %}</div>
     </div>
     <div class="ds-banner-actions">
-        <button type="button" class="ds-banner-accept" onclick="dsEnable(true, true)">{% trans "Activer" %}</button>
-        <button type="button" class="ds-banner-dismiss" onclick="dsDismissBanner()">{% trans "Ignorer" %}</button>
+        <button type="button" class="vz-btn vz-btn--primary vz-btn--sm" onclick="dsEnable(true, true)">{% trans "Activer" %}</button>
+        <button type="button" class="vz-btn vz-btn--muted vz-btn--sm" onclick="dsDismissBanner()">{% trans "Ignorer" %}</button>
     </div>
 </div>
 
@@ -507,19 +509,6 @@
         document.querySelectorAll('.zbn-item').forEach(function(el) {
             if (el.dataset.page === best) el.classList.add('active');
         });
-
-
-        // Sync pending friend-request badge from push-notif counter if exists
-        var pendingCount = parseInt(sessionStorage.getItem('zoot_pending_fr') || '0', 10);
-        if (pendingCount > 0) {
-            var link = document.getElementById('zbn-friends-link');
-            if (link) {
-                var badge = document.createElement('span');
-                badge.className = 'zbn-badge';
-                badge.textContent = pendingCount > 9 ? '9+' : pendingCount;
-                link.appendChild(badge);
-            }
-        }
     })();
     </script>
     {% endif %}
@@ -528,7 +517,7 @@
     <!-- jQuery en premier (Bootstrap en dépend) -->
     <!-- jQuery 3.5.1 et Bootstrap 4.5.3 servis depuis notre domaine (WhiteNoise,
          cache long, précache du service worker) : plus de dépendance à deux CDN
-         tiers, souvent lents ou bloqués sur les réseaux mobiles malgaches. -->
+         tiers, souvent lents ou bloqués sur les réseaux mobiles africains. -->
     <script src="{% static 'perso/jquery/jquery-3.5.1.min.js' %}"></script>
     <!-- Bootstrap JS -->
     <script src="{% static 'perso/bootstrap/js/bootstrap-4.5.3.bundle.min.js' %}"></script>
@@ -553,7 +542,7 @@
 
 <!-- Bannière offline/online -->
 <div id="pwa-offline-banner">
-    <span id="pwa-banner-text"><i class="material-icons" aria-hidden="true">wifi_off</i> Vous êtes hors ligne — contenu mis en cache disponible</span>
+    <span id="pwa-banner-text"><i class="material-icons" aria-hidden="true">wifi_off</i> {% trans "Hors ligne — le contenu déjà consulté reste disponible" %}</span>
 </div>
 
 <!-- Prompt installation PWA -->
@@ -561,8 +550,8 @@
     <h4><i class="material-icons" aria-hidden="true">add_to_home_screen</i> {% trans "Installer Vazimba" %}</h4>
     <p>{% trans "Accédez à l’app directement depuis votre écran d’accueil, même hors ligne." %}</p>
     <div class="pwa-install-actions">
-        <button type="button" class="pwa-btn-install" onclick="pwaInstall()">{% trans "Installer" %}</button>
-        <button type="button" class="pwa-btn-later" onclick="pwaDismiss()">{% trans "Plus tard" %}</button>
+        <button type="button" class="vz-btn vz-btn--muted vz-btn--sm" onclick="pwaDismiss()">{% trans "Plus tard" %}</button>
+        <button type="button" class="vz-btn vz-btn--primary vz-btn--sm" onclick="pwaInstall()">{% trans "Installer" %}</button>
     </div>
 </div>
 
@@ -606,12 +595,10 @@ if ('serviceWorker' in navigator) {
     });
 }
 
-/* ── Déconnexion : demander au SW de vider pages et images en cache ── */
-document.addEventListener('click', function(e) {
-    var a = e.target.closest && e.target.closest('a[href]');
-    if (!a) return;
-    var href = a.getAttribute('href') || '';
-    if (href.indexOf('/logout') < 0) return;
+/* ── Déconnexion : demander au SW de vider pages et images en cache ──
+   (la déconnexion est un formulaire POST marqué data-vz-logout) */
+document.addEventListener('submit', function(e) {
+    if (!e.target || !e.target.matches || !e.target.matches('form[data-vz-logout]')) return;
     if (navigator.serviceWorker && navigator.serviceWorker.controller) {
         navigator.serviceWorker.controller.postMessage({ type: 'CLEAR_CACHE' });
     }
@@ -626,12 +613,12 @@ var _bannerText = document.getElementById('pwa-banner-text');
 function pwaUpdateBanner() {
     if (!navigator.onLine) {
         _banner.className = '';
-        _bannerText.innerHTML = '<i class="material-icons" aria-hidden="true">wifi_off</i> Hors ligne — contenu mis en cache disponible';
+        _bannerText.innerHTML = '<i class="material-icons" aria-hidden="true">wifi_off</i> {% trans "Hors ligne — le contenu déjà consulté reste disponible"|escapejs %}';
         _banner.style.display = 'block';
     } else {
         // Montrer brièvement "reconnecté" puis cacher
         _banner.className = 'online';
-        _bannerText.innerHTML = '<i class="material-icons" aria-hidden="true">wifi</i> Connexion rétablie';
+        _bannerText.innerHTML = '<i class="material-icons" aria-hidden="true">wifi</i> {% trans "Connexion rétablie"|escapejs %}';
         _banner.style.display = 'block';
         setTimeout(function() { _banner.style.display = 'none'; }, 2500);
     }
@@ -757,7 +744,7 @@ document.addEventListener('DOMContentLoaded', function() {
     // Afficher le nombre de posts en attente si > 0
     pwaGetPendingCount().then(function(count) {
         if (count > 0) {
-            pwaShowToast(count + ' post(s) en attente de connexion…', 4000);
+            pwaShowToast("{% trans '%(n)s publication(s) en attente de connexion…'|escapejs %}".replace('%(n)s', count), 4000);
         }
     });
 });
@@ -767,7 +754,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
 <!-- ══ Modal Signalement de contenu ══════════════════════════════════════ -->
 {% if user.is_authenticated %}
-<div id="report-modal-overlay" class="vz-overlay" style="display:none;" onclick="if(event.target===this)closeReportModal()">
+<div id="report-modal-overlay" class="vz-overlay" hidden onclick="if(event.target===this)closeReportModal()">
     <div class="vz-dialog vz-dialog--danger" role="dialog" aria-modal="true" aria-labelledby="report-modal-title">
         <div class="vz-dialog-handle"></div>
         <div class="vz-dialog-head">
@@ -810,13 +797,11 @@ document.addEventListener('DOMContentLoaded', function() {
         wrap.innerHTML = '';
         _REPORT_REASONS.forEach(function(pair, i) {
             var lbl = document.createElement('label');
-            lbl.style.cssText = 'display:flex;align-items:center;gap:.65rem;cursor:pointer;padding:.55rem .6rem;border-radius:var(--radius-sm);margin:0;min-height:44px;';
+            lbl.className = 'report-reason';
             var inp = document.createElement('input');
             inp.type = 'radio'; inp.name = 'report-reason'; inp.value = pair[0];
-            inp.style.cssText = 'accent-color:var(--accent);width:18px;height:18px;margin:0;';
             if (i === 0) inp.checked = true;
             var span = document.createElement('span');
-            span.style.cssText = 'font-size:.92rem;color:var(--text);';
             span.textContent = pair[1];
             lbl.appendChild(inp); lbl.appendChild(span);
             wrap.appendChild(lbl);
@@ -829,10 +814,10 @@ document.addEventListener('DOMContentLoaded', function() {
         document.getElementById('report-oid').value = objectId;
         document.getElementById('report-comment').value = '';
         var fb = document.getElementById('report-feedback');
-        fb.textContent = ''; fb.style.color = 'var(--text-muted)';
+        fb.textContent = ''; fb.classList.remove('is-error');
         var ov = document.getElementById('report-modal-overlay');
-        if (ov.style.display === 'flex') return;
-        ov.style.display = 'flex';
+        if (!ov.hidden) return;
+        ov.hidden = false;
         ov.getBoundingClientRect();
         ov.classList.add('open');
         if (window.vzLock) vzLock();
@@ -841,11 +826,11 @@ document.addEventListener('DOMContentLoaded', function() {
 
     window.closeReportModal = function() {
         var ov = document.getElementById('report-modal-overlay');
-        if (ov.style.display !== 'flex') return;
+        if (ov.hidden) return;
         ov.classList.remove('open');
         if (window.vzUnlock) vzUnlock();
         if (window.vzLayers) vzLayers.remove(window.closeReportModal);
-        setTimeout(function(){ ov.style.display = 'none'; }, 200);
+        setTimeout(function(){ ov.hidden = true; }, 200);
     };
 
     window.submitReport = function() {
@@ -858,7 +843,7 @@ document.addEventListener('DOMContentLoaded', function() {
         var fb  = document.getElementById('report-feedback');
         var btn = document.getElementById('report-submit-btn');
 
-        if (!reason) { fb.style.color = 'var(--danger)'; fb.textContent = '{% trans "Veuillez choisir une raison."|escapejs %}'; return; }
+        if (!reason) { fb.classList.add('is-error'); fb.textContent = '{% trans "Veuillez choisir une raison."|escapejs %}'; return; }
         if (btn.classList.contains('is-loading')) return;
         btn.classList.add('is-loading'); btn.setAttribute('aria-busy', 'true');
         function done() { btn.classList.remove('is-loading'); btn.removeAttribute('aria-busy'); }
@@ -880,11 +865,11 @@ document.addEventListener('DOMContentLoaded', function() {
                 closeReportModal();
                 vzToast('{% trans "Signalement envoyé. Merci !"|escapejs %}', 'success');
             } else {
-                fb.style.color = 'var(--danger)';
+                fb.classList.add('is-error');
                 fb.textContent = data.error || '{% trans "Erreur lors de l’envoi."|escapejs %}';
             }
         })
-        .catch(function(){ done(); fb.style.color='var(--danger)'; fb.textContent='{% trans "Erreur réseau."|escapejs %}'; });
+        .catch(function(){ done(); fb.classList.add('is-error'); fb.textContent='{% trans "Erreur réseau."|escapejs %}'; });
     };
 })();
 </script>

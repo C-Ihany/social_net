@@ -1,8 +1,8 @@
 {% load static %}
 {% load i18n %}
 {% load personal_tags %}
-<!DOCTYPE html>
-<html lang="fr" data-theme="light">
+{% get_current_language as HTML_LANG %}<!DOCTYPE html>
+<html lang="{{ HTML_LANG|default:'fr' }}" data-theme="light">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -157,6 +157,17 @@
       text-decoration: underline; text-underline-offset: 4px;
     }
     .lp-textlink:hover { color: var(--lp-ink); }
+    /* Sélecteur de langue (pied de page) */
+    .section-title--spaced { margin-bottom: 2rem; }
+    .lp-langs { display: flex; align-items: center; gap: .25rem; flex-wrap: wrap; }
+    .lp-langs form { margin: 0; }
+    .lp-lang {
+      min-height: 44px; padding: 0 .7rem; border: 0; border-radius: 11px; background: transparent;
+      font-family: var(--lp-font); font-size: inherit; color: inherit; cursor: pointer;
+    }
+    .lp-lang:hover { background: var(--lp-band); }
+    .lp-lang.is-active { font-weight: 700; color: var(--lp-ink); text-decoration: underline; text-underline-offset: 4px; }
+
     .icon-btn {
       width: 44px; height: 44px; border-radius: 50%;
       border: 1.5px solid var(--lp-line-firm); background: transparent; color: var(--lp-ink);
@@ -243,7 +254,7 @@
     .pillar h3 { font-size: 1.3125rem; line-height: 1.2; letter-spacing: -.028em; font-weight: 700; }
     .pillar p  { font-size: .9375rem; line-height: 1.55; color: var(--lp-muted); }
 
-    /* ─────────────────────── Bande Madagascar ───────────────────── */
+    /* ─────────────────────── Bande « d'ici » ───────────────────── */
     .band { background: var(--lp-band); padding-block: 5.25rem; }
     .band-inner { max-width: 780px; display: flex; flex-direction: column; gap: 1.125rem; }
     .band h2 { font-size: clamp(1.625rem, 3vw, 2.5rem); line-height: 1.12; letter-spacing: -.035em; font-weight: 700; }
@@ -314,7 +325,9 @@
     }
     @media (max-width: 400px) {
       .lp-brand-name { font-size: 1rem; }
-      .btn-nav { padding-inline: 1rem; font-size: .875rem; }
+      .btn-nav { padding-inline: .8rem; font-size: .875rem; }
+      .lp-nav-actions { gap: .4rem; }
+      .lp-brand-name { display: none; }
     }
   </style>
 </head>
@@ -423,7 +436,7 @@
           <span class="pillar-icon" aria-hidden="true">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m3 6 6-3 6 3 6-3v15l-6 3-6-3-6 3z"></path><path d="M9 3v15M15 6v15"></path></svg>
           </span>
-          <h3>{% trans "Découvrir Madagascar" %}</h3>
+          <h3>{% trans "Découvrir l'Afrique" %}</h3>
           <p>{% trans "Les lieux région par région, les avis de ceux qui y sont allés, et des guides locaux à contacter." %}</p>
         </a>
 
@@ -438,7 +451,7 @@
     </div>
   </section>
 
-  <!-- ═══════════════════ Bande Madagascar ═══════════════════ -->
+  <!-- ═══════════════════ Bande « d'ici » ═══════════════════ -->
   {# .band-inner limite la largeur du texte ; il doit être IMBRIQUÉ dans .wrap #}
   {# et non cumulé avec lui, sinon son max-width écrase celui de .wrap et le  #}
   {# bloc se recentre au lieu de s'aligner sur le reste de la page.           #}
@@ -446,7 +459,7 @@
     <div class="wrap">
       <div class="band-inner">
         <h2>{% trans "Construit pour d'ici, pas adapté depuis ailleurs." %}</h2>
-        <p>{% trans "Les régions de Madagascar structurent la recherche, les prix sont en ariary, et un mode économie charge les médias à la demande pour que le site reste utilisable quand le réseau ne suit pas." %}</p>
+        <p>{% trans "La recherche se fait pays par pays, les annonces et les restaurants sont ceux de votre région, et un mode économie charge les médias à la demande pour que le site reste utilisable quand le réseau ne suit pas." %}</p>
       </div>
     </div>
   </section>
@@ -455,7 +468,7 @@
   {% if announcements %}
   <section class="block" id="actualites">
     <div class="wrap">
-      <h2 class="section-title" style="margin-bottom: 2rem;">{% trans "Actualités de la plateforme" %}</h2>
+      <h2 class="section-title section-title--spaced">{% trans "Actualités de la plateforme" %}</h2>
       <div class="news">
         {% for ann in announcements %}
         <div class="ann ann-{{ ann.priority }}">
@@ -488,6 +501,18 @@
       <span class="lp-foot-name">Vazimba</span>
       <a href="{% url 'privacy-policy' %}">{% trans "Confidentialité" %}</a>
       <a href="{% url 'legal:cgu' %}">CGU</a>
+      {# Choix de la langue : la page d'accueil n'en proposait aucun #}
+      <div class="lp-langs" role="group" aria-label="{% trans 'Language' %}">
+        {% get_available_languages as LP_LANGS %}
+        {% for lang_code, lang_name in LP_LANGS %}
+        <form method="post" action="{% url 'set_language' %}">
+          {% csrf_token %}
+          <input type="hidden" name="language" value="{{ lang_code }}">
+          <input type="hidden" name="next" value="{% url 'landing' %}">
+          <button type="submit" class="lp-lang{% if HTML_LANG == lang_code %} is-active{% endif %}"{% if HTML_LANG == lang_code %} aria-current="true"{% endif %}>{% if lang_code == 'fr' %}Français{% elif lang_code == 'en' %}English{% else %}Malagasy{% endif %}</button>
+        </form>
+        {% endfor %}
+      </div>
       <span>vazimba.io</span>
     </footer>
   </div>

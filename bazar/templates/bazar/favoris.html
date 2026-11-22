@@ -1,60 +1,51 @@
 {% extends 'base.html' %}
 {% load static i18n %}
+{% block page_title %}{% trans "Mes favoris" %} — {% trans "Bazar" %} Vazimba{% endblock %}
 
 {% block content %}
 <link rel="stylesheet" href="{% static 'css/pages/bazar-favoris.css' %}">
 
 <div class="bazar-fav-wrap">
 
-    <!-- En-tête -->
-    <div class="bazar-fav-header">
-        <div>
-            <nav class="bazar-crumb">
-                <a href="{% url 'bazar:index' %}">{% trans "Bazar" %}</a>
-                <span> › </span>{% trans "Mes favoris" %}
-            </nav>
-            <h1 class="bazar-fav-title"><i class="material-icons" aria-hidden="true">favorite</i> {% trans "Mes favoris" %}
+    <a class="vz-back" href="{% url 'bazar:index' %}"><i class="material-icons" aria-hidden="true">arrow_back</i>{% trans "Bazar" %}</a>
+    <div class="vz-page-head">
+        <div class="vz-page-head__main">
+            <h1 class="vz-page-title"><i class="material-icons" aria-hidden="true">favorite</i> {% trans "Mes favoris" %}
                 {% if total %}<span class="bazar-fav-count">({{ total }})</span>{% endif %}
             </h1>
         </div>
-        <a href="{% url 'bazar:index' %}" class="vz-btn vz-btn--secondary vz-btn--sm">
-            <i class="material-icons" aria-hidden="true">search</i>
-            {% trans "Explorer le Bazar" %}
-        </a>
     </div>
 
     {% if page_obj.object_list %}
     <div class="vz-grid bazar-fav-grid">
         {% for fav in page_obj.object_list %}
         {% with a=fav.annonce img=fav.annonce.get_primary_image %}
-        <div class="vz-card vz-card--link bazar-fav-card" onclick="location.href='{% url 'bazar:detail' a.pk %}'">
-            <!-- Bouton retirer -->
-            <button class="vz-card__corner bazar-fav-remove"
-                    onclick="event.stopPropagation(); retirerFavori({{ a.pk }}, this)"
-                    title="{% trans 'Retirer des favoris' %}" aria-label="{% trans 'Retirer des favoris' %}" type="button"><i class="material-icons" aria-hidden="true">close</i></button>
-
-            <!-- Image -->
-            <div class="vz-card__media">
-                {% if img %}
-                <img src="{{ img.image.url }}" alt="{{ a.title }}" loading="lazy">
-                {% else %}
-                <div class="vz-card__media-ph"><i class="material-icons" aria-hidden="true">sell</i></div>
-                {% endif %}
-                {% if a.status == 'vendue' %}
-                <div class="vz-card__overlay">{% trans "VENDUE" %}</div>
-                {% endif %}
-            </div>
-
-            <!-- Corps -->
-            <div class="vz-card__body">
-                <h3 class="vz-card__title">{{ a.title }}</h3>
-                <div class="vz-card__meta">
-                    <span class="vz-card__meta-item"><i class="material-icons" aria-hidden="true">person</i><span>{{ a.seller.get_full_name|default:a.seller.username }}</span></span>
+        <div class="bazar-fav-card">
+            <a class="vz-card" href="{% url 'bazar:detail' a.pk %}">
+                <div class="vz-card__media">
+                    {% if img %}
+                    <img src="{{ img.image.url }}" alt="{{ a.title }}" loading="lazy">
+                    {% else %}
+                    <div class="vz-card__media-ph"><i class="material-icons" aria-hidden="true">sell</i></div>
+                    {% endif %}
+                    {% if a.status == 'vendue' %}
+                    <div class="vz-card__overlay">{% trans "VENDUE" %}</div>
+                    {% elif a.status == 'louee' %}
+                    <div class="vz-card__overlay">{% trans "LOUÉE" %}</div>
+                    {% endif %}
                 </div>
-                <span class="vz-card__price">
-                    {% if a.price %}{{ a.formatted_price }}{% else %}<small>{% trans "Prix à discuter" %}</small>{% endif %}
-                </span>
-            </div>
+                <div class="vz-card__body">
+                    <h2 class="vz-card__title">{{ a.title }}</h2>
+                    <div class="vz-card__meta">
+                        <span class="vz-card__meta-item"><i class="material-icons" aria-hidden="true">person</i><span>{{ a.seller.username }}</span></span>
+                    </div>
+                    <span class="vz-card__price">{{ a.display_price }}</span>
+                </div>
+            </a>
+            <!-- Bouton retirer : hors du lien, posé sur la photo -->
+            <button class="vz-icon-btn vz-icon-btn--lg vz-icon-btn--over bazar-fav-remove" type="button"
+                    data-fav-url="{% url 'bazar:toggle_favori' a.pk %}"
+                    title="{% trans 'Retirer des favoris' %}" aria-label="{% trans 'Retirer des favoris' %}"><i class="material-icons" aria-hidden="true">close</i></button>
         </div>
         {% endwith %}
         {% endfor %}
@@ -62,28 +53,28 @@
 
     <!-- Pagination -->
     {% if page_obj.has_other_pages %}
-    <div class="bazar-pagination">
+    <nav class="vz-pager" aria-label="{% trans 'Pagination' %}">
         {% if page_obj.has_previous %}
-        <a href="?page={{ page_obj.previous_page_number }}" class="bazar-page-btn">←</a>
+        <a href="?page={{ page_obj.previous_page_number }}" aria-label="{% trans 'Page précédente' %}"><i class="material-icons" aria-hidden="true">chevron_left</i></a>
         {% endif %}
         {% for n in page_obj.paginator.page_range %}
         {% if n == page_obj.number %}
-        <span class="bazar-page-btn active">{{ n }}</span>
+        <span class="is-current" aria-current="page">{{ n }}</span>
         {% elif n >= page_obj.number|add:"-2" and n <= page_obj.number|add:"2" %}
-        <a href="?page={{ n }}" class="bazar-page-btn">{{ n }}</a>
+        <a href="?page={{ n }}">{{ n }}</a>
         {% endif %}
         {% endfor %}
         {% if page_obj.has_next %}
-        <a href="?page={{ page_obj.next_page_number }}" class="bazar-page-btn">→</a>
+        <a href="?page={{ page_obj.next_page_number }}" aria-label="{% trans 'Page suivante' %}"><i class="material-icons" aria-hidden="true">chevron_right</i></a>
         {% endif %}
-    </div>
+    </nav>
     {% endif %}
 
     {% else %}
     <div class="vz-empty bazar-fav-empty">
         <i class="material-icons" aria-hidden="true">favorite_border</i>
-        <h3 class="vz-empty-title">{% trans "Aucun favori pour l'instant" %}</h3>
-        <p class="vz-empty-text">{% trans "Sauvegardez des annonces qui vous intéressent pour les retrouver facilement ici." %}</p>
+        <h2 class="vz-empty-title">{% trans "Aucun favori pour l'instant" %}</h2>
+        <p class="vz-empty-text">{% trans "Enregistrez les annonces qui vous intéressent pour les retrouver facilement ici." %}</p>
         <a href="{% url 'bazar:index' %}" class="vz-btn vz-btn--primary">
             {% trans "Parcourir le Bazar" %}
         </a>
@@ -93,23 +84,23 @@
 </div>
 
 <script>
-function retirerFavori(pk, btn) {
-    const card = btn.closest('.bazar-fav-card');
-    fetch('/bazar/' + pk + '/favori/', {
-        method: 'POST',
-        headers: { 'X-CSRFToken': document.cookie.match(/csrftoken=([^;]+)/)?.[1] || '' },
-        credentials: 'same-origin',
-    })
-    .then(r => r.json())
-    .then(data => {
-        if (!data.saved && card) {
-            card.style.transition = 'opacity .3s, transform .3s';
-            card.style.opacity = '0';
-            card.style.transform = 'scale(.92)';
-            setTimeout(() => card.remove(), 300);
-        }
-    })
-    .catch(() => {});
-}
+(function () {
+    var I18N = { network: "{% trans 'Erreur réseau. Vérifiez votre connexion et réessayez.'|escapejs %}" };
+    var CSRF = (document.cookie.match(/csrftoken=([^;]+)/) || [])[1] || '';
+    document.addEventListener('click', function (e) {
+        var btn = e.target.closest('.bazar-fav-remove');
+        if (!btn) return;
+        var card = btn.closest('.bazar-fav-card');
+        btn.disabled = true;
+        fetch(btn.dataset.favUrl, { method: 'POST', credentials: 'same-origin', headers: { 'X-CSRFToken': CSRF } })
+        .then(function (r) { if (!r.ok) throw new Error(r.status); return r.json(); })
+        .then(function (data) {
+            if (data.saved) { btn.disabled = false; return; }
+            card.classList.add('is-leaving');
+            setTimeout(function () { card.remove(); }, 300);
+        })
+        .catch(function () { btn.disabled = false; vzToast(I18N.network, {type: 'error'}); });
+    });
+})();
 </script>
 {% endblock %}

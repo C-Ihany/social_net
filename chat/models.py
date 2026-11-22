@@ -25,6 +25,10 @@ class PrivateChatRoom(models.Model):
 	# Conversation secrète : les nouveaux messages et fichiers y sont chiffrés de bout en bout
 	# dans les navigateurs (static/js/e2ee/vz-e2ee.mjs). Le serveur ne peut plus les lire.
 	encrypted           = models.BooleanField(default=False)
+	# Qui a activé ou coupé la conversation secrète en dernier, et quand : l'autre personne le voit
+	# en ouvrant la conversation, même si elle n'était pas là au moment du changement.
+	secret_changed_by   = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, blank=True, related_name='+')
+	secret_changed_at   = models.DateTimeField(null=True, blank=True)
 
 	def connect_user(self, user):
 		"""
@@ -138,6 +142,9 @@ class MessageReaction(models.Model):
 
 
 
+PREVIEW_MAX = 250   # (Notification.verb fait 255 caractères)
+
+
 class UnreadChatRoomMessages(models.Model):
 	"""
 	Keep track of the number of unread messages by a specific user in a specific private chat.
@@ -163,6 +170,10 @@ class UnreadChatRoomMessages(models.Model):
 	def save(self, *args, **kwargs):
 		if not self.id: # if just created, add a timestamp. Otherwise do not automatically change it ever.
 			self.reset_timestamp = timezone.now()
+		# L'aperçu est recopié dans Notification.verb (255 caractères) : un long message levait une
+		# erreur sur PostgreSQL et n'était jamais diffusé.
+		if self.most_recent_message:
+			self.most_recent_message = self.most_recent_message[:PREVIEW_MAX]
 		return super(UnreadChatRoomMessages, self).save(*args, **kwargs)
 
 	@property
@@ -226,7 +237,7 @@ def sync_unread_notification(sender, instance, created, **kwargs):
 	other_user = instance.room.user2 if instance.user_id == instance.room.user1_id else instance.room.user1
 	notification = existing.first()
 	if notification is not None:
-		notification.verb = instance.most_recent_message
+		notification.verb = (instance.most_recent_message or '')[:PREVIEW_MAX]
 		notification.timestamp = timezone.now()
 		notification.from_user = other_user
 		notification.save()
@@ -235,9 +246,18 @@ def sync_unread_notification(sender, instance, created, **kwargs):
 			target=instance.user,
 			from_user=other_user,
 			redirect_url=reverse('chat:private-chat-room') + f'?room_id={instance.room.id}',
-			verb=instance.most_recent_message,
+			verb=(instance.most_recent_message or '')[:PREVIEW_MAX],
 			content_type=content_type,
 		)
+
+
+@receiver(post_save, sender=RoomChatMessage)
+def activate_room_on_first_message(sender, instance, created, **kwargs):
+	"""Une conversation apparaît dans la liste des deux personnes dès son premier message.
+	Avant, seule l'amitié l'activait : une conversation avec un non-ami (contact Bazar, profil)
+	n'était jamais listée."""
+	if created:
+		PrivateChatRoom.objects.filter(pk=instance.room_id, is_active=False).update(is_active=True)
 
 
 def reset_unread(room, user):
@@ -250,16 +270,3 @@ def reset_unread(room, user):
 		unread.count = 0
 		unread.save()
 	return unread
-
-
-
-
-
-
-
-
-
-
-
-
-

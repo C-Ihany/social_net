@@ -12,7 +12,7 @@
         <div class="post-form-header">
             <img src="{{ request.user.profile_image.url }}" alt="{{ request.user.username }}">
             <div>
-                <h4>{% trans "Create a post" %}</h4>
+                <h1 class="post-form-title">{% trans "Create a post" %}</h1>
                 <span>{% trans "as" %} <strong>{{ request.user.username }}</strong></span>
             </div>
         </div>
@@ -34,7 +34,7 @@
                 <div class="form-field">
                     <label for="id_title">{% trans "Title" %} <span class="form-required">*</span></label>
                     <input type="text" name="title" id="id_title"
-                           placeholder="Donnez un titre à votre post…"
+                           placeholder="{% trans 'Donnez un titre à votre post…' %}"
                            value="{{ form.title.value|default:'' }}" required>
                     {% if form.title.errors %}
                     <p class="form-error">{{ form.title.errors|join:", " }}</p>
@@ -121,40 +121,37 @@
             <input type="hidden" name="action" id="post-action" value="publish">
             <input type="hidden" name="scheduled_at" id="post-scheduled-at" value="">
 
-            <div class="post-form-actions">
-                <a class="btn-cancel" href="{% url 'post:post-view' %}">
-                    <span class="material-icons">arrow_back</span> {% trans "Cancel" %}
-                </a>
+            <div class="vz-actions post-form-actions">
+                <a class="vz-btn vz-btn--muted" href="{% url 'post:post-view' %}">{% trans "Annuler" %}</a>
 
                 <!-- Brouillon -->
-                <button class="btn-cancel" type="button" onclick="submitAs('draft')">
-                    <span class="material-icons">drafts</span> {% trans "Brouillon" %}
+                <button class="vz-btn vz-btn--secondary" type="button" onclick="submitAs('draft')">
+                    <span class="material-icons" aria-hidden="true">drafts</span> {% trans "Brouillon" %}
                 </button>
 
                 <!-- Programmer -->
-                <button class="btn-cancel btn-schedule" type="button" onclick="toggleSchedulePicker()"
-                        id="schedule-toggle-btn">
-                    <span class="material-icons">schedule</span> {% trans "Programmer" %}
+                <button class="vz-btn vz-btn--secondary btn-schedule" type="button" onclick="toggleSchedulePicker()"
+                        id="schedule-toggle-btn" aria-expanded="false" aria-controls="schedule-picker">
+                    <span class="material-icons" aria-hidden="true">schedule</span> {% trans "Programmer" %}
                 </button>
 
-                <!-- Publier -->
-                <button class="btn-submit" type="submit">
-                    <span class="material-icons">send</span> {% trans "Publish" %}
+                <!-- Publier : seul bouton primaire de la zone -->
+                <button class="vz-btn vz-btn--primary btn-submit" type="submit">
+                    <span class="material-icons" aria-hidden="true">send</span> {% trans "Publier" %}
                 </button>
             </div>
 
             <!-- Picker date/heure pour publication programmée (caché par défaut) -->
-            {# display:none conservé en ligne : toggleSchedulePicker() lit p.style.display #}
-            <div id="schedule-picker" class="schedule-picker" style="display:none;">
+            <div id="schedule-picker" class="schedule-picker" hidden>
                 <label>
                     {% trans "Date et heure de publication" %}
                 </label>
                 <div class="schedule-row">
                     <input type="datetime-local" id="sched-dt-input">
-                    <button type="button" class="btn-submit"
+                    <button type="button" class="vz-btn vz-btn--tonal"
                             onclick="submitAs('schedule')">
-                        <span class="material-icons">schedule_send</span>
-                        {% trans "Programmer" %}
+                        <span class="material-icons" aria-hidden="true">schedule_send</span>
+                        {% trans "Valider la date" %}
                     </button>
                 </div>
             </div>
@@ -278,7 +275,7 @@ function _renderPreview() {
                que l'URL reste valide pendant l'affichage de la miniature. */
             item.appendChild(vid);
             var badge = document.createElement('span');
-            badge.className = 'mp-type-badge'; badge.textContent = 'vidéo';
+            badge.className = 'mp-type-badge'; badge.textContent = '{% trans "video"|escapejs %}';
             item.appendChild(badge);
         } else {
             /* Image : FileReader.readAsDataURL() — plus fiable que createObjectURL
@@ -297,8 +294,8 @@ function _renderPreview() {
         var btn = document.createElement('button');
         btn.type = 'button';
         btn.className = 'mp-remove';
-        btn.innerHTML = '&#x2715;';
-        btn.title = 'Retirer';
+        btn.innerHTML = '<span class="material-icons" aria-hidden="true">close</span>';
+        btn.setAttribute('aria-label', AP_T.remove);
         (function(i){ btn.onclick = function(e){ e.stopPropagation(); removeFromSelection(i); }; })(idx);
         item.appendChild(btn);
 
@@ -328,12 +325,16 @@ function _renderPreview() {
    ═══════════════════════════════════════════════════════════════════════════ */
 
 var _form = document.getElementById('add-post-form');
+{% trans "Veuillez remplir les champs obligatoires." as ap_required %}{% trans "Une erreur est survenue. Réessayez." as ap_error %}
+{% trans "Erreur réseau. Vérifiez votre connexion." as ap_network %}{% trans "%a fichier(s) enregistré(s) sur %b." as ap_partial %}
+var AP_T = { required: "{{ ap_required|escapejs }}", error: "{{ ap_error|escapejs }}", network: "{{ ap_network|escapejs }}",
+             partial: "{{ ap_partial|escapejs }}", remove: "{% trans 'Retirer'|escapejs %}" };
 
 /* Noyau d'envoi — appelé par le listener submit ET par submitAs() */
 function _doFetch(extraAction, extraScheduledAt) {
     if (!_form) return;
     var submitBtn = _form.querySelector('.btn-submit');
-    if (submitBtn) { submitBtn.disabled = true; submitBtn.style.opacity = '.6'; }
+    if (submitBtn) { submitBtn.disabled = true; submitBtn.classList.add('is-loading'); }
 
     /* Sync CKEditor */
     if (typeof CKEDITOR !== 'undefined') {
@@ -411,32 +412,32 @@ function _doFetch(extraAction, extraScheduledAt) {
 
             if (data && data.ok && data.redirect) {
                 /* Succès → redirection */
-                if (data.received !== undefined) {
-                    _diagToast(data.saved + '/' + data.received + ' fichier(s) sauvegardé(s)', 'green');
+                if (data.received && data.saved < data.received) {
+                    _diagToast(AP_T.partial.replace('%a', data.saved).replace('%b', data.received), 'orange');
                     setTimeout(function() { window.location.href = data.redirect; }, 1800);
                 } else {
                     window.location.href = data.redirect;
                 }
             } else if (data && data.errors) {
                 /* Erreurs de validation JSON du serveur */
-                if (submitBtn) { submitBtn.disabled = false; submitBtn.style.opacity = ''; }
-                _diagToast('Veuillez remplir tous les champs obligatoires.', 'orange');
+                if (submitBtn) { submitBtn.disabled = false; submitBtn.classList.remove('is-loading'); }
+                _diagToast(AP_T.required, 'orange');
             } else if (res.status === 200 && res.txt.indexOf('<form') !== -1) {
                 /* Formulaire invalide (réponse HTML) */
-                if (submitBtn) { submitBtn.disabled = false; submitBtn.style.opacity = ''; }
-                _diagToast('Veuillez vérifier les champs obligatoires.', 'orange');
+                if (submitBtn) { submitBtn.disabled = false; submitBtn.classList.remove('is-loading'); }
+                _diagToast(AP_T.required, 'orange');
             } else if (res.status === 302 || (res.url && res.url.indexOf('/login') !== -1)) {
                 /* Session expirée — rediriger vers login */
                 window.location.href = '/login/?next=' + encodeURIComponent(window.location.pathname);
             } else {
-                if (submitBtn) { submitBtn.disabled = false; submitBtn.style.opacity = ''; }
-                _diagToast('Erreur ' + res.status + ' — URL: ' + res.url.split('?')[0], 'orange');
+                if (submitBtn) { submitBtn.disabled = false; submitBtn.classList.remove('is-loading'); }
+                _diagToast(AP_T.error, 'orange');
             }
         })
         .catch(function(err) {
             console.warn('[Vazimba] fetch error', err);
-            if (submitBtn) { submitBtn.disabled = false; submitBtn.style.opacity = ''; }
-            _diagToast('Erreur réseau. Vérifiez votre connexion.', 'orange');
+            if (submitBtn) { submitBtn.disabled = false; submitBtn.classList.remove('is-loading'); }
+            _diagToast(AP_T.network, 'orange');
             /* NE PAS appeler form.submit() — cela déclencherait ERR_UPLOAD_FILE_CHANGED */
         });
 
@@ -453,14 +454,7 @@ if (_form) {
 
 // ── Toast diagnostic ─────────────────────────────────────────────────────────
 function _diagToast(msg, color) {
-    var t = document.createElement('div');
-    t.style.cssText = 'position:fixed;top:20px;left:50%;transform:translateX(-50%);' +
-        'background:' + (color === 'green' ? '#1a7a1a' : '#b45000') + ';color:#fff;' +
-        'font-size:.9rem;font-weight:700;padding:.8rem 1.4rem;border-radius:12px;' +
-        'z-index:99999;max-width:90vw;text-align:center;box-shadow:0 4px 20px rgba(0,0,0,.4);';
-    t.textContent = msg;
-    document.body.appendChild(t);
-    setTimeout(function() { if (t.parentNode) t.parentNode.removeChild(t); }, 5000);
+    window.vzToast(msg, color === 'green' ? 'success' : 'error');
 }
 
 // ── Brouillon / Programmer ────────────────────────────────────────────────────
@@ -474,8 +468,10 @@ function submitAs(action) {
     }
 }
 function toggleSchedulePicker() {
-    var p = document.getElementById('schedule-picker');
-    if (p) p.style.display = (p.style.display === 'none') ? 'block' : 'none';
+    var p = document.getElementById('schedule-picker'), b = document.getElementById('schedule-toggle-btn');
+    if (!p) return;
+    p.hidden = !p.hidden;
+    if (b) b.setAttribute('aria-expanded', p.hidden ? 'false' : 'true');
 }
 </script>
 

@@ -52,6 +52,16 @@ def visible_posts(qs, viewer, author=None):
     return qs
 
 
+def unsealed(qs):
+    """Écarte les capsules Vintana encore scellées (reveal_date dans le futur).
+
+    À utiliser partout où le **corps** d'un post est lu ou cherché en dehors de
+    sa carte (recherche, hashtags, tendances) : la carte sait afficher l'état
+    « scellé », pas ces listes.
+    """
+    return qs.exclude(reveal_date__gt=timezone.now())
+
+
 def get_visible_post_or_404(viewer, pk, qs=None):
     """Récupère un post par sa clé, ou 404 si `viewer` n'a pas le droit de le voir.
 
@@ -64,6 +74,11 @@ def get_visible_post_or_404(viewer, pk, qs=None):
 
     if qs is None:
         qs = Post.objects.all()
+    # Identifiant absent ou non numérique (« abc ») : 404, pas une erreur 500.
+    try:
+        pk = int(pk)
+    except (TypeError, ValueError):
+        raise Http404("Post introuvable.")
     qs = qs.filter(pk=pk)
     if getattr(viewer, 'is_authenticated', False):
         own = qs.filter(author=viewer).first()

@@ -1,0 +1,72 @@
+{% load i18n %}{% comment %}
+Champs communs « proposer un lieu » / « modifier le lieu ».
+Attend : form (valeurs courantes), categories, regions.
+{% endcomment %}
+<h2 class="ls-section-label">
+    <span class="material-icons" aria-hidden="true">info</span>
+    {% trans "Informations principales" %}
+</h2>
+
+<div class="vz-field">
+    <label for="id_name">{% trans "Nom du lieu" %}<span class="vz-req" aria-hidden="true">*</span></label>
+    <input type="text" id="id_name" name="name" value="{{ form.name|default:'' }}"
+           placeholder="{% trans 'Ex : nom du parc, de la plage, du site…' %}"
+           required maxlength="200">
+</div>
+
+<div class="ls-row">
+    <div class="vz-field">
+        <label for="id_category">{% trans "Catégorie" %}<span class="vz-req" aria-hidden="true">*</span></label>
+        <select id="id_category" name="category">
+            {% for val, label in categories %}
+            <option value="{{ val }}" {% if form.category == val %}selected{% endif %}>{{ label }}</option>
+            {% endfor %}
+        </select>
+    </div>
+    <div class="vz-field">
+        <label for="id_region">{% trans "Pays ou région" %}</label>
+        <select id="id_region" name="region">
+            <option value="">{% trans "— Choisir —" %}</option>
+            {% for val, label in regions %}
+            <option value="{{ val }}" {% if form.region == val %}selected{% endif %}>{{ label }}</option>
+            {% endfor %}
+        </select>
+    </div>
+</div>
+
+<div class="vz-field">
+    <label for="id_description">{% trans "Description" %}<span class="vz-req" aria-hidden="true">*</span></label>
+    <textarea class="ls-textarea--tall" id="id_description" name="description"
+              placeholder="{% trans 'Décrivez ce lieu : paysage, histoire, ce qui le rend unique…' %}"
+              required>{{ form.description|default:'' }}</textarea>
+</div>
+
+<h2 class="ls-section-label">
+    <span class="material-icons" aria-hidden="true">directions</span>
+    {% trans "Informations pratiques" %}
+</h2>
+
+<div class="vz-field">
+    <label for="id_address">{% trans "Adresse / Coordonnées GPS" %}</label>
+    <input type="text" id="id_address" name="address" maxlength="250" value="{{ form.address|default:'' }}"
+           placeholder="{% trans 'Ex : ville ou village le plus proche, ou coordonnées GPS' %}">
+</div>
+
+<div class="ls-row">
+    <div class="vz-field">
+        <label for="id_best_period">{% trans "Meilleure période" %}</label>
+        <input type="text" id="id_best_period" name="best_period" maxlength="120" value="{{ form.best_period|default:'' }}"
+               placeholder="{% trans 'Ex : saison sèche, de mai à octobre' %}">
+    </div>
+    <div class="vz-field">
+        <label for="id_entry_fee">{% trans "Tarif d'entrée" %}</label>
+        <input type="text" id="id_entry_fee" name="entry_fee" maxlength="80" value="{{ form.entry_fee|default:'' }}"
+               placeholder="{% trans 'Ex : gratuit, ou prix du billet' %}">
+    </div>
+</div>
+
+<div class="vz-field">
+    <label for="id_tips">{% trans "Conseils pratiques" %}</label>
+    <textarea id="id_tips" name="tips"
+              placeholder="{% trans 'Conseils pour les visiteurs : transport, hébergement, précautions…' %}">{{ form.tips|default:'' }}</textarea>
+</div>

@@ -14,11 +14,6 @@
 @media (max-width: 767px) { .sl-wrapper { padding-top: 58px; } }
 
 /* ── Titre ────────────────────────────────────────────── */
-.sl-title {
-    color: var(--text); font-size: 1.6rem; font-weight: 800;
-    padding: .9rem 1rem .6rem; margin: 0;
-    letter-spacing: -.01em;
-}
 
 /* ── Grille 2 colonnes plein-écran ───────────────────── */
 .sl-grid {
@@ -161,8 +156,9 @@
 }
 
 /* ── Vide ─────────────────────────────────────────────── */
-.sl-empty {
-    text-align: center; padding: 4rem 1.5rem; color: var(--text-muted);
-    grid-column: span 2;
-}
-.sl-empty .material-icons { font-size: 3.5rem; color: var(--text-subtle); display: block; margin-bottom: .8rem; }
+
+/* ── Compléments (2026-11) : cartes actionnables au clavier ── */
+.sl-wrapper .vz-page-head { padding: .9rem 1rem 0; margin-bottom: .6rem; }
+.sl-create-card { border: 0; padding: 0; font: inherit; color: inherit; cursor: pointer; text-align: left; display: block; width: 100%; }
+.sl-card-open { position: absolute; inset: 0; z-index: 1; border: 0; padding: 0; background: transparent; cursor: pointer; }
+.sl-card-link { min-height: 32px; }

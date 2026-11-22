@@ -10,11 +10,11 @@
 <!-- ── Hero ── -->
 <div class="rs-hero">
     <h1><i class="material-icons rs-ico" aria-hidden="true">restaurant</i> {% trans "Resto Vazimba" %}</h1>
-    <p>{% trans "Commande ton plat, choisis tes suppléments, suis ton livreur sur la carte." %}</p>
+    <p>{% trans "Commandez votre plat, choisissez vos suppléments, suivez votre livreur sur la carte." %}</p>
     <form class="rs-search" method="get" action="{% url 'resto:index' %}">
-        <input type="text" name="q" value="{{ q }}" placeholder="{% trans 'Un plat, un restaurant, un quartier…' %}">
+        <input type="search" name="q" value="{{ q }}" placeholder="{% trans 'Un plat, un restaurant, un quartier…' %}" aria-label="{% trans 'Rechercher' %}">
         {% if sel_region %}<input type="hidden" name="region" value="{{ sel_region }}">{% endif %}
-        <button type="submit">{% trans "Chercher" %}</button>
+        <button type="submit" class="vz-btn vz-btn--pill rs-search-btn"><i class="material-icons" aria-hidden="true">search</i> {% trans "Rechercher" %}</button>
     </form>
     <div class="rs-hero-links">
         {% if request.user.is_authenticated %}
@@ -22,7 +22,7 @@
         <a href="{% url 'resto:vendor_dashboard' %}"><i class="material-icons rs-ico" aria-hidden="true">storefront</i> {% if my_restaurants %}{% trans "Mon restaurant" %}{% else %}{% trans "Vendre mes plats" %}{% endif %}</a>
         <a href="{% url 'resto:courier_dashboard' %}"><i class="material-icons rs-ico" aria-hidden="true">two_wheeler</i> {% trans "Espace livreur" %}</a>
         {% else %}
-        <a href="{% url 'login' %}?next={% url 'resto:index' %}">{% trans "Connexion pour commander" %}</a>
+        <a href="{% url 'login' %}?next={% url 'resto:index' %}">{% trans "Se connecter pour commander" %}</a>
         {% endif %}
     </div>
 </div>
@@ -38,7 +38,7 @@
             {% endfor %}
         </select>
         <select name="region" class="rs-select" id="rs-region" onchange="this.form.submit()">
-            <option value="">{% trans "Toute Madagascar" %}</option>
+            <option value="">{% trans "Toute l'Afrique" %}</option>
             {% for val, label in regions %}
             <option value="{{ val }}" {% if val == sel_region %}selected{% endif %}>{{ label }}</option>
             {% endfor %}
@@ -62,8 +62,8 @@
 
 <div class="rs-wrap">
     <p class="rs-muted rs-count">
-        <strong>{{ total }}</strong> {% trans "restaurant" %}{{ total|pluralize }}
-        {% if sel_region %} · {{ region_labels|default_if_none:'' }}{% for val, label in regions %}{% if val == sel_region %}{{ label }}{% endif %}{% endfor %}{% endif %}
+        {% blocktrans count n=total %}<strong>{{ n }}</strong> restaurant{% plural %}<strong>{{ n }}</strong> restaurants{% endblocktrans %}
+        {% if sel_region_label %} · {{ sel_region_label }}{% endif %}
         {% if q %} · « {{ q }} »{% endif %}
     </p>
 
@@ -94,12 +94,10 @@
     </div>
 
     {% if page_obj.has_other_pages %}
-    <nav class="rs-pager" aria-label="{% trans 'Pagination' %}">
-        <div class="vz-segmented">
-            {% if page_obj.has_previous %}<a class="vz-seg" href="?{% if q %}q={{ q }}&{% endif %}{% if sel_cat %}cat={{ sel_cat }}&{% endif %}{% if sel_region %}region={{ sel_region }}&{% endif %}sort={{ sort }}&page={{ page_obj.previous_page_number }}" aria-label="{% trans 'Page précédente' %}"><i class="material-icons" aria-hidden="true">chevron_left</i></a>{% endif %}
-            <span class="vz-seg active">{{ page_obj.number }} / {{ page_obj.paginator.num_pages }}</span>
-            {% if page_obj.has_next %}<a class="vz-seg" href="?{% if q %}q={{ q }}&{% endif %}{% if sel_cat %}cat={{ sel_cat }}&{% endif %}{% if sel_region %}region={{ sel_region }}&{% endif %}sort={{ sort }}&page={{ page_obj.next_page_number }}" aria-label="{% trans 'Page suivante' %}"><i class="material-icons" aria-hidden="true">chevron_right</i></a>{% endif %}
-        </div>
+    <nav class="vz-pager" aria-label="{% trans 'Pagination' %}">
+        {% if page_obj.has_previous %}<a href="?{% if q %}q={{ q|urlencode }}&{% endif %}{% if sel_cat %}cat={{ sel_cat }}&{% endif %}{% if sel_region %}region={{ sel_region }}&{% endif %}sort={{ sort }}&page={{ page_obj.previous_page_number }}" aria-label="{% trans 'Page précédente' %}"><i class="material-icons" aria-hidden="true">chevron_left</i></a>{% else %}<span class="is-disabled" aria-hidden="true"><i class="material-icons">chevron_left</i></span>{% endif %}
+        <span class="is-current" aria-current="page">{{ page_obj.number }} / {{ page_obj.paginator.num_pages }}</span>
+        {% if page_obj.has_next %}<a href="?{% if q %}q={{ q|urlencode }}&{% endif %}{% if sel_cat %}cat={{ sel_cat }}&{% endif %}{% if sel_region %}region={{ sel_region }}&{% endif %}sort={{ sort }}&page={{ page_obj.next_page_number }}" aria-label="{% trans 'Page suivante' %}"><i class="material-icons" aria-hidden="true">chevron_right</i></a>{% else %}<span class="is-disabled" aria-hidden="true"><i class="material-icons">chevron_right</i></span>{% endif %}
     </nav>
     {% endif %}
 
@@ -107,7 +105,7 @@
     <div class="vz-empty">
         <i class="material-icons" aria-hidden="true">restaurant</i>
         <p class="vz-empty-title">{% trans "Aucun restaurant pour l'instant" %}</p>
-        <p class="vz-empty-text">{% trans "Sois le premier : crée ta page, ajoute ton menu, et tes clients te retrouveront ici au lieu de chercher ta page Facebook." %}</p>
+        <p class="vz-empty-text">{% trans "Soyez le premier : créez votre page, ajoutez votre menu, et vos clients vous retrouveront ici en un clic." %}</p>
         {% if request.user.is_authenticated %}
         <a class="vz-btn vz-btn--primary" href="{% url 'resto:restaurant_create' %}">{% trans "Créer mon restaurant" %}</a>
         {% endif %}
@@ -117,8 +115,8 @@
 
 {% if cart_summary.count %}
 <a href="{% url 'resto:cart' %}" class="rs-cartbar show">
-    <span class="material-icons">shopping_basket</span>
-    <span>{{ cart_summary.count }} {% trans "article" %}{{ cart_summary.count|pluralize }} · {{ cart_summary.restaurant.name }}</span>
+    <span class="material-icons" aria-hidden="true">shopping_basket</span>
+    <span>{% blocktrans count n=cart_summary.count %}{{ n }} article{% plural %}{{ n }} articles{% endblocktrans %} · {{ cart_summary.restaurant.name }}</span>
     <span>{{ cart_summary.total|vz_ariary }} <i class="material-icons rs-ico" aria-hidden="true">arrow_forward</i></span>
 </a>
 {% endif %}

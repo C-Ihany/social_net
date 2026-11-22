@@ -6,25 +6,26 @@
 {% include 'resto/_style.html' %}
 <link rel="stylesheet" href="{% static 'css/pages/resto-dashboard.css' %}">
 <div class="rs-wrap rs-wrap--xl">
-    <div class="rs-page-head">
-        <h1 class="rs-h1"><i class="material-icons" aria-hidden="true">storefront</i> {% trans "Mes restaurants" %}</h1>
-        <a class="vz-btn vz-btn--sm vz-btn--primary" href="{% url 'resto:restaurant_create' %}"><i class="material-icons" aria-hidden="true">add</i> {% trans "Nouveau restaurant" %}</a>
+    <div class="vz-page-head">
+        <a class="vz-back" href="{% url 'resto:index' %}" aria-label="{% trans 'Retour' %}"><i class="material-icons" aria-hidden="true">arrow_back</i></a>
+        <div class="vz-page-head__main"><h1 class="vz-page-title"><i class="material-icons" aria-hidden="true">storefront</i> {% trans "Mes restaurants" %}</h1></div>
+        {% if restaurants %}<div class="vz-page-head__actions"><a class="vz-btn vz-btn--sm vz-btn--secondary" href="{% url 'resto:restaurant_create' %}"><i class="material-icons" aria-hidden="true">add</i> {% trans "Nouveau restaurant" %}</a></div>{% endif %}
     </div>
 
     {% for r in restaurants %}
-    <div class="rs-card rs-card--pad rs-card--mb-m">
+    <div class="vz-card rs-box rs-card--pad rs-card--mb">
         <div class="rs-between">
             <div>
                 <strong class="rs-rname">{{ r.name }}</strong>
                 <span class="vz-chip vz-chip--sm vz-chip--static {% if r.is_open %}vz-chip--success{% else %}vz-chip--danger{% endif %}">{% if r.is_open %}{% trans "Ouvert" %}{% else %}{% trans "Fermé" %}{% endif %}</span>
                 {% if not r.is_approved %}<span class="vz-chip vz-chip--sm vz-chip--static vz-chip--warning">{% trans "En attente de validation Vazimba" %}</span>{% endif %}
-                <div class="rs-muted">{{ r.get_category_display }} · {{ r.address }} · {{ r.items_count }} {% trans "plat(s)" %}</div>
+                <div class="rs-muted">{{ r.get_category_display }} · {{ r.address }} · {% blocktrans count n=r.items_count %}{{ n }} plat{% plural %}{{ n }} plats{% endblocktrans %}</div>
             </div>
             <form method="post" action="{% url 'resto:toggle_open' r.slug %}">{% csrf_token %}
-                <button class="vz-btn vz-btn--sm {% if r.is_open %}vz-btn--muted{% else %}vz-btn--primary{% endif %}" type="submit">{% if r.is_open %}<i class="material-icons" aria-hidden="true">pause</i> {% trans "Suspendre les commandes" %}{% else %}<i class="material-icons" aria-hidden="true">play_arrow</i> {% trans "Ouvrir les commandes" %}{% endif %}</button>
+                <button class="vz-btn vz-btn--sm {% if r.is_open %}vz-btn--muted{% else %}vz-btn--tonal{% endif %}" type="submit">{% if r.is_open %}<i class="material-icons" aria-hidden="true">pause</i> {% trans "Suspendre les commandes" %}{% else %}<i class="material-icons" aria-hidden="true">play_arrow</i> {% trans "Ouvrir les commandes" %}{% endif %}</button>
             </form>
         </div>
-        <div class="rs-actions rs-actions--mt">
+        <div class="vz-btn-row rs-mt-m">
             <a class="vz-btn vz-btn--sm {% if r.pending %}vz-btn--primary{% else %}vz-btn--secondary{% endif %}" href="{% url 'resto:vendor_orders' r.slug %}"><i class="material-icons" aria-hidden="true">list_alt</i> {% trans "Commandes" %}{% if r.pending %} <span class="rs-pending-count">{{ r.pending }} {% trans "nouvelle(s)" %}</span>{% elif r.active %} ({{ r.active }}){% endif %}</a>
             <a class="vz-btn vz-btn--sm vz-btn--secondary" href="{% url 'resto:menu_manage' r.slug %}"><i class="material-icons" aria-hidden="true">restaurant_menu</i> {% trans "Menu" %}</a>
             <a class="vz-btn vz-btn--sm vz-btn--secondary" href="{% url 'resto:vendor_couriers' r.slug %}"><i class="material-icons" aria-hidden="true">delivery_dining</i> {% trans "Livreurs" %}</a>

@@ -16,7 +16,7 @@
     display: flex; align-items: center; gap: .8rem;
 }
 .post-form-header .material-icons { font-size: 1.5rem; color: var(--accent); }
-.post-form-header h4 { font-size: 1.05rem; font-weight: 700; color: var(--text); margin: 0; }
+.post-form-header .post-form-title { font-size: 1.05rem; font-weight: 700; color: var(--text); margin: 0; }
 .post-form-header span { font-size: .85rem; color: var(--text-muted); }
 .post-form-body { padding: 1.5rem; }
 
@@ -123,29 +123,9 @@
     display: flex; gap: .7rem; align-items: center;
     padding: 1rem 1.5rem; border-top: 1px solid var(--border); background: var(--bg-card);
 }
-.btn-submit {
-    flex: 1; padding: .6rem 1.5rem;
-    background: linear-gradient(135deg, var(--accent), var(--accent2));
-    color: var(--on-accent); border: none; border-radius: var(--radius-pill);
-    font-size: 1rem; font-weight: 700; cursor: pointer;
-    transition: opacity .2s, transform .1s, box-shadow .2s;
-    display: inline-flex; align-items: center; justify-content: center; gap: .4rem;
-    box-shadow: 0 4px 16px rgba(var(--accent-rgb),.25);
-  min-height: 44px; display: inline-flex; align-items: center; justify-content: center; gap: .4rem;
-}
-.btn-submit:hover { opacity: .88; transform: translateY(-1px); box-shadow: 0 6px 22px rgba(var(--accent-rgb),.35); }
-.btn-cancel {
-    padding: .6rem 1.2rem; border: 1.5px solid var(--border); border-radius: 22px;
-    background: none; color: var(--text-muted); font-size: .95rem; font-weight: 600;
-    cursor: pointer; text-decoration: none;
-    transition: background .15s, color .15s, border-color .15s;
-    display: inline-flex; align-items: center; gap: .35rem;
-}
-.btn-cancel:hover { background: var(--btn-bg); color: var(--text); border-color: var(--accent); text-decoration: none; }
 
 /* ── Icônes des libellés et des boutons ── */
 .form-field label .material-icons { font-size: 1rem; vertical-align: middle; }
-.btn-cancel .material-icons, .btn-submit .material-icons { font-size: 1rem; }
 
 /* ── Champs : obligatoire, erreurs, aide ── */
 .form-required { color: var(--danger); }
@@ -158,3 +138,8 @@
 .pp-optional { font-weight: 400; color: var(--text-muted); font-size: .8rem; }
 /* Input fichier masqué sans display:none (le label doit rester cliquable en WebView) */
 .input-file-hidden { position: absolute; width: 1px; height: 1px; opacity: 0; overflow: hidden; pointer-events: none; }
+
+/* Rangée d'actions : .vz-actions du socle, dans le pied de la carte */
+.post-form-actions.vz-actions { margin-top: 0; }
+.post-form-title { font-size: 1.05rem; font-weight: 700; color: var(--text); margin: 0; }
+.media-preview-item .mp-remove .material-icons { font-size: .9rem; }

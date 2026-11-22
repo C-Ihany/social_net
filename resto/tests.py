@@ -229,7 +229,7 @@ class RestoFlowTests(TestCase):
             'cin_number': '1234', 'languages': 'Malagasy', 'years_experience': 2, 'mm_provider': 'mvola', 'mm_number': '',
         })
         self.assertEqual(r.status_code, 200)
-        self.assertContains(r, '12 chiffres')
+        self.assertContains(r, '6 à 20 lettres ou chiffres')
         r = self.client.post(reverse('resto:courier_signup'), {
             'full_name': 'RABE Koto', 'phone': '034', 'vehicle': 'moto', 'vehicle_plate': '1234 TAB', 'region': 'analamanga',
             'cin_number': '101 011 234 567', 'zones': 'Analakely, Isoraka', 'hours': 'Lun–Sam', 'languages': 'Malagasy',
@@ -354,3 +354,128 @@ class RestoFlowTests(TestCase):
                            ('resto:courier_signup', [])]:
             r = self.client.get(reverse(name, args=args))
             self.assertEqual(r.status_code, 200, f'{name} → {r.status_code}')
+
+    # ── Corrections du lot 2026-11-22 ─────────────────────────────────────────
+    def test_restaurant_cannot_approve_or_steal_a_courier(self):
+        """Rattacher un livreur : il doit avoir son profil, être libre, et sa validation ne change pas."""
+        url = reverse('resto:vendor_couriers', args=[self.resto.slug])
+        self.client.login(email='owner@test.mg', password='pass12345')
+        # Pas de profil livreur : rien n'est créé à sa place
+        self.client.post(url, {'username': 'livreur'})
+        self.assertFalse(Courier.objects.filter(user=self.courier_user).exists())
+        # Profil créé par le livreur lui-même, non validé par Vazimba
+        c = Courier.objects.create(user=self.courier_user, phone='034', is_available=True)
+        self.client.post(url, {'username': 'Livreur'})
+        c.refresh_from_db()
+        self.assertEqual(c.restaurant_id, self.resto.pk)
+        self.assertFalse(c.is_approved)             # le rattachement ne vaut pas validation
+        self.assertTrue(c.can_deliver)              # mais il peut livrer les commandes de CE restaurant
+        # Un autre restaurant ne peut pas le prendre
+        other_owner = User.objects.create_user(email='o2@test.mg', username='owner2', password='pass12345')
+        other = Restaurant.objects.create(owner=other_owner, name='Autre', address='y', is_approved=True)
+        self.client.login(email='o2@test.mg', password='pass12345')
+        self.client.post(reverse('resto:vendor_couriers', args=[other.slug]), {'username': 'livreur'})
+        c.refresh_from_db()
+        self.assertEqual(c.restaurant_id, self.resto.pk)
+        # Retiré : il redevient indépendant NON validé → ne voit plus aucune commande
+        self.client.login(email='owner@test.mg', password='pass12345')
+        self.assertEqual(self.client.post(url, {'remove': 'abc'}).status_code, 302)   # entrée invalide : pas de 500
+        self.client.post(url, {'remove': c.pk})
+        c.refresh_from_db()
+        self.assertIsNone(c.restaurant_id)
+        self.assertFalse(c.is_approved)
+        self.assertFalse(c.can_deliver)
+
+    def test_malformed_json_never_crashes(self):
+        self.client.login(email='client@test.mg', password='pass12345')
+        url = reverse('resto:cart_add', args=[self.item.pk])
+        for body in ('[]', '"x"', '{"options": 5, "ingredients": "abc"}', '{bad'):
+            r = self.client.post(url, data=body, content_type='application/json')
+            self.assertEqual(r.status_code, 400, body)      # option obligatoire manquante, jamais 500
+        self.client.login(email='owner@test.mg', password='pass12345')
+        url = reverse('resto:item_options_save', args=[self.resto.slug, self.item.pk])
+        r = self.client.post(url, content_type='application/json', data=json.dumps({'groups': [
+            'x', {'name': 'Cuisson', 'min': 'a', 'max': None, 'options': [{'name': 'Bien cuit', 'extra_price': 'abc'}, 7]}]}))
+        self.assertEqual(r.status_code, 200)
+        self.assertEqual(self.item.option_groups.get().options.get().extra_price, 0)
+
+    def test_numbers_reach_javascript_unlocalized(self):
+        """En français un flottant rendu dans un gabarit prend une virgule : coordonnées en JSON / unlocalize."""
+        self.client.login(email='client@test.mg', password='pass12345')
+        self._add([self.sauce_a.pk])
+        r = self.client.get(reverse('resto:checkout'))
+        self.assertContains(r, '"lat": -18.91')
+        self.assertNotContains(r, '-18,91')
+        r = self.client.post(reverse('resto:checkout'), {
+            'mode': 'delivery', 'customer_name': 'Client', 'customer_phone': '033', 'delivery_address': 'Ici',
+            'delivery_latitude': '-18.9', 'delivery_longitude': '47.5', 'payment_method': 'cash'})
+        order = Order.objects.get()
+        Order.objects.filter(pk=order.pk).update(status=Order.STATUS_PICKED_UP,
+            courier=Courier.objects.create(user=self.courier_user, phone='034', is_approved=True))
+        self.client.login(email='livreur@test.mg', password='pass12345')
+        r = self.client.get(reverse('resto:courier_dashboard'))
+        self.assertContains(r, 'destination=-18.9,47.5')
+
+    def test_action_labels_have_no_emoji_and_main_action_comes_last(self):
+        order = Order(restaurant=self.resto, customer=self.client_user, status=Order.STATUS_PENDING)
+        actions = order.actions_for(['restaurant'])
+        self.assertEqual([a[0] for a in actions], ['refused', 'accepted'])        # « Refuser » puis « Accepter »
+        for code, label in Order.ACTION_LABELS.items():
+            self.assertTrue(str(label)[0].isalpha(), label)
+            self.assertIn(code, Order.ACTION_ICONS)
+        order.status = Order.STATUS_PICKED_UP
+        self.assertEqual([a[0] for a in order.actions_for(['courier'])], ['delivered', 'delivering'])
+
+    def test_identity_scans_get_a_random_private_name(self):
+        from .models import identity_upload_to
+        a = identity_upload_to(None, 'Ma CNI RAKOTO.JPG')
+        b = identity_upload_to(None, 'Ma CNI RAKOTO.JPG')
+        self.assertNotEqual(a, b)
+        self.assertNotIn('RAKOTO', a)
+        self.assertTrue(a.endswith('.jpg'))
+        self.assertTrue(identity_upload_to(None, 'x.svg').endswith('.jpg'))
+
+    def test_pages_render_in_three_languages_with_valid_scripts(self):
+        """Toutes les pages Resto en fr / en / mg : 200, pas de dictionnaire Python affiché, scripts analysables."""
+        import re
+        try:
+            import esprima
+        except ImportError:
+            esprima = None
+        self.client.login(email='client@test.mg', password='pass12345')
+        self._add([self.sauce_a.pk])
+        self.client.post(reverse('resto:checkout'), {
+            'mode': 'delivery', 'customer_name': 'Client', 'customer_phone': '033', 'delivery_address': 'Ici',
+            'payment_method': 'cash'})
+        order = Order.objects.get()
+        self._add([self.sauce_a.pk])
+        Courier.objects.create(user=self.owner, restaurant=self.resto, phone='034', is_available=True)
+        pages = {
+            'client@test.mg': [('resto:index', []), ('resto:restaurant', [self.resto.slug]), ('resto:cart', []),
+                               ('resto:checkout', []), ('resto:my_orders', []), ('resto:order', [order.number])],
+            'owner@test.mg': [('resto:vendor_dashboard', []), ('resto:restaurant_create', []),
+                              ('resto:restaurant_edit', [self.resto.slug]), ('resto:menu_manage', [self.resto.slug]),
+                              ('resto:vendor_orders', [self.resto.slug]), ('resto:vendor_couriers', [self.resto.slug]),
+                              ('resto:courier_signup', []), ('resto:courier_dashboard', []),
+                              ('resto:courier_profile', ['owner']), ('resto:order', [order.number])],
+        }
+        for lang in ('fr', 'en', 'mg'):
+            self.client.cookies['zoot_language'] = lang
+            for email, urls in pages.items():
+                self.client.login(email=email, password='pass12345')
+                for name, args in urls:
+                    r = self.client.get(reverse(name, args=args) + ('?region=analamanga' if name == 'resto:index' else ''))
+                    self.assertEqual(r.status_code, 200, f'{lang} {name} → {r.status_code}')
+                    html = r.content.decode()
+                    self.assertNotIn("{'", html.split('<script')[0][-2000:] if name != 'resto:index' else '', name)
+                    if name == 'resto:index':
+                        self.assertNotIn("'analamanga':", html)       # le dictionnaire des régions n'est plus imprimé
+                    if esprima:
+                        for m in re.finditer(r'<script(?![^>]*\bsrc=)(?![^>]*application/(?:json|ld\+json))[^>]*>(.*?)</script>', html, re.S):
+                            if m.group(1).strip():
+                                # esprima (ES2017) ne connaît ni « ?. » ni « ?? » : on les ramène à leur forme simple
+                                js = m.group(1).replace('?.[', '[').replace('?.(', '(').replace('?.', '.').replace(' ?? ', ' || ')
+                                try:
+                                    esprima.parseScript(js, tolerant=False)
+                                except Exception as e:      # pragma: no cover
+                                    self.fail(f'{lang} {name} : script en ligne invalide — {e}')

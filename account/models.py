@@ -102,7 +102,7 @@ class Account(AbstractBaseUser):
 	region = models.CharField(
 		max_length=30, blank=True, default='',
 		verbose_name='Région',
-		help_text='Région de Madagascar (pour le filtre "Près de chez moi")',
+		help_text='Pays ou région (pour le filtre "Près de chez moi")',
 		db_index=True,
 	)
 	cgu_accepted_at = models.DateTimeField(

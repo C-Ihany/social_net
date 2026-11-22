@@ -4,6 +4,23 @@ from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
 
 
+def whatsapp_digits(phone):
+    """
+    Numéro utilisable dans un lien wa.me (chiffres seuls, indicatif du pays compris),
+    ou '' si le numéro est vide ou saisi au format local (« 034… », sans indicatif) :
+    wa.me ne sait pas l'appeler.
+    """
+    raw = (phone or '').strip()
+    digits = ''.join(c for c in raw if c.isdigit())
+    if raw.startswith('+'):
+        return digits if len(digits) >= 8 else ''
+    if digits.startswith('00'):
+        digits = digits[2:]
+    elif digits.startswith('0'):
+        return ''
+    return digits if len(digits) >= 8 else ''
+
+
 class Annonce(models.Model):
     """
     Annonce du Bazar Vazimba — petites annonces entre particuliers.
@@ -136,12 +153,12 @@ class Annonce(models.Model):
     location    = models.CharField(
         max_length=120,
         verbose_name=_('Localisation'),
-        help_text=_('Ville / quartier (ex: Antananarivo, Analakely)'),
+        help_text=_('Ville / quartier (ex : Dakar, Plateau)'),
     )
     region      = models.CharField(
         max_length=30, blank=True, default='',
         verbose_name=_('Région'),
-        help_text=_('Région de Madagascar (pour le filtre "Près de chez moi")'),
+        help_text=_('Pays ou région (pour le filtre "Près de chez moi")'),
         db_index=True,
     )
 
@@ -200,15 +217,37 @@ class Annonce(models.Model):
     @property
     def formatted_price(self):
         if self.price is None:
-            return 'Prix à discuter'
+            return str(_('Prix à discuter'))
         return f'{int(self.price):,} Ar'.replace(',', ' ')
 
     @property
     def formatted_prix_location(self):
         if self.prix_location is None:
-            return 'Prix à discuter'
+            return str(_('Prix à discuter'))
         period = dict(self.PERIODE_CHOICES).get(self.periode_location, '')
         return f'{int(self.prix_location):,} Ar {period}'.replace(',', ' ')
+
+    @property
+    def display_price(self):
+        """Le prix à montrer sur une carte : le loyer pour une location, le prix de vente sinon."""
+        return self.formatted_prix_location if self.is_location else self.formatted_price
+
+    @property
+    def has_price(self):
+        return (self.prix_location if self.is_location else self.price) is not None
+
+    @property
+    def is_closed(self):
+        """Vendue ou louée : l'annonce reste consultable mais n'est plus disponible."""
+        return self.status in ('vendue', 'louee')
+
+    @property
+    def whatsapp_number(self):
+        return whatsapp_digits(self.contact_phone)
+
+    @property
+    def tel_number(self):
+        return ''.join(c for c in (self.contact_phone or '') if c.isdigit() or c == '+')
 
     @property
     def is_active(self):
@@ -409,9 +448,13 @@ class SellerVerification(models.Model):
         return self.seller_type == self.SELLER_TYPE_PRO and self.status == self.STATUS_APPROVED
 
     @property
+    def whatsapp_number(self):
+        return whatsapp_digits(self.boutique_phone)
+
+    @property
     def boutique_display_name(self):
         """Nom d'affichage de la boutique (nom boutique ou username)."""
-        return self.boutique_name or self.seller.get_full_name() or self.seller.username
+        return self.boutique_name or self.seller.username
 
     # ── Helpers admin ──────────────────────────────────────────────────────────
 

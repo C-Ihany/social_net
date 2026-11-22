@@ -5,11 +5,14 @@
 <link rel="stylesheet" href="{% static 'css/pages/post-mes_favoris_posts.css' %}">
 
 <div class="saved-wrapper">
-    <div class="saved-hero">
-        <span class="material-icons">bookmarks</span>
-        <div>
-            <h1>{% trans "Posts sauvegardés" %}</h1>
-            <p>{% blocktrans count count=bookmarks|length %}{{ count }} post{% plural %}{{ count }} posts{% endblocktrans %}</p>
+    <div class="vz-page-head">
+        <a class="vz-back" href="{% url 'post:post-view' %}">
+            <span class="material-icons" aria-hidden="true">arrow_back</span>
+            {% trans "Retour" %}
+        </a>
+        <div class="vz-page-head__main">
+            <h1 class="vz-page-title"><span class="material-icons" aria-hidden="true">bookmarks</span>{% trans "Posts sauvegardés" %}</h1>
+            <p class="vz-page-sub">{% blocktrans count count=bookmarks|length %}{{ count }} post{% plural %}{{ count }} posts{% endblocktrans %}</p>
         </div>
     </div>
 
@@ -21,7 +24,7 @@
                 <img class="vz-card__avatar vz-card__avatar--sm" src="{{ bk.post.author.profile_image.url }}"
                      alt="{{ bk.post.author.username }}" loading="lazy">
                 <div class="vz-card__body">
-                    <h3 class="vz-card__title vz-card__title--1">{{ bk.post.title }}</h3>
+                    <h2 class="vz-card__title vz-card__title--1">{{ bk.post.title|default:_("Sans titre") }}</h2>
                     <p class="vz-card__subtitle">@{{ bk.post.author.username }} · {{ bk.created_at|vz_since }}</p>
                 </div>
             </a>
@@ -29,17 +32,17 @@
                 <button class="vz-btn vz-btn--muted vz-btn--sm vz-btn--icon saved-unbookmark"
                         onclick="unsavePost({{ bk.post_id }}, this)"
                         title="{% trans 'Retirer des sauvegardes' %}" aria-label="{% trans 'Retirer des sauvegardes' %}" type="button">
-                    <i class="material-icons">bookmark_remove</i>
+                    <i class="material-icons" aria-hidden="true">bookmark_remove</i>
                 </button>
             </div>
         </div>
         {% endfor %}
     </div>
     {% else %}
-    <div class="saved-empty">
-        <span class="material-icons">bookmarks</span>
-        <p>{% trans "Aucun post sauvegardé pour l'instant." %}</p>
-        <p class="saved-empty-hint">{% trans "Clique sur l'icône 🔖 d'un post pour le retrouver ici." %}</p>
+    <div class="vz-empty">
+        <span class="material-icons" aria-hidden="true">bookmarks</span>
+        <p class="vz-empty-title">{% trans "Aucun post sauvegardé pour l'instant." %}</p>
+        <p class="vz-empty-text">{% trans "Touchez le signet sous un post pour le retrouver ici." %}</p>
     </div>
     {% endif %}
 </div>
@@ -50,15 +53,16 @@ function unsavePost(postId, btn) {
     var fd = new FormData();
     fd.append('post_id', postId);
     fd.append('csrfmiddlewaretoken', getCsrfToken());
-    fetch(_BK_URL, { method: 'POST', body: fd })
-    .then(function(r) { return r.json(); })
+    fetch(_BK_URL, { method: 'POST', body: fd, credentials: 'same-origin' })
+    .then(function(r) { if (!r.ok) throw new Error(r.status); return r.json(); })
     .then(function(d) {
         if (d.ok && !d.saved) {
             var row = document.getElementById('saved-row-' + postId);
-            if (row) row.style.transition = 'opacity .3s';
-            if (row) { row.style.opacity = '0'; setTimeout(function(){ row.remove(); }, 300); }
+            if (row) { row.classList.add('saved-leaving'); setTimeout(function(){ row.remove(); }, 300); }
+            vzToast('{% trans "Retiré des sauvegardes"|escapejs %}', 'info');
         }
-    });
+    })
+    .catch(function() { vzToast('{% trans "Une erreur est survenue"|escapejs %}', 'error'); });
 }
 function getCsrfToken() {
     var v = null;

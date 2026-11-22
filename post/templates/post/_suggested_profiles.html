@@ -8,10 +8,10 @@
             {% trans "Suggested for you" %}
         </span>
         <div class="sugg-nav-group">
-            <button type="button" class="sugg-nav" data-dir="-1" aria-label="{% trans 'Previous' %}">
+            <button type="button" class="vz-icon-btn sugg-nav" data-dir="-1" aria-label="{% trans 'Previous' %}">
                 <span class="material-icons">chevron_left</span>
             </button>
-            <button type="button" class="sugg-nav" data-dir="1" aria-label="{% trans 'Next' %}">
+            <button type="button" class="vz-icon-btn sugg-nav" data-dir="1" aria-label="{% trans 'Next' %}">
                 <span class="material-icons">chevron_right</span>
             </button>
         </div>
@@ -20,7 +20,7 @@
     <div class="sugg-scroller" id="sugg-scroller">
         {% for account in profile_suggestions %}
         <article class="sugg-item vz-card vz-card--flat" id="sugg-item-{{ account.id }}">
-            <button type="button" class="sugg-dismiss vz-card__corner"
+            <button type="button" class="sugg-dismiss vz-card__corner vz-tap"
                     data-sugg-dismiss="{{ account.id }}"
                     title="{% trans 'Remove this suggestion' %}"
                     aria-label="{% trans 'Remove this suggestion' %}">

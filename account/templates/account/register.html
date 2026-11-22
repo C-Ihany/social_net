@@ -1,9 +1,9 @@
 {% extends 'base.html' %}
-{% load static %}
-{% load i18n %}
+{% load static i18n %}
+{% block page_title %}{% trans "Create account" %} — Vazimba{% endblock %}
 
 {% block content %}
-<link rel="stylesheet" href="{% static 'css/pages/account-register.css' %}">
+<link rel="stylesheet" href="{% static 'css/pages/account-login.css' %}">
 
 <div class="auth-page">
     <span class="auth-particle"></span>
@@ -14,106 +14,91 @@
 
     <div class="auth-card">
 
-        <!-- Brand -->
-        <a href="{% url 'landing' %}" class="auth-brand">
-            <img src="{% static 'logo/Vazi_logo003.jpeg' %}" alt="VAZIMBA" class="auth-brand-logo"
-                 onerror="this.style.display='none'">
+        <a href="{% url 'landing' %}" class="auth-brand" aria-label="Vazimba">
+            <img src="{% static 'logo/Vazi_logo003.jpeg' %}" alt="Vazimba" class="auth-brand-logo"
+                 onerror="this.remove()">
         </a>
 
         <h1 class="auth-heading">{% trans "Create account" %}</h1>
         <p class="auth-sub">{% trans "Join the VAZIMBA community" %} <i class="material-icons auth-sub-icon" aria-hidden="true">auto_awesome</i></p>
 
-        <!-- Errors -->
         {% if registration_form.non_field_errors %}
-        <div class="auth-errors">
-            <span class="material-icons">error_outline</span>
-            <span>{{ registration_form.non_field_errors }}</span>
+        <div class="auth-errors" role="alert">
+            <span class="material-icons" aria-hidden="true">error_outline</span>
+            <span>{% for error in registration_form.non_field_errors %}{{ error }}{% if not forloop.last %}<br>{% endif %}{% endfor %}</span>
         </div>
         {% endif %}
         {% for field in registration_form %}{% for error in field.errors %}
-        <div class="auth-errors">
-            <span class="material-icons">warning_amber</span>
+        <div class="auth-errors" role="alert">
+            <span class="material-icons" aria-hidden="true">warning_amber</span>
             <span>{{ error }}</span>
         </div>
         {% endfor %}{% endfor %}
 
-        <!-- Form -->
         <form method="post">{% csrf_token %}
-
             <div class="auth-field">
                 <label for="inputEmail">{% trans "Email address" %}</label>
                 <div class="auth-input-wrap">
-                    <span class="material-icons">mail_outline</span>
-                    <input type="email" name="email" id="inputEmail"
-                           placeholder="votre@email.com" required autofocus autocomplete="email">
+                    <span class="material-icons" aria-hidden="true">mail_outline</span>
+                    <input type="email" name="email" id="inputEmail" value="{{ registration_form.email.value|default:'' }}"
+                           placeholder="{% trans 'vous@exemple.com' %}" required autofocus autocomplete="email">
                 </div>
             </div>
-
             <div class="auth-field">
                 <label for="inputUsername">{% trans "Username" %}</label>
                 <div class="auth-input-wrap">
-                    <span class="material-icons">person_outline</span>
-                    <input type="text" name="username" id="inputUsername"
-                           placeholder="ex : cy_borg_42" required autocomplete="username">
+                    <span class="material-icons" aria-hidden="true">person_outline</span>
+                    <input type="text" name="username" id="inputUsername" value="{{ registration_form.username.value|default:'' }}"
+                           maxlength="30" required autocomplete="username">
                 </div>
             </div>
-
             <div class="auth-field">
                 <label for="inputPassword1">{% trans "Password" %}</label>
                 <div class="auth-input-wrap">
-                    <span class="material-icons">lock_outline</span>
-                    <input type="password" name="password1" id="inputPassword1"
-                           placeholder="••••••••" required autocomplete="new-password">
+                    <span class="material-icons" aria-hidden="true">lock_outline</span>
+                    <input type="password" name="password1" id="inputPassword1" required autocomplete="new-password">
                 </div>
-                <!-- Barre de force -->
-                <div class="pw-strength" id="pw-strength-wrap">
-                    <div class="pw-bar" id="pw-bar-1"></div>
-                    <div class="pw-bar" id="pw-bar-2"></div>
-                    <div class="pw-bar" id="pw-bar-3"></div>
-                    <div class="pw-bar" id="pw-bar-4"></div>
-                    <span class="pw-label" id="pw-label">{% trans "Weak" %}</span>
+                {# Jauge de force : le JS pose data-level (1 à 4), les couleurs sont dans la feuille #}
+                <div class="pw-strength" id="pw-strength-wrap" aria-hidden="true">
+                    <div class="pw-bar"></div>
+                    <div class="pw-bar"></div>
+                    <div class="pw-bar"></div>
+                    <div class="pw-bar"></div>
+                    <span class="pw-label" id="pw-label"></span>
                 </div>
             </div>
-
             <div class="auth-field">
                 <label for="inputPassword2">{% trans "Confirm password" %}</label>
                 <div class="auth-input-wrap">
-                    <span class="material-icons">lock_reset</span>
-                    <input type="password" name="password2" id="inputPassword2"
-                           placeholder="••••••••" required autocomplete="new-password">
+                    <span class="material-icons" aria-hidden="true">lock_reset</span>
+                    <input type="password" name="password2" id="inputPassword2" required autocomplete="new-password">
                 </div>
             </div>
 
-            <!-- Case à cocher CGU + Confidentialité -->
             <div class="auth-terms-wrap">
                 {% if terms_error %}
-                <div class="auth-terms-error">
-                    <span class="material-icons">warning_amber</span>
-                    Tu dois accepter les CGU et la politique de confidentialité pour continuer.
+                <div class="auth-terms-error" role="alert">
+                    <span class="material-icons" aria-hidden="true">warning_amber</span>
+                    {% trans "Vous devez accepter les CGU et la politique de confidentialité pour continuer." %}
                 </div>
                 {% endif %}
                 <label class="auth-terms-label">
                     <input type="checkbox" name="accept_terms" id="accept_terms" required>
                     <span>
-                        J'ai lu et j'accepte les
-                        <a href="{% url 'legal:cgu' %}" target="_blank" rel="noopener">Conditions Générales d'Utilisation</a>
-                        et la
-                        <a href="{% url 'legal:confidentialite' %}" target="_blank" rel="noopener">Politique de confidentialité</a>
-                        de Vazimba.
+                        {% url 'legal:cgu' as cgu_url %}{% url 'legal:confidentialite' as conf_url %}
+                        {% blocktrans %}J’ai lu et j’accepte les <a href="{{ cgu_url }}" target="_blank" rel="noopener">Conditions générales d’utilisation</a> et la <a href="{{ conf_url }}" target="_blank" rel="noopener">Politique de confidentialité</a> de Vazimba.{% endblocktrans %}
                     </span>
                 </label>
             </div>
 
-            <button class="auth-btn" type="submit">
-                {% trans "Create account" %}
-            </button>
+            <button class="vz-btn vz-btn--primary vz-btn--lg vz-btn--block" type="submit">{% trans "Create account" %}</button>
         </form>
 
-        <div class="auth-divider">ou</div>
+        <div class="auth-divider">{% trans "ou" %}</div>
 
         <div class="auth-login-link">
             {% trans "Already have an account?" %}
-            <a href="{% url 'login' %}">{% trans "Login" %}</a>
+            <a href="{% url 'login' %}">{% trans "Se connecter" %}</a>
         </div>
 
     </div>
@@ -124,38 +109,21 @@
 (function() {
     var input = document.getElementById('inputPassword1');
     var wrap  = document.getElementById('pw-strength-wrap');
-    var bars  = [
-        document.getElementById('pw-bar-1'),
-        document.getElementById('pw-bar-2'),
-        document.getElementById('pw-bar-3'),
-        document.getElementById('pw-bar-4'),
-    ];
     var label = document.getElementById('pw-label');
-    var COLORS = ['#ff4da6', '#ffa500', '#00cfff', '#00ffaa'];
-    var LABELS = ['Faible', 'Moyen', 'Fort', 'Excellent'];
-
-    function score(pw) {
-        var s = 0;
+    var LABELS = ['{% trans "Weak"|escapejs %}', '{% trans "Moyen"|escapejs %}', '{% trans "Fort"|escapejs %}', '{% trans "Excellent"|escapejs %}'];
+    if (!input || !wrap) return;
+    input.addEventListener('input', function() {
+        var pw = input.value, s = 0;
+        if (!pw) { wrap.classList.remove('is-on'); return; }
         if (pw.length >= 8)  s++;
         if (/[A-Z]/.test(pw)) s++;
         if (/[0-9]/.test(pw)) s++;
         if (/[^A-Za-z0-9]/.test(pw)) s++;
-        return s;
-    }
-
-    if (input && wrap) {
-        input.addEventListener('input', function() {
-            var pw = input.value;
-            if (!pw) { wrap.style.display = 'none'; return; }
-            wrap.style.display = 'flex';
-            var s = score(pw);
-            bars.forEach(function(b, i) {
-                b.style.background = i < s ? COLORS[s - 1] : 'var(--border)';
-            });
-            label.textContent  = LABELS[s - 1] || 'Faible';
-            label.style.color  = COLORS[s - 1] || COLORS[0];
-        });
-    }
+        s = Math.max(s, 1);
+        wrap.classList.add('is-on');
+        wrap.setAttribute('data-level', s);
+        label.textContent = LABELS[s - 1];
+    });
 })();
 </script>
 {% endblock content %}

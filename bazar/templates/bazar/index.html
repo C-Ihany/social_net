@@ -1,58 +1,62 @@
 {% extends 'base.html' %}
 {% load static i18n %}
+{% block page_title %}{% trans "Bazar" %} — Vazimba{% endblock %}
 
 {% block content %}
 <link rel="stylesheet" href="{% static 'css/pages/bazar-index.css' %}">
 
 <!-- ── Hero ── -->
 <section class="bazar-hero">
-    <h1 class="bazar-hero-title"><i class="material-icons" aria-hidden="true">storefront</i> Bazar Vazimba</h1>
-    <p class="bazar-hero-sub">{% trans "Acheter et vendre entre Malgaches — simple, rapide, local" %}</p>
+    <h1 class="bazar-hero-title"><i class="material-icons" aria-hidden="true">storefront</i> {% trans "Bazar Vazimba" %}</h1>
+    <p class="bazar-hero-sub">{% trans "Acheter et vendre entre voisins — simple, rapide, local" %}</p>
 
-    <form method="get" action="{% url 'bazar:index' %}" class="bazar-search-wrap">
-        <input type="text" name="q" value="{{ q }}" placeholder="{% trans 'Chercher une annonce…' %}" autocomplete="off">
+    <form method="get" action="{% url 'bazar:index' %}" class="bazar-search-wrap" role="search">
+        <input type="search" name="q" value="{{ q }}" placeholder="{% trans 'Chercher une annonce…' %}" aria-label="{% trans 'Chercher une annonce…' %}" autocomplete="off">
         {% if sel_cat %}<input type="hidden" name="cat" value="{{ sel_cat }}">{% endif %}
         {% if sel_cond %}<input type="hidden" name="cond" value="{{ sel_cond }}">{% endif %}
+        {% if sel_region %}<input type="hidden" name="region" value="{{ sel_region }}">{% endif %}
+        {% if listing_type %}<input type="hidden" name="type" value="{{ listing_type }}">{% endif %}
+        {% if only_verified %}<input type="hidden" name="verified" value="1">{% endif %}
+        {% if sel_pmin %}<input type="hidden" name="pmin" value="{{ sel_pmin }}">{% endif %}
+        {% if sel_pmax %}<input type="hidden" name="pmax" value="{{ sel_pmax }}">{% endif %}
         {% if sort != 'recent' %}<input type="hidden" name="sort" value="{{ sort }}">{% endif %}
-        <button type="submit" class="bazar-search-btn">{% trans "Chercher" %}</button>
+        <button type="submit" class="vz-btn vz-btn--pill bazar-on-hero"><i class="material-icons" aria-hidden="true">search</i>{% trans "Rechercher" %}</button>
     </form>
 
-    {% if request.user.is_authenticated %}
-    <a href="{% url 'bazar:create' %}" class="bazar-hero-btn">
-        <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-        {% trans "Publier une annonce" %}
-    </a>
-    <div class="bazar-hero-extra">
-        <a href="{% url 'bazar:request_verification' %}" class="bazar-hero-link">
-            <i class="material-icons" aria-hidden="true">verified_user</i>
-            {% trans "Vérification vendeur / Boutique Pro" %}
+    <div class="vz-btn-row bazar-hero-actions">
+        {% if request.user.is_authenticated %}
+        <a href="{% url 'bazar:create' %}" class="vz-btn vz-btn--pill bazar-on-hero">
+            <i class="material-icons" aria-hidden="true">add</i>{% trans "Publier une annonce" %}
         </a>
+        <a href="{% url 'bazar:request_verification' %}" class="vz-btn vz-btn--pill bazar-on-hero bazar-on-hero--ghost">
+            <i class="material-icons" aria-hidden="true">verified_user</i>{% trans "Vérification vendeur / Boutique Pro" %}
+        </a>
+        {% else %}
+        <a href="{% url 'login' %}?next={% url 'bazar:create' %}" class="vz-btn vz-btn--pill bazar-on-hero">
+            <i class="material-icons" aria-hidden="true">add</i>{% trans "Publier une annonce" %}
+        </a>
+        {% endif %}
     </div>
-    {% else %}
-    <a href="{% url 'login' %}?next={% url 'bazar:create' %}" class="bazar-hero-btn">
-        <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-        {% trans "Publier une annonce" %}
-    </a>
-    {% endif %}
 </section>
 
-<!-- ── Tabs Vente / Location ── -->
-<div class="bazar-type-tabs">
-  <a href="?{% if q %}q={{ q }}&{% endif %}{% if sel_cat %}cat={{ sel_cat }}&{% endif %}type=vente"
-     class="bazar-tab {% if listing_type == 'vente' or not listing_type %}active{% endif %}">
-    <i class="material-icons" aria-hidden="true">sell</i> À vendre
+<!-- ── Onglets Tout / À vendre / À louer (conservent les autres filtres) ── -->
+<nav class="bazar-type-tabs" aria-label="{% trans "Type d'annonce" %}">
+  <a href="?{{ qs_tabs }}" class="bazar-tab {% if not listing_type %}active{% endif %}"{% if not listing_type %} aria-current="page"{% endif %}>
+    <i class="material-icons" aria-hidden="true">apps</i> {% trans "Tout" %}
   </a>
-  <a href="?{% if q %}q={{ q }}&{% endif %}{% if sel_cat %}cat={{ sel_cat }}&{% endif %}type=location"
-     class="bazar-tab {% if listing_type == 'location' %}active{% endif %}">
-    <i class="material-icons" aria-hidden="true">vpn_key</i> À louer
+  <a href="?{% if qs_tabs %}{{ qs_tabs }}&amp;{% endif %}type=vente" class="bazar-tab {% if listing_type == 'vente' %}active{% endif %}"{% if listing_type == 'vente' %} aria-current="page"{% endif %}>
+    <i class="material-icons" aria-hidden="true">sell</i> {% trans "À vendre" %}
   </a>
-</div>
+  <a href="?{% if qs_tabs %}{{ qs_tabs }}&amp;{% endif %}type=location" class="bazar-tab {% if listing_type == 'location' %}active{% endif %}"{% if listing_type == 'location' %} aria-current="page"{% endif %}>
+    <i class="material-icons" aria-hidden="true">vpn_key</i> {% trans "À louer" %}
+  </a>
+</nav>
 
 <!-- ── Raccourci "Ma région" ── -->
 {% if user_region and not sel_region %}
 <div class="bazar-near">
     <span class="bazar-near-label">{% trans "Près de chez moi :" %}</span>
-    <a href="?region={{ user_region }}" class="vz-chip vz-chip--accent">
+    <a href="?{% if qs_page %}{{ qs_page }}&amp;{% endif %}region={{ user_region }}" class="vz-chip vz-chip--accent">
         <i class="material-icons" aria-hidden="true">place</i>{{ user_region_label }}
     </a>
 </div>
@@ -62,9 +66,10 @@
 <div class="bazar-filters">
     <form method="get" action="{% url 'bazar:index' %}" class="bazar-filters-inner" id="filter-form">
         {% if q %}<input type="hidden" name="q" value="{{ q }}">{% endif %}
+        {% if listing_type %}<input type="hidden" name="type" value="{{ listing_type }}">{% endif %}
 
         <!-- Catégorie -->
-        <select name="cat" class="bazar-filter-select" onchange="this.form.submit()">
+        <select name="cat" class="bazar-filter-select" aria-label="{% trans 'Catégorie' %}" onchange="this.form.submit()">
             <option value="">{% trans "Toutes catégories" %}</option>
             {% for val, label in categories %}
             <option value="{{ val }}" {% if sel_cat == val %}selected{% endif %}>{{ label }}</option>
@@ -72,7 +77,7 @@
         </select>
 
         <!-- État -->
-        <select name="cond" class="bazar-filter-select" onchange="this.form.submit()">
+        <select name="cond" class="bazar-filter-select" aria-label="{% trans 'État' %}" onchange="this.form.submit()">
             <option value="">{% trans "Tout état" %}</option>
             {% for val, label in conditions %}
             <option value="{{ val }}" {% if sel_cond == val %}selected{% endif %}>{{ label }}</option>
@@ -80,15 +85,15 @@
         </select>
 
         <!-- Région -->
-        <select name="region" class="bazar-filter-select" onchange="this.form.submit()">
-            <option value="">{% trans "Toute Madagascar" %}</option>
+        <select name="region" class="bazar-filter-select" aria-label="{% trans 'Région' %}" onchange="this.form.submit()">
+            <option value="">{% trans "Toute l'Afrique" %}</option>
             {% for code, label in region_choices %}{% if code %}
             <option value="{{ code }}" {% if sel_region == code %}selected{% endif %}>{{ label }}</option>
             {% endif %}{% endfor %}
         </select>
-        <button type="button" class="geo-detect-btn" id="geo-detect-btn"
-                onclick="detectMyRegion()" title="{% trans 'Détecter ma région automatiquement' %}">
-            <span class="material-icons">my_location</span>
+        <button type="button" class="vz-btn vz-btn--sm vz-btn--muted vz-btn--pill vz-tap geo-detect-btn" id="geo-detect-btn"
+                onclick="detectMyRegion()" title="{% trans 'Détecter mon pays automatiquement' %}">
+            <span class="material-icons" aria-hidden="true">my_location</span>
             <span id="geo-detect-label">{% trans "Près de moi" %}</span>
         </button>
 
@@ -100,43 +105,47 @@
 
         <!-- Prix min / max -->
         <div class="bazar-price-range">
-            <input type="number" name="pmin" min="0" step="100"
+            <input type="number" name="pmin" min="0" step="100" inputmode="numeric"
                    value="{{ sel_pmin }}"
-                   placeholder="{% trans 'Prix min (Ar)' %}">
-            <span>—</span>
-            <input type="number" name="pmax" min="0" step="100"
+                   placeholder="{% trans 'Prix min (Ar)' %}" aria-label="{% trans 'Prix min (Ar)' %}">
+            <span aria-hidden="true">—</span>
+            <input type="number" name="pmax" min="0" step="100" inputmode="numeric"
                    value="{{ sel_pmax }}"
-                   placeholder="{% trans 'Prix max (Ar)' %}">
+                   placeholder="{% trans 'Prix max (Ar)' %}" aria-label="{% trans 'Prix max (Ar)' %}">
         </div>
 
         <!-- Tri -->
-        <span class="bazar-sort-label">{% trans "Trier par" %}&nbsp;:</span>
-        <select name="sort" class="bazar-filter-select" onchange="this.form.submit()">
+        <label class="bazar-sort-label" for="bazar-sort">{% trans "Trier par" %}&nbsp;:</label>
+        <select name="sort" id="bazar-sort" class="bazar-filter-select" onchange="this.form.submit()">
             <option value="recent"     {% if sort == 'recent' %}selected{% endif %}>{% trans "Plus récentes" %}</option>
             <option value="price_asc"  {% if sort == 'price_asc' %}selected{% endif %}>{% trans "Prix croissant" %}</option>
             <option value="price_desc" {% if sort == 'price_desc' %}selected{% endif %}>{% trans "Prix décroissant" %}</option>
             <option value="popular"    {% if sort == 'popular' %}selected{% endif %}>{% trans "Plus vues" %}</option>
         </select>
 
-        {% if sel_cat or sel_cond or sel_region or q or sort != 'recent' or only_verified or sel_pmin or sel_pmax %}
-        <a href="{% url 'bazar:index' %}" class="bazar-filter-reset">
-            <i class="material-icons" aria-hidden="true">close</i>
-            {% trans "Réinitialiser" %}
-        </a>
-        {% endif %}
+        <div class="vz-btn-row bazar-filter-actions">
+            {% if has_filters %}
+            <a href="{% url 'bazar:index' %}" class="vz-btn vz-btn--sm vz-btn--ghost vz-tap">
+                <i class="material-icons" aria-hidden="true">close</i>{% trans "Réinitialiser" %}
+            </a>
+            {% endif %}
+            <button type="submit" class="vz-btn vz-btn--sm vz-btn--primary vz-tap">
+                <i class="material-icons" aria-hidden="true">filter_list</i>{% trans "Filtrer" %}
+            </button>
+        </div>
     </form>
 </div>
 
 <!-- ── Compteur de résultats ── -->
 <div class="bazar-results-bar">
     <p class="bazar-results-count mb-0">
-        <strong>{{ total }}</strong> {% trans "annonce" %}{{ total|pluralize }} {% trans "trouvée" %}{{ total|pluralize }}
-        {% if sel_cat %} dans <em>{% for val, label in categories %}{% if val == sel_cat %}{{ label }}{% endif %}{% endfor %}</em>{% endif %}
-        {% if q %} pour « <em>{{ q }}</em> »{% endif %}
+        {% blocktrans count n=total %}<strong>{{ n }}</strong> annonce trouvée{% plural %}<strong>{{ n }}</strong> annonces trouvées{% endblocktrans %}
+        {% if sel_cat_label %}{% blocktrans with c=sel_cat_label %}dans <em>{{ c }}</em>{% endblocktrans %}{% endif %}
+        {% if q %}{% blocktrans %}pour « <em>{{ q }}</em> »{% endblocktrans %}{% endif %}
     </p>
     {% if request.user.is_authenticated %}
     <a href="{% url 'bazar:mes_annonces' %}" class="bazar-results-link">
-        {% trans "Mes annonces" %} →
+        {% trans "Mes annonces" %} <i class="material-icons" aria-hidden="true">arrow_forward</i>
     </a>
     {% endif %}
 </div>
@@ -161,10 +170,7 @@
             <div class="vz-card__media-ph"><i class="material-icons" aria-hidden="true">sell</i></div>
             {% endif %}
             {% if annonce.listing_type == 'location' %}
-            <span class="vz-card__badge vz-card__badge--bottom vz-card__badge--accent"><i class="material-icons" aria-hidden="true">vpn_key</i>Location</span>
-            {% endif %}
-            {% if annonce.status == 'vendue' %}
-            <div class="vz-card__overlay">{% trans "VENDUE" %}</div>
+            <span class="vz-card__badge vz-card__badge--bottom vz-card__badge--accent"><i class="material-icons" aria-hidden="true">vpn_key</i>{% trans "Location" %}</span>
             {% endif %}
         </div>
         {% endwith %}
@@ -183,11 +189,7 @@
                 {% endif %}
             </div>
             <span class="vz-card__price">
-                {% if annonce.listing_type == 'location' %}
-                  {{ annonce.formatted_prix_location }}
-                {% else %}
-                  {{ annonce.formatted_price }}{% if annonce.price_negotiable and annonce.price %}<small>· {% trans "négociable" %}</small>{% endif %}
-                {% endif %}
+                {{ annonce.display_price }}{% if not annonce.is_location and annonce.price_negotiable and annonce.price %}<small>· {% trans "négociable" %}</small>{% endif %}
             </span>
         </div>
     </a>
@@ -196,39 +198,37 @@
 
 <!-- ── Pagination ── -->
 {% if page_obj.has_other_pages %}
-<div class="bazar-pagination">
+<nav class="vz-pager" aria-label="{% trans 'Pagination' %}">
     {% if page_obj.has_previous %}
-    <a href="?{% if q %}q={{ q }}&{% endif %}{% if sel_cat %}cat={{ sel_cat }}&{% endif %}{% if sel_cond %}cond={{ sel_cond }}&{% endif %}{% if sel_region %}region={{ sel_region }}&{% endif %}{% if only_verified %}verified=1&{% endif %}{% if sel_pmin %}pmin={{ sel_pmin }}&{% endif %}{% if sel_pmax %}pmax={{ sel_pmax }}&{% endif %}sort={{ sort }}&page={{ page_obj.previous_page_number }}" class="bazar-page-btn">←</a>
+    <a href="?{% if qs_page %}{{ qs_page }}&amp;{% endif %}page={{ page_obj.previous_page_number }}" aria-label="{% trans 'Page précédente' %}"><i class="material-icons" aria-hidden="true">chevron_left</i></a>
     {% endif %}
-
     {% for num in page_obj.paginator.page_range %}
     {% if page_obj.number == num %}
-    <span class="bazar-page-btn active">{{ num }}</span>
+    <span class="is-current" aria-current="page">{{ num }}</span>
     {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %}
-    <a href="?{% if q %}q={{ q }}&{% endif %}{% if sel_cat %}cat={{ sel_cat }}&{% endif %}{% if sel_cond %}cond={{ sel_cond }}&{% endif %}{% if sel_region %}region={{ sel_region }}&{% endif %}{% if only_verified %}verified=1&{% endif %}{% if sel_pmin %}pmin={{ sel_pmin }}&{% endif %}{% if sel_pmax %}pmax={{ sel_pmax }}&{% endif %}sort={{ sort }}&page={{ num }}" class="bazar-page-btn">{{ num }}</a>
+    <a href="?{% if qs_page %}{{ qs_page }}&amp;{% endif %}page={{ num }}">{{ num }}</a>
     {% endif %}
     {% endfor %}
-
     {% if page_obj.has_next %}
-    <a href="?{% if q %}q={{ q }}&{% endif %}{% if sel_cat %}cat={{ sel_cat }}&{% endif %}{% if sel_cond %}cond={{ sel_cond }}&{% endif %}{% if sel_region %}region={{ sel_region }}&{% endif %}{% if only_verified %}verified=1&{% endif %}{% if sel_pmin %}pmin={{ sel_pmin }}&{% endif %}{% if sel_pmax %}pmax={{ sel_pmax }}&{% endif %}sort={{ sort }}&page={{ page_obj.next_page_number }}" class="bazar-page-btn">→</a>
+    <a href="?{% if qs_page %}{{ qs_page }}&amp;{% endif %}page={{ page_obj.next_page_number }}" aria-label="{% trans 'Page suivante' %}"><i class="material-icons" aria-hidden="true">chevron_right</i></a>
     {% endif %}
-</div>
+</nav>
 {% endif %}
 
 {% else %}
 <!-- État vide -->
 <div class="vz-empty bazar-empty">
     <i class="material-icons" aria-hidden="true">search_off</i>
-    <h4 class="vz-empty-title">{% trans "Aucune annonce trouvée" %}</h4>
+    <h2 class="vz-empty-title">{% trans "Aucune annonce trouvée" %}</h2>
     <p class="vz-empty-text">
         {% if q %}{% blocktrans with q=q %}Aucun résultat pour <strong>« {{ q }} »</strong>. Essayez un autre mot-clé.{% endblocktrans %}
-        {% elif sel_cat %}{% trans "Aucune annonce dans cette catégorie pour le moment." %}
+        {% elif has_filters %}{% trans "Aucune annonce ne correspond à ces filtres pour le moment." %}
         {% else %}{% trans "Le bazar est encore vide. Soyez le premier à publier !" %}{% endif %}
     </p>
-    {% if request.user.is_authenticated %}
-    <a href="{% url 'bazar:create' %}" class="vz-btn vz-btn--primary vz-btn--pill mt-2">
-        {% trans "Publier une annonce" %}
-    </a>
+    {% if has_filters %}
+    <a href="{% url 'bazar:index' %}" class="vz-btn vz-btn--secondary">{% trans "Réinitialiser" %}</a>
+    {% elif request.user.is_authenticated %}
+    <a href="{% url 'bazar:create' %}" class="vz-btn vz-btn--primary">{% trans "Publier une annonce" %}</a>
     {% endif %}
 </div>
 {% endif %}
@@ -245,9 +245,9 @@ var VZB_I18N = {
 };
 </script>
 <script>
-/* ── Géolocalisation → région Madagascar ─────────── */
+/* ── Géolocalisation → pays d'Afrique (ou région, à Madagascar) ─────────── */
 (function() {
-    // Centroids des 22 régions (lat, lon, code)
+    // Madagascar : centres des régions (lat, lon, code)
     var REGIONS = [
         [-18.91, 47.54, 'analamanga'],
         [-19.87, 47.03, 'vakinankaratra'],
@@ -274,21 +274,90 @@ var VZB_I18N = {
         [-14.27, 50.17, 'sava'],
     ];
 
+    // Reste du continent : capitales et grandes villes (lat, lon, code pays).
+    // La ville la plus proche donne le pays — plus juste qu'un centre de pays
+    // pour les grands territoires ; le membre peut toujours corriger la liste.
+    var CITIES = [
+        [-25.75,28.19,'za'],[-26.20,28.05,'za'],[-33.92,18.42,'za'],[-29.86,31.02,'za'],[-33.96,25.60,'za'],
+        [36.75,3.06,'dz'],[35.70,-0.63,'dz'],[36.37,6.61,'dz'],[22.79,5.53,'dz'],
+        [-8.84,13.23,'ao'],[-12.78,15.74,'ao'],[-14.92,13.49,'ao'],
+        [6.37,2.39,'bj'],[9.34,2.63,'bj'],
+        [-24.65,25.91,'bw'],[-21.17,27.51,'bw'],[-19.98,23.42,'bw'],
+        [12.37,-1.52,'bf'],[11.18,-4.29,'bf'],
+        [-3.38,29.36,'bi'],[-3.43,29.93,'bi'],
+        [3.87,11.52,'cm'],[4.05,9.70,'cm'],[9.30,13.40,'cm'],[10.59,14.32,'cm'],
+        [14.93,-23.51,'cv'],
+        [-11.70,43.26,'km'],
+        [-4.27,15.28,'cg'],[-4.78,11.86,'cg'],[1.61,16.05,'cg'],
+        [-4.44,15.27,'cd'],[-11.66,27.48,'cd'],[-1.68,29.22,'cd'],[0.52,25.19,'cd'],[-6.14,23.59,'cd'],[-5.90,22.42,'cd'],[-2.51,28.86,'cd'],[0.05,18.26,'cd'],
+        [5.36,-4.01,'ci'],[6.82,-5.28,'ci'],[7.69,-5.03,'ci'],[9.46,-5.63,'ci'],
+        [11.59,43.15,'dj'],
+        [30.04,31.24,'eg'],[31.20,29.92,'eg'],[24.09,32.90,'eg'],[25.69,32.64,'eg'],
+        [15.32,38.93,'er'],
+        [-26.31,31.14,'sz'],
+        [9.03,38.74,'et'],[9.60,41.87,'et'],[13.50,39.47,'et'],[7.05,38.48,'et'],[11.59,37.39,'et'],
+        [0.39,9.45,'ga'],[-0.72,8.78,'ga'],[-1.63,13.58,'ga'],
+        [13.45,-16.58,'gm'],
+        [5.60,-0.19,'gh'],[6.69,-1.62,'gh'],[9.40,-0.84,'gh'],
+        [9.64,-13.58,'gn'],[10.38,-9.31,'gn'],[7.75,-8.82,'gn'],
+        [11.86,-15.60,'gw'],
+        [3.75,8.78,'gq'],[1.86,9.77,'gq'],
+        [-1.29,36.82,'ke'],[-4.04,39.67,'ke'],[-0.09,34.77,'ke'],[0.52,35.27,'ke'],[3.12,35.60,'ke'],
+        [-29.31,27.48,'ls'],
+        [6.30,-10.80,'lr'],
+        [32.89,13.19,'ly'],[32.12,20.07,'ly'],[27.04,14.43,'ly'],
+        [-13.96,33.79,'mw'],[-15.79,35.01,'mw'],[-11.46,34.02,'mw'],
+        [12.64,-8.00,'ml'],[16.77,-3.01,'ml'],[14.49,-4.20,'ml'],[16.27,-0.04,'ml'],
+        [34.02,-6.84,'ma'],[33.57,-7.59,'ma'],[31.63,-7.99,'ma'],[35.76,-5.83,'ma'],[30.43,-9.60,'ma'],[34.03,-5.00,'ma'],[27.15,-13.20,'ma'],
+        [-20.16,57.50,'mu'],
+        [18.08,-15.98,'mr'],[20.94,-17.04,'mr'],[16.62,-7.26,'mr'],
+        [-25.97,32.57,'mz'],[-19.84,34.84,'mz'],[-15.12,39.27,'mz'],[-16.16,33.59,'mz'],[-12.97,40.52,'mz'],
+        [-22.56,17.08,'na'],[-22.96,14.51,'na'],[-17.92,19.77,'na'],[-26.65,15.16,'na'],
+        [13.51,2.11,'ne'],[13.81,8.99,'ne'],[16.97,7.99,'ne'],
+        [9.06,7.49,'ng'],[6.52,3.38,'ng'],[12.00,8.52,'ng'],[4.82,7.03,'ng'],[7.38,3.90,'ng'],[11.85,13.16,'ng'],[6.45,7.50,'ng'],[13.06,5.24,'ng'],
+        [0.35,32.58,'ug'],[2.77,32.30,'ug'],[-0.61,30.66,'ug'],
+        [4.36,18.56,'cf'],[5.76,20.67,'cf'],
+        [-1.94,30.06,'rw'],
+        [0.34,6.73,'st'],
+        [14.72,-17.47,'sn'],[16.03,-16.49,'sn'],[12.57,-16.27,'sn'],[13.77,-13.67,'sn'],
+        [-4.62,55.45,'sc'],
+        [8.47,-13.23,'sl'],[7.96,-11.74,'sl'],
+        [2.05,45.32,'so'],[9.56,44.07,'so'],[11.28,49.18,'so'],
+        [15.50,32.56,'sd'],[19.62,37.22,'sd'],[13.63,25.35,'sd'],[13.18,30.22,'sd'],
+        [4.85,31.58,'ss'],[7.70,28.00,'ss'],[9.53,31.66,'ss'],
+        [-6.16,35.75,'tz'],[-6.79,39.21,'tz'],[-2.52,32.90,'tz'],[-3.37,36.68,'tz'],[-8.91,33.46,'tz'],[-6.16,39.19,'tz'],
+        [12.13,15.06,'td'],[8.57,16.07,'td'],[13.83,20.83,'td'],[17.93,19.10,'td'],
+        [6.13,1.22,'tg'],[9.55,1.19,'tg'],
+        [36.81,10.18,'tn'],[34.74,10.76,'tn'],[33.89,10.10,'tn'],
+        [-15.39,28.32,'zm'],[-12.80,28.21,'zm'],[-17.85,25.85,'zm'],[-10.21,31.18,'zm'],
+        [-17.83,31.05,'zw'],[-20.15,28.58,'zw'],[-18.97,32.67,'zw'],
+    ];
+
     function dist(lat1, lon1, lat2, lon2) {
         // Distance euclidienne approx (suffit pour la précision régionale)
         var dlat = lat1 - lat2, dlon = lon1 - lon2;
         return dlat * dlat + dlon * dlon;
     }
 
-    function nearestRegion(lat, lon) {
-        // Si hors des limites de Madagascar (~-10 à -27, 43 à 51)
-        if (lat < -27 || lat > -10 || lon < 43 || lon > 51) return 'diaspora';
-        var best = REGIONS[0], bestD = Infinity;
-        for (var i = 0; i < REGIONS.length; i++) {
-            var d = dist(lat, lon, REGIONS[i][0], REGIONS[i][1]);
-            if (d < bestD) { bestD = d; best = REGIONS[i]; }
+    function nearest(points, lat, lon) {
+        var best = points[0], bestD = Infinity;
+        for (var i = 0; i < points.length; i++) {
+            var d = dist(lat, lon, points[i][0], points[i][1]);
+            if (d < bestD) { bestD = d; best = points[i]; }
         }
         return best[2];
+    }
+
+    function nearestRegion(lat, lon) {
+        // Madagascar (~-10 à -27, 43 à 51) : au niveau de la région
+        if (lat >= -27 && lat <= -11.9 && lon >= 43.1 && lon <= 51) return nearest(REGIONS, lat, lon);
+        // Hors du continent et de ses îles : diaspora
+        if (lat < -36 || lat > 38 || lon < -26 || lon > 64) return 'diaspora';
+        // L'Europe du Sud et la péninsule Arabique débordent sur ce rectangle
+        if (lat > 30 && lon > 35.5) return 'diaspora';
+        if (lat > 12.7 && lon > 43.6) return 'diaspora';
+        if (lat > 36 && lon < -1) return 'diaspora';
+        return nearest(CITIES, lat, lon);
     }
 
     window.detectMyRegion = function() {

@@ -1,6 +1,7 @@
 {% extends 'base.html' %}
 {% load static %}
 {% load i18n %}
+{% block page_title %}{{ username }} — Vazimba{% endblock %}
 
 {% block content %}
 <link rel="stylesheet" href="{% static 'css/pages/account-account.css' %}">
@@ -12,8 +13,8 @@
          ══════════════════════════════════ -->
     <div class="profile-cover" id="profile-cover-wrap">
         {% if cover_image_url %}
-        <img src="{{ cover_image_url }}" class="profile-cover-img" id="cover-img" alt="Couverture" loading="lazy" decoding="async"
-             onclick="openPhotoDirectLb('{{ cover_image_url }}', '{% trans "Photo de couverture" %}')">
+        <img src="{{ cover_image_url }}" class="profile-cover-img" id="cover-img" alt="{% trans 'Photo de couverture' %}" loading="lazy" decoding="async"
+             onclick="openPhotoDirectLb(this.src, this.alt)">
         {% else %}
         <div class="profile-cover-bg"></div>
         <div class="profile-cover-noise"></div>
@@ -21,8 +22,8 @@
 
         {% if is_self %}
         {# Bouton visible sur la couverture #}
-        <button class="cover-edit-btn" onclick="document.getElementById('cover-file-input').click()" type="button">
-            <span class="material-icons">photo_camera</span>
+        <button class="vz-btn vz-btn--sm cover-edit-btn" onclick="document.getElementById('cover-file-input').click()" type="button">
+            <span class="material-icons" aria-hidden="true">photo_camera</span>
             {% trans "Change cover" %}
         </button>
         {# Input caché #}
@@ -36,11 +37,11 @@
             <div class="avatar-ring-wrap" id="profile-avatar-wrap">
                 <span id="profile-story-ring-el"></span>
                 <img src="{{ profile_image }}" alt="{{ username }}" class="profile-avatar-img"
-                     onclick="openPhotoDirectLb('{{ profile_image }}', '{{ username|escapejs }}'); event.stopPropagation();">
+                     onclick="openPhotoDirectLb(this.src, this.alt); event.stopPropagation();">
                 {% if is_self %}
-                <a class="avatar-edit-fab" href="{% url 'account:edit' user_id=id %}"
-                   title="Modifier la photo" onclick="event.stopPropagation();">
-                    <span class="material-icons">photo_camera</span>
+                <a class="avatar-edit-fab vz-tap" href="{% url 'account:edit' user_id=id %}"
+                   title="{% trans 'Changer la photo de profil' %}" aria-label="{% trans 'Changer la photo de profil' %}" onclick="event.stopPropagation();">
+                    <span class="material-icons" aria-hidden="true">photo_camera</span>
                 </a>
                 {% endif %}
             </div>
@@ -71,12 +72,12 @@
                     </span>
                     {% endif %}
                     {% if region_label %}
-                    <a class="vz-chip" href="{% url 'post:post-view' %}?tab=region" title="{% trans 'Région' %}">
-                        <span class="material-icons">map</span> {{ region_label }}
-                    </a>
+                    <span class="vz-chip vz-chip--static" title="{% trans 'Région' %}">
+                        <span class="material-icons" aria-hidden="true">map</span> {{ region_label }}
+                    </span>
                     {% endif %}
                     <span class="fihav-stat"
-                          title="Score Fihavanana — solidarité &amp; engagement communautaire">
+                          title="{% trans 'Score Fihavanana — solidarité et engagement dans la communauté' %}">
                         <span class="fihav-badge-inline">
                             <span class="material-icons">favorite</span>
                             Fihavanana&nbsp;
@@ -88,109 +89,92 @@
             </div>
         </div>
 
-        <!-- Action buttons -->
+        {% comment %}
+          Actions du profil. Une seule action principale par état ; Partager, Signaler,
+          Bloquer et « Changer le mot de passe » sont regroupés dans le menu ⋯ (vzMenu) :
+          à 390 px la rangée comptait jusqu'à six boutons de deux tailles différentes.
+        {% endcomment %}
         <div class="profile-actions">
+            {% if request.user.is_authenticated and not is_self and request_sent == 0 %}
+            <div class="fr-banner">
+                <span class="material-icons" aria-hidden="true">person_add</span>
+                <span class="fr-text">{% blocktrans %}{{ username }} vous a envoyé une demande d’ami.{% endblocktrans %}</span>
+                <div class="vz-btn-row">
+                    <button class="vz-btn vz-btn--secondary vz-btn--sm" onclick='triggerDeclineFriendRequest("{{ pending_friend_request_id }}")' type="button">
+                        <span class="material-icons" aria-hidden="true">close</span>{% trans "Refuser" %}
+                    </button>
+                    <button class="vz-btn vz-btn--primary vz-btn--sm" onclick='triggerAcceptFriendRequest("{{ pending_friend_request_id }}")' type="button">
+                        <span class="material-icons" aria-hidden="true">check</span>{% trans "Accepter" %}
+                    </button>
+                </div>
+            </div>
+            {% endif %}
+
+            <div class="vz-btn-row profile-actions-row">
             {% if request.user.is_authenticated %}
                 {% if is_self %}
-                    <a class="btn-p btn-p-secondary" href="{% url 'account:edit' user_id=id %}">
-                        <span class="material-icons">edit</span> {% trans "Edit profile" %}
-                    </a>
-                    <a class="btn-p btn-p-secondary" href="{% url 'password_change' %}">
-                        <span class="material-icons">lock</span> {% trans "Change password" %}
+                    <a class="vz-btn vz-btn--secondary" href="{% url 'account:edit' user_id=id %}">
+                        <span class="material-icons" aria-hidden="true">edit</span>{% trans "Edit profile" %}
                     </a>
                     {% if friend_requests %}
-                    <a class="btn-p btn-p-primary" href="{% url 'friend:friend-requests' user_id=id %}">
-                        <span class="material-icons">notifications</span>
+                    <a class="vz-btn vz-btn--tonal" href="{% url 'friend:friend-requests' user_id=id %}">
+                        <span class="material-icons" aria-hidden="true">person_add</span>
                         {% blocktrans count n=friend_requests|length %}{{ n }} demande{% plural %}{{ n }} demandes{% endblocktrans %}
                     </a>
                     {% endif %}
-
-                {% else %}
-                    {% if request_sent == 0 %}
-                    <div class="fr-banner">
-                        <span class="material-icons">person_add</span>
-                        <span class="fr-text">{% blocktrans %}{{ username }} vous a envoyé une demande d’ami.{% endblocktrans %}</span>
-                        <button class="btn-p btn-p-success" onclick='triggerAcceptFriendRequest("{{ pending_friend_request_id }}")' type="button">
-                            <span class="material-icons">check</span> {% trans "Accept" %}
-                        </button>
-                        <button class="btn-p btn-p-danger" onclick='triggerDeclineFriendRequest("{{ pending_friend_request_id }}")' type="button">
-                            <span class="material-icons">close</span> {% trans "Decline" %}
-                        </button>
-                    </div>
-                    {% endif %}
-
-                    {% if is_friend %}
-                    <div class="dropdown">
-                        <button class="btn-p btn-p-secondary dropdown-toggle" data-toggle="dropdown" id="friends-drop" type="button">
-                            <span class="material-icons">how_to_reg</span> {% trans "Ami" %}
-                        </button>
-                        <div class="dropdown-menu profile-dd-menu" aria-labelledby="friends-drop">
-                            <a class="dropdown-item profile-dd-danger" href="#"
-                               onclick="removeFriend('{{ id }}', onFriendRemoved)">
-                                <span class="material-icons mr-1">person_remove</span>
-                                {% trans "Remove friend" %}
-                            </a>
-                        </div>
-                    </div>
-                    <button class="btn-p btn-p-primary" onclick="createOrReturnPrivateChat('{{ id }}')" type="button">
-                        <span class="material-icons">message</span> {% trans "Message" %}
+                {% elif is_friend %}
+                    <button class="vz-btn vz-btn--primary" onclick="createOrReturnPrivateChat('{{ id }}')" type="button">
+                        <span class="material-icons" aria-hidden="true">message</span>{% trans "Message" %}
                     </button>
-
-                    {% elif request_sent == 1 %}
-                    <button class="btn-p btn-p-secondary" id="id_cancel_friend_request_btn" type="button">
-                        <span class="material-icons">person_remove</span> {% trans "Cancel request" %}
+                    <span class="vz-chip vz-chip--success vz-chip--static"><span class="material-icons" aria-hidden="true">how_to_reg</span>{% trans "Ami" %}</span>
+                {% elif request_sent != 0 and not is_blocked %}
+                    {# Les deux boutons existent, un seul est visible : le JS bascule après la réponse du serveur #}
+                    <button class="vz-btn vz-btn--primary" id="id_send_friend_request_btn" type="button"{% if request_sent == 1 %} hidden{% endif %}>
+                        <span class="material-icons" aria-hidden="true">person_add</span>{% trans "Add friend" %}
                     </button>
-
-                    {% elif request_sent == -1 %}
-                    <button class="btn-p btn-p-primary" id="id_send_friend_request_btn" type="button">
-                        <span class="material-icons">person_add</span> {% trans "Add friend" %}
+                    <button class="vz-btn vz-btn--secondary" id="id_cancel_friend_request_btn" type="button"{% if request_sent != 1 %} hidden{% endif %}>
+                        <span class="material-icons" aria-hidden="true">schedule</span>{% trans "Cancel request" %}
                     </button>
-                    {% endif %}
                 {% endif %}
             {% else %}
-                <a class="btn-p btn-p-primary" href="{% url 'login' %}">
-                    <span class="material-icons">login</span> {% trans "Login" %}
+                <a class="vz-btn vz-btn--primary" href="{% url 'login' %}?next={{ request.path|urlencode }}">
+                    <span class="material-icons" aria-hidden="true">login</span>{% trans "Se connecter" %}
                 </a>
             {% endif %}
-            <button type="button" class="vz-btn vz-btn--muted vz-btn--sm vz-btn--pill"
-                    onclick="vzShare({title:'{{ username|escapejs }} · Vazimba', url:'{% url 'account:view' user_id=id %}'})"
-                    aria-label="{% trans 'Partager le profil' %}">
-                <span class="material-icons">share</span>{% trans "Partager" %}
-            </button>
-            {% if request.user.is_authenticated and not is_self %}
-            <button type="button" class="vz-btn vz-btn--muted vz-btn--sm vz-btn--pill" onclick="openReportModal('account','{{ id }}')" title="{% trans 'Signaler ce profil' %}">
-                <span class="material-icons">flag</span>{% trans "Signaler" %}
-            </button>
-            <button type="button" class="vz-btn vz-btn--sm vz-btn--pill {% if is_blocked %}vz-btn--danger-soft{% else %}vz-btn--muted{% endif %}" id="profile-block-btn"
-                    onclick="vzConfirm({ text: {% if is_blocked %}'{% trans "Débloquer cet utilisateur ?"|escapejs %}'{% else %}'{% trans "Bloquer cet utilisateur ? Vous ne verrez plus ses publications et il ne pourra plus vous écrire."|escapejs %}'{% endif %}, danger: {% if is_blocked %}false{% else %}true{% endif %} }).then(function(ok){ if (ok) vzToggleBlock({{ id }}, document.getElementById('profile-block-btn')); })">
-                <span class="material-icons">block</span>{% if is_blocked %}{% trans "Débloquer" %}{% else %}{% trans "Bloquer" %}{% endif %}
-            </button>
-            {% endif %}
+                {% if request.user.is_authenticated and not is_self %}
+                {# Bloquer / débloquer : bouton réel, sans affichage propre — c'est l'entrée du menu ⋯ qui le déclenche #}
+                <button type="button" id="profile-block-btn" hidden data-blocked="{{ is_blocked|yesno:'1,0' }}"></button>
+                {% endif %}
+                <button type="button" class="vz-icon-btn vz-icon-btn--lg vz-icon-btn--solid profile-more-btn" id="profile-more-btn"
+                        aria-haspopup="menu" aria-expanded="false" aria-label="{% trans 'Plus d’actions' %}">
+                    <span class="material-icons" aria-hidden="true">more_horiz</span>
+                </button>
+            </div>
         </div>
     </div>
 
     <!-- ══════════════════════════════════
          TABS
          ══════════════════════════════════ -->
-    <div class="profile-tabs" id="profile-tabs" role="tablist">
+    <div class="profile-tabs" id="profile-tabs" role="tablist" aria-label="{% trans 'Sections du profil' %}">
         <button class="tab-btn active" data-tab="posts" type="button" role="tab" id="tabbtn-posts" aria-controls="tab-posts" aria-selected="true">
-            <span class="material-icons">article</span> {% trans "Posts" %}
+            <span class="material-icons" aria-hidden="true">article</span> {% trans "Posts" %}
         </button>
-        <button class="tab-btn" data-tab="photos" type="button">
-            <span class="material-icons">photo_library</span> {% trans "Photos" %}
+        <button class="tab-btn" data-tab="photos" type="button" role="tab" id="tabbtn-photos" aria-controls="tab-photos" aria-selected="false" tabindex="-1">
+            <span class="material-icons" aria-hidden="true">photo_library</span> {% trans "Photos" %}
         </button>
-        <button class="tab-btn" data-tab="friends-tab" type="button">
-            <span class="material-icons">group</span> {% trans "Friends" %}
+        <button class="tab-btn" data-tab="friends-tab" type="button" role="tab" id="tabbtn-friends-tab" aria-controls="tab-friends-tab" aria-selected="false" tabindex="-1">
+            <span class="material-icons" aria-hidden="true">group</span> {% trans "Friends" %}
         </button>
-        <button class="tab-btn" data-tab="about" type="button">
-            <span class="material-icons">info</span> {% trans "My Profile" %}
+        <button class="tab-btn" data-tab="about" type="button" role="tab" id="tabbtn-about" aria-controls="tab-about" aria-selected="false" tabindex="-1">
+            <span class="material-icons" aria-hidden="true">info</span> {% trans "À propos" %}
         </button>
     </div>
 
     <!-- ══════════════════════════════════
          TAB: POSTS
          ══════════════════════════════════ -->
-    <div class="tab-pane active" id="tab-posts">
+    <div class="tab-pane active" id="tab-posts" role="tabpanel" aria-labelledby="tabbtn-posts">
         <div class="profile-body">
 
             <!-- Sidebar -->
@@ -199,13 +183,12 @@
                 <!-- Score Fihavanana -->
                 <div class="fihav-card" id="fihav-sidebar-card">
                     <div class="fihav-card-title">
-                        <span class="material-icons">favorite</span>
-                        Score Fihavanana
+                        <span class="material-icons" aria-hidden="true">favorite</span>
+                        {% trans "Score Fihavanana" %}
                     </div>
                     <div class="fihav-score-big" id="fihav-score-val">{{ profile_user.score_fihavanana }}</div>
                     {% with lvl=profile_user.fihavanana_level %}
-                    <div class="fihav-level-chip" id="fihav-level-chip"
-                         style="border-color:{{ lvl.2 }}33;background:{{ lvl.2 }}18;color:{{ lvl.2 }}">
+                    <div class="fihav-level-chip" id="fihav-level-chip">
                         {{ lvl.1 }} {{ lvl.0 }}
                     </div>
                     {% endwith %}
@@ -325,8 +308,8 @@
                         {% endfor %}
                     </div>
                     {% if friends_count > 9 %}
-                    <a href="{% url 'friend:list' user_id=id %}" class="btn-p btn-p-secondary pc-sidebar-cta">
-                        {% trans "My friends" %}
+                    <a href="{% url 'friend:list' user_id=id %}" class="vz-btn vz-btn--secondary vz-btn--sm vz-btn--block pc-sidebar-cta">
+                        {% trans "Voir tous les amis" %}
                     </a>
                     {% endif %}
                 </div>
@@ -339,7 +322,7 @@
                     <div class="mini-friends-grid">
                         {% for photo in photos|slice:":9" %}
                         <div class="mini-friend mini-photo"
-                             onclick="openGalleryLightbox([{% for p in photos|slice:':9' %}'{{ p.url }}'{% if not forloop.last %},{% endif %}{% endfor %}], {{ forloop.counter0 }})"
+                             role="button" tabindex="0" onclick="openLightbox(null, null, {{ forloop.counter0 }})"
                              title="{{ photo.title }}">
                             <img src="{{ photo.url }}" alt="{{ photo.title }}" loading="lazy" decoding="async">
                         </div>
@@ -403,6 +386,7 @@
                         <button class="pf-cb-trigger" id="pf-cb-trigger" type="button">
                             {% trans "What's new" %} {{ username }} ?
                         </button>
+                        <label class="vz-sr-only" for="pf-cb-body">{% trans "Publish" %}</label>
                         <textarea id="pf-cb-body" rows="2"
                             placeholder="{% trans "What's new" %} {{ username }} ?"
                             oninput="pfCbResize(this)"></textarea>
@@ -418,8 +402,8 @@
                             {% trans "Cancel" %}
                         </button>
                         <button type="button" id="pf-cb-submit-btn" class="vz-btn vz-btn--primary vz-btn--sm">
-                            <span class="material-icons">send</span>
-                            {% trans "Publish" %}
+                            <span class="material-icons" aria-hidden="true">send</span>
+                            {% trans "Publier" %}
                         </button>
                     </div>
 
@@ -466,6 +450,15 @@
 
                 var selectedFiles = [];
                 var isOpen = false;
+                var PF_T = {
+                    remove:  "{% trans 'Retirer'|escapejs %}",
+                    files1:  "{% trans '%(n)s fichier sélectionné'|escapejs %}",
+                    filesN:  "{% trans '%(n)s fichiers sélectionnés'|escapejs %}",
+                    sending: "{% trans 'Publication…'|escapejs %}",
+                    failed:  "{% trans 'La publication a échoué. Réessayez.'|escapejs %}",
+                    network: "{% trans 'Erreur réseau.'|escapejs %}",
+                    publish: "{% trans 'Publier'|escapejs %}"
+                };
 
                 function expand(doFocus) {
                     if (isOpen) return;
@@ -503,7 +496,7 @@
                 function renderPreview() {
                     var n = selectedFiles.length;
                     if (!n) { prevGrid.style.display='none'; prevGrid.innerHTML=''; fileCount.textContent=''; return; }
-                    prevGrid.style.cssText='display:grid;gap:4px;border-radius:12px;overflow:hidden;max-height:320px;margin:.1rem 1.1rem .5rem;';
+                    prevGrid.style.display='grid';
                     prevGrid.style.gridTemplateColumns = n===1?'1fr':n===2?'1fr 1fr':n===3?'2fr 1fr':'1fr 1fr';
                     prevGrid.style.gridTemplateRows    = n>=3?'1fr 1fr':'';
                     prevGrid.innerHTML='';
@@ -511,41 +504,41 @@
                         (function(i){
                             var f=selectedFiles[i];
                             var it=document.createElement('div');
-                            it.style.cssText='position:relative;overflow:hidden;min-height:110px;background:var(--btn-bg);';
+                            it.className='pf-cb-item';
                             if(n===3&&i===0) it.style.gridRow='1/3';
                             var rm=document.createElement('button');
                             rm.type='button';
-                            rm.innerHTML='<span class="material-icons" style="font-size:.85rem;line-height:1;">close</span>';
-                            rm.style.cssText='position:absolute;top:5px;right:5px;z-index:3;background:rgba(0,0,0,.6);color:#fff;border:none;border-radius:50%;width:22px;height:22px;display:flex;align-items:center;justify-content:center;cursor:pointer;';
+                            rm.className='vz-icon-btn vz-icon-btn--over pf-cb-rm';
+                            rm.setAttribute('aria-label', PF_T.remove);
+                            rm.innerHTML='<span class="material-icons" aria-hidden="true">close</span>';
                             rm.onclick=function(e){e.stopPropagation();removeFile(i);};
                             it.appendChild(rm);
                             if(i===3&&n>4){
                                 var ov=document.createElement('div');
-                                ov.style.cssText='position:absolute;inset:0;background:rgba(0,0,0,.52);display:flex;align-items:center;justify-content:center;color:#fff;font-size:1.5rem;font-weight:800;z-index:2;pointer-events:none;';
+                                ov.className='pf-cb-more';
                                 ov.textContent='+'+(n-4); it.appendChild(ov);
                             }
                             if(f.type.startsWith('image/')){
                                 var img=document.createElement('img');
-                                img.style.cssText='width:100%;height:100%;object-fit:cover;display:block;';
                                 img.src=URL.createObjectURL(f); it.appendChild(img);
                             } else if(f.type.startsWith('video/')){
                                 var vid=document.createElement('video');
-                                vid.style.cssText='width:100%;height:100%;object-fit:contain;display:block;background:#000;max-height:300px;';
                                 vid.src=URL.createObjectURL(f); vid.muted=true; vid.preload='metadata';
                                 var pOv=document.createElement('div');
-                                pOv.style.cssText='position:absolute;inset:0;display:flex;align-items:center;justify-content:center;pointer-events:none;z-index:1;';
-                                pOv.innerHTML='<span class="material-icons" style="font-size:2.2rem;color:#fff;filter:drop-shadow(0 2px 6px rgba(0,0,0,.7));">play_circle_filled</span>';
+                                pOv.className='pf-cb-play';
+                                pOv.innerHTML='<span class="material-icons" aria-hidden="true">play_circle_filled</span>';
                                 it.appendChild(vid); it.appendChild(pOv);
                             } else {
                                 var ic=document.createElement('div');
-                                ic.style.cssText='display:flex;flex-direction:column;align-items:center;justify-content:center;height:100%;min-height:110px;gap:.4rem;padding:1rem;';
-                                ic.innerHTML='<span class="material-icons" style="font-size:2rem;color:var(--accent);">insert_drive_file</span><span style="font-size:.73rem;color:var(--text-muted);word-break:break-all;text-align:center;">'+f.name+'</span>';
+                                ic.className='pf-cb-doc';
+                                ic.innerHTML='<span class="material-icons" aria-hidden="true">insert_drive_file</span><span class="pf-cb-doc-name"></span>';
+                                ic.querySelector('.pf-cb-doc-name').textContent=f.name;   /* (nom de fichier : jamais en innerHTML) */
                                 it.appendChild(ic);
                             }
                             prevGrid.appendChild(it);
                         })(idx);
                     }
-                    fileCount.textContent=n+' fichier'+(n>1?'s':'')+' sélectionné'+(n>1?'s':'');
+                    fileCount.textContent=(n>1?PF_T.filesN:PF_T.files1).replace('%(n)s', n);
                 }
 
                 trigger.addEventListener('click',  function(){ expand(); });
@@ -566,7 +559,7 @@
                         setTimeout(function(){ bodyTA.style.borderColor='var(--accent)'; },2000); return;
                     }
                     submitBtn.disabled=true;
-                    submitBtn.innerHTML='<span class="material-icons pf-cb-spinning">refresh</span> Publication…';
+                    submitBtn.classList.add('is-loading');
 
                     bodyHidden.value = bodyTA.value;
                     var fd=new FormData(form);
@@ -586,8 +579,8 @@
                                 var container=document.getElementById('profile-posts-container');
                                 if (!container) {
                                     /* Cas "aucun post" : créer le container et retirer l'état vide */
-                                    var empty=document.querySelector('.pf-empty');
-                                    if (empty) empty.style.display='none';
+                                    var empty=document.getElementById('pf-empty-posts');
+                                    if (empty) empty.hidden=true;
                                     container=document.createElement('div');
                                     container.id='profile-posts-container';
                                     document.getElementById('pf-create-box').insertAdjacentElement('afterend',container);
@@ -606,11 +599,11 @@
                                     });
                                 }
                             }
-                        } else { vzAlert('Erreur lors de la publication.'); }
-                    } catch(err) { console.error('pf-cb-form:',err); vzAlert('Erreur réseau.'); }
+                        } else { vzAlert(data.error || PF_T.failed); }
+                    } catch(err) { console.error('pf-cb-form:',err); vzAlert(PF_T.network); }
                     finally {
                         submitBtn.disabled=false;
-                        submitBtn.innerHTML='<span class="material-icons">send</span> {% trans "Publish"|escapejs %}';
+                        submitBtn.classList.remove('is-loading');
                     }
                 });
                 })();
@@ -628,17 +621,17 @@
                          data-next="{{ posts_next_page }}"
                          data-url="{% url 'account:profile-posts-more' user_id=id %}">
                     </div>
-                    <div id="profile-posts-loader">
-                        <div class="spinner-border text-primary" role="status"></div>
+                    <div id="profile-posts-loader" role="status" aria-label="{% trans 'Chargement…' %}">
+                        <div class="vz-skel pf-loader-skel"></div>
                     </div>
                     {% endif %}
                 {% else %}
-                    <div class="pf-empty">
-                        <span class="material-icons">article</span>
-                        <p>{% trans "No posts yet." %}</p>
+                    <div class="vz-empty" id="pf-empty-posts">
+                        <span class="material-icons" aria-hidden="true">article</span>
+                        <div class="vz-empty-title">{% trans "No posts yet." %}</div>
                         {% if is_self %}
-                        <a class="btn-p btn-p-primary pf-empty-cta" href="{% url 'post:addPost' %}">
-                            <span class="material-icons">add</span> {% trans "First Post" %}
+                        <a class="vz-btn vz-btn--primary" href="{% url 'post:addPost' %}">
+                            <span class="material-icons" aria-hidden="true">add</span>{% trans "First Post" %}
                         </a>
                         {% endif %}
                     </div>
@@ -651,25 +644,25 @@
     <!-- ══════════════════════════════════
          TAB: PHOTOS
          ══════════════════════════════════ -->
-    <div class="tab-pane" id="tab-photos">
+    <div class="tab-pane" id="tab-photos" role="tabpanel" aria-labelledby="tabbtn-photos">
         {% if photos %}
         <div class="photos-grid">
             {% for photo in photos %}
-            <div class="photo-thumb" onclick="openLightbox('{{ photo.url }}', '{{ photo.title|escapejs }}', {{ forloop.counter0 }})">
+            <button type="button" class="photo-thumb" onclick="openLightbox(null, null, {{ forloop.counter0 }})" aria-label="{% trans 'Agrandir la photo' %}">
                 <img src="{{ photo.url }}" alt="{{ photo.title }}" loading="lazy">
-                <div class="photo-thumb-overlay">
-                    <span class="material-icons">zoom_in</span>
-                </div>
-            </div>
+                <span class="photo-thumb-overlay">
+                    <span class="material-icons" aria-hidden="true">zoom_in</span>
+                </span>
+            </button>
             {% endfor %}
         </div>
         {% else %}
-        <div class="pf-empty">
-            <span class="material-icons">photo_library</span>
-            <p>{% trans "No photos yet." %}</p>
+        <div class="vz-empty">
+            <span class="material-icons" aria-hidden="true">photo_library</span>
+            <div class="vz-empty-title">{% trans "No photos yet." %}</div>
             {% if is_self %}
-            <a class="btn-p btn-p-primary pf-empty-cta" href="{% url 'post:addPost' %}">
-                <span class="material-icons">add_photo_alternate</span> {% trans "Publish Photo" %}
+            <a class="vz-btn vz-btn--primary" href="{% url 'post:addPost' %}">
+                <span class="material-icons" aria-hidden="true">add_photo_alternate</span>{% trans "Publish Photo" %}
             </a>
             {% endif %}
         </div>
@@ -679,8 +672,15 @@
     <!-- ══════════════════════════════════
          TAB: FRIENDS
          ══════════════════════════════════ -->
-    <div class="tab-pane" id="tab-friends-tab">
-        {% if friends %}
+    <div class="tab-pane" id="tab-friends-tab" role="tabpanel" aria-labelledby="tabbtn-friends-tab">
+        {% if not can_see_friends %}
+        {# Même règle que la page « liste d'amis » : réservée au membre et à ses amis #}
+        <div class="vz-empty">
+            <span class="material-icons" aria-hidden="true">lock</span>
+            <div class="vz-empty-title">{% blocktrans count n=friends_count %}{{ n }} ami{% plural %}{{ n }} amis{% endblocktrans %}</div>
+            <p class="vz-empty-text">{% trans "Seuls ses amis peuvent voir la liste d’amis de ce membre." %}</p>
+        </div>
+        {% elif friends %}
         <div class="friends-grid">
             {% for friend in friends %}
             <a class="friend-card-link" href="{% url 'account:view' user_id=friend.id %}">
@@ -690,9 +690,9 @@
             {% endfor %}
         </div>
         {% else %}
-        <div class="pf-empty">
-            <span class="material-icons">group</span>
-            <p>{% trans "No friends yet" %}</p>
+        <div class="vz-empty">
+            <span class="material-icons" aria-hidden="true">group</span>
+            <div class="vz-empty-title">{% trans "No friends yet" %}</div>
         </div>
         {% endif %}
     </div>
@@ -700,7 +700,7 @@
     <!-- ══════════════════════════════════
          TAB: ABOUT
          ══════════════════════════════════ -->
-    <div class="tab-pane" id="tab-about">
+    <div class="tab-pane" id="tab-about" role="tabpanel" aria-labelledby="tabbtn-about">
         <div class="pc-sidebar-card pc-about-card">
             <p class="pc-sidebar-label">{% trans "About" %}</p>
 
@@ -763,12 +763,12 @@
             </div>
 
             {% if is_self %}
-            <div class="pc-about-actions">
-                <a class="btn-p btn-p-primary" href="{% url 'account:edit' user_id=id %}">
-                    <span class="material-icons">edit</span> {% trans "Edit profile" %}
+            <div class="vz-btn-row pc-about-actions">
+                <a class="vz-btn vz-btn--secondary" href="{% url 'account:edit' user_id=id %}">
+                    <span class="material-icons" aria-hidden="true">edit</span>{% trans "Edit profile" %}
                 </a>
-                <a class="btn-p btn-p-secondary" href="{% url 'password_change' %}">
-                    <span class="material-icons">lock</span> {% trans "Change password" %}
+                <a class="vz-btn vz-btn--secondary" href="{% url 'password_change' %}">
+                    <span class="material-icons" aria-hidden="true">lock</span>{% trans "Change password" %}
                 </a>
             </div>
             {% endif %}
@@ -777,21 +777,28 @@
 
 </div><!-- /profile-wrapper -->
 
-<!-- Share toast -->
-<div id="share-toast"><span class="material-icons">link</span> {% trans "Link copied!" %}</div>
 
 <script>
 /* ── Tab navigation ── */
 document.querySelectorAll('.tab-btn').forEach(function(btn) {
     btn.addEventListener('click', function() {
         var target = this.dataset.tab;
-        document.querySelectorAll('.tab-btn').forEach(function(b) { b.classList.remove('active'); b.setAttribute('aria-selected', 'false'); });
+        document.querySelectorAll('.tab-btn').forEach(function(b) { b.classList.remove('active'); b.setAttribute('aria-selected', 'false'); b.setAttribute('tabindex', '-1'); });
         document.querySelectorAll('.tab-pane').forEach(function(p) { p.classList.remove('active'); });
-        this.classList.add('active'); this.setAttribute('aria-selected', 'true');
+        this.classList.add('active'); this.setAttribute('aria-selected', 'true'); this.removeAttribute('tabindex');
         var pane = document.getElementById('tab-' + target);
         if (pane) pane.classList.add('active');
         try { sessionStorage.setItem('profile_tab_{{ id }}', target); } catch(e){}
     });
+});
+/* Flèches gauche / droite entre onglets (modèle ARIA « tabs ») */
+document.getElementById('profile-tabs').addEventListener('keydown', function(e) {
+    if (e.key !== 'ArrowRight' && e.key !== 'ArrowLeft') return;
+    var tabs = Array.prototype.slice.call(this.querySelectorAll('.tab-btn'));
+    var i = tabs.indexOf(document.activeElement);
+    if (i < 0) return;
+    var next = tabs[(i + (e.key === 'ArrowRight' ? 1 : tabs.length - 1)) % tabs.length];
+    next.click(); next.focus();
 });
 (function() {
     try {
@@ -834,45 +841,19 @@ document.querySelectorAll('.tab-btn').forEach(function(btn) {
     }, { passive: true });
 })();
 
-/* ── Friend callbacks ── */
+/* ── Amitié : les rappels ne partent qu'après la confirmation du serveur ── */
 function onFriendRequestSent() {
-    var btn = document.getElementById("id_send_friend_request_btn");
-    if (!btn) return;
-    /* Changer l'apparence → état "demande envoyée" */
-    btn.classList.remove('btn-p-primary');
-    btn.classList.add('btn-p-pending');
-    btn.disabled = true;
-    btn.style.pointerEvents = 'none';
-    btn.innerHTML = '<span class="material-icons">schedule</span> {% trans "Request sent"|escapejs %}';
-
-    /* Ajouter un lien "Annuler" discret juste après le bouton */
-    if (!document.getElementById('id_inline_cancel_link')) {
-        var cancelLink = document.createElement('button');
-        cancelLink.id = 'id_inline_cancel_link';
-        cancelLink.className = 'btn-p btn-p-secondary';
-        cancelLink.classList.add('btn-p-cancel-inline');
-        cancelLink.innerHTML = '<span class="material-icons">close</span> {% trans "Cancel"|escapejs %}';
-        cancelLink.onclick = function() {
-            cancelFriendRequest("{{ id }}", onFriendRequestCancelled);
-        };
-        btn.parentNode.insertBefore(cancelLink, btn.nextSibling);
-    }
+    var send = document.getElementById("id_send_friend_request_btn");
+    var cancel = document.getElementById("id_cancel_friend_request_btn");
+    if (send) send.hidden = true;
+    if (cancel) { cancel.hidden = false; cancel.focus(); }
 }
-
 function onFriendRequestCancelled() {
-    /* Remettre le bouton "Ajouter en ami" */
-    var btn = document.getElementById("id_send_friend_request_btn");
-    if (btn) {
-        btn.classList.remove('btn-p-pending');
-        btn.classList.add('btn-p-primary');
-        btn.disabled = false;
-        btn.style.pointerEvents = '';
-        btn.innerHTML = '<span class="material-icons">person_add</span> {% trans "Add friend"|escapejs %}';
-    }
-    var cancelLink = document.getElementById('id_inline_cancel_link');
-    if (cancelLink) cancelLink.remove();
+    var send = document.getElementById("id_send_friend_request_btn");
+    var cancel = document.getElementById("id_cancel_friend_request_btn");
+    if (cancel) cancel.hidden = true;
+    if (send) { send.hidden = false; send.focus(); }
 }
-
 function onFriendRemoved()         { location.reload(); }
 function onFriendRequestAccepted() { location.reload(); }
 function onFriendRequestDeclined() { location.reload(); }
@@ -885,6 +866,56 @@ if (cancelBtn) cancelBtn.onclick = function() { cancelFriendRequest("{{ id }}", 
 
 function triggerAcceptFriendRequest(id) { acceptFriendRequest(id, onFriendRequestAccepted); }
 function triggerDeclineFriendRequest(id) { declineFriendRequest(id, onFriendRequestDeclined); }
+
+/* ── Menu ⋯ du profil : Partager, mot de passe, retirer des amis, signaler, bloquer ── */
+(function() {
+    var more = document.getElementById('profile-more-btn');
+    if (!more) return;
+    var IS_AUTH = {{ request.user.is_authenticated|yesno:"true,false" }};
+    var IS_SELF = {{ is_self|yesno:"true,false" }};
+    var IS_FRIEND = {{ is_friend|yesno:"true,false" }};
+    var IS_BLOCKED = {{ is_blocked|yesno:"true,false" }};
+    var T = {
+        share:    "{% trans 'Partager le profil'|escapejs %}",
+        password: "{% trans 'Change password'|escapejs %}",
+        remove:   "{% trans 'Remove friend'|escapejs %}",
+        removeQ:  "{% trans 'Retirer cette personne de vos amis ?'|escapejs %}",
+        removeOk: "{% trans 'Retirer'|escapejs %}",
+        report:   "{% trans 'Signaler ce profil'|escapejs %}",
+        block:    "{% trans 'Bloquer'|escapejs %}",
+        unblock:  "{% trans 'Débloquer'|escapejs %}",
+        blockQ:   "{% trans 'Bloquer cet utilisateur ? Vous ne verrez plus ses publications et il ne pourra plus vous écrire.'|escapejs %}",
+        unblockQ: "{% trans 'Débloquer cet utilisateur ?'|escapejs %}"
+    };
+    more.addEventListener('click', function() {
+        var items = [
+            { icon: 'share', label: T.share, onClick: function() {
+                vzShare({ title: '{{ username|escapejs }} · Vazimba', url: '{% url 'account:view' user_id=id %}' });
+            } }
+        ];
+        if (IS_SELF) items.push({ icon: 'lock', label: T.password, href: "{% url 'password_change' %}" });
+        if (IS_AUTH && !IS_SELF) {
+            items.push('sep');
+            if (IS_FRIEND) items.push({ icon: 'person_remove', label: T.remove, danger: true, onClick: function() {
+                vzConfirm({ text: T.removeQ, danger: true, icon: 'person_remove', confirmText: T.removeOk })
+                    .then(function(ok) { if (ok) removeFriend('{{ id }}', onFriendRemoved); });
+            } });
+            items.push({ icon: 'flag', label: T.report, onClick: function() { openReportModal('account', '{{ id }}'); } });
+            items.push({ icon: 'block', label: IS_BLOCKED ? T.unblock : T.block, danger: !IS_BLOCKED, onClick: function() {
+                var blockBtn = document.getElementById('profile-block-btn');
+                if (blockBtn) blockBtn.click();
+            } });
+        }
+        more.setAttribute('aria-expanded', 'true');
+        vzMenu(more, items, { title: '{{ username|escapejs }}' });
+    });
+    var blockBtn = document.getElementById('profile-block-btn');
+    if (blockBtn) blockBtn.addEventListener('click', function() {
+        vzConfirm({ text: IS_BLOCKED ? T.unblockQ : T.blockQ, danger: !IS_BLOCKED, icon: 'block',
+                    confirmText: IS_BLOCKED ? T.unblock : T.block })
+            .then(function(ok) { if (ok) vzToggleBlock({{ id }}, more); });
+    });
+})();
 </script>
 
 <script>
@@ -975,6 +1006,14 @@ function toggleLike(postId) { sendReaction(postId, 'like'); }
 /* ══════════════════════════════════════
    COMMENTS
    ══════════════════════════════════════ */
+/* Libellés et adresses des commentaires ajoutés à la volée (plus de texte ni d'URL en dur) */
+var CMT_T = {
+    del:         '{% trans "Supprimer"|escapejs %}',
+    reply:       '{% trans "Répondre"|escapejs %}',
+    placeholder: '{% trans "Écrire une réponse…"|escapejs %}'
+};
+var _accountUrlTpl = "{% url 'account:view' user_id=999999 %}";
+function accountUrl(id) { return _accountUrlTpl.replace('999999', encodeURIComponent(id)); }
 function toggleComments(postId) {
     var panel = document.getElementById('comment-panel-' + postId);
     var btn   = document.getElementById('comment-btn-'   + postId);
@@ -1011,29 +1050,29 @@ function submitComment(postId, url) {
         if (!data.ok) return;
         ta.value = ''; ta.style.height = 'auto';
         var delBtn = data.can_delete
-            ? '<button class="pc-comment-del" onclick="deleteComment(' + data.id + ', commentDeleteUrl(' + data.id + '))" type="button">Supprimer</button>'
+            ? '<button class="pc-comment-del" onclick="deleteComment(' + data.id + ', commentDeleteUrl(' + data.id + '))" type="button">' + CMT_T.del + '</button>'
             : '';
         var html = '<div class="pc-comment-item" id="comment-item-' + data.id + '">'
-            + '<a href="/account/' + data.author_id + '/view/"><img class="cmt-avatar" src="' + data.avatar + '" alt=""></a>'
+            + '<a href="' + accountUrl(data.author_id) + '"><img class="cmt-avatar" src="' + escHtml(data.avatar) + '" alt=""></a>'
             + '<div class="pc-comment-right">'
             +   '<div class="pc-comment-bubble">'
-            +     '<a class="pc-comment-author" href="/account/' + data.author_id + '/view/">' + escHtml(data.author) + '</a>'
+            +     '<a class="pc-comment-author" href="' + accountUrl(data.author_id) + '">' + escHtml(data.author) + '</a>'
             +     '<p class="pc-comment-body">' + escHtml(data.body) + '</p>'
             +   '</div>'
             +   '<div class="pc-comment-footer">'
-            +     '<span class="pc-comment-time">' + data.created_at + '</span>'
-            +     '<button class="pc-comment-reply-btn" onclick="toggleReplyForm(' + data.id + ', ' + postId + ', \'' + url + '\')" type="button">Répondre</button>'
+            +     '<span class="pc-comment-time">' + escHtml(data.created_at) + '</span>'
+            +     '<button class="pc-comment-reply-btn" onclick="toggleReplyForm(' + data.id + ', ' + postId + ', \'' + url + '\')" type="button">' + CMT_T.reply + '</button>'
             +     delBtn
             +   '</div>'
             +   '<div class="pc-comment-replies" id="replies-' + data.id + '" style="display:none;"></div>'
             +   '<div class="pc-reply-form-wrap" id="reply-form-' + data.id + '">'
             +     '<img class="reply-form-avatar" src="' + data.avatar + '" alt="">'
             +     '<div class="pc-reply-input-wrap">'
-            +       '<textarea class="pc-reply-textarea" id="reply-input-' + data.id + '" placeholder="Écrire une réponse…" rows="1" maxlength="1000"'
+            +       '<textarea class="pc-reply-textarea" id="reply-input-' + data.id + '" placeholder="' + CMT_T.placeholder + '" rows="1" maxlength="1000"'
             +       ' onkeydown="handleReplyKey(event,' + data.id + ',' + postId + ',\'' + url + '\')"'
             +       ' oninput="autoResize(this)"></textarea>'
             +     '</div>'
-            +     '<button class="pc-comment-send" onclick="submitReply(' + data.id + ',' + postId + ',\'' + url + '\')" title="Répondre" type="button">'
+            +     '<button class="pc-comment-send" onclick="submitReply(' + data.id + ',' + postId + ',\'' + url + '\')" aria-label="' + CMT_T.reply + '" type="button">'
             +       '<span class="material-icons">send</span></button>'
             +   '</div>'
             + '</div>'
@@ -1080,17 +1119,17 @@ function submitReply(parentCommentId, postId, url) {
         var form = document.getElementById('reply-form-' + parentCommentId);
         if (form) form.classList.remove('open');
         var delBtn = data.can_delete
-            ? '<button class="pc-comment-del" onclick="deleteComment(' + data.id + ', commentDeleteUrl(' + data.id + '))" type="button">Supprimer</button>'
+            ? '<button class="pc-comment-del" onclick="deleteComment(' + data.id + ', commentDeleteUrl(' + data.id + '))" type="button">' + CMT_T.del + '</button>'
             : '';
         var html = '<div class="pc-comment-reply-item" id="comment-item-' + data.id + '">'
-            + '<a href="/account/' + data.author_id + '/view/"><img class="reply-avatar" src="' + data.avatar + '" alt=""></a>'
+            + '<a href="' + accountUrl(data.author_id) + '"><img class="reply-avatar" src="' + data.avatar + '" alt=""></a>'
             + '<div class="pc-comment-right">'
             +   '<div class="pc-comment-bubble">'
-            +     '<a class="pc-comment-author" href="/account/' + data.author_id + '/view/">' + escHtml(data.author) + '</a>'
+            +     '<a class="pc-comment-author" href="' + accountUrl(data.author_id) + '">' + escHtml(data.author) + '</a>'
             +     '<p class="pc-comment-body">' + escHtml(data.body) + '</p>'
             +   '</div>'
             +   '<div class="pc-comment-footer">'
-            +     '<span class="pc-comment-time">' + data.created_at + '</span>'
+            +     '<span class="pc-comment-time">' + escHtml(data.created_at) + '</span>'
             +     delBtn
             +   '</div>'
             + '</div>'
@@ -1138,29 +1177,11 @@ function updateCommentCount(postId, delta) {
 /* ══════════════════════════════════════
    SHARE
    ══════════════════════════════════════ */
-var _shareTimer = null;
 function sharePost(postId) {
     var url = window.location.origin + window.location.pathname + '#post-' + postId;
-    /* ZootShare : feuille native (iOS/Android) ou bottom-sheet WhatsApp/FB */
+    /* ZootShare : feuille native (iOS/Android) ou bottom-sheet WhatsApp/FB ; sinon copie du lien (vz-core) */
     if (window.ZootShare) { ZootShare.open(url, document.title || 'Vazimba'); return; }
-    /* Fallback clipboard si ZootShare non disponible */
-    if (navigator.clipboard && navigator.clipboard.writeText) {
-        navigator.clipboard.writeText(url).then(showShareToast);
-    } else {
-        var tmp = document.createElement('textarea');
-        tmp.value = url; tmp.style.cssText = 'position:fixed;opacity:0';
-        document.body.appendChild(tmp); tmp.select();
-        try { document.execCommand('copy'); } catch(e){}
-        document.body.removeChild(tmp);
-        showShareToast();
-    }
-}
-function showShareToast() {
-    var t = document.getElementById('share-toast');
-    if (!t) return;
-    t.classList.add('show');
-    clearTimeout(_shareTimer);
-    _shareTimer = setTimeout(function(){ t.classList.remove('show'); }, 2800);
+    vzCopy(url);
 }
 
 /* ══════════════════════════════════════
@@ -1193,6 +1214,8 @@ function escHtml(str) {
 }
 
 /* ── Hashtags + Mentions ── */
+var _hashtagUrlTpl = '{% url "post:hashtag" tag="__TAG__" %}';
+var _searchUrl = '{% url "recherche" %}';
 function processHashtagsAndMentions(container) {
     if (!container) return;
     var SKIP = new Set(['A', 'SCRIPT', 'STYLE', 'CODE', 'PRE', 'TEXTAREA', 'INPUT']);
@@ -1211,10 +1234,10 @@ function processHashtagsAndMentions(container) {
         var html = text
             .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')
             .replace(/#([a-zA-ZÀ-ÿ0-9_]{2,30})/g, function(m, tag) {
-                return '<a href="/post/hashtag/' + tag.toLowerCase() + '/" class="zf-hashtag">' + m + '</a>';
+                return '<a href="' + _hashtagUrlTpl.replace('__TAG__', encodeURIComponent(tag.toLowerCase())) + '" class="zf-hashtag">' + m + '</a>';
             })
             .replace(/@([a-zA-Z0-9_]{2,30})/g, function(m, user) {
-                return '<a href="/account/search/?q=' + encodeURIComponent(user) + '" class="zf-mention">' + m + '</a>';
+                return '<a href="' + _searchUrl + '?q=' + encodeURIComponent(user) + '" class="zf-mention">' + m + '</a>';
             });
         var span = document.createElement('span');
         span.innerHTML = html;
@@ -1329,14 +1352,14 @@ document.addEventListener('zootStoriesLoaded', function(e) {
 
             if (s.story_type === 'text') {
                 inner.style.background = GRAD_MAP[s.bg_gradient] || GRAD_MAP.grad_cyan;
-                inner.innerHTML = '<div class="profile-story-thumb-text"><p>' + (s.caption || '') + '</p></div>';
+                inner.innerHTML = '<div class="profile-story-thumb-text"><p>' + escHtml(s.caption || '') + '</p></div>';
             } else if (s.story_type === 'video' && s.media_url) {
-                inner.innerHTML = '<video src="' + s.media_url + '" muted preload="metadata" class="pf-story-video"></video>';
+                inner.innerHTML = '<video src="' + escHtml(s.media_url) + '" muted preload="metadata" class="pf-story-video"></video>';
             } else if (s.media_url) {
-                inner.innerHTML = '<img src="' + s.media_url + '" alt="" loading="lazy">';
+                inner.innerHTML = '<img src="' + escHtml(s.media_url) + '" alt="" loading="lazy">';
             } else {
                 inner.style.background = GRAD_MAP.grad_cyan;
-                inner.innerHTML = '<div class="profile-story-thumb-text"><p>' + (s.caption || '') + '</p></div>';
+                inner.innerHTML = '<div class="profile-story-thumb-text"><p>' + escHtml(s.caption || '') + '</p></div>';
             }
 
             if (s.seen && !IS_SELF) {
@@ -1438,18 +1461,18 @@ document.addEventListener('zootStoriesLoaded', function(e) {
 
 <!-- ── Lightbox modal ── -->
 <div id="pf-lightbox" role="dialog" aria-modal="true" onclick="lbBgClick(event)">
-    <button class="lb-close" onclick="closeLightbox()" aria-label="Fermer" type="button">
+    <button class="lb-close" onclick="closeLightbox()" aria-label="{% trans 'Fermer' %}" type="button">
         <span class="material-icons">close</span>
     </button>
     <span class="lb-counter" id="lb-counter"></span>
-    <button class="lb-arrow lb-prev" onclick="lbNav(-1)" aria-label="Précédent" type="button">
+    <button class="lb-arrow lb-prev" onclick="lbNav(-1)" aria-label="{% trans 'Précédent' %}" type="button">
         <span class="material-icons">chevron_left</span>
     </button>
     <div class="lb-img-wrap">
         <img id="lb-img" src="" alt="">
     </div>
     <p class="lb-caption" id="lb-caption"></p>
-    <button class="lb-arrow lb-next" onclick="lbNav(1)" aria-label="Suivant" type="button">
+    <button class="lb-arrow lb-next" onclick="lbNav(1)" aria-label="{% trans 'Suivant' %}" type="button">
         <span class="material-icons">chevron_right</span>
     </button>
 </div>
@@ -1460,7 +1483,7 @@ document.addEventListener('zootStoriesLoaded', function(e) {
    ══════════════════════════════════════ */
 var _lbPhotos = [
     {% for photo in photos %}
-    { src: '{{ photo.url }}', caption: '{{ photo.title|escapejs }}' }{% if not forloop.last %},{% endif %}
+    { src: '{{ photo.url|escapejs }}', caption: '{{ photo.title|escapejs }}' }{% if not forloop.last %},{% endif %}
     {% endfor %}
 ];
 var _lbIdx = 0;
@@ -1598,7 +1621,9 @@ function uploadCoverImage(input) {
 
     var wrap = document.getElementById('profile-cover-wrap');
     var btn  = wrap ? wrap.querySelector('.cover-edit-btn') : null;
-    if (btn) { btn.disabled = true; btn.style.opacity = '.5'; }
+    if (btn) { btn.disabled = true; btn.classList.add('is-loading'); }
+    var COVER_FAIL = "{% trans 'L’envoi de la photo de couverture a échoué.'|escapejs %}";
+    function coverDone() { if (btn) { btn.disabled = false; btn.classList.remove('is-loading'); } input.value = ''; }
 
     /* Convertir HEIC / images lourdes → WebP avant upload */
     var convPromise = (window.ZootMediaConverter && !rawFile.type.startsWith('video/'))
@@ -1621,8 +1646,9 @@ function uploadCoverImage(input) {
                 img = document.createElement('img');
                 img.id        = 'cover-img';
                 img.className = 'profile-cover-img';
-                img.alt       = 'Couverture';
+                img.alt       = "{% trans 'Photo de couverture'|escapejs %}";
                 img.src       = e.target.result;
+                img.onclick   = function() { openPhotoDirectLb(this.src, this.alt); };
                 wrap.insertBefore(img, wrap.firstChild);
             }
         };
@@ -1639,16 +1665,16 @@ function uploadCoverImage(input) {
     })
     .then(function(r) { return r.json(); })
     .then(function(data) {
-        if (btn) { btn.disabled = false; btn.style.opacity = ''; }
-        if (!data.ok) {
-            vzAlert(data.error || 'Erreur lors de l\'upload.');
-        }
-        input.value = '';
+        coverDone();
+        if (!data.ok) { vzAlert(data.error || COVER_FAIL); return; }
+        /* L'image enregistrée remplace l'aperçu local */
+        var shown = document.getElementById('cover-img');
+        if (shown && data.url) shown.src = data.url;
     })
     .catch(function(e) {
-        if (btn) { btn.disabled = false; btn.style.opacity = ''; }
+        coverDone();
         console.error('Cover upload error:', e);
-        input.value = '';
+        vzAlert(COVER_FAIL);
     });
     }); // fin convPromise.then
 }

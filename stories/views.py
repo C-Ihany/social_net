@@ -12,7 +12,9 @@ from django.shortcuts import render, get_object_or_404
 from django.views.decorators.http import require_POST, require_GET
 from django.contrib.auth.decorators import login_required
 from django.db.models import Count
+from django.contrib.contenttypes.models import ContentType
 from django.utils import timezone
+from django.utils.translation import gettext as _
 
 from stories.models import Story, StoryView, StoryReaction, StoryReply
 
@@ -169,6 +171,50 @@ def _download_audio_from_url(url):
     return file_obj, content_type
 
 
+def _clean_story_link(link):
+    """Lien d'une story : http(s) ou chemin interne uniquement.
+
+    Le champ finissait tel quel dans un href : un lien « javascript:… »
+    s'exécutait au clic chez celui qui regardait la story.
+    """
+    from urllib.parse import urlparse
+    link = (link or '').strip()[:500]
+    if not link:
+        return ''
+    if link.startswith('/') and not link.startswith('//'):
+        return link
+    parsed = urlparse(link)
+    if parsed.scheme in ('http', 'https') and parsed.netloc:
+        return link
+    return ''
+
+
+def _visible_stories(viewer, stories):
+    """Écarte les stories des comptes bloqués (dans un sens ou dans l'autre)
+    et des comptes « Pola seulement » que `viewer` ne peut pas voir."""
+    from account.models import UserBlock
+    hidden = UserBlock.hidden_user_ids(viewer)
+    verdict = {}
+    out = []
+    for story in stories:
+        uid = story.user_id
+        if uid in hidden:
+            continue
+        if uid not in verdict:
+            verdict[uid] = story.user.visible_to(viewer)
+        if verdict[uid]:
+            out.append(story)
+    return out
+
+
+def _story_for_interaction(viewer, story_id):
+    """Story encore active que `viewer` a le droit de voir, ou None."""
+    story = Story.objects.select_related('user').filter(pk=story_id).first()
+    if story is None or not story.is_active:
+        return None
+    return story if _visible_stories(viewer, [story]) else None
+
+
 def _seen_story_ids(viewer, stories):
     """Ids des stories déjà vues par `viewer`, en une seule requête."""
     if not (viewer and viewer.is_authenticated):
@@ -224,8 +270,8 @@ def _story_to_dict(story, viewer, seen_ids=None):
         'text_size':   story.text_size or 0,
         'text_bg':     story.text_bg or 'none',
         'media_fit':   story.media_fit or 'contain',
-        'link':        story.link,
-        'link_label':  story.link_label or 'Voir l\'offre',
+        'link':        _clean_story_link(story.link),
+        'link_label':  story.link_label or _("Voir l'offre"),
         'created_at':  story.created_at.isoformat(),
         'expires_at':  story.expires_at.isoformat(),
         'time_left':   story.time_left_seconds,
@@ -244,8 +290,8 @@ def _seller_context(user):
 # ── PAGE DÉDIÉE ───────────────────────────────────────────────────────────────
 def stories_page(request):
     """
-    Page /stories/ — toutes les stories actives de tous les utilisateurs.
-    Accessible à tous (connectés ou non) en lecture.
+    Page /stories/ — les stories actives visibles par le visiteur (hors
+    comptes bloqués et comptes « Pola seulement »). Lisible sans connexion.
     """
     now = timezone.now()
 
@@ -259,7 +305,8 @@ def stories_page(request):
 
     # Grouper par utilisateur
     grouped = {}
-    for story in stories_qs:
+    for story in _visible_stories(request.user, stories_qs):
+        story.link = _clean_story_link(story.link)   # anciennes stories : lien assaini à l'affichage
         uid = story.user_id
         if uid not in grouped:
             try:
@@ -355,6 +402,8 @@ def discard_story_media(request):
 @require_POST
 def create_story(request):
     story_type  = request.POST.get('story_type', 'image')
+    if story_type not in ('image', 'video', 'image_text', 'text'):
+        story_type = 'image'
     caption     = request.POST.get('caption', '').strip()[:200]
     bg_gradient = request.POST.get('bg_gradient', 'grad_cyan')
     text_align  = request.POST.get('text_align', 'center')
@@ -371,7 +420,7 @@ def create_story(request):
         text_size = 0.0
     if text_align not in ('left', 'center', 'right'):
         text_align = 'center'
-    link        = request.POST.get('link', '').strip()[:500]
+    link        = _clean_story_link(request.POST.get('link', ''))
     link_label  = request.POST.get('link_label', '').strip()[:60]
     media_file  = request.FILES.get('media')
     audio_file  = request.FILES.get('audio')
@@ -409,7 +458,7 @@ def create_story(request):
     # Si l'utilisateur a fourni une URL externe, télécharger le fichier
     if audio_url_input and not audio_file:
         try:
-            audio_file, _ = _download_audio_from_url(audio_url_input)
+            audio_file, _mime = _download_audio_from_url(audio_url_input)
         except ValueError as exc:
             return JsonResponse({'error': str(exc)}, status=400)
 
@@ -466,7 +515,7 @@ def create_story(request):
             cache.delete(_tmp_key(media_token))
     except Exception as e:
         _logger.exception("create_story FAILED: %s", e)
-        return JsonResponse({'error': f'Erreur lors de la publication : {e}'}, status=500)
+        return JsonResponse({'error': _('Erreur lors de la publication. Réessayez.')}, status=500)
 
     return JsonResponse({'ok': True, 'story': _story_to_dict(story, request.user)})
 
@@ -487,11 +536,8 @@ def delete_story(request, story_id):
 @login_required(login_url='login')
 @require_POST
 def mark_viewed(request, story_id):
-    try:
-        story = Story.objects.get(pk=story_id)
-    except Story.DoesNotExist:
-        return JsonResponse({'error': 'Story introuvable.'}, status=404)
-    if story.is_active:
+    story = _story_for_interaction(request.user, story_id)
+    if story is not None:
         StoryView.objects.get_or_create(story=story, viewer=request.user)
     return JsonResponse({'ok': True})
 
@@ -512,7 +558,7 @@ def get_feed_stories(request):
     stories_qs = _with_view_counts(Story.objects.filter(
         expires_at__gt=now,
     ).select_related('user')).order_by('user', 'created_at')   # chronologique
-    stories_list = list(stories_qs)
+    stories_list = _visible_stories(request.user, stories_qs)
     seen_ids = _seen_story_ids(viewer, stories_list)
 
     # Grouper par utilisateur
@@ -573,12 +619,12 @@ def get_my_stories(request):
 def music_search(request):
     """GET /stories/music-search/ — catalogue de musique pour les stories.
 
-    Paramètres : q (recherche libre), tag (tendances | gasy | afro | gospel |
+    Paramètres : q (recherche libre), tag (tendances | afro | amapiano | rumba | bongo | gasy | gospel |
     love | hiphop | dance | chill | rnb | rock), limit (≤ 30).
 
     Source : l'API publique Deezer (sans clé) — extraits de 30 s avec
-    pochette, artiste et durée, dont les artistes malgaches (Jaojoby,
-    Ambondrona, Bodo…). À l'ouverture de la feuille on renvoie les tendances
+    pochette, artiste et durée, dont une sélection d'artistes de l'océan Indien
+    (pastille « gasy »). À l'ouverture de la feuille on renvoie les tendances
     sans rien saisir, comme Facebook. L'ancien catalogue Jamendo ne renvoyait
     plus aucun titre (clé de démonstration vide) ; il reste un repli si une
     vraie clé JAMENDO_CLIENT_ID est configurée.
@@ -608,8 +654,9 @@ def music_search(request):
 
 # Pastilles de genre → classement éditorial Deezer (id de genre) ou playlist
 _MUSIC_GENRE_CHARTS = {'afro': 2, 'hiphop': 116, 'rnb': 165, 'dance': 113, 'rock': 152, 'pop': 132}
-_MUSIC_PLAYLISTS = {'gospel': 'afro gospel', 'love': 'love songs', 'chill': 'chill'}
-# « Gasy » : artistes malgaches populaires, mélangés
+_MUSIC_PLAYLISTS = {'gospel': 'afro gospel', 'love': 'love songs', 'chill': 'chill',
+                    'amapiano': 'amapiano', 'rumba': 'rumba congolaise', 'bongo': 'bongo flava'}
+# Pastille « Océan Indien » (tag historique « gasy ») : artistes populaires, mélangés
 _GASY_ARTISTS = ('Jaojoby', 'Ambondrona', 'Bodo', 'Shyn', 'Denise', 'Mage 4', 'Njakatiana',
                  'Big MJ', 'Black Nadia', 'Tence Mena', 'Rak Roots', 'Wawa', 'Lola', 'Mahaleo')
 
@@ -662,7 +709,7 @@ def _deezer_tracks(query, tag, limit):
 
 
 def _deezer_gasy(limit):
-    """Artistes malgaches : une recherche par artiste, en parallèle, filtrée sur
+    """Artistes de l'océan Indien : une recherche par artiste, en parallèle, filtrée sur
     le nom d'artiste (la recherche Deezer mélange des homonymes), mélangée."""
     import random
     from concurrent.futures import ThreadPoolExecutor
@@ -709,7 +756,8 @@ def get_profile_stories(request, user_id):
         profile_user = Account.objects.get(pk=user_id)
     except Account.DoesNotExist:
         return JsonResponse({'stories': []})
-    if not profile_user.visible_to(request.user):
+    from account.models import UserBlock
+    if not profile_user.visible_to(request.user) or profile_user.pk in UserBlock.hidden_user_ids(request.user):
         return JsonResponse({'stories': []})
     now = timezone.now()
     stories_qs = Story.objects.filter(
@@ -835,16 +883,19 @@ def story_reply(request, story_id):
     POST /stories/<id>/reply/
     Enregistre une réponse texte à une story + envoie une notification à l'auteur.
     """
-    story = get_object_or_404(Story, pk=story_id)
+    # Story expirée, compte bloqué ou invisible : rien à quoi répondre.
+    story = _story_for_interaction(request.user, story_id)
+    if story is None:
+        return JsonResponse({'ok': False, 'error': _("Cette story n'est plus disponible.")}, status=404)
     if story.user == request.user:
-        return JsonResponse({'ok': False, 'error': 'Cannot reply to own story'}, status=400)
+        return JsonResponse({'ok': False, 'error': _('Vous ne pouvez pas répondre à votre propre story.')}, status=400)
 
     # Accepte un corps JSON ou un POST classique (formulaire).
     data    = _json_body(request) or request.POST
     message = (data.get('message') or '').strip()[:500]
 
     if not message:
-        return JsonResponse({'ok': False, 'error': 'Empty message'}, status=400)
+        return JsonResponse({'ok': False, 'error': _('Le message est vide.')}, status=400)
 
     reply = StoryReply.objects.create(story=story, user=request.user, message=message)
 
@@ -869,6 +920,9 @@ def story_reply(request, story_id):
             redirect_url=stories_url,
             verb=f"{request.user.username} a répondu à votre story",
             read=False,
+            # content_type est obligatoire : sans lui la création échouait en silence
+            content_type=ContentType.objects.get_for_model(Story),
+            object_id=story.id,
         )
         # Diffusion temps réel : signal post_save de Notification (notification/signals.py)
     except Exception:
@@ -887,13 +941,15 @@ def story_react(request, story_id):
     """
     if request.method != 'POST':
         return JsonResponse({'ok': False}, status=405)
-    story = get_object_or_404(Story, id=story_id)
+    story = _story_for_interaction(request.user, story_id)
+    if story is None:
+        return JsonResponse({'ok': False, 'error': _("Cette story n'est plus disponible.")}, status=404)
     data  = _json_body(request) or request.POST
     emoji = (data.get('emoji') or '').strip()
 
     valid_emojis = {'❤️', '😂', '😮', '😢', '🔥'}
     if emoji not in valid_emojis:
-        return JsonResponse({'ok': False, 'error': 'Invalid emoji'}, status=400)
+        return JsonResponse({'ok': False, 'error': _('Réaction inconnue.')}, status=400)
 
     existing = StoryReaction.objects.filter(story=story, user=request.user).first()
     if existing:
@@ -931,6 +987,9 @@ def story_react(request, story_id):
                 redirect_url=stories_url,
                 verb=f"{request.user.username} a réagi {emoji} à votre story",
                 read=False,
+                # content_type est obligatoire : sans lui la création échouait en silence
+                content_type=ContentType.objects.get_for_model(Story),
+                object_id=story.id,
             )
             # Diffusion temps réel : signal post_save de Notification (notification/signals.py)
         except Exception:

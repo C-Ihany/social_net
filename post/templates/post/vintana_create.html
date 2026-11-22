@@ -9,28 +9,28 @@
 
     <div class="vintana-hero">
         <img src="{% static 'logo/Vazi_logo003.jpeg' %}" alt="Vazimba" class="vintana-hero-icon">
-        <h1 class="vintana-hero-title">Capsule Vintana</h1>
+        <h1 class="vintana-hero-title">{% trans "Capsule Vintana" %}</h1>
         <p class="vintana-hero-sub">
-            Écris un message destiné au futur — il restera verrouillé jusqu'à la date que tu choisis.
-            <em>Vintana</em> signifie <em>destin</em> en malgache.
+            {% trans "Écrivez un message destiné au futur : il restera scellé jusqu'à la date que vous choisissez." %}
+            {% blocktrans %}<em>Vintana</em> signifie <em>destin</em>.{% endblocktrans %}
         </p>
     </div>
 
     <div class="vintana-form-card">
-        <div class="vt-error-box" id="vt-error-box"></div>
+        <div class="vt-error-box" id="vt-error-box" role="alert" hidden></div>
 
         <!-- Titre (optionnel) -->
         <div class="vt-field-group">
             <label class="vt-label" for="vt-title">
-                <span class="material-icons">title</span>
-                Titre <span class="vt-optional">(optionnel)</span>
+                <span class="material-icons" aria-hidden="true">title</span>
+                {% trans "Titre" %} <span class="vt-optional">({% trans "optionnel" %})</span>
             </label>
             <input
                 id="vt-title"
                 class="vt-input"
                 type="text"
                 maxlength="120"
-                placeholder="Donne un titre à ta capsule…"
+                placeholder="{% trans 'Donnez un titre à votre capsule…' %}"
                 oninput="vtUpdatePreview()"
             >
         </div>
@@ -38,14 +38,14 @@
         <!-- Message -->
         <div class="vt-field-group">
             <label class="vt-label" for="vt-message">
-                <span class="material-icons">mail_outline</span>
-                Message pour le futur <span class="vt-optional">(obligatoire)</span>
+                <span class="material-icons" aria-hidden="true">mail_outline</span>
+                {% trans "Message pour le futur" %} <span class="vt-optional">({% trans "obligatoire" %})</span>
             </label>
             <textarea
                 id="vt-message"
                 class="vt-textarea"
                 maxlength="3000"
-                placeholder="Cher moi du futur… Que veux-tu te dire dans quelques mois ou années ?"
+                placeholder="{% trans 'Cher moi du futur… Que voulez-vous vous dire dans quelques mois ou quelques années ?' %}"
                 oninput="vtUpdatePreview()"
             ></textarea>
             <div class="vt-counter">
@@ -56,8 +56,8 @@
         <!-- Date de révélation -->
         <div class="vt-field-group">
             <label class="vt-label" for="vt-reveal-date">
-                <span class="material-icons">lock_clock</span>
-                Date de révélation
+                <span class="material-icons" aria-hidden="true">lock_clock</span>
+                {% trans "Date de révélation" %}
             </label>
             <div class="vt-date-wrap">
                 <input
@@ -70,30 +70,30 @@
             </div>
             <!-- Préréglages rapides -->
             <div class="vt-presets">
-                <button class="vt-preset-btn" type="button" onclick="vtPreset(7)">Dans 1 semaine</button>
-                <button class="vt-preset-btn" type="button" onclick="vtPreset(30)">Dans 1 mois</button>
-                <button class="vt-preset-btn" type="button" onclick="vtPreset(180)">Dans 6 mois</button>
-                <button class="vt-preset-btn" type="button" onclick="vtPreset(365)">Dans 1 an</button>
-                <button class="vt-preset-btn" type="button" onclick="vtPreset(365*3)">Dans 3 ans</button>
+                <button class="vz-chip vt-preset-btn" type="button" onclick="vtPreset(7)">{% trans "Dans 1 semaine" %}</button>
+                <button class="vz-chip vt-preset-btn" type="button" onclick="vtPreset(30)">{% trans "Dans 1 mois" %}</button>
+                <button class="vz-chip vt-preset-btn" type="button" onclick="vtPreset(180)">{% trans "Dans 6 mois" %}</button>
+                <button class="vz-chip vt-preset-btn" type="button" onclick="vtPreset(365)">{% trans "Dans 1 an" %}</button>
+                <button class="vz-chip vt-preset-btn" type="button" onclick="vtPreset(365*3)">{% trans "Dans 3 ans" %}</button>
             </div>
-            <div class="vt-countdown-preview" id="vt-countdown-preview"></div>
+            <div class="vt-countdown-preview" id="vt-countdown-preview" hidden></div>
         </div>
 
         <!-- Prévisualisation -->
         <div class="vt-preview-section">
             <div class="vt-preview-label">
-                <span class="material-icons">preview</span>
-                Aperçu de la capsule dans le feed
+                <span class="material-icons" aria-hidden="true">preview</span>
+                {% trans "Aperçu de la capsule dans le fil" %}
             </div>
             <div class="vt-preview-card" id="vt-preview-card">
                 <div class="vt-locked" id="vt-preview-locked">
                     <span class="material-icons lock-icon" aria-hidden="true">auto_awesome</span>
-                    <div class="lock-title" id="vt-preview-title-text">Capsule Vintana</div>
-                    <p class="lock-sub">Ce message sera révélé à la date choisie.</p>
+                    <div class="lock-title" id="vt-preview-title-text">{% trans "Capsule Vintana" %}</div>
+                    <p class="lock-sub">{% trans "Ce message sera révélé à la date choisie." %}</p>
                 </div>
                 <div class="vt-lock-band" id="vt-preview-band">
-                    <span class="material-icons">schedule</span>
-                    <span id="vt-preview-band-text">Sélectionne une date…</span>
+                    <span class="material-icons" aria-hidden="true">schedule</span>
+                    <span id="vt-preview-band-text">{% trans "Sélectionnez une date…" %}</span>
                 </div>
             </div>
         </div>
@@ -101,24 +101,21 @@
         <!-- Infos culturelles -->
         <div class="vt-culture-box">
             <div class="vt-culture-title">
-                <span class="material-icons">info</span>
-                À propos de Vintana
+                <span class="material-icons" aria-hidden="true">info</span>
+                {% trans "À propos de Vintana" %}
             </div>
             <p class="vt-culture-text">
-                En malgache, <strong>Vintana</strong> désigne le destin, la destinée liée aux astres
-                et au temps. Une Capsule Vintana est un message que tu te réserves ou que tu adresses
-                à la communauté, mais qui ne se dévoilera qu'au moment voulu. Personne ne peut lire
-                le contenu avant la date de révélation — pas même toi dans le feed.
+                {% blocktrans %}<strong>Vintana</strong> désigne le destin, la destinée liée aux astres et au temps. Une Capsule Vintana est un message que vous vous réservez ou que vous adressez à la communauté, mais qui ne se dévoilera qu'au moment voulu. Personne ne peut lire le contenu avant la date de révélation, pas même vous. Le titre, lui, reste visible.{% endblocktrans %}
             </p>
         </div>
 
         <!-- Bouton de soumission -->
-        <div class="vt-submit-row">
-            <a href="{% url 'post:post-view' %}" class="vt-back-link">← Retour</a>
-            <button class="vt-submit-btn" id="vt-submit-btn" type="button"
+        <div class="vz-actions vt-submit-row">
+            <a href="{% url 'post:post-view' %}" class="vz-btn vz-btn--muted">{% trans "Annuler" %}</a>
+            <button class="vz-btn vz-btn--primary vt-submit-btn" id="vt-submit-btn" type="button"
                     onclick="vtSubmit()" disabled>
-                <span class="material-icons">rocket_launch</span>
-                Sceller la capsule
+                <span class="material-icons" aria-hidden="true">lock_clock</span>
+                {% trans "Publier la capsule" %}
             </button>
         </div>
     </div>
@@ -128,6 +125,21 @@
 <script>
 var VT_CREATE_URL = '{% url "post:vintana-create" %}';
 var VT_CSRF = '{{ csrf_token }}';
+{% trans "Capsule Vintana" as vt_def %}{% trans "Sélectionnez une date…" as vt_pick %}{% trans "Sélectionnez une date dans le futur" as vt_future %}
+{% trans "Révélation dans %s" as vt_in %}{% trans "La capsule sera révélée dans %s, le %d." as vt_reveal %}
+{% trans "Le message est obligatoire." as vt_e_msg %}{% trans "La date de révélation est obligatoire." as vt_e_date %}
+{% trans "Une erreur est survenue. Réessayez ou rechargez la page." as vt_e_any %}
+{% trans "%n an" as vt_y1 %}{% trans "%n ans" as vt_yn %}{% trans "%n mois" as vt_mo %}{% trans "%n jour" as vt_d1 %}{% trans "%n jours" as vt_dn %}
+{% trans "%n heure" as vt_h1 %}{% trans "%n heures" as vt_hn %}{% trans "%n minute" as vt_m1 %}{% trans "%n minutes" as vt_mn %}{% trans "quelques secondes" as vt_secs %}
+var VT_T = {
+    def: "{{ vt_def|escapejs }}", pick: "{{ vt_pick|escapejs }}", future: "{{ vt_future|escapejs }}",
+    inX: "{{ vt_in|escapejs }}", reveal: "{{ vt_reveal|escapejs }}",
+    eMsg: "{{ vt_e_msg|escapejs }}", eDate: "{{ vt_e_date|escapejs }}", eAny: "{{ vt_e_any|escapejs }}",
+    y1: "{{ vt_y1|escapejs }}", yn: "{{ vt_yn|escapejs }}", mo: "{{ vt_mo|escapejs }}", d1: "{{ vt_d1|escapejs }}", dn: "{{ vt_dn|escapejs }}",
+    h1: "{{ vt_h1|escapejs }}", hn: "{{ vt_hn|escapejs }}", m1: "{{ vt_m1|escapejs }}", mn: "{{ vt_mn|escapejs }}", secs: "{{ vt_secs|escapejs }}"
+};
+var VT_LANG = (window.VZ_I18N && window.VZ_I18N.lang) || 'fr';
+function vtN(one, many, n) { return (n > 1 ? many : one).replace('%n', n); }
 
 // ── Préréglages de date ──────────────────────────────────────
 function vtPreset(days) {
@@ -156,32 +168,31 @@ function vtHumanDiff(ms) {
     var days  = Math.floor(hours / 24);
     var months = Math.floor(days / 30);
     var years  = Math.floor(days / 365);
-    if (years >= 1)   return years + ' an' + (years > 1 ? 's' : '');
-    if (months >= 1)  return months + ' mois';
-    if (days >= 1)    return days + ' jour' + (days > 1 ? 's' : '');
-    if (hours >= 1)   return hours + ' heure' + (hours > 1 ? 's' : '');
-    if (mins >= 1)    return mins + ' minute' + (mins > 1 ? 's' : '');
-    return 'quelques secondes';
+    if (years >= 1)   return vtN(VT_T.y1, VT_T.yn, years);
+    if (months >= 1)  return vtN(VT_T.mo, VT_T.mo, months);
+    if (days >= 1)    return vtN(VT_T.d1, VT_T.dn, days);
+    if (hours >= 1)   return vtN(VT_T.h1, VT_T.hn, hours);
+    if (mins >= 1)    return vtN(VT_T.m1, VT_T.mn, mins);
+    return VT_T.secs;
 }
 
 function vtUpdateCountdown() {
     var val = document.getElementById('vt-reveal-date').value;
     var box = document.getElementById('vt-countdown-preview');
-    if (!val) { box.style.display = 'none'; return; }
+    if (!val) { box.hidden = true; return; }
     var target = new Date(val);
     var diff = target - new Date();
     var human = vtHumanDiff(diff);
-    if (!human) { box.style.display = 'none'; return; }
-    box.style.display = 'block';
-    box.innerHTML = '⏳ La capsule sera révélée dans <strong>' + human + '</strong> — le '
-        + target.toLocaleDateString('fr-FR', {day:'numeric', month:'long', year:'numeric'})
-        + ' à ' + target.toLocaleTimeString('fr-FR', {hour:'2-digit', minute:'2-digit'}) + '.';
+    if (!human) { box.hidden = true; return; }
+    box.hidden = false;
+    box.textContent = VT_T.reveal.replace('%s', human).replace('%d',
+        target.toLocaleString(VT_LANG, {day:'numeric', month:'long', year:'numeric', hour:'2-digit', minute:'2-digit'}));
 }
 
 // ── Prévisualisation ─────────────────────────────────────────
 function vtUpdatePreview() {
     vtUpdateMsgCount();
-    var title = document.getElementById('vt-title').value.trim() || 'Capsule Vintana';
+    var title = document.getElementById('vt-title').value.trim() || VT_T.def;
     var dateVal = document.getElementById('vt-reveal-date').value;
     var msg    = document.getElementById('vt-message').value.trim();
 
@@ -192,10 +203,10 @@ function vtUpdatePreview() {
         var d = new Date(dateVal);
         var human = vtHumanDiff(d - new Date());
         bandEl.textContent = human
-            ? 'Révélation dans ' + human + ' — ' + d.toLocaleDateString('fr-FR', {day:'numeric', month:'short', year:'numeric'})
-            : 'Sélectionne une date dans le futur';
+            ? VT_T.inX.replace('%s', human) + ' — ' + d.toLocaleDateString(VT_LANG, {day:'numeric', month:'short', year:'numeric'})
+            : VT_T.future;
     } else {
-        bandEl.textContent = 'Sélectionne une date…';
+        bandEl.textContent = VT_T.pick;
     }
 
     // Active le bouton si les champs obligatoires sont remplis
@@ -207,17 +218,17 @@ function vtUpdatePreview() {
 function vtSubmit() {
     var btn = document.getElementById('vt-submit-btn');
     var errBox = document.getElementById('vt-error-box');
-    errBox.style.display = 'none';
+    errBox.hidden = true;
 
     var title     = document.getElementById('vt-title').value.trim();
     var message   = document.getElementById('vt-message').value.trim();
     var revealDate = document.getElementById('vt-reveal-date').value;
 
-    if (!message) { vtShowError('Le message est obligatoire.'); return; }
-    if (!revealDate) { vtShowError('La date de révélation est obligatoire.'); return; }
+    if (!message) { vtShowError(VT_T.eMsg); return; }
+    if (!revealDate) { vtShowError(VT_T.eDate); return; }
 
     btn.disabled = true;
-    btn.innerHTML = '<span class="material-icons vt-spin">autorenew</span> Scellement…';
+    btn.classList.add('is-loading');
 
     fetch(VT_CREATE_URL, {
         method: 'POST',
@@ -236,31 +247,25 @@ function vtSubmit() {
         if (data.ok) {
             window.location.href = data.redirect;
         } else {
-            vtShowError(data.error || 'Erreur inattendue.');
+            vtShowError(data.error || VT_T.eAny);
             btn.disabled = false;
-            btn.innerHTML = '<span class="material-icons">rocket_launch</span> Sceller la capsule';
+            btn.classList.remove('is-loading');
         }
     })
     .catch(e => {
         console.error('Vintana submit error:', e);
-        vtShowError('Erreur (' + e.message + '). Réessaie ou recharge la page.');
+        vtShowError(VT_T.eAny);
         btn.disabled = false;
-        btn.innerHTML = '<span class="material-icons">rocket_launch</span> Sceller la capsule';
+        btn.classList.remove('is-loading');
     });
 }
 
 function vtShowError(msg) {
     var box = document.getElementById('vt-error-box');
     box.textContent = msg;
-    box.style.display = 'block';
+    box.hidden = false;
     box.scrollIntoView({ behavior: 'smooth', block: 'center' });
 }
 
-// ── Style spin ───────────────────────────────────────────────
-(function() {
-    var s = document.createElement('style');
-    s.textContent = '@keyframes spin { to { transform: rotate(360deg); } }';
-    document.head.appendChild(s);
-})();
 </script>
 {% endblock %}

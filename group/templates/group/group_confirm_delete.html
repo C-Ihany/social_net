@@ -14,10 +14,10 @@
         </p>
         <form method="post" action="{% url 'group:delete' group.slug %}">
             {% csrf_token %}
-            <div class="gd-del-actions">
-                <a class="gd-del-cancel" href="{% url 'group:detail' group.slug %}">{% trans "Cancel" %}</a>
-                <button type="submit" class="gd-del-confirm">
-                    <span class="material-icons">delete_outline</span> {% trans "Delete" %}
+            <div class="vz-actions">
+                <a class="vz-btn vz-btn--muted" href="{% url 'group:detail' group.slug %}">{% trans "Annuler" %}</a>
+                <button type="submit" class="vz-btn vz-btn--danger">
+                    <span class="material-icons" aria-hidden="true">delete_outline</span> {% trans "Supprimer" %}
                 </button>
             </div>
         </form>

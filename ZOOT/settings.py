@@ -368,7 +368,7 @@ VAPID_PRIVATE_KEY  = config('VAPID_PRIVATE_KEY',  default='')
 VAPID_CLAIMS_EMAIL = config('VAPID_CLAIMS_EMAIL', default='admin@vazimba.com')
 
 # ── SMS (vérification numéro de téléphone) ────────────────────────────────────
-# Fournisseur : Africa's Talking (meilleur rapport qualité/prix pour Madagascar)
+# Fournisseur : Africa's Talking (couvre la plupart des pays d'Afrique)
 # En développement : backend console (aucun SMS réel envoyé)
 # En production    : backend Africa's Talking
 # Variables Railway à créer :

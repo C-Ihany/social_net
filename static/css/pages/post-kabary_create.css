@@ -14,14 +14,6 @@
     .kbr-hero-title { font-size: 1.15rem; }
     .kbr-card { border-radius: 14px; }
 }
-.kbr-back {
-    display: inline-flex; align-items: center; gap: .35rem;
-    color: var(--text-muted); font-size: .88rem; font-weight: 600;
-    text-decoration: none; margin-bottom: 1.2rem;
-    padding: .3rem .7rem; border-radius: 8px; transition: background .15s, color .15s;
-}
-.kbr-back:hover { background: var(--btn-bg); color: var(--accent); text-decoration: none; }
-.kbr-back .material-icons { font-size: 1rem; }
 
 /* ── Hero ── */
 .kbr-hero {
@@ -113,18 +105,6 @@
     display: flex; align-items: center; justify-content: space-between;
     gap: 1rem; flex-wrap: wrap;
 }
-.kbr-feedback { font-size: .85rem; font-weight: 600; color: var(--danger); flex: 1; }
-.kbr-submit {
-    display: inline-flex; align-items: center; gap: .45rem;
-    padding: .7rem 1.8rem; border-radius: 12px;
-    background: linear-gradient(135deg, var(--accent), var(--accent2));
-    color: #fff; border: none; font-size: .95rem; font-weight: 700;
-    cursor: pointer; font-family: inherit; transition: opacity .15s;
-    box-shadow: 0 4px 18px rgba(0,0,0,.15);
-}
-.kbr-submit:hover { opacity: .88; }
-.kbr-submit .material-icons { font-size: 1.1rem; }
-.kbr-submit:disabled { opacity: .5; cursor: not-allowed; }
 
 /* ── In-card Kabary preview CSS (same as feed) ── */
 .kbr-body { display: flex; flex-direction: column; gap: .9rem; }
@@ -142,12 +122,11 @@
 .kbr-section-icon--famaranana { background: linear-gradient(135deg, var(--success), var(--accent2)); }
 
 /* ── Boîte d'erreur (display basculé par kbrShowError / kbrHideError) ── */
+#kbr-error-box[hidden] { display: none; }
 #kbr-error-box {
-    display: none;
     background: rgba(var(--danger-rgb),.08);
     border: 1.5px solid rgba(var(--danger-rgb),.3);
     border-radius: 10px; padding: .7rem 1rem;
     color: var(--danger); font-size: .88rem; margin-bottom: 1rem;
 }
 @keyframes kbr-spin { to { transform: rotate(360deg); } }
-.kbr-spin { animation: kbr-spin .8s linear infinite; display: inline-block; }

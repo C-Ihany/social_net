@@ -14,7 +14,8 @@
 <div class="vf-stage" id="vf-stage">
     <div class="vf-scroller" id="vf-scroller" data-next="{{ next_offset|default_if_none:'' }}"
          data-more-url="{% url 'post:video-feed-more' %}"
-         data-react-url="{% url 'post:react-post' %}">
+         data-react-url="{% url 'post:react-post' %}"
+         data-profile-url="{% url 'account:view' user_id=0 %}">
         {% if not initial_items %}
         <div class="vf-empty">
             <span class="material-icons">videocam_off</span>
@@ -72,7 +73,7 @@
         </div>
         <div class="vf-actions">
             <button class="vf-act vf-like" type="button" aria-label="{% trans 'J’aime' %}"><span class="vf-ico"><span class="material-icons">favorite</span></span><span class="vf-n"></span></button>
-            <a class="vf-act vf-comment" aria-label="{% trans 'Commentaires' %}"><span class="vf-ico"><span class="material-icons">chat_bubble</span></span><span class="vf-n"></span></a>
+            <button class="vf-act vf-comment" type="button" aria-label="{% trans 'Commentaires' %}"><span class="vf-ico"><span class="material-icons">chat_bubble</span></span><span class="vf-n"></span></button>
             <button class="vf-act vf-share" type="button" aria-label="{% trans 'Partager' %}"><span class="vf-ico"><span class="material-icons">share</span></span><span class="vf-n">{% trans "Partager" %}</span></button>
         </div>
         <div class="vf-progress"><i></i></div>
@@ -87,6 +88,7 @@
     var tpl       = document.getElementById('vf-slide-tpl');
     var MORE_URL  = scroller.dataset.moreUrl;
     var REACT_URL = scroller.dataset.reactUrl;
+    var PROFILE_URL = scroller.dataset.profileUrl;
     var nextOffset = scroller.dataset.next === '' ? null : parseInt(scroller.dataset.next, 10);
     var loading = false;
     var soundOn = false;              // les navigateurs exigent un geste avant le son
@@ -120,7 +122,7 @@
             video.poster = item.poster;
         }
         var a = node.querySelector('.vf-author');
-        a.href = '/account/' + item.author.id + '/view/';
+        a.href = PROFILE_URL.replace('/0/', '/' + item.author.id + '/');
         a.querySelector('img').src = item.author.avatar;
         a.querySelector('b').textContent = item.author.username;
         if (item.region) {
@@ -142,7 +144,6 @@
         like.querySelector('.vf-n').textContent = fmt(item.reactions);
         like.onclick = function (e) { e.stopPropagation(); react(node, like); };
         var comment = node.querySelector('.vf-comment');
-        comment.href = item.url + '#comments';
         comment.querySelector('.vf-n').textContent = fmt(item.comments);
         comment.onclick = function (e) { e.preventDefault(); e.stopPropagation(); openComments(node, item); };
         node.querySelector('.vf-share').onclick = function (e) { e.stopPropagation(); share(item); };
@@ -240,7 +241,7 @@
         var canDel = c.can_delete || c.author_id === ME || (csPost && csPost.item.author.id === ME);
         var div = document.createElement('div');
         div.className = 'vf-cs-item'; div.dataset.id = c.id;
-        div.innerHTML = '<a href="/account/' + c.author_id + '/view/"><img src="' + esc(c.avatar) + '" alt=""></a>' +
+        div.innerHTML = '<a href="' + PROFILE_URL.replace('/0/', '/' + c.author_id + '/') + '"><img src="' + esc(c.avatar) + '" alt=""></a>' +
             '<div class="vf-cs-body"><b>' + esc(c.author) + '</b><p>' + esc(c.body) + '</p>' +
             '<div class="vf-cs-meta"><span>' + esc(c.created_at) + '</span>' +
             (canDel ? '<button type="button" class="vf-cs-del">' + L.del + '</button>' : '') + '</div></div>';

@@ -173,27 +173,27 @@
         </div>
 
         <!-- Recherche (mobile uniquement — masqué sur desktop par CSS) -->
-        <a href="{% url 'search' %}?q=" class="zoot-icon-btn zoot-mobile-search-btn"
-           title="{% trans 'Search' %}">
-            <span class="material-icons">search</span>
+        <a href="{% url 'recherche' %}" class="zoot-icon-btn zoot-mobile-search-btn"
+           aria-label="{% trans 'Rechercher' %}">
+            <span class="material-icons" aria-hidden="true">search</span>
         </a>
 
         <!-- Theme toggle (desktop — masqué sur mobile par CSS) -->
-        <button id="theme-toggle-btn" onclick="toggleTheme()" class="zoot-icon-btn" title="{% trans 'Dark mode' %}" type="button">
+        <button id="theme-toggle-btn" onclick="toggleTheme()" class="zoot-icon-btn" aria-label="{% trans 'Dark mode' %}" type="button">
             <span class="material-icons">dark_mode</span>
         </button>
 
         <!-- Chat notifications -->
         <div class="dropdown">
-            <div class="zoot-icon-btn"
+            <button type="button" class="zoot-icon-btn"
                  id="id_chat_notification_dropdown_toggle"
                  data-toggle="dropdown"
                  data-display="static"
                  aria-haspopup="true"
-                 aria-expanded="false" role="button" tabindex="0" aria-label="{% trans 'Messages' %}">
+                 aria-expanded="false" aria-label="{% trans 'Messages' %}">
                 <span id="id_chat_notifications_count" class="zoot-badge"></span>
-                <span class="material-icons">chat_bubble_outline</span>
-            </div>
+                <span class="material-icons" aria-hidden="true">chat_bubble_outline</span>
+            </button>
             <div class="dropdown-menu dropdown-menu-right scrollable-menu"
                  aria-labelledby="id_chat_notification_dropdown_toggle"
                  id="id_chat_notifications_container">
@@ -203,23 +203,23 @@
 
         <!-- General notifications -->
         <div class="dropdown">
-            <div class="zoot-icon-btn"
+            <button type="button" class="zoot-icon-btn"
                  id="id_notification_dropdown_toggle"
                  data-toggle="dropdown"
                  data-display="static"
                  aria-haspopup="true"
-                 aria-expanded="false" role="button" tabindex="0" aria-label="Notifications">
+                 aria-expanded="false" aria-label="{% trans 'Notifications' %}">
                 <span id="id_general_notifications_count" class="zoot-badge"></span>
-                <span class="material-icons">notifications_none</span>
-            </div>
+                <span class="material-icons" aria-hidden="true">notifications_none</span>
+            </button>
             <div class="dropdown-menu dropdown-menu-right scrollable-menu"
                  aria-labelledby="id_notification_dropdown_toggle"
                  id="id_general_notifications_container">
                 <!-- header statique notifications -->
                 <div class="zoot-dropdown-header">
                     <span class="zoot-dropdown-header-title">
-                        <span class="material-icons">notifications</span>
-                        Notifications
+                        <span class="material-icons" aria-hidden="true">notifications</span>
+                        {% trans "Notifications" %}
                     </span>
                     <button type="button" class="zoot-dropdown-header-link" onclick="setGeneralNotificationsAsRead();event.stopPropagation();">
                         {% trans "Tout marquer lu" %}
@@ -233,23 +233,23 @@
 
         <!-- Profile avatar dropdown -->
         <div class="dropdown">
-            <div class="zoot-avatar-btn"
+            <button type="button" class="zoot-avatar-btn"
                  id="id_profile_links"
                  data-toggle="dropdown"
                  data-display="static"
                  aria-haspopup="true"
-                 aria-expanded="false">
-                <img src="{{ request.user.profile_image.url }}" alt="profil">
-                <span class="material-icons zoot-avatar-caret">expand_more</span>
-            </div>
+                 aria-expanded="false" aria-label="{% trans 'Mon compte' %}">
+                <img src="{{ request.user.profile_image.url }}" alt="">
+                <span class="material-icons zoot-avatar-caret" aria-hidden="true">expand_more</span>
+            </button>
             <div class="dropdown-menu dropdown-menu-right zoot-profile-menu" aria-labelledby="id_profile_links">
 
                 <!-- Bandeau gradient + avatar -->
                 <div class="zoot-profile-banner"></div>
                 <div class="zoot-profile-header">
-                    <img src="{{ request.user.profile_image.url }}" alt="profil">
+                    <img src="{{ request.user.profile_image.url }}" alt="">
                     <div class="zoot-profile-info">
-                        <div class="zoot-profile-name">{{ request.user.get_full_name|default:request.user.username }}</div>
+                        <div class="zoot-profile-name">{{ request.user.username }}</div>
                         <div class="zoot-profile-handle">@{{ request.user.username }}</div>
                     </div>
                 </div>
@@ -271,7 +271,7 @@
                 <div class="dropdown-divider"></div>
 
                 <!-- Social -->
-                <p class="zoot-dropdown-label">Social</p>
+                <p class="zoot-dropdown-label">{% trans "Communauté" %}</p>
                 <a class="dropdown-item" href="{% url 'friend:list' user_id=request.user.id %}">
                     <span class="material-icons">group</span> {% trans "My friends" %}
                 </a>
@@ -320,13 +320,17 @@
                 </a>
                 <!-- Push notifications toggle -->
                 <button class="dropdown-item" id="push-notif-btn"
-                        onclick="togglePushNotif()" type="button">
-                    <span class="material-icons" id="push-notif-icon">notifications_none</span>
+                        onclick="togglePushNotif()" type="button" aria-pressed="false">
+                    <span class="material-icons" id="push-notif-icon" aria-hidden="true">notifications_none</span>
                     <span id="push-notif-label">{% trans "Activer les notifications" %}</span>
                 </button>
-                <a class="dropdown-item danger" href="{% url 'logout' %}">
-                    <span class="material-icons">logout</span> {% trans "Logout" %}
-                </a>
+                {# Déconnexion en POST (un lien GET se déclenchait depuis n'importe quel site tiers) #}
+                <form method="post" action="{% url 'logout' %}" data-vz-logout>
+                    {% csrf_token %}
+                    <button type="submit" class="dropdown-item danger">
+                        <span class="material-icons" aria-hidden="true">logout</span> {% trans "Logout" %}
+                    </button>
+                </form>
 
                 <div class="dropdown-divider"></div>
 
@@ -359,7 +363,8 @@
         </div>
 
         <!-- Mobile hamburger -->
-        <button class="zoot-hamburger" id="zoot-mobile-toggle" aria-label="Menu" type="button">
+        <button class="zoot-hamburger" id="zoot-mobile-toggle" aria-label="{% trans 'Menu' %}"
+                aria-expanded="false" aria-controls="zoot-mobile-menu" type="button">
             <span class="material-icons">menu</span>
         </button>
 
@@ -375,7 +380,7 @@
         <!-- Le hamburger et le menu déroulant n'existaient que pour les
              comptes connectés : sur téléphone, un visiteur n'avait aucun
              accès au Bazar, au Tourisme ni aux Groupes, pourtant publics. -->
-        <button class="zoot-hamburger" id="zoot-mobile-toggle" aria-label="Menu"
+        <button class="zoot-hamburger" id="zoot-mobile-toggle" aria-label="{% trans 'Menu' %}"
                 aria-expanded="false" aria-controls="zoot-mobile-menu" type="button">
             <span class="material-icons">menu</span>
         </button>
@@ -387,7 +392,7 @@
 <!-- Mobile expandable menu -->
 {% if request.user.is_authenticated %}
 <div class="zoot-mobile-menu" id="zoot-mobile-menu">
-    <form class="zoot-mobile-search" method="GET" action="{% url 'search' %}">
+    <form class="zoot-mobile-search" method="GET" action="{% url 'recherche' %}">
         <input type="text" name="q" placeholder="{% trans 'Search...' %}" autocomplete="off">
         <button type="submit" aria-label="{% trans 'Rechercher' %}"><span class="material-icons">search</span></button>
     </form>
@@ -437,9 +442,12 @@
     <a href="{% url 'account:view' user_id=request.user.id %}" class="zoot-mobile-link">
         <span class="material-icons">person_outline</span> {% trans "My profile" %}
     </a>
-    <a href="{% url 'logout' %}" class="zoot-mobile-link zoot-tint-danger">
-        <span class="material-icons">logout</span> {% trans "Logout" %}
-    </a>
+    <form method="post" action="{% url 'logout' %}" data-vz-logout>
+        {% csrf_token %}
+        <button type="submit" class="zoot-mobile-link zoot-tint-danger">
+            <span class="material-icons" aria-hidden="true">logout</span> {% trans "Logout" %}
+        </button>
+    </form>
 </div>
 {% else %}
 <!-- Menu mobile du visiteur : uniquement les sections publiques, plus les
@@ -471,12 +479,19 @@
 </nav>
 
 
+<!-- ── Mobile menu toggle ──────────────────────────────────────────── -->
+<script src="{% static 'js/vz-mobile-menu.js' %}"></script>
+
+{% comment %}
+  Notifications, socket et sondage des badges : réservés aux membres connectés.
+  Avant, chaque visiteur anonyme ouvrait un WebSocket et appelait /notif/counts/
+  (redirigé vers la page de connexion, rendue en entier), toutes les 5 s si le
+  socket tombait.
+{% endcomment %}
+{% if request.user.is_authenticated %}
 <script src="{% static 'collections/collections.min.js' %}"></script>
 {% include 'snippets/general_notifications.html' %}
 {% include 'snippets/chat_notifications.html' %}
-
-<!-- ── Mobile menu toggle ──────────────────────────────────────────── -->
-<script src="{% static 'js/vz-mobile-menu.js' %}"></script>
 
 <!-- ── Setup SOCKET for NOTIFICATIONS ─────────────────────────────── -->
 <script type="text/javascript">
@@ -554,7 +569,7 @@
     var _wsActive = false;  // mis à true quand le WS est connecté
 
     function _pollBadgesFallback() {
-        fetch('/notif/counts/', {credentials: 'same-origin'})
+        fetch("{% url 'notification:unread-counts' %}", {credentials: 'same-origin'})
             .then(function(r){ return r.ok ? r.json() : null; })
             .then(function(d){
                 if (!d) return;
@@ -599,57 +614,58 @@
         }
     });
 
-        window.handleNewPostNotification = function(data){
-        var feedUrl = "{% url 'post:post-view' %}";
+    /* Toast « nouveau post » / « live » : tout ce qui vient du socket (pseudo,
+       titre) est posé en textContent — jamais concaténé dans du HTML. */
+    function _vzPushToast(opts) {
         var container = document.getElementById('zoot-post-toast');
-        if(!container) return;
+        if (!container) return;
         var toast = document.createElement('div');
-        toast.className = 'zoot-toast-item';
-        toast.innerHTML =
-            '<img class="zoot-toast-avatar" src="'+(data.from_image||'')+'" alt="">' +
-            '<div class="zoot-toast-body">' +
-                '<div class="zoot-toast-user">' + (data.from_username||'') + ' a publié quelque chose</div>' +
-                '<div class="zoot-toast-msg">'+(data.post_title||'')+'</div>' +
-            '</div>' +
-            '<button class="zoot-toast-close material-icons" onclick="this.closest(\'.zoot-toast-item\').remove()" type="button">close</button>';
-        toast.addEventListener('click', function(ev){
-            if(!ev.target.classList.contains('zoot-toast-close')) window.location.href = feedUrl;
-        });
+        toast.className = 'zoot-toast-item' + (opts.live ? ' zoot-toast-live' : '');
+        var img = document.createElement('img');
+        img.className = 'zoot-toast-avatar'; img.alt = '';
+        img.src = opts.image || "{% static 'images/profile_pic.png' %}";
+        var body = document.createElement('div'); body.className = 'zoot-toast-body';
+        var user = document.createElement('div');
+        user.className = 'zoot-toast-user' + (opts.live ? ' zoot-toast-user--live' : '');
+        if (opts.live) { var dot = document.createElement('span'); dot.className = 'zoot-live-dot'; user.appendChild(dot); }
+        user.appendChild(document.createTextNode(opts.title));
+        var msg = document.createElement('div'); msg.className = 'zoot-toast-msg'; msg.textContent = opts.text || '';
+        body.appendChild(user); body.appendChild(msg);
+        var close = document.createElement('button');
+        close.type = 'button'; close.className = 'vz-icon-btn zoot-toast-close';
+        close.setAttribute('aria-label', "{% trans 'Fermer'|escapejs %}");
+        close.innerHTML = '<span class="material-icons" aria-hidden="true">close</span>';
+        close.addEventListener('click', function(ev){ ev.stopPropagation(); toast.remove(); });
+        toast.appendChild(img); toast.appendChild(body); toast.appendChild(close);
+        toast.addEventListener('click', function(){ window.location.href = opts.url; });
         container.appendChild(toast);
-        setTimeout(function(){ if(toast.parentNode) toast.remove(); }, 8000);
+        setTimeout(function(){ if (toast.parentNode) toast.remove(); }, opts.duration || 8000);
+    }
+    /* N'accepter qu'une adresse du site pour la redirection du toast */
+    function _vzLocalUrl(url, fallback) {
+        return (typeof url === 'string' && url.charAt(0) === '/' && url.charAt(1) !== '/') ? url : fallback;
+    }
+
+    window.handleNewPostNotification = function(data){
+        _vzPushToast({
+            image: data.from_image,
+            title: "{% trans '%(name)s a publié quelque chose'|escapejs %}".replace('%(name)s', data.from_username || ''),
+            text:  data.post_title,
+            url:   "{% url 'post:post-view' %}"
+        });
         if(typeof showNewPostsBanner === 'function') showNewPostsBanner(data.from_username);
     };
 
     window.handleLiveStartedNotification = function(data) {
-        var liveUrl      = data.live_url      || '/live/';
-        var hostUsername = data.host_username || '';
-        var hostImage    = data.host_image    || '';
-        var liveTitle    = data.live_title    || 'Rejoins maintenant';
+        _vzPushToast({
+            live: true, duration: 12000,
+            image: data.host_image,
+            title: "{% trans '%(name)s est en direct'|escapejs %}".replace('%(name)s', data.host_username || ''),
+            text:  data.live_title || "{% trans 'Rejoignez le direct'|escapejs %}",
+            url:   _vzLocalUrl(data.live_url, "{% url 'video:live-list' %}")
+        });
 
-        /* ── 1. Toast temporaire ── */
-        var toastContainer = document.getElementById('zoot-post-toast');
-        if (toastContainer) {
-            var toast = document.createElement('div');
-            toast.className = 'zoot-toast-item zoot-toast-live';
-            toast.innerHTML =
-                '<img class="zoot-toast-avatar" src="' + hostImage + '" alt="">' +
-                '<div class="zoot-toast-body">' +
-                    '<div class="zoot-toast-user zoot-toast-user--live">' +
-                        '<span class="zoot-live-dot"></span>' +
-                        '<strong>' + hostUsername + '</strong> est en live !' +
-                    '</div>' +
-                    '<div class="zoot-toast-msg">' + liveTitle + '</div>' +
-                '</div>' +
-                '<button class="zoot-toast-close material-icons" onclick="this.closest(\'.zoot-toast-item\').remove()" type="button">close</button>';
-            toast.style.cursor = 'pointer';
-            toast.addEventListener('click', function(ev) {
-                if (!ev.target.classList.contains('zoot-toast-close')) window.location.href = liveUrl;
-            });
-            toastContainer.appendChild(toast);
-            setTimeout(function() { if (toast.parentNode) toast.remove(); }, 12000);
-        }
-
-        /* ── 2. Badge live navbar ── */
+        /* Badge live navbar */
         var liveBadge = document.getElementById('nav-live-count');
         if (liveBadge) {
             var cur = parseInt(liveBadge.textContent, 10) || 0;
@@ -663,7 +679,6 @@
 </script>
 
 <!-- ── Live count badge polling ──────────────────────────────────── -->
-{% if request.user.is_authenticated %}
 <script>
 (function() {
     function refreshLiveCount() {
@@ -702,23 +717,22 @@ document.addEventListener('click', function(e) {
 });
 </script>
 
-<!-- ── Search query handler ───────────────────────────────────────── -->
-<script type="text/javascript">
-    function executeQuery() {
-        var query = document.getElementById('id_q_large') ? document.getElementById('id_q_large').value : '';
-        if (!query) {
-            query = document.getElementById('id_q_small') ? document.getElementById('id_q_small').value : '';
-        }
-        window.location.replace("{% url 'search' %}?q=" + encodeURIComponent(query));
-        return false;
-    }
-</script>
-
 <!-- ── Live Search Dropdown ──────────────────────────────────────── -->
 <script>
 (function() {
     var _searchTimer = null;
     var _searchApiUrl = "{% url 'account:search-api' %}";
+    var _accountUrlTpl = "{% url 'account:view' user_id=999999 %}";
+    var _hashtagUrlTpl = '{% url "post:hashtag" tag="__TAG__" %}';
+    var _postUrlTpl    = "{% url 'post:post-detail' post_id=999999 %}";
+    var _searchPageUrl = "{% url 'recherche' %}";
+    var SR_T = {
+        users:    "{% trans 'Users'|escapejs %}",
+        hashtags: "{% trans 'Hashtags'|escapejs %}",
+        bazar:    "{% trans 'Bazar'|escapejs %}",
+        posts:    "{% trans 'Posts'|escapejs %}",
+        all:      "{% trans 'Voir tous les résultats'|escapejs %}"
+    };
 
     window.onSearchInput = function(val) {
         clearTimeout(_searchTimer);
@@ -764,12 +778,12 @@ document.addEventListener('click', function(e) {
 
         // Users
         if (data.users && data.users.length) {
-            html += '<div class="srdd-label">Utilisateurs</div>';
+            html += '<div class="srdd-label">' + SR_T.users + '</div>';
             data.users.forEach(function(u) {
                 var avatarHtml = u.avatar
-                    ? '<img src="' + u.avatar + '" width="32" height="32" class="srdd-avatar" loading="lazy" alt="">'
+                    ? '<img src="' + escH(u.avatar) + '" width="32" height="32" class="srdd-avatar" loading="lazy" alt="">'
                     : '<span class="material-icons srdd-avatar-ph">account_circle</span>';
-                html += '<a href="/account/' + u.id + '/" class="srdd-item">'
+                html += '<a href="' + _accountUrlTpl.replace('999999', encodeURIComponent(u.id)) + '" class="srdd-item">'
                       + '<div class="srdd-avatar-wrap">' + avatarHtml + '</div>'
                       + '<div>'
                       + '<div class="srdd-title srdd-title--user">@' + escH(u.username) + '</div>'
@@ -779,12 +793,12 @@ document.addEventListener('click', function(e) {
 
         // Hashtags
         if (data.hashtags && data.hashtags.length) {
-            html += '<div class="srdd-label">Hashtags</div>';
+            html += '<div class="srdd-label">' + SR_T.hashtags + '</div>';
             html += '<div class="srdd-tags">';
             data.hashtags.forEach(function(ht) {
-                html += '<a href="/feed/hashtag/' + encodeURIComponent(ht.tag.slice(1)) + '/" class="srdd-tag">'
+                html += '<a href="' + _hashtagUrlTpl.replace('__TAG__', encodeURIComponent(String(ht.tag).replace(/^#/, ''))) + '" class="srdd-tag">'
                       + escH(ht.tag)
-                      + '<span class="srdd-tag-count">' + ht.count + '</span>'
+                      + '<span class="srdd-tag-count">' + escH(ht.count) + '</span>'
                       + '</a>';
             });
             html += '</div>';
@@ -792,12 +806,12 @@ document.addEventListener('click', function(e) {
 
         // Annonces bazar
         if (data.annonces && data.annonces.length) {
-            html += '<div class="srdd-label">Bazar</div>';
+            html += '<div class="srdd-label">' + SR_T.bazar + '</div>';
             data.annonces.forEach(function(a) {
                 var thumb = a.img
-                    ? '<img src="' + a.img + '" width="36" height="36" class="srdd-thumb" loading="lazy" alt="">'
+                    ? '<img src="' + escH(a.img) + '" width="36" height="36" class="srdd-thumb" loading="lazy" alt="">'
                     : '<span class="material-icons srdd-thumb-ph">storefront</span>';
-                html += '<a href="/bazar/' + a.id + '/" class="srdd-item">'
+                html += '<a href="/bazar/' + encodeURIComponent(a.id) + '/" class="srdd-item">'
                       + thumb
                       + '<div class="srdd-text">'
                       + '<div class="srdd-title">' + escH(a.title) + '</div>'
@@ -808,9 +822,9 @@ document.addEventListener('click', function(e) {
 
         // Posts
         if (data.posts && data.posts.length) {
-            html += '<div class="srdd-label">Publications</div>';
+            html += '<div class="srdd-label">' + SR_T.posts + '</div>';
             data.posts.forEach(function(p) {
-                html += '<a href="/feed/' + p.id + '/" class="srdd-item">'
+                html += '<a href="' + _postUrlTpl.replace('999999', encodeURIComponent(p.id)) + '" class="srdd-item">'
                       + '<span class="material-icons srdd-post-icon">article</span>'
                       + '<div class="srdd-text">'
                       + '<div class="srdd-title">' + escH(p.title) + '</div>'
@@ -821,9 +835,9 @@ document.addEventListener('click', function(e) {
 
         // View all link
         html += '<div class="srdd-foot">'
-              + '<a href="/recherche/?q=' + encodeURIComponent(q) + '" class="srdd-all">'
+              + '<a href="' + _searchPageUrl + '?q=' + encodeURIComponent(q) + '" class="srdd-all">'
               + '<span class="material-icons">search</span>'
-              + ' Voir tous les résultats</a></div>';
+              + ' ' + SR_T.all + '</a></div>';
 
         html += '</div>';
         dd.innerHTML = html;
@@ -831,7 +845,7 @@ document.addEventListener('click', function(e) {
     }
 
     function escH(s) {
-        return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+        return String(s == null ? '' : s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');
     }
 
     // Close on outside click
@@ -849,24 +863,35 @@ document.addEventListener('click', function(e) {
 {% if request.user.is_authenticated %}
 <script>
 (function() {
-    var VAPID_PUBLIC_KEY = "{% url 'notification:push-key' %}";
     var SUBSCRIBE_URL    = "{% url 'notification:push-subscribe' %}";
 
-    // Register service worker
     if (!('serviceWorker' in navigator) || !('PushManager' in window)) return;
+
+    var PUSH_T = {
+        on:       "{% trans 'Notifications activées'|escapejs %}",
+        off:      "{% trans 'Activer les notifications'|escapejs %}",
+        blocked:  "{% trans 'Notifications bloquées'|escapejs %}",
+        unsupported: "{% trans 'Votre navigateur ne prend pas en charge les notifications.'|escapejs %}",
+        blockedHelp: "{% trans 'Les notifications sont bloquées. Autorisez-les dans les réglages de votre navigateur.'|escapejs %}",
+        disabled: "{% trans 'Notifications désactivées sur cet appareil.'|escapejs %}"
+    };
+    /* Choix « désactivé » retenu sur l'appareil : sans lui, la page se réabonnait
+       toute seule au chargement suivant (la permission du navigateur reste accordée). */
+    function pushOptedOut() { try { return localStorage.getItem('vz-push-off') === '1'; } catch (e) { return false; } }
+    function setPushOptedOut(off) { try { off ? localStorage.setItem('vz-push-off', '1') : localStorage.removeItem('vz-push-off'); } catch (e) {} }
 
     // Le service worker est enregistré une seule fois par base.html : on attend qu'il soit prêt.
     navigator.serviceWorker.ready
     .then(function(reg) {
-        // Check existing subscription
         return reg.pushManager.getSubscription().then(function(sub) {
-            if (sub) return; // Already subscribed
-            // Only subscribe if user has already granted permission (don't auto-prompt)
-            if (Notification.permission === 'granted') {
+            if (sub) return; // déjà abonné
+            // Réabonnement silencieux seulement si la permission est accordée ET que le membre n'a pas désactivé
+            if (Notification.permission === 'granted' && !pushOptedOut()) {
                 return subscribeUser(reg);
             }
         });
     })
+    .then(function() { updatePushBtn(); })
     .catch(function(e) { /* Service worker registration failed silently */ });
 
     function subscribeUser(reg) {
@@ -909,73 +934,63 @@ document.addEventListener('click', function(e) {
         return m ? m[1] : '';
     }
 
-    // Update push button state on load
-    function updatePushBtn() {
+    /* État du bouton : d'après l'abonnement RÉEL (getSubscription), pas d'après la
+       seule permission du navigateur, qui reste « accordée » après un désabonnement. */
+    function paintPushBtn(state) {
         var btn   = document.getElementById('push-notif-btn');
         var icon  = document.getElementById('push-notif-icon');
         var label = document.getElementById('push-notif-label');
+        if (!btn || !icon || !label) return;
+        btn.classList.remove('is-on', 'is-blocked');
+        if (state === 'on')           { icon.textContent = 'notifications_active'; label.textContent = PUSH_T.on;      btn.classList.add('is-on'); }
+        else if (state === 'blocked') { icon.textContent = 'notifications_off';    label.textContent = PUSH_T.blocked; btn.classList.add('is-blocked'); }
+        else                          { icon.textContent = 'notifications_none';   label.textContent = PUSH_T.off; }
+        btn.setAttribute('aria-pressed', state === 'on' ? 'true' : 'false');
+    }
+    function updatePushBtn() {
+        var btn = document.getElementById('push-notif-btn');
         if (!btn) return;
-
-        if (!('Notification' in window)) {
-            btn.style.display = 'none'; return;
-        }
-        if (Notification.permission === 'granted') {
-            if (icon)  icon.textContent  = 'notifications_active';
-            if (label) label.textContent = 'Notifications activées';
-            icon.style.color = 'var(--accent)';
-        } else if (Notification.permission === 'denied') {
-            if (icon)  icon.textContent  = 'notifications_off';
-            if (label) label.textContent = 'Notifications bloquées';
-            icon.style.color = 'var(--danger)';
-        } else {
-            if (icon)  icon.textContent  = 'notifications_none';
-            if (label) label.textContent = 'Activer les notifications';
-            icon.style.color = '';
-        }
+        if (!('Notification' in window)) { btn.hidden = true; return; }
+        if (Notification.permission === 'denied') { paintPushBtn('blocked'); return; }
+        if (Notification.permission !== 'granted') { paintPushBtn('off'); return; }
+        navigator.serviceWorker.ready
+            .then(function(reg) { return reg.pushManager.getSubscription(); })
+            .then(function(sub) { paintPushBtn(sub ? 'on' : 'off'); })
+            .catch(function() { paintPushBtn('off'); });
     }
 
     document.addEventListener('DOMContentLoaded', updatePushBtn);
 
-    // Global function to toggle push notifications
     window.togglePushNotif = function() {
-        if (!('serviceWorker' in navigator) || !('PushManager' in window)) {
-            vzAlert('Ton navigateur ne supporte pas les notifications push.');
-            return;
-        }
+        if (!('Notification' in window)) { vzAlert(PUSH_T.unsupported); return; }
+        if (Notification.permission === 'denied') { vzAlert(PUSH_T.blockedHelp); return; }
         if (Notification.permission === 'granted') {
-            // Already granted — check if subscribed
             navigator.serviceWorker.ready.then(function(reg) {
-                reg.pushManager.getSubscription().then(function(sub) {
+                return reg.pushManager.getSubscription().then(function(sub) {
                     if (sub) {
-                        // Unsubscribe
-                        sub.unsubscribe().then(function() {
+                        /* Désabonnement : navigateur, serveur, puis choix retenu sur l'appareil */
+                        var endpoint = sub.endpoint;
+                        return sub.unsubscribe().then(function() {
+                            setPushOptedOut(true);
                             fetch("{% url 'notification:push-unsubscribe' %}", {
                                 method: 'POST',
-                                headers: {
-                                    'Content-Type': 'application/json',
-                                    'X-CSRFToken': getCsrfToken(),
-                                },
-                                body: JSON.stringify({ endpoint: sub.endpoint })
-                            });
-                            updatePushBtn();
+                                headers: { 'Content-Type': 'application/json', 'X-CSRFToken': getCsrfToken() },
+                                body: JSON.stringify({ endpoint: endpoint })
+                            }).catch(function() {});
+                            vzToast(PUSH_T.disabled, 'info');
                         });
-                    } else {
-                        subscribeUser(reg).then(updatePushBtn);
                     }
+                    setPushOptedOut(false);
+                    return subscribeUser(reg);
                 });
-            });
-        } else if (Notification.permission === 'denied') {
-            vzAlert('Les notifications sont bloquées. Modifie les paramètres de ton navigateur pour les autoriser.');
-        } else {
-            Notification.requestPermission().then(function(perm) {
-                if (perm === 'granted') {
-                    navigator.serviceWorker.ready.then(function(reg) {
-                        subscribeUser(reg).then(updatePushBtn);
-                    });
-                }
-                updatePushBtn();
-            });
+            }).then(updatePushBtn, updatePushBtn);
+            return;
         }
+        Notification.requestPermission().then(function(perm) {
+            if (perm !== 'granted') { updatePushBtn(); return; }
+            setPushOptedOut(false);
+            navigator.serviceWorker.ready.then(function(reg) { return subscribeUser(reg); }).then(updatePushBtn, updatePushBtn);
+        });
     };
 
     // Global function to request push permission + subscribe
@@ -1000,7 +1015,7 @@ document.addEventListener('click', function(e) {
         <p id="gco-name"></p>
         <p id="gco-type">
             <span id="gco-icon" class="material-icons">call</span>
-            <span id="gco-type-text">Appel entrant</span>
+            <span id="gco-type-text">{% trans "Appel entrant" %}</span>
         </p>
     </div>
     <!-- Boutons Rejeter / Accepter -->
@@ -1067,9 +1082,9 @@ document.addEventListener('click', function(e) {
         var isAudio = (data.call_mode === 'audio');
         document.getElementById('gco-icon').textContent   = isAudio ? 'call' : 'videocam';
         document.getElementById('gco-accept-icon').textContent = isAudio ? 'call' : 'videocam';
-        document.getElementById('gco-type-text').textContent   = isAudio ? 'Appel audio entrant' : 'Appel vidéo entrant';
+        document.getElementById('gco-type-text').textContent   = isAudio ? "{% trans 'Appel audio entrant'|escapejs %}" : "{% trans 'Appel vidéo entrant'|escapejs %}";
         var img = document.getElementById('gco-img');
-        img.src = data.profile_image || '/static/default_profile_image.png';
+        img.src = data.profile_image || "{% static 'images/profile_pic.png' %}";
 
         o.style.display = 'flex';
         _gcoStartRing();
@@ -1108,7 +1123,7 @@ document.addEventListener('click', function(e) {
         var callMode = _gcoData.call_mode || 'video';
         _gcoHide();
         // Naviguer vers la room en mode auto-réponse
-        window.location.href = '{% url "chat:private-chat-room" %}?room_id=' + roomId + '&auto_answer=1&call_mode=' + callMode;
+        window.location.href = '{% url "chat:private-chat-room" %}?room_id=' + encodeURIComponent(roomId) + '&auto_answer=1&call_mode=' + encodeURIComponent(callMode);
     };
 })();
 </script>

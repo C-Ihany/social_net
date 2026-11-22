@@ -1,25 +1,37 @@
 import datetime
 
 from django.shortcuts import render, redirect, get_object_or_404
+from django.urls import reverse
 from django.contrib.auth.decorators import login_required
 from django.views.decorators.csrf import ensure_csrf_cookie
 from django.http import Http404, JsonResponse
 from django.utils import timezone
+from django.utils.translation import gettext as _
 from django.contrib import messages
 from django.views.decorators.http import require_POST
 
 from .models import LiveRoom
 
-# Durée max d'un live sans activité WebSocket — au-delà, la room est zombie
-STALE_LIVE_HOURS = 3
+# Un live est « zombie » quand son hôte ne donne plus signe de vie :
+#  - il a diffusé, mais plus aucun battement depuis STALE_LIVE_MINUTES ;
+#  - ou la salle a été créée et jamais rejointe depuis STALE_UNSTARTED_HOURS.
+# (L'ancien critère, « créé depuis plus de 3 h », coupait aussi les lives
+# longs toujours en cours.)
+STALE_LIVE_MINUTES = 10
+STALE_UNSTARTED_HOURS = 3
+CLEANUP_EVERY = 60   # secondes : le widget du fil interroge l'API toutes les 20 s
 
 
-def _cleanup_stale_rooms():
-    """Termine les lives qui traînent depuis plus de STALE_LIVE_HOURS heures."""
-    cutoff = timezone.now() - datetime.timedelta(hours=STALE_LIVE_HOURS)
-    LiveRoom.objects.filter(
-        status=LiveRoom.STATUS_ACTIVE,
-        created_at__lt=cutoff,
+def _cleanup_stale_rooms(force=False):
+    """Termine les lives abandonnés (au plus une fois par minute)."""
+    from django.core.cache import cache
+    from django.db.models import Q
+    if not force and not cache.add('live:cleanup', 1, CLEANUP_EVERY):
+        return
+    now = timezone.now()
+    LiveRoom.objects.filter(status=LiveRoom.STATUS_ACTIVE).filter(
+        Q(last_seen__lt=now - datetime.timedelta(minutes=STALE_LIVE_MINUTES))
+        | Q(last_seen__isnull=True, created_at__lt=now - datetime.timedelta(hours=STALE_UNSTARTED_HOURS))
     ).update(
         status=LiveRoom.STATUS_ENDED,
         ended_at=timezone.now(),
@@ -53,7 +65,7 @@ def live_create(request):
     group_id = request.POST.get('group_id', None)
 
     if not title:
-        title = f"Live de {request.user.username}"
+        title = _("Live de %(name)s") % {'name': request.user.username}
 
     group = None
     if group_id:
@@ -80,7 +92,7 @@ def live_room(request, room_id):
         raise Http404
 
     if room.status == LiveRoom.STATUS_ENDED:
-        messages.info(request, "Ce live est terminé.")
+        messages.info(request, _("Ce live est terminé."))
         return redirect('video:live-list')
 
     is_host = (room.host == request.user)
@@ -141,6 +153,6 @@ def live_api_active(request):
             'host_avatar':  avatar,
             'viewer_count': r.viewer_count,
             'group':        r.group.name if r.group else None,
-            'url':          f'/live/{r.pk}/',
+            'url':          reverse('video:live-room', args=[r.pk]),
         })
     return JsonResponse({'lives': data})

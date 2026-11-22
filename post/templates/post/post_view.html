@@ -7,6 +7,8 @@
 {% block content %}
 <h1 class="vz-sr-only">{% trans "Fil d'actualité" %}</h1>
 <link rel="stylesheet" href="{% static 'css/pages/post-post_view.css' %}">
+<link rel="stylesheet" href="{% static 'css/pages/video-live_feed_card.css' %}">
+{% include 'post/_post_card_assets.html' %}
 
 <!-- ═══════════════════════════════════════════════════════════
      3-COLUMN LAYOUT
@@ -37,7 +39,7 @@
                         <span class="lsb-stat-lbl">{% trans "Friends" %}</span>
                     </div>
                 </div>
-                <a class="lsb-profile-btn" href="{% url 'account:view' user_id=request.user.id %}">
+                <a class="vz-btn vz-btn--tonal vz-btn--sm vz-btn--block lsb-profile-btn" href="{% url 'account:view' user_id=request.user.id %}">
                     {% trans "My profile" %}
                 </a>
             </div>
@@ -54,7 +56,7 @@
                 {% trans "Friend requests" %}
             </a>
             <a class="lsb-nav-item" href="{% url 'friend:list' user_id=request.user.id %}">
-                <span class="lsb-nav-icon"><span class="material-icons">groupe</span></span>
+                <span class="lsb-nav-icon"><span class="material-icons">group</span></span>
                 {% trans "My friends" %}
             </a>
             <a class="lsb-nav-item" href="{% url 'account:edit' user_id=request.user.id %}">
@@ -72,9 +74,9 @@
             <div class="feed-live-head">
                 <span class="feed-live-title">
                     <span class="feed-live-dot"></span>
-                    Lives en cours
+                    {% trans "Lives en cours" %}
                 </span>
-                <a href="{% url 'video:live-list' %}" class="feed-live-all">Voir tout</a>
+                <a href="{% url 'video:live-list' %}" class="feed-live-all">{% trans "Voir tout" %}</a>
             </div>
             <div id="feed-live-list"></div>
         </div>
@@ -86,8 +88,8 @@
                     <span class="material-icons">auto_stories</span>
                     {% trans "Stories" %}
                 </span>
-                <button class="lsb-stories-add-btn" onclick="window.zootStories && window.zootStories.openCreator()" title="{% trans 'Add a story' %}" type="button">
-                    <span class="material-icons">add</span>
+                <button class="vz-icon-btn vz-icon-btn--solid lsb-stories-add-btn" onclick="window.zootStories && window.zootStories.openCreator()" title="{% trans 'Add a story' %}" aria-label="{% trans 'Add a story' %}" type="button">
+                    <span class="material-icons" aria-hidden="true">add</span>
                 </button>
             </div>
             <div class="lsb-stories-list" id="lsb-stories-list">
@@ -108,7 +110,7 @@
             {% if friends|length > 10 %}
             <a class="lsb-friend lsb-friend--more" href="{% url 'friend:list' user_id=request.user.id %}">
                 <span class="material-icons">more_horiz</span>
-                <span class="lsb-friend-name">Voir tous ({{ friends|length }})</span>
+                <span class="lsb-friend-name">{% blocktrans with n=friends|length %}Voir tous ({{ n }}){% endblocktrans %}</span>
             </a>
             {% endif %}
         </div>
@@ -123,7 +125,6 @@
 
         {% include 'stories/story_bar.html' %}
 
-        <!-- ── Onglets : Mon fil · Pour toi · Ma région ── -->
         <!-- ── Onglets : Mon fil · Pour toi · Ma région (contrôle segmenté partagé) ── -->
         <nav class="vz-segmented vz-segmented--block feed-tabs" aria-label="{% trans "Onglets du fil" %}">
             <a href="{% url 'post:post-view' %}?tab=feed" class="vz-seg{% if active_tab == 'feed' %} active{% endif %}"
@@ -132,7 +133,7 @@
             </a>
             <a href="{% url 'post:post-view' %}?tab=foryou" class="vz-seg{% if active_tab == 'foryou' %} active{% endif %}"
                {% if active_tab == 'foryou' %}aria-current="page"{% endif %}>
-                <span class="material-icons"></span> {% trans "Pour toi" %}
+                <span class="material-icons">auto_awesome</span> {% trans "Pour toi" %}
             </a>
             {% if user_region %}
             <a href="{% url 'post:post-view' %}?tab=region" class="vz-seg{% if active_tab == 'region' %} active{% endif %}"
@@ -186,11 +187,11 @@
             <div id="cb-submit-bar">
                 <span id="cb-file-count"></span>
                 <button type="button" id="cb-cancel-btn" class="vz-btn vz-btn--muted vz-btn--sm">
-                    {% trans "Cancel" %}
+                    {% trans "Annuler" %}
                 </button>
                 <button type="button" id="cb-submit-btn" class="vz-btn vz-btn--primary vz-btn--sm">
-                    <span class="material-icons">send</span>
-                    {% trans "Publish" %}
+                    <span class="material-icons" aria-hidden="true">send</span>
+                    {% trans "Publier" %}
                 </button>
             </div>
 
@@ -208,10 +209,10 @@
                     <span class="material-icons">edit_note</span><span class="btn-label"> {% trans "Write" %}</span>
                 </button>
                 <a class="create-box-action kabary" href="{% url 'post:kabary-create' %}">
-                    <span class="material-icons">record_voice_over</span><span class="btn-label"> Kabary</span>
+                    <span class="material-icons">record_voice_over</span><span class="btn-label"> {% trans "Kabary" %}</span>
                 </a>
                 <a class="create-box-action vintana" href="{% url 'post:vintana-create' %}">
-                    <span class="material-icons">lock_clock</span><span class="btn-label"> Vintana</span>
+                    <span class="material-icons">lock_clock</span><span class="btn-label"> {% trans "Vintana" %}</span>
                 </a>
             </div>
         </div>
@@ -238,6 +239,11 @@
 
         var selectedFiles = [];
         var isOpen = false;
+        {% trans "Retirer" as cb_remove %}{% trans "%s fichier sélectionné" as cb_file %}{% trans "%s fichiers sélectionnés" as cb_files %}
+        {% trans "Publication…" as cb_sending %}{% trans "Erreur lors de la publication." as cb_err %}{% trans "Erreur réseau." as cb_net %}{% trans "Publier" as cb_publish %}
+        var CB_T = { remove: "{{ cb_remove|escapejs }}", file: "{{ cb_file|escapejs }}", files: "{{ cb_files|escapejs }}",
+                     sending: "{{ cb_sending|escapejs }}", err: "{{ cb_err|escapejs }}", net: "{{ cb_net|escapejs }}",
+                     publish: "{{ cb_publish|escapejs }}" };
 
         /* ── Ouvrir : trigger → textarea en place ── */
         function expand(doFocus) {
@@ -279,52 +285,52 @@
         function renderPreview() {
             var n = selectedFiles.length;
             if (!n) {
-                prevGrid.style.display='none'; prevGrid.innerHTML='';
+                prevGrid.style.display='none'; prevGrid.innerHTML=''; prevGrid.className='';
                 fileCount.textContent=''; return;
             }
-            prevGrid.style.cssText = 'display:grid;gap:4px;border-radius:12px;overflow:hidden;max-height:320px;margin:.1rem 1.1rem .5rem;';
-            prevGrid.style.gridTemplateColumns = n===1?'1fr':n===2?'1fr 1fr':n===3?'2fr 1fr':'1fr 1fr';
-            prevGrid.style.gridTemplateRows    = n>=3?'1fr 1fr':'';
+            prevGrid.style.display = 'grid';
+            prevGrid.className = 'cb-prev-grid cb-prev-grid--' + Math.min(n, 4);
             prevGrid.innerHTML='';
             for (var idx=0; idx<Math.min(n,4); idx++) {
                 (function(i){
                     var f=selectedFiles[i];
                     var it=document.createElement('div');
-                    it.style.cssText='position:relative;overflow:hidden;min-height:110px;background:var(--btn-bg);';
-                    if(n===3&&i===0) it.style.gridRow='1/3';
+                    it.className='cb-prev-item';
                     var rm=document.createElement('button');
                     rm.type='button';
-                    rm.innerHTML='<span class="material-icons cb-prev-rm-icon">close</span>';
-                    rm.style.cssText='position:absolute;top:5px;right:5px;z-index:3;background:rgba(0,0,0,.6);color:#fff;border:none;border-radius:50%;width:22px;height:22px;display:flex;align-items:center;justify-content:center;cursor:pointer;';
+                    rm.className='vz-icon-btn vz-icon-btn--over cb-prev-rm';
+                    rm.setAttribute('aria-label', CB_T.remove);
+                    rm.innerHTML='<span class="material-icons cb-prev-rm-icon" aria-hidden="true">close</span>';
                     rm.onclick=function(e){e.stopPropagation();removeFile(i);};
                     it.appendChild(rm);
                     if(i===3&&n>4){
                         var ov=document.createElement('div');
-                        ov.style.cssText='position:absolute;inset:0;background:rgba(0,0,0,.52);display:flex;align-items:center;justify-content:center;color:#fff;font-size:1.5rem;font-weight:800;z-index:2;pointer-events:none;';
+                        ov.className='cb-prev-more';
                         ov.textContent='+'+(n-4); it.appendChild(ov);
                     }
                     if(f.type.startsWith('image/')){
                         var img=document.createElement('img');
-                        img.style.cssText='width:100%;height:100%;object-fit:cover;display:block;';
+                        img.alt='';
                         img.src=URL.createObjectURL(f); it.appendChild(img);
                     } else if(f.type.startsWith('video/')){
                         var vid=document.createElement('video');
-                        vid.style.cssText='width:100%;height:100%;object-fit:contain;display:block;background:#000;max-height:300px;';
                         vid.src=URL.createObjectURL(f); vid.muted=true; vid.preload='metadata';
                         var pOv=document.createElement('div');
-                        pOv.style.cssText='position:absolute;inset:0;display:flex;align-items:center;justify-content:center;pointer-events:none;z-index:1;';
-                        pOv.innerHTML='<span class="material-icons cb-prev-play">play_circle_filled</span>';
+                        pOv.className='cb-prev-play-wrap';
+                        pOv.innerHTML='<span class="material-icons cb-prev-play" aria-hidden="true">play_circle_filled</span>';
                         it.appendChild(vid); it.appendChild(pOv);
                     } else {
                         var ic=document.createElement('div');
-                        ic.style.cssText='display:flex;flex-direction:column;align-items:center;justify-content:center;height:100%;min-height:110px;gap:.4rem;padding:1rem;';
-                        ic.innerHTML='<span class="material-icons cb-prev-file-icon">insert_drive_file</span><span class="cb-prev-file-name">'+f.name+'</span>';
+                        ic.className='cb-prev-file';
+                        var fi=document.createElement('span'); fi.className='material-icons cb-prev-file-icon'; fi.textContent='insert_drive_file';
+                        var fn=document.createElement('span'); fn.className='cb-prev-file-name'; fn.textContent=f.name;
+                        ic.appendChild(fi); ic.appendChild(fn);
                         it.appendChild(ic);
                     }
                     prevGrid.appendChild(it);
                 })(idx);
             }
-            fileCount.textContent=n+' fichier'+(n>1?'s':'')+' sélectionné'+(n>1?'s':'');
+            fileCount.textContent = (n > 1 ? CB_T.files : CB_T.file).replace('%s', n);
         }
 
         /* ── Listeners ── */
@@ -344,11 +350,11 @@
         /* ── Soumission AJAX ── */
         submitBtn.addEventListener('click', async function(){
             if (!bodyTA.value.trim() && !selectedFiles.length) {
-                bodyTA.focus(); bodyTA.style.borderColor='var(--danger)';
-                setTimeout(function(){ bodyTA.style.borderColor=''; },2000); return;
+                bodyTA.focus(); bodyTA.classList.add('is-invalid');
+                setTimeout(function(){ bodyTA.classList.remove('is-invalid'); },2000); return;
             }
             submitBtn.disabled=true;
-            submitBtn.innerHTML='<span class="material-icons cb-spinning">refresh</span> Publication…';
+            submitBtn.classList.add('is-loading');
 
             /* Copier le body dans le champ hidden du formulaire */
             bodyHidden.value = bodyTA.value;
@@ -384,18 +390,18 @@
                             }
                         }
                     }
-                } else { vzAlert('Erreur lors de la publication.'); }
-            } catch(err) { console.error('cb-form:',err); vzAlert('Erreur réseau.'); }
+                } else { vzToast(CB_T.err, 'error'); }
+            } catch(err) { console.error('cb-form:',err); vzToast(CB_T.net, 'error'); }
             finally {
                 submitBtn.disabled=false;
-                submitBtn.innerHTML='<span class="material-icons">send</span> {% trans "Publish"|escapejs %}';
+                submitBtn.classList.remove('is-loading');
             }
         });
         })();
         </script>
 
         <!-- ── Anchor pour injection des nouveaux posts créés inline ── -->
-        <div id="cb-post-list-anchor">
+        <div id="cb-post-list-anchor" data-hashtag-url='{% url "post:hashtag" tag="__TAG__" %}'>
 
         <!-- ── Lives actifs (épinglés en haut) ── -->
         {% if active_lives %}
@@ -413,25 +419,16 @@
             <div id="feed-sentinel"></div>
 
             <!-- Skeleton loading indicator -->
-            <div id="feed-loading-indicator">
-                {% for _ in "xxx" %}
-                <div class="skeleton-card">
-                    <div class="skeleton-header">
-                        <div class="skeleton-line skeleton-avatar"></div>
-                        <div class="skeleton-meta">
-                            <div class="skeleton-line skeleton-title"></div>
-                            <div class="skeleton-line skeleton-sub"></div>
-                        </div>
+            <div id="feed-loading-indicator" aria-hidden="true">
+                {% for _ in "xx" %}
+                <div class="vz-skel-card">
+                    <div class="vz-skel-row">
+                        <div class="vz-skel vz-skel--avatar"></div>
+                        <div><div class="vz-skel vz-skel--title"></div><div class="vz-skel vz-skel--text"></div></div>
                     </div>
-                    <div class="skeleton-line skeleton-body w90"></div>
-                    <div class="skeleton-line skeleton-body w75"></div>
-                    <div class="skeleton-line skeleton-body w60"></div>
-                    <div class="skeleton-line skeleton-image"></div>
-                    <div class="skeleton-footer">
-                        <div class="skeleton-line skeleton-btn"></div>
-                        <div class="skeleton-line skeleton-btn"></div>
-                        <div class="skeleton-line skeleton-btn"></div>
-                    </div>
+                    <div class="vz-skel vz-skel--text"></div>
+                    <div class="vz-skel vz-skel--text"></div>
+                    <div class="vz-skel vz-skel--media"></div>
                 </div>
                 {% endfor %}
             </div>
@@ -442,12 +439,12 @@
             </div>
 
         {% else %}
-            <div class="empty-feed">
-                <span class="material-icons ef-icon">dynamic_feed</span>
-                <h5>{% trans "Nothing new for now." %}</h5>
-                <p>{% trans "Invite friends or post something." %}</p>
-                <a class="ef-cta" href="{% url 'post:addPost' %}">
-                    <span class="material-icons">add</span> {% trans "My first post" %}
+            <div class="vz-empty">
+                <span class="material-icons" aria-hidden="true">dynamic_feed</span>
+                <p class="vz-empty-title">{% trans "Nothing new for now." %}</p>
+                <p class="vz-empty-text">{% trans "Invite friends or post something." %}</p>
+                <a class="vz-btn vz-btn--primary" href="{% url 'post:addPost' %}">
+                    <span class="material-icons" aria-hidden="true">add</span> {% trans "My first post" %}
                 </a>
             </div>
             {% include 'post/_suggested_profiles.html' %}
@@ -481,11 +478,11 @@
             {% endfor %}
             {% endif %}
             <div class="rsb-btn-row">
-                <a href="{% url 'group:list' %}" class="rsb-btn rsb-btn--outline">
+                <a href="{% url 'group:list' %}" class="vz-btn vz-btn--secondary vz-btn--sm">
                     <span class="material-icons">explore</span>
                     {% trans "Explore" %}
                 </a>
-                <a href="{% url 'group:create' %}" class="rsb-btn rsb-btn--grad">
+                <a href="{% url 'group:create' %}" class="vz-btn vz-btn--tonal vz-btn--sm">
                     <span class="material-icons">add</span>
                     {% trans "Create" %}
                 </a>
@@ -499,7 +496,7 @@
                     <span class="material-icons">storefront</span> {% trans "Marketplace" %}
                 </span>
                 <a href="{% url 'bazar:index' %}" class="rsb-see-all">
-                    {% trans "See all" %} →
+                    {% trans "Voir tout" %}
                 </a>
             </p>
             {% for annonce in recent_bazar %}
@@ -519,7 +516,7 @@
             </a>
             {% endwith %}
             {% endfor %}
-            <a href="{% url 'bazar:create' %}" class="rsb-btn rsb-btn--grad rsb-btn--cta">
+            <a href="{% url 'bazar:create' %}" class="vz-btn vz-btn--tonal vz-btn--sm rsb-btn--cta">
                 <span class="material-icons">add</span>
                 {% trans "Sell something" %}
             </a>
@@ -534,7 +531,7 @@
                     <span class="material-icons">trending_up</span> {% trans "Trends" %}
                 </span>
                 <a href="{% url 'post:tendances' %}" class="rsb-see-all">
-                    Voir tout →
+                    {% trans "Voir tout" %}
                 </a>
             </p>
             {% for ht in trending_hashtags %}
@@ -545,7 +542,7 @@
             </a>
             {% endfor %}
             <a href="{% url 'post:tendances' %}" class="rsb-all-link">
-                <i class="material-icons" aria-hidden="true">local_fire_department</i> Toutes les tendances
+                <i class="material-icons" aria-hidden="true">local_fire_department</i> {% trans "Toutes les tendances" %}
             </a>
         </div>
         {% endif %}
@@ -562,7 +559,7 @@
                     &nbsp;{% trans "Friends" %}: <strong>{{ friends_count|default:"0" }}</strong>
                 </span>
             </div>
-            <a href="{% url 'account:edit' user_id=request.user.id %}" class="rsb-btn rsb-btn--outline rsb-btn--left">
+            <a href="{% url 'account:edit' user_id=request.user.id %}" class="vz-btn vz-btn--secondary vz-btn--sm rsb-btn--left">
                 <span class="material-icons">settings</span>
                 {% trans "Edit profile" %}
             </a>
@@ -591,7 +588,7 @@
                 </div>
             </div>
             {% endfor %}
-            <a href="{% url 'landing' %}#announcements" class="rsb-btn rsb-btn--outline rsb-btn--ann">
+            <a href="{% url 'landing' %}#announcements" class="vz-btn vz-btn--secondary vz-btn--sm rsb-btn--ann">
                 <span class="material-icons">open_in_new</span>
                 {% trans "See all" %}
             </a>
@@ -600,11 +597,11 @@
 
         <!-- Footer links -->
         <div class="rsb-footer-links">
-            <a class="rsb-link" href="#">{% trans "Privacy" %}</a>
-            <a class="rsb-link" href="#">{% trans "Rules" %}</a>
-            <a class="rsb-link" href="#">{% trans "About" %}</a>
+            <a class="rsb-link" href="{% url 'legal:confidentialite' %}">{% trans "Privacy" %}</a>
+            <a class="rsb-link" href="{% url 'legal:cgu' %}">{% trans "Rules" %}</a>
+            <a class="rsb-link" href="{% url 'landing' %}">{% trans "About" %}</a>
             <br><br>
-            <span class="rsb-copy">VAZIMBA © 2026</span>
+            <span class="rsb-copy">VAZIMBA © {% now "Y" %}</span>
         </div>
 
     </aside>
@@ -685,461 +682,8 @@ var _ZF_CSRF = '{{ csrf_token }}';
     } catch(e) { console.warn('Infinite scroll init error:', e); }
 })();
 
-/* ══════════════════════════════════════
-   REACTIONS
-   ══════════════════════════════════════ */
-var _REACT_URL    = "{% url 'post:react-post' %}";
-var _REACT_EMOJIS = { like:'👍', heart:'❤️', laugh:'😂', wow:'😮', sad:'😢' };
-var _REACT_LABELS = { like:'{% trans "Like"|escapejs %}', heart:'{% trans "Love"|escapejs %}', laugh:'{% trans "Haha"|escapejs %}', wow:'{% trans "Wow"|escapejs %}', sad:'{% trans "Sad"|escapejs %}' };
-var _pickerTimers = {};
-var _userReactions = {};
-
-/* Positionne le picker en position:fixed au-dessus (ou en-dessous) du bouton réagir.
-   Bypass complet des overflow:auto/hidden des conteneurs parents (feed-main, post-card…) */
-function _positionPicker(picker, wrapEl) {
-    if (!picker || !wrapEl) return;
-    var rect = wrapEl.getBoundingClientRect();
-    /* Mesure des dimensions réelles en affichant invisiblement.
-       On pose left/top à 0 puis on lit le rect obtenu : cela donne l'origine
-       réelle du bloc conteneur. Si un ancêtre est transformé (transform,
-       filter, backdrop-filter...), le position:fixed n'est plus relatif au
-       viewport mais à cet ancêtre — la différence compense le décalage. */
-    picker.style.visibility = 'hidden';
-    picker.style.display    = 'flex';
-    picker.style.transform  = 'none';
-    picker.style.bottom     = 'auto';
-    picker.style.right      = 'auto';
-    picker.style.left       = '0px';
-    picker.style.top        = '0px';
-    var ph     = picker.offsetHeight || 56;
-    var pw     = picker.offsetWidth  || 200;
-    var origin = picker.getBoundingClientRect();
-    picker.style.display    = '';
-    picker.style.visibility = '';
-    /* Position verticale (viewport) : au-dessus par défaut, en-dessous si trop près du haut */
-    var top = rect.top - ph - 10;
-    if (top < 8) top = rect.bottom + 8;
-    /* Position horizontale (viewport) : centré sur le bouton, sans translateX */
-    var cx   = rect.left + rect.width / 2;
-    var left = cx - pw / 2;
-    if (left < 8) left = 8;
-    if (left + pw > window.innerWidth - 8) left = window.innerWidth - pw - 8;
-    /* Conversion viewport -> coordonnées du bloc conteneur */
-    picker.style.top       = (top  - origin.top)  + 'px';
-    picker.style.left      = (left - origin.left) + 'px';
-    picker.style.transform = 'none';
-    picker.style.bottom    = 'auto';
-}
-
-function openPicker(postId) {
-    clearTimeout(_pickerTimers[postId]);
-    _pickerTimers[postId] = setTimeout(function() {
-        var p    = document.getElementById('picker-' + postId);
-        var btn  = document.getElementById('react-btn-' + postId);
-        var wrap = document.getElementById('reaction-wrap-' + postId);
-        if (!p) return;
-        /* Centre sur le bouton Like lui-même, pas sur tout le reaction-wrap */
-        _positionPicker(p, btn || wrap);
-        p.classList.add('open');
-    }, 200);
-}
-function closePicker(postId) {
-    clearTimeout(_pickerTimers[postId]);
-    _pickerTimers[postId] = setTimeout(function() {
-        var p = document.getElementById('picker-' + postId);
-        if (p) p.classList.remove('open');
-    }, 150);
-}
-function closeAllPickers() {
-    document.querySelectorAll('.reaction-picker.open').forEach(function(p) {
-        p.classList.remove('open');
-    });
-}
-document.addEventListener('click', function(e) {
-    if (!e.target.closest('.reaction-wrap')) closeAllPickers();
-});
-
-/* ── Touch / Long-press pour les réactions sur mobile ── */
-(function() {
-    if (!('ontouchstart' in window)) return; // Desktop: hover events suffice.
-
-    var _lpTimers = {}; // postId → setTimeout handle
-
-    function bindTouch(wrap) {
-        var postId = wrap.id.replace('reaction-wrap-', '');
-        if (!postId) return;
-
-        wrap.addEventListener('touchstart', function(e) {
-            // Lance un long-press de 450 ms pour ouvrir le picker
-            _lpTimers[postId] = setTimeout(function() {
-                _lpTimers[postId] = null;
-                clearTimeout(_pickerTimers[postId]);
-                var p   = document.getElementById('picker-' + postId);
-                var btn = document.getElementById('react-btn-' + postId);
-                _positionPicker(p, btn || wrap);
-                if (p) p.classList.add('open');
-                // Bloquer le tap "quickReact" qui suivrait le touchend
-                wrap._longPressed = true;
-            }, 450);
-        }, { passive: true });
-
-        /* Android : le long-press déclenche aussi un contextmenu natif */
-        wrap.addEventListener('contextmenu', function(e) { e.preventDefault(); });
-
-        wrap.addEventListener('touchmove', function() {
-            // Si le doigt bouge, annuler le long-press
-            if (_lpTimers[postId]) { clearTimeout(_lpTimers[postId]); _lpTimers[postId] = null; }
-        }, { passive: true });
-
-        wrap.addEventListener('touchend', function(e) {
-            if (_lpTimers[postId]) {
-                clearTimeout(_lpTimers[postId]);
-                _lpTimers[postId] = null;
-                // Court tap sur le bouton → quickReact (géré par onclick)
-                // Ne pas déclencher deux fois si le bouton a un onclick
-            }
-            if (wrap._longPressed) {
-                // Bloquer le click natif qui suivrait le touchend
-                e.preventDefault();
-                wrap._longPressed = false;
-            }
-        }, { passive: false });
-    }
-
-    // Bind sur toutes les .reaction-wrap existantes + futures (mutation observer)
-    document.querySelectorAll('.reaction-wrap').forEach(bindTouch);
-
-    // Fermer le picker quand on touche ailleurs
-    document.addEventListener('touchstart', function(e) {
-        if (!e.target.closest('.reaction-wrap') && !e.target.closest('.reaction-picker')) {
-            closeAllPickers();
-        }
-    }, { passive: true });
-})();
-function quickReact(postId) {
-    var cur = _userReactions[postId] !== undefined ? _userReactions[postId]
-            : document.getElementById('react-btn-' + postId).classList.contains('liked') ? 'like' : null;
-    sendReaction(postId, cur || 'like');
-}
-function sendReaction(postId, reactionType) {
-    closePicker(postId);
-    var fd = new FormData();
-    fd.append('post_id', postId);
-    fd.append('reaction', reactionType);
-    fd.append('csrfmiddlewaretoken', _ZF_CSRF);
-
-    fetch(_REACT_URL, { method: 'POST', headers: { 'X-Requested-With': 'XMLHttpRequest' }, body: fd })
-    .then(function(r) { return r.json(); })
-    .then(function(data) {
-        _userReactions[postId] = data.user_reaction;
-        var btn   = document.getElementById('react-btn-'   + postId);
-        var icon  = document.getElementById('react-icon-'  + postId);
-        var label = document.getElementById('react-label-' + postId);
-        if (btn) btn.classList.toggle('liked', !!data.user_reaction);
-        if (icon) {
-            if (data.user_reaction && _REACT_EMOJIS[data.user_reaction]) {
-                icon.textContent = _REACT_EMOJIS[data.user_reaction];
-                icon.style.fontSize = '1.05rem';
-            } else {
-                icon.innerHTML = '<span class="material-icons">thumb_up_off_alt</span>';
-            }
-        }
-        if (label) label.textContent = data.user_reaction ? (_REACT_LABELS[data.user_reaction] || _REACT_LABELS.like) : _REACT_LABELS.like;
-
-        var picker = document.getElementById('picker-' + postId);
-        if (picker) {
-            picker.querySelectorAll('.reaction-emoji-btn').forEach(function(b) { b.classList.remove('selected'); });
-            if (data.user_reaction) {
-                var sel = picker.querySelector('[onclick*="' + data.user_reaction + '"]');
-                if (sel) sel.classList.add('selected');
-            }
-        }
-
-        var bar     = document.getElementById('reaction-bar-'     + postId);
-        var summary = document.getElementById('reaction-summary-' + postId);
-        var total   = document.getElementById('reaction-total-'   + postId);
-        if (total)   total.textContent = data.total;
-        if (bar)     bar.style.display = data.total > 0 ? '' : 'none';
-        if (summary) {
-            var html = '';
-            Object.keys(data.counts).forEach(function(rt) {
-                if (_REACT_EMOJIS[rt]) html += '<span class="rc-emoji" data-type="' + rt + '">' + _REACT_EMOJIS[rt] + '</span>';
-            });
-            summary.innerHTML = html;
-        }
-    })
-    .catch(function(e) { console.error('Reaction error:', e); });
-}
-function toggleLike(postId) { sendReaction(postId, 'like'); }
-
-/* ══════════════════════════════════════
-   COMMENT TOGGLE
-   ══════════════════════════════════════ */
-function toggleComments(postId) {
-    var panel = document.getElementById('comment-panel-' + postId);
-    var btn   = document.getElementById('comment-btn-'   + postId);
-    if (!panel) return;
-    var isOpen = panel.classList.contains('open');
-    panel.classList.toggle('open', !isOpen);
-    if (btn) btn.classList.toggle('active', !isOpen);
-    /* Commentaires en direct : s'abonner au post tant que le panneau est ouvert */
-    if (window.notificationSocketSend) {
-        window.notificationSocketSend({command: isOpen ? 'unsubscribe_post' : 'subscribe_post', post_id: postId});
-    }
-    if (!isOpen) {
-        var ta = document.getElementById('comment-input-' + postId);
-        if (!ta) return;
-        /* ── Focus synchrone (iOS Safari PWA bloque tout focus() dans un setTimeout)
-           panel.offsetHeight force le reflow → le panel est display:block avant focus() ── */
-        void panel.offsetHeight;
-        ta.focus();
-        /* ── Correction scroll mobile : si le textarea tombe derrière la bottom nav
-           (58 px fixe en bas) ou hors de vue, on le ramène au centre ── */
-        requestAnimationFrame(function() {
-            var rect  = ta.getBoundingClientRect();
-            var viewH = window.innerHeight;
-            var navH  = 76; /* bottom nav 58px + marge 18px */
-            if (rect.bottom > viewH - navH || rect.top < 64) {
-                ta.scrollIntoView({ behavior: 'smooth', block: 'center' });
-            }
-        });
-    }
-}
-
-/* ══════════════════════════════════════
-   COMMENT FORM
-   ══════════════════════════════════════ */
-function handleCommentKey(evt, postId, url) {
-    if (evt.key === 'Enter' && !evt.shiftKey) { evt.preventDefault(); submitComment(postId, url); }
-}
-function autoResize(el) {
-    el.style.height = 'auto';
-    el.style.height = Math.min(el.scrollHeight, 120) + 'px';
-}
-function submitComment(postId, url) {
-    var ta  = document.getElementById('comment-input-' + postId);
-    var btn = document.getElementById('comment-send-'  + postId);
-    if (!ta) return;
-    var body = ta.value.trim();
-    if (!body) return;
-    if (btn) btn.disabled = true;
-
-    var fd = new FormData();
-    fd.append('body', body);
-    fd.append('csrfmiddlewaretoken', _ZF_CSRF);
-
-    fetch(url, { method: 'POST', headers: { 'X-Requested-With': 'XMLHttpRequest' }, body: fd })
-    .then(function(r){
-        if (!r.ok) { throw new Error('HTTP ' + r.status); }
-        return r.json();
-    })
-    .then(function(data) {
-        if (btn) btn.disabled = false;
-        if (!data.ok) {
-            console.error('Commentaire rejeté:', data.error);
-            return;
-        }
-        ta.value = ''; ta.style.height = 'auto';
-
-        var delBtn = data.can_delete
-            ? '<button class="pc-comment-del" onclick="deleteComment(' + data.id + ', commentDeleteUrl(' + data.id + '))" type="button">Supprimer</button>'
-            : '';
-
-        var html = '<div class="pc-comment-item" id="comment-item-' + data.id + '">'
-            + '<a href="/account/' + data.author_id + '/view/"><img class="cmt-avatar" src="' + data.avatar + '" alt="' + escHtml(data.author) + '"></a>'
-            + '<div class="pc-comment-right">'
-            +   '<div class="pc-comment-bubble">'
-            +     '<a class="pc-comment-author" href="/account/' + data.author_id + '/view/">' + escHtml(data.author) + '</a>'
-            +     '<p class="pc-comment-body">' + escHtml(data.body) + '</p>'
-            +   '</div>'
-            +   '<div class="pc-comment-footer">'
-            +     '<span class="pc-comment-time">' + data.created_at + '</span>'
-            +     '<button class="pc-comment-reply-btn" onclick="toggleReplyForm(' + data.id + ', ' + postId + ', \'' + url + '\')" type="button">Répondre</button>'
-            +     delBtn
-            +   '</div>'
-            +   '<div class="pc-comment-replies" id="replies-' + data.id + '" style="display:none;"></div>'
-            +   '<div class="pc-reply-form-wrap" id="reply-form-' + data.id + '">'
-            +     '<img class="reply-form-avatar" src="' + data.avatar + '" alt="">'
-            +     '<div class="pc-reply-input-wrap">'
-            +       '<textarea class="pc-reply-textarea" id="reply-input-' + data.id + '" placeholder="Écrire une réponse…" rows="1" maxlength="1000"'
-            +       ' onkeydown="handleReplyKey(event,' + data.id + ',' + postId + ',\'' + url + '\')"'
-            +       ' oninput="autoResize(this)"></textarea>'
-            +     '</div>'
-            +     '<button class="pc-comment-send" onclick="submitReply(' + data.id + ',' + postId + ',\'' + url + '\')" title="Répondre" type="button">'
-            +       '<span class="material-icons">send</span></button>'
-            +   '</div>'
-            + '</div>'
-            + '</div>';
-
-        var list = document.getElementById('comment-list-' + postId);
-        if (list) { list.insertAdjacentHTML('beforeend', html); list.scrollTop = list.scrollHeight; }
-        updateCommentCount(postId, 1);
-    })
-    .catch(function(err){
-        console.error('Erreur commentaire:', err);
-        if (btn) btn.disabled = false;
-        /* Retour visuel léger : faire clignoter le textarea en rouge */
-        if (ta) {
-            ta.style.borderColor = '#e74c3c';
-            setTimeout(function(){ ta.style.borderColor = ''; }, 2000);
-        }
-    });
-}
-
-/* ══════════════════════════════════════
-   REPLY TO COMMENT
-   ══════════════════════════════════════ */
-function toggleReplyForm(commentId, postId, url) {
-    var form = document.getElementById('reply-form-' + commentId);
-    if (!form) return;
-    var isOpen = form.classList.contains('open');
-    form.classList.toggle('open', !isOpen);
-    if (!isOpen) {
-        // Ensure replies container is visible
-        var replies = document.getElementById('replies-' + commentId);
-        if (replies) replies.style.display = '';
-        var ta = document.getElementById('reply-input-' + commentId);
-        if (ta) setTimeout(function(){ ta.focus(); }, 50);
-    }
-}
-
-function handleReplyKey(evt, parentId, postId, url) {
-    if (evt.key === 'Enter' && !evt.shiftKey) { evt.preventDefault(); submitReply(parentId, postId, url); }
-}
-
-function submitReply(parentCommentId, postId, url) {
-    var ta = document.getElementById('reply-input-' + parentCommentId);
-    if (!ta) return;
-    var body = ta.value.trim();
-    if (!body) return;
-
-    var fd = new FormData();
-    fd.append('body', body);
-    fd.append('parent_id', parentCommentId);
-    fd.append('csrfmiddlewaretoken', _ZF_CSRF);
-
-    fetch(url, { method: 'POST', headers: { 'X-Requested-With': 'XMLHttpRequest' }, body: fd })
-    .then(function(r){
-        if (!r.ok) { throw new Error('HTTP ' + r.status); }
-        return r.json();
-    })
-    .then(function(data) {
-        if (!data.ok) { console.error('Réponse rejetée:', data.error); return; }
-        ta.value = ''; ta.style.height = 'auto';
-
-        // Close reply form
-        var form = document.getElementById('reply-form-' + parentCommentId);
-        if (form) form.classList.remove('open');
-
-        var delBtn = data.can_delete
-            ? '<button class="pc-comment-del" onclick="deleteComment(' + data.id + ', commentDeleteUrl(' + data.id + '))" type="button">Supprimer</button>'
-            : '';
-
-        var html = '<div class="pc-comment-reply-item" id="comment-item-' + data.id + '">'
-            + '<a href="/account/' + data.author_id + '/view/"><img class="reply-avatar" src="' + data.avatar + '" alt="' + escHtml(data.author) + '"></a>'
-            + '<div class="pc-comment-right">'
-            +   '<div class="pc-comment-bubble">'
-            +     '<a class="pc-comment-author" href="/account/' + data.author_id + '/view/">' + escHtml(data.author) + '</a>'
-            +     '<p class="pc-comment-body">' + escHtml(data.body) + '</p>'
-            +   '</div>'
-            +   '<div class="pc-comment-footer">'
-            +     '<span class="pc-comment-time">' + data.created_at + '</span>'
-            +     delBtn
-            +   '</div>'
-            + '</div>'
-            + '</div>';
-
-        var repliesContainer = document.getElementById('replies-' + parentCommentId);
-        if (repliesContainer) {
-            repliesContainer.style.display = '';
-            repliesContainer.insertAdjacentHTML('beforeend', html);
-        }
-        updateCommentCount(postId, 1);
-    })
-    .catch(function(e) { console.error('Reply error:', e); });
-}
-
-/* ══════════════════════════════════════
-   DELETE COMMENT
-   ══════════════════════════════════════ */
-var _delUrlTpl = "{% url 'post:delete-comment' 999999 %}";
-function commentDeleteUrl(id) { return _delUrlTpl.replace('999999', id); }
-
-function deleteComment(commentId, url) {
-    vzConfirm({ text: '{% trans "Supprimer ce commentaire ?"|escapejs %}', danger: true, confirmText: '{% trans "Supprimer"|escapejs %}' })
-    .then(function(ok){ if (ok) _deleteCommentNow(commentId, url); });
-}
-function _deleteCommentNow(commentId, url) {
-    var fd = new FormData();
-    fd.append('csrfmiddlewaretoken', _ZF_CSRF);
-    fetch(url, { method: 'POST', headers: { 'X-Requested-With': 'XMLHttpRequest' }, body: fd })
-    .then(function(r){ return r.json(); })
-    .then(function(data) {
-        if (!data.ok) return;
-        var el = document.getElementById('comment-item-' + commentId);
-        if (el) {
-            var panel = el.closest('[id^="comment-panel-"]');
-            el.remove();
-            if (panel) updateCommentCount(panel.id.replace('comment-panel-', ''), -1);
-        }
-    });
-}
-
-function updateCommentCount(postId, delta) {
-    var badge = document.getElementById('comment-count-' + postId);
-    if (!badge) return;
-    var list = document.getElementById('comment-list-' + postId);
-    var cnt  = list ? list.querySelectorAll('.pc-comment-item, .pc-comment-reply-item').length : 0;
-    if (cnt > 0) { badge.textContent = '(' + cnt + ')'; badge.style.display = ''; }
-    else           badge.style.display = 'none';
-}
-
-/* ══════════════════════════════════════
-   READ MORE / COLLAPSE
-   ══════════════════════════════════════ */
-function expandBody(el) {
-    if (el.classList.contains('expanded')) { collapseBody(el); return; }
-    el.classList.add('expanded');
-    var btn = el.nextElementSibling;
-    if (btn && btn.classList.contains('pc-read-more')) btn.textContent = btn.dataset.less;
-}
-function collapseBody(el) {
-    el.classList.remove('expanded');
-    var btn = el.nextElementSibling;
-    if (btn && btn.classList.contains('pc-read-more')) btn.textContent = btn.dataset.more;
-    // Attendre que le DOM finisse de se réduire avant de mesurer la position
-    var card = el.closest('.post-card');
-    if (card) {
-        setTimeout(function() {
-            var headerH = (document.getElementById('header') || {}).offsetHeight || 64;
-            var top = card.getBoundingClientRect().top + window.scrollY - headerH - 8;
-            window.scrollTo({ top: top, behavior: 'smooth' });
-        }, 0);
-    }
-}
-function expandBodyBtn(el) {
-    var body = el.previousElementSibling;
-    if (!body || !body.classList.contains('pc-body')) return;
-    if (body.classList.contains('expanded')) collapseBody(body);
-    else expandBody(body);
-}
-document.addEventListener('DOMContentLoaded', function() {
-    document.querySelectorAll('.pc-body').forEach(function(el) {
-        var btn = el.nextElementSibling;
-        if (!btn || !btn.classList.contains('pc-read-more')) return;
-        if (el.scrollHeight <= el.clientHeight + 4) {
-            btn.classList.add('hidden');
-            el.style.cursor = 'default';
-            el.onclick = null;
-        }
-    });
-});
-
-/* ══════════════════════════════════════
-   SHARE MODAL
-   ══════════════════════════════════════ */
-
-
+/* Réactions, commentaires, « Voir plus », hashtags, mentions et commentaires
+   en direct : static/js/vz-post-card.js (configuré par post/_post_card_assets.html). */
 
 /* ══════════════════════════════════════
    NEW-POSTS BANNER
@@ -1190,252 +734,6 @@ function vzFeedLoadNew() {
     })
     .catch(function () { location.reload(); });
 }
-
-/* ══════════════════════════════════════
-   HASHTAGS + MENTIONS PARSER
-   ══════════════════════════════════════ */
-function processHashtagsAndMentions(container) {
-    if (!container) return;
-    var SKIP = new Set(['A', 'SCRIPT', 'STYLE', 'CODE', 'PRE', 'TEXTAREA', 'INPUT']);
-    var walker = document.createTreeWalker(container, NodeFilter.SHOW_TEXT, {
-        acceptNode: function(n) {
-            var p = n.parentElement;
-            while (p) { if (SKIP.has(p.tagName)) return NodeFilter.FILTER_REJECT; p = p.parentElement; }
-            return NodeFilter.FILTER_ACCEPT;
-        }
-    }, false);
-    var nodes = [], node;
-    while (node = walker.nextNode()) nodes.push(node);
-    nodes.forEach(function(n) {
-        var text = n.textContent;
-        if (!/#[a-zA-ZÀ-ÿ0-9_]{2,}|@[a-zA-Z0-9_]{2,}/.test(text)) return;
-        var html = text
-            .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')
-            .replace(/#([a-zA-ZÀ-ÿ0-9_]{2,30})/g, function(m, tag) {
-                return '<a href="' + '{% url "post:hashtag" tag="__TAG__" %}'.replace('__TAG__', encodeURIComponent(tag.toLowerCase())) + '" class="zf-hashtag" onclick="event.stopPropagation();">' + m + '</a>';
-            })
-            .replace(/@([a-zA-Z0-9_]{2,30})/g, function(m, user) {
-                return '<a href="/account/search/?q=' + encodeURIComponent(user) + '" class="zf-mention" onclick="event.stopPropagation();">' + m + '</a>';
-            });
-        var span = document.createElement('span');
-        span.innerHTML = html;
-        n.parentNode.replaceChild(span, n);
-    });
-}
-function processAllPostBodies() {
-    document.querySelectorAll('.pc-body, .pc-title').forEach(function(el) {
-        if (!el.dataset.htagDone) { el.dataset.htagDone = '1'; processHashtagsAndMentions(el); }
-    });
-    /* Show "See more" only when text is actually clamped */
-    document.querySelectorAll('.pc-body').forEach(function(el) {
-        if (el.classList.contains('expanded')) return;
-        var rm = el.nextElementSibling;
-        if (rm && rm.classList.contains('pc-read-more')) {
-            rm.classList.toggle('hidden', el.scrollHeight <= el.clientHeight + 2);
-        }
-    });
-}
-document.addEventListener('DOMContentLoaded', processAllPostBodies);
-
-
-(function() {
-    try {
-        var mo = new MutationObserver(function() { try { processAllPostBodies(); } catch(e){} });
-        mo.observe(document.querySelector('.feed-main') || document.body, { childList: true, subtree: true });
-    } catch(e) { console.warn('MutationObserver init error:', e); }
-})();
-
-/* ══════════════════════════════════════
-   MENTION AUTOCOMPLETE
-   ══════════════════════════════════════ */
-var _MENTION_AC_URL = "{% url 'post:mention-autocomplete' %}";
-var _acDropdown = null;
-var _acTimer = null;
-
-document.addEventListener('input', function(e) {
-    var ta = e.target;
-    if (!ta.classList.contains('pc-comment-textarea') && !ta.classList.contains('pc-reply-textarea')) return;
-    var val    = ta.value;
-    var cursor = ta.selectionStart;
-    var before = val.slice(0, cursor);
-    var match  = before.match(/@([a-zA-Z0-9_]*)$/);
-    if (!match) { hideAcDropdown(); return; }
-    clearTimeout(_acTimer);
-    _acTimer = setTimeout(function() { fetchMentions(ta, match[1]); }, 220);
-});
-function fetchMentions(ta, query) {
-    fetch(_MENTION_AC_URL + '?q=' + encodeURIComponent(query), { headers: { 'X-Requested-With': 'XMLHttpRequest' } })
-    .then(function(r) { return r.json(); })
-    .then(function(data) {
-        if (data.users && data.users.length) showAcDropdown(ta, data.users);
-        else hideAcDropdown();
-    });
-}
-function showAcDropdown(ta, users) {
-    hideAcDropdown();
-    var dd = document.createElement('div');
-    dd.id = 'mention-ac-dd';
-    dd.style.cssText = 'position:absolute;z-index:9999;background:var(--bg-card);border:1px solid var(--border);border-radius:12px;box-shadow:0 8px 28px rgba(0,0,0,.2);overflow:hidden;min-width:180px;max-width:260px;';
-    users.forEach(function(u) {
-        var item = document.createElement('button');
-        item.type = 'button';
-        item.textContent = '@' + u.username;
-        item.style.cssText = 'display:block;width:100%;text-align:left;padding:.5rem .9rem;background:none;border:none;cursor:pointer;color:var(--text);font-size:.88rem;font-weight:600;transition:background .1s;';
-        item.onmouseover = function() { this.style.background = 'var(--btn-bg)'; };
-        item.onmouseout  = function() { this.style.background = 'none'; };
-        item.onclick = function() { insertMention(ta, u.username); hideAcDropdown(); };
-        dd.appendChild(item);
-    });
-    var rect = ta.getBoundingClientRect();
-    dd.style.top  = (window.scrollY + rect.bottom + 4) + 'px';
-    dd.style.left = (window.scrollX + rect.left) + 'px';
-    document.body.appendChild(dd);
-    _acDropdown = dd;
-}
-function hideAcDropdown() { if (_acDropdown) { _acDropdown.remove(); _acDropdown = null; } }
-function insertMention(ta, username) {
-    var val = ta.value, cursor = ta.selectionStart;
-    var newBefore = val.slice(0, cursor).replace(/@([a-zA-Z0-9_]*)$/, '@' + username + ' ');
-    ta.value = newBefore + val.slice(cursor);
-    ta.setSelectionRange(newBefore.length, newBefore.length);
-    ta.focus();
-}
-document.addEventListener('click', function(e) {
-    if (_acDropdown && !_acDropdown.contains(e.target)) hideAcDropdown();
-});
-
-/* ══════════════════════════════════════
-   BOOKMARK
-   ══════════════════════════════════════ */
-/* Sauvegarder : vzPostBookmark (static/js/vz-post-card.js) */
-function getCsrfToken() {
-    var name = 'csrftoken';
-    var v = null;
-    if (document.cookie) {
-        document.cookie.split(';').forEach(function(c) {
-            c = c.trim();
-            if (c.startsWith(name + '=')) v = decodeURIComponent(c.slice(name.length + 1));
-        });
-    }
-    return v;
-}
-
-/* ══════════════════════════════════════
-   HELPERS
-   ══════════════════════════════════════ */
-function getCookie(name) {
-    var val = null;
-    if (document.cookie) {
-        document.cookie.split(';').forEach(function(c) {
-            c = c.trim();
-            if (c.startsWith(name + '=')) val = decodeURIComponent(c.slice(name.length + 1));
-        });
-    }
-    return val;
-}
-function escHtml(str) {
-    return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');
-}
-
-/* ══════════════════════════════════════
-   COMMENTAIRES EN DIRECT
-   Les nouveaux commentaires arrivent par le WebSocket de notifications
-   (message general_msg_type 8). Le polling HTTP ne sert plus que de
-   roue de secours (toutes les 45 s) si le WebSocket est coupé.
-   ══════════════════════════════════════ */
-(function() {
-    /* Map postId → dernier comment id connu */
-    var _lastCommentId = {};
-    var CURRENT_USER_ID = {{ request.user.id|default:0 }};
-
-    function appendComment(c, postId) {
-        if (c.parent_id) return;                       /* les réponses se chargent avec leur fil */
-        if (document.getElementById('comment-item-' + c.id)) return;   /* déjà affiché (ex. : le nôtre) */
-        var list = document.getElementById('comment-list-' + postId);
-        if (!list) return;
-        var addUrl = '{% url "post:add-comment" 0 %}'.replace('/0/', '/' + postId + '/');
-        if (c.can_delete === undefined) {
-            c.can_delete = (CURRENT_USER_ID && (c.author_id === CURRENT_USER_ID || c.post_author_id === CURRENT_USER_ID));
-        }
-        list.insertAdjacentHTML('beforeend', buildCommentHtml(c, postId, addUrl));
-        updateCommentCount(postId, 1);
-        _lastCommentId[postId] = Math.max(_lastCommentId[postId] || 0, c.id);
-    }
-
-    window._onLivePostComment = function(data) {
-        if (data && data.comment) appendComment(data.comment, String(data.post_id));
-    };
-
-    /* Après une reconnexion du WebSocket, se réabonner aux panneaux ouverts */
-    var _prevConnected = window._notifWsConnected;
-    window._notifWsConnected = function() {
-        if (typeof _prevConnected === 'function') _prevConnected();
-        document.querySelectorAll('.pc-comment-panel.open').forEach(function(panel) {
-            var m = panel.id.match(/comment-panel-(\d+)/);
-            if (m && window.notificationSocketSend) window.notificationSocketSend({command: 'subscribe_post', post_id: m[1]});
-        });
-    };
-
-    function buildCommentHtml(data, postId, addUrl) {
-        var delBtn = data.can_delete
-            ? '<button class="pc-comment-del" onclick="deleteComment(' + data.id + ', commentDeleteUrl(' + data.id + '))" type="button">Supprimer</button>'
-            : '';
-        return '<div class="pc-comment-item" id="comment-item-' + data.id + '">'
-            + '<a href="/account/' + data.author_id + '/view/"><img class="cmt-avatar" src="' + data.avatar + '" alt="' + escHtml(data.author) + '"></a>'
-            + '<div class="pc-comment-right">'
-            +   '<div class="pc-comment-bubble">'
-            +     '<a class="pc-comment-author" href="/account/' + data.author_id + '/view/">' + escHtml(data.author) + '</a>'
-            +     '<p class="pc-comment-body">' + escHtml(data.body) + '</p>'
-            +   '</div>'
-            +   '<div class="pc-comment-footer">'
-            +     '<span class="pc-comment-time">' + data.created_at + '</span>'
-            +     '<button class="pc-comment-reply-btn" onclick="toggleReplyForm(' + data.id + ', ' + postId + ', \'' + addUrl + '\')" type="button">Répondre</button>'
-            +     delBtn
-            +   '</div>'
-            +   '<div class="pc-comment-replies" id="replies-' + data.id + '" style="display:none;"></div>'
-            +   '<div class="pc-reply-form-wrap" id="reply-form-' + data.id + '"></div>'
-            + '</div>'
-            + '</div>';
-    }
-
-    function pollOpenCommentSections() {
-        /* Trouver tous les panneaux de commentaires ouverts */
-        document.querySelectorAll('.pc-comment-panel.open').forEach(function(panel) {
-            var m = panel.id.match(/comment-panel-(\d+)/);
-            if (!m) return;
-            var postId = m[1];
-            var since  = _lastCommentId[postId] || 0;
-            var addUrl = '{% url "post:add-comment" 0 %}'.replace('/0/', '/' + postId + '/');
-            var newUrl = '{% url "post:new-comments" 0 %}'.replace('/0/', '/' + postId + '/');
-
-            fetch(newUrl + '?since=' + since, {credentials: 'same-origin',
-                headers: {'X-Requested-With': 'XMLHttpRequest'}})
-            .then(function(r){ return r.ok ? r.json() : null; })
-            .then(function(d){
-                if (!d || !d.comments.length) return;
-                d.comments.forEach(function(c) { appendComment(c, postId); });
-            })
-            .catch(function(){});
-        });
-    }
-
-    /* Initialiser _lastCommentId à partir des commentaires déjà dans le DOM */
-    function initLastIds() {
-        document.querySelectorAll('.pc-comment-item[id]').forEach(function(el) {
-            var m = el.id.match(/comment-item-(\d+)/);
-            if (!m) return;
-            var panel = el.closest('[id^="comment-panel-"]');
-            if (!panel) return;
-            var pm = panel.id.match(/comment-panel-(\d+)/);
-            if (pm) _lastCommentId[pm[1]] = Math.max(_lastCommentId[pm[1]] || 0, parseInt(m[1]));
-        });
-    }
-
-    document.addEventListener('DOMContentLoaded', function() {
-        initLastIds();
-        setInterval(pollOpenCommentSections, 45000);
-    });
-})();
 
 /* ══════════════════════════════════════════════
    SIDEBAR STORIES WIDGET
@@ -1557,110 +855,6 @@ function escHtml(str) {
 
     document.addEventListener('DOMContentLoaded', refreshLives);
     setInterval(refreshLives, 20000);
-})();
-</script>
-
-<!-- ══════════════════════════════════════════════
-     MODAL RÉACTIONS — qui a réagi au post
-     ══════════════════════════════════════════════ -->
-<div id="rw-modal" onclick="if(event.target===this)rwClose()">
-  <div id="rw-panel">
-    <div id="rw-header">
-      <span id="rw-title">Réactions</span>
-      <button id="rw-close" onclick="rwClose()" type="button" aria-label="{% trans 'Fermer' %}">
-        <span class="material-icons">close</span>
-      </button>
-    </div>
-    <div id="rw-tabs"></div>
-    <div id="rw-list"><p class="rw-hint">Chargement…</p></div>
-  </div>
-</div>
-
-<script>
-(function(){
-    var _rwPostId   = null;
-    var _rwCounts   = {};
-    var _rwRows     = [];
-    var _rwActive   = '';
-    var EMOJI_MAP   = {like:'👍', heart:'❤️', laugh:'😂', wow:'😮', sad:'😢'};
-    var LABEL_MAP   = {like:'J\'aime', heart:'Amour', laugh:'Hilarant', wow:'Wow', sad:'Triste'};
-
-    window.rwOpen = function(postId) {
-        _rwPostId = postId;
-        _rwActive = '';
-        document.getElementById('rw-modal').classList.add('open');
-        document.getElementById('rw-list').innerHTML =
-            '<p class="rw-hint">Chargement…</p>';
-        document.getElementById('rw-tabs').innerHTML = '';
-
-        fetch('/feed/' + postId + '/reactions/')
-            .then(function(r){
-                if (!r.ok) { throw new Error('HTTP ' + r.status + ' ' + r.url); }
-                return r.json();
-            })
-            .then(function(d){
-                _rwCounts = d.counts || {};
-                _rwRows   = d.rows   || [];
-                _buildTabs(d.total || 0);
-                _renderList('');
-            })
-            .catch(function(err){
-                console.error('[reactions_who] fetch error:', err);
-                document.getElementById('rw-list').innerHTML =
-                    '<p class="rw-hint">Erreur de chargement.</p>';
-            });
-    };
-
-    window.rwClose = function() {
-        document.getElementById('rw-modal').classList.remove('open');
-    };
-
-    function _buildTabs(total) {
-        var tabs = document.getElementById('rw-tabs');
-        var html = '<button class="rw-tab active" onclick="rwFilter(\'\')" type="button">Tous ' + total + '</button>';
-        Object.keys(_rwCounts).forEach(function(type) {
-            var emoji = EMOJI_MAP[type] || '';
-            var cnt   = _rwCounts[type] || 0;
-            html += '<button class="rw-tab" onclick="rwFilter(\'' + type + '\')" type="button">'
-                  + emoji + ' ' + cnt + '</button>';
-        });
-        tabs.innerHTML = html;
-    }
-
-    window.rwFilter = function(type) {
-        _rwActive = type;
-        document.querySelectorAll('.rw-tab').forEach(function(t){ t.classList.remove('active'); });
-        var active = document.querySelector('.rw-tab[onclick="rwFilter(\'' + type + '\')"]');
-        if (!active) active = document.querySelector('.rw-tab');
-        if (active) active.classList.add('active');
-        _renderList(type);
-    };
-
-    function _renderList(type) {
-        var list = document.getElementById('rw-list');
-        var rows = type ? _rwRows.filter(function(r){ return r.reaction_type === type; }) : _rwRows;
-
-        if (!rows.length) {
-            list.innerHTML = '<p class="rw-hint">Aucune réaction.</p>';
-            return;
-        }
-
-        var html = rows.map(function(r) {
-            return '<a href="/account/' + r.id + '/" class="rw-row">'
-                + '<div class="rw-av"><img src="' + _e(r.avatar) + '" onerror="this.parentNode.textContent=\'' + _e(r.username.charAt(0).toUpperCase()) + '\'" alt=""></div>'
-                + '<span class="rw-name">' + _e(r.username) + '</span>'
-                + '<span class="rw-emoji">' + (r.emoji || '') + '</span>'
-                + '</a>';
-        }).join('');
-        list.innerHTML = html;
-    }
-
-    function _e(s){ return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
-
-    // Fermeture clavier
-    document.addEventListener('keydown', function(e){
-        if (e.key === 'Escape') rwClose();
-    });
 })();
 </script>
 

@@ -1,0 +1,57 @@
+{% load i18n %}
+{% comment %}Champs communs à la création et à la modification d'une annonce (hors photos, statut et boutons).{% endcomment %}
+<!-- Récapitulatif des erreurs (rempli aussi par le script quand l'envoi passe par fetch) -->
+<div id="bazar-form-errors" class="bazar-form-errors" role="alert"{% if not form.errors %} hidden{% endif %}>
+    <strong><i class="material-icons" aria-hidden="true">error_outline</i>{% trans "Vérifiez les champs signalés." %}</strong>
+    <ul>
+        {% for e in form.non_field_errors %}<li>{{ e }}</li>{% endfor %}
+        {% for field in form %}{% for e in field.errors %}<li>{{ field.label }} : {{ e }}</li>{% endfor %}{% endfor %}
+    </ul>
+</div>
+
+{% with lt=form.listing_type.value|default:'vente' %}
+<!-- Type d'annonce -->
+<div class="vz-card bazar-section">
+  <h2 class="bazar-section-title"><i class="material-icons" aria-hidden="true">category</i>{% trans "Type d'annonce" %}</h2>
+  <div class="type-radio-group" role="radiogroup" aria-label="{% trans "Type d'annonce" %}">
+    <label class="type-radio-btn {% if lt != 'location' %}selected{% endif %}" id="lbl-vente">
+      <input type="radio" name="listing_type" value="vente" {% if lt != 'location' %}checked{% endif %}>
+      <i class="material-icons" aria-hidden="true">sell</i>
+      <strong>{% trans "À vendre" %}</strong>
+      <small>{% trans "Vente d'un objet ou d'un service" %}</small>
+    </label>
+    <label class="type-radio-btn {% if lt == 'location' %}selected{% endif %}" id="lbl-location">
+      <input type="radio" name="listing_type" value="location" {% if lt == 'location' %}checked{% endif %}>
+      <i class="material-icons" aria-hidden="true">vpn_key</i>
+      <strong>{% trans "À louer" %}</strong>
+      <small>{% trans "Location d'un véhicule ou d'un logement" %}</small>
+    </label>
+  </div>
+
+  <!-- Conditions de location (affichées par le script quand « À louer » est choisi) -->
+  <div class="location-fields" id="location-fields"{% if lt != 'location' %} hidden{% endif %}>
+    <div class="loc-fields-header"><i class="material-icons" aria-hidden="true">assignment</i>{% trans "Conditions de location" %}</div>
+    <div class="bazar-form-grid bazar-form-grid--3">
+      {% include 'bazar/_field.html' with field=form.prix_location %}
+      {% include 'bazar/_field.html' with field=form.periode_location %}
+      {% trans "facultatif" as opt %}
+      {% include 'bazar/_field.html' with field=form.caution hint=opt %}
+      {% include 'bazar/_field.html' with field=form.duree_min %}
+      {% trans "logement" as for_home %}
+      {% include 'bazar/_field.html' with field=form.nb_pieces hint=for_home %}
+      {% include 'bazar/_field.html' with field=form.surface_m2 %}
+    </div>
+    <div class="bazar-check-row">
+      <div class="form-check bazar-check">
+        {{ form.meuble }} <label class="form-check-label bazar-check-label" for="{{ form.meuble.id_for_label }}">{{ form.meuble.label }}</label>
+      </div>
+      <div class="form-check bazar-check">
+        {{ form.charges_incluses }} <label class="form-check-label bazar-check-label" for="{{ form.charges_incluses.id_for_label }}">{{ form.charges_incluses.label }}</label>
+      </div>
+      <div class="form-check bazar-check">
+        {{ form.avec_chauffeur }} <label class="form-check-label bazar-check-label" for="{{ form.avec_chauffeur.id_for_label }}">{{ form.avec_chauffeur.label }}</label>
+      </div>
+    </div>
+  </div>
+</div>
+{% endwith %}

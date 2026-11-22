@@ -3,14 +3,13 @@
 
 <link rel="stylesheet" href="{% static 'css/pages/base-chat_notifications.css' %}">
 
-<p class="d-none" id="id_chat_newest_timestamp" style="display:none"></p>
-<p class="d-none" id="id_chat_page_number" style="display:none">1</p>
+<p id="id_chat_newest_timestamp" hidden></p>
+<p id="id_chat_page_number" hidden>1</p>
 
 
 <script type="text/javascript">
 
 	setOnChatNotificationScrollListener()
-	onChatNotificationsPaginationTriggerListener()
 
 	/* Le WebSocket pousse déjà les nouveautés (types 3/4/13/14) : ce poll n'est
 	   qu'un filet de sécurité. 4 s vidait la batterie et le forfait data. */
@@ -96,7 +95,6 @@
 		else if(current == "" || current == null || current == "undefined"){
 			element.innerHTML = timestamp
 		}
-		console.log("setChatNewestTimestamp: " + element.innerHTML)
 	}
 
 	/*
@@ -111,16 +109,14 @@
 
         var titleEl = document.createElement("span")
         titleEl.className = "chat-dropdown-header-title"
-        titleEl.innerHTML = '<span class="material-icons">chat_bubble</span> Messages'
+        titleEl.innerHTML = '<span class="material-icons" aria-hidden="true">chat_bubble</span> {% trans "Messages"|escapejs %}'
         header.appendChild(titleEl)
 
-        var gotoBtn = document.createElement("button")
-        gotoBtn.className = "chat-dropdown-header-goto"
-        gotoBtn.innerHTML = 'Ouvrir <span class="material-icons" style="font-size:.85rem;vertical-align:middle;">open_in_new</span>'
-        gotoBtn.addEventListener("click", function(e){
-            e.stopPropagation();
-            chatRedirect("{% url 'chat:private-chat-room' %}")
-        })
+        var gotoBtn = document.createElement("a")
+        gotoBtn.className = "vz-btn vz-btn--sm vz-btn--ghost chat-dropdown-header-goto"
+        gotoBtn.href = "{% url 'chat:private-chat-room' %}"
+        gotoBtn.innerHTML = '{% trans "Ouvrir"|escapejs %} <span class="material-icons" aria-hidden="true">arrow_forward</span>'
+        gotoBtn.addEventListener("click", function(e){ e.stopPropagation(); })
         header.appendChild(gotoBtn)
 
         // insérer en premier dans le container
@@ -142,8 +138,8 @@
 
 			var empty = document.createElement("div")
 			empty.id = "id_no_chat_notifications"
-			empty.style.cssText = "display:flex;flex-direction:column;align-items:center;justify-content:center;padding:2rem 1rem;color:var(--text-muted,#65676b);gap:.5rem;"
-			empty.innerHTML = '<span class="material-icons" style="font-size:2.2rem;opacity:.35;">chat_bubble_outline</span><span style="font-size:.85rem;">{% trans "Aucun nouveau message"|escapejs %}</span>'
+			empty.className = "vz-empty chat-dropdown-empty"
+			empty.innerHTML = '<span class="material-icons" aria-hidden="true">chat_bubble_outline</span><span class="vz-empty-text">{% trans "Aucun nouveau message"|escapejs %}</span>'
 			notificationContainer.appendChild(empty)
 
 			setChatNotificationsCount([])
@@ -169,6 +165,12 @@
 			card.id = cardId
 		}
 		card.classList.add("d-flex", "flex-column", "align-items-start", "chat-card","p-4")
+		/* (une carte se parcourt et s'ouvre au clavier comme un bouton) */
+		card.setAttribute("role", "button")
+		card.tabIndex = 0
+		card.addEventListener("keydown", function(e){
+			if(e.key === "Enter" || e.key === " "){ e.preventDefault(); card.click() }
+		})
 		return card
 	}
 
@@ -189,7 +191,7 @@
 	function createChatTimestampElement(notification){
 		var timestamp = document.createElement("p")
 		timestamp.classList.add("small", "pt-2", "timestamp-text")
-		timestamp.innerHTML = notification['natural_timestamp']
+		timestamp.textContent = notification['natural_timestamp']
 		timestamp.id = assignChatTimestampId(notification)
 		return timestamp
 	}
@@ -206,8 +208,7 @@
 		})
 
 		var div1 = document.createElement("div")
-		div1.classList.add("d-flex", "flex-row", "align-items-center")
-		div1.style.gap = ".65rem"
+		div1.classList.add("d-flex", "flex-row", "align-items-center", "chat-card-row")
 		div1.id = assignChatDiv1Id(notification)
 
 		// Avatar
@@ -217,27 +218,24 @@
 
 		// Text block
 		var div2 = document.createElement("div")
-		div2.classList.add("d-flex", "flex-column")
-		div2.style.cssText = "flex:1;min-width:0;"
+		div2.classList.add("d-flex", "flex-column", "chat-card-text")
 		div2.id = assignChatDiv2Id(notification)
 
 		var title = document.createElement("div")
 		title.classList.add("chat-card-title")
-		title.innerHTML = notification['from']['title']
+		/* (nom et aperçu viennent d'un autre membre : jamais interprétés comme du HTML) */
+		title.textContent = notification['from']['title']
 		title.id = assignChatTitleId(notification)
 		div2.appendChild(title)
 
 		var chatRoomMessage = document.createElement("div")
 		chatRoomMessage.id = assignChatroomMessageId(notification)
 		chatRoomMessage.classList.add("notification-chatroom-msg")
-		chatRoomMessage.innerHTML = notification['verb'].length > 45
-			? notification['verb'].slice(0, 45) + "…"
-			: notification['verb']
+		chatRoomMessage.textContent = chatPreviewText(notification['verb'], 45)
 		div2.appendChild(chatRoomMessage)
 
 		// Timestamp below message
 		var ts = createChatTimestampElement(notification)
-		ts.style.margin = "0"
 		div2.appendChild(ts)
 		div1.appendChild(div2)
 
@@ -353,16 +351,11 @@
 						child.childNodes.forEach(function(nextChild){
 							if(nextChild.id == ("id_chat_title_" + notification['notification_id'])){
 								// found title
-								nextChild.innerHTML = notification['from']['title']
+								nextChild.textContent = notification['from']['title']
 							}
 							if(nextChild.id == ("id_chat_message_" + notification['notification_id'])){
 								// found chat message
-								if(notification['verb'].length > 50){
-									nextChild.innerHTML = notification['verb'].slice(0, 50) + "..."
-								}
-								else{
-									nextChild.innerHTML = notification['verb']
-								}
+								nextChild.textContent = chatPreviewText(notification['verb'], 50)
 							}
 						})
 					}
@@ -371,7 +364,7 @@
 
 			// TIMESTAMP
 			if (element.id == ("id_timestamp_" + notification['notification_id'])){
-				element.innerHTML = notification['natural_timestamp']
+				element.textContent = notification['natural_timestamp']
 			}
 		})
 	}
@@ -390,13 +383,12 @@
 		document.getElementById("id_chat_page_number").innerHTML = pageNumber
 	}
 
-	function onChatNotificationsPaginationTriggerListener(){
-		window.onscroll = function(ev) {
-			// because of rounding we need to add 2. 1 might be OK but I'm using 2.
-			if ((window.innerHeight + window.scrollY + 2) >= document.body.scrollHeight) {
-				getNextChatNotificationsPage()
-			}
-		};
+	/* (plus de window.onscroll : il remplaçait tout autre gestionnaire de défilement du site et
+	   chargeait la suite des messages en bas de n'importe quelle page ; la pagination suit
+	   maintenant le défilement du menu lui-même, ci-dessous) */
+	function chatPreviewText(text, max){
+		text = String(text == null ? '' : text)
+		return text.length > max ? text.slice(0, max) + "…" : text
 	}
 
 	/*
@@ -431,8 +423,8 @@
 		var nt = document.getElementById("id_chat_newest_timestamp"); if(nt) nt.innerHTML = ""
 		var empty = document.createElement("div")
 		empty.id = "id_no_chat_notifications"
-		empty.style.cssText = "display:flex;flex-direction:column;align-items:center;justify-content:center;padding:2rem 1rem;color:var(--text-muted,#65676b);gap:.5rem;"
-		empty.innerHTML = '<span class="material-icons" style="font-size:2.2rem;opacity:.35;">chat_bubble_outline</span><span style="font-size:.85rem;">{% trans "Aucun nouveau message"|escapejs %}</span>'
+		empty.className = "vz-empty chat-dropdown-empty"
+		empty.innerHTML = '<span class="material-icons" aria-hidden="true">chat_bubble_outline</span><span class="vz-empty-text">{% trans "Aucun nouveau message"|escapejs %}</span>'
 		container.appendChild(empty)
 		if(reload) getFirstChatNotificationsPage()
 	}
@@ -448,18 +440,16 @@
 
 	function setChatNotificationsCount(count){
 		var countElement = document.getElementById("id_chat_notifications_count")
-		if(count == 0 && chatCachedNotifList.size() > 0){
+		if(countElement == null) return;
+		if(count == 0 && chatCachedNotifList.length > 0){
 			// Plus rien de non lu : les cartes encore affichées sont périmées
 			resetChatNotificationsList(false)
 		}
 		if(count > 0){
-			var accentColor = getComputedStyle(document.documentElement).getPropertyValue('--accent3').trim() || '#e0245e';
-			countElement.style.background = accentColor;
 			countElement.style.display = "block"
-			countElement.innerHTML = count
+			countElement.textContent = count
 		}
 		else{
-			countElement.style.background = "transparent"
 			countElement.style.display = "none"
 		}
 	}

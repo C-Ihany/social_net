@@ -1,6 +1,6 @@
 {% extends 'base.html' %}
 {% load static %}
-{% load i18n %}
+{% load i18n personal_tags %}
 
 {% block content %}
 <link rel="stylesheet" href="{% static 'css/pages/post-index.css' %}">
@@ -17,6 +17,9 @@
   .explore-hero {
     background: linear-gradient(135deg, var(--accent-dark) 0%, var(--accent) 55%, var(--accent2) 100%) !important;
   }
+  [data-theme="dark"] .explore-hero {
+    background: linear-gradient(135deg, rgba(var(--accent-rgb), .30) 0%, rgba(var(--accent-rgb), .10) 100%), var(--bg-card) !important;
+  }
   {% if hero.background_image %}
   .explore-hero {
     background:
@@ -29,15 +32,15 @@
 <div class="explore-hero">
     <div class="explore-hero-content">
         <img src="{% static 'logo/vazimba_icon.png' %}" alt="Vazimba" class="explore-hero-logo">
-        <h1>{{ hero.title }}</h1>
+        <h1>{{ hero.title|hero_accent }}</h1>
         <p>{{ hero.subtitle }}</p>
         <div class="hero-search-wrap">
-            <input type="text" id="hero-search-input"
+            <input type="search" id="hero-search-input" aria-label="{% trans 'Rechercher' %}"
                    placeholder="{% trans 'Search users, posts…' %}"
                    onkeydown="if(event.key==='Enter') doHeroSearch()">
-            <a class="hero-search-btn" onclick="doHeroSearch()">
-                <span class="material-icons">search</span> {% trans "Search" %}
-            </a>
+            <button type="button" class="vz-btn vz-btn--primary vz-btn--pill hero-search-btn" onclick="doHeroSearch()">
+                <span class="material-icons" aria-hidden="true">search</span> {% trans "Rechercher" %}
+            </button>
         </div>
 
         <!-- Statistiques globales dans le hero -->
@@ -108,17 +111,17 @@
             <div class="sidebar-cta">
                 {% if user.is_authenticated %}
                 <p>{% trans "Want to share something with the community?" %}</p>
-                <a class="sidebar-cta-btn cta-primary" href="{% url 'post:addPost' %}">
+                <a class="vz-btn vz-btn--primary vz-btn--block sidebar-cta-btn" href="{% url 'post:addPost' %}">
                     <span class="material-icons">add</span>
                     {% trans "Create a post" %}
                 </a>
-                <a class="sidebar-cta-btn cta-secondary" href="{% url 'post:post-view' %}">
+                <a class="vz-btn vz-btn--secondary vz-btn--block sidebar-cta-btn" href="{% url 'post:post-view' %}">
                     {% trans "My news feed" %}
                 </a>
                 {% else %}
                 <p>{% trans "Join Vazimba to post, comment and interact with the community." %}</p>
-                <a class="sidebar-cta-btn cta-primary" href="{% url 'register' %}">{% trans "Create an account" %}</a>
-                <a class="sidebar-cta-btn cta-secondary" href="{% url 'login' %}">{% trans "Sign in" %}</a>
+                <a class="vz-btn vz-btn--primary vz-btn--block sidebar-cta-btn" href="{% url 'register' %}">{% trans "Create an account" %}</a>
+                <a class="vz-btn vz-btn--secondary vz-btn--block sidebar-cta-btn" href="{% url 'login' %}">{% trans "Sign in" %}</a>
                 {% endif %}
             </div>
         </div>
@@ -177,15 +180,15 @@
                     {% if thumb %}
                     <img class="epc-thumb" src="{{ thumb }}"
                          alt="{{ post.title }}"
-                         onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">
-                    <div class="epc-thumb-placeholder" style="display:none;">
+                         onerror="this.hidden=true;this.nextElementSibling.hidden=false">
+                    <div class="epc-thumb-placeholder" hidden>
                         <span class="material-icons">article</span>
                     </div>
                     {% elif first_media and not first_media.is_video %}
                     <img class="epc-thumb" src="{{ first_media.url }}"
                          alt="{{ post.title }}"
-                         onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">
-                    <div class="epc-thumb-placeholder" style="display:none;">
+                         onerror="this.hidden=true;this.nextElementSibling.hidden=false">
+                    <div class="epc-thumb-placeholder" hidden>
                         <span class="material-icons">article</span>
                     </div>
                     {% else %}
@@ -242,20 +245,20 @@
         <!-- CTA après la grille -->
         <div class="explore-cta-bar">
             {% if user.is_authenticated %}
-            <a href="{% url 'post:post-view' %}" class="explore-cta-btn explore-cta-primary">
+            <a href="{% url 'post:post-view' %}" class="vz-btn vz-btn--primary explore-cta-btn">
                 <span class="material-icons">dynamic_feed</span>
                 {% trans "My full news feed" %}
             </a>
-            <a href="{% url 'post:addPost' %}" class="explore-cta-btn explore-cta-secondary">
+            <a href="{% url 'post:addPost' %}" class="vz-btn vz-btn--secondary explore-cta-btn">
                 <span class="material-icons">add</span>
                 {% trans "New post" %}
             </a>
             {% else %}
-            <a href="{% url 'register' %}" class="explore-cta-btn explore-cta-primary">
+            <a href="{% url 'register' %}" class="vz-btn vz-btn--primary explore-cta-btn">
                 <span class="material-icons">person_add</span>
                 {% trans "Join VAZIMBA" %}
             </a>
-            <a href="{% url 'login' %}" class="explore-cta-btn explore-cta-secondary">
+            <a href="{% url 'login' %}" class="vz-btn vz-btn--secondary explore-cta-btn">
                 <span class="material-icons">login</span>
                 {% trans "Sign in" %}
             </a>
@@ -268,7 +271,7 @@
             <h5>{% trans "No posts to explore yet" %}</h5>
             <p>{% trans "Be the first to share something." %}</p>
             {% if user.is_authenticated %}
-            <a href="{% url 'post:addPost' %}" class="explore-cta-btn explore-cta-primary">
+            <a href="{% url 'post:addPost' %}" class="vz-btn vz-btn--primary explore-cta-btn">
                 <span class="material-icons">add</span> {% trans "Create the first post" %}
             </a>
             {% endif %}

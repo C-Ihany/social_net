@@ -5,7 +5,10 @@
 {% block content %}
 {% include 'resto/_style.html' %}
 <div class="rs-wrap rs-wrap--md">
-    <h1 class="rs-h1 rs-h1--top"><i class="material-icons" aria-hidden="true">receipt_long</i> {% trans "Mes commandes" %}</h1>
+    <div class="vz-page-head">
+        <a class="vz-back" href="{% url 'resto:index' %}" aria-label="{% trans 'Retour' %}"><i class="material-icons" aria-hidden="true">arrow_back</i></a>
+        <div class="vz-page-head__main"><h1 class="vz-page-title"><i class="material-icons" aria-hidden="true">receipt_long</i> {% trans "Mes commandes" %}</h1></div>
+    </div>
 
     <h2 class="rs-section-title rs-section-title--tight">{% trans "En cours" %}</h2>
     <div class="vz-stack">
@@ -17,7 +20,7 @@
             <div class="vz-card__meta">
                 <span class="vz-card__meta-item"><i class="material-icons" aria-hidden="true">receipt_long</i><span>{{ o.number }}</span></span>
                 <span class="vz-card__meta-item"><i class="material-icons" aria-hidden="true">schedule</i><span>{{ o.created_at|vz_since }}</span></span>
-                <span class="vz-card__meta-item"><i class="material-icons" aria-hidden="true">restaurant_menu</i><span>{{ o.items.count }} {% trans "article(s)" %}</span></span>
+                <span class="vz-card__meta-item"><i class="material-icons" aria-hidden="true">restaurant_menu</i><span>{% blocktrans count n=o.items.count %}{{ n }} article{% plural %}{{ n }} articles{% endblocktrans %}</span></span>
             </div>
             <span class="vz-card__price">{{ o.formatted_total }}</span>
         </div>
@@ -26,7 +29,11 @@
         </div>
     </a>
     {% empty %}
-    <p class="rs-muted">{% trans "Aucune commande en cours." %} <a href="{% url 'resto:index' %}" class="rs-link">{% trans "Commander" %} <i class="material-icons rs-ico" aria-hidden="true">arrow_forward</i></a></p>
+    <div class="vz-empty">
+        <i class="material-icons" aria-hidden="true">receipt_long</i>
+        <p class="vz-empty-text">{% trans "Aucune commande en cours." %}</p>
+        <a href="{% url 'resto:index' %}" class="vz-btn vz-btn--primary">{% trans "Voir les restaurants" %}</a>
+    </div>
     {% endfor %}
     </div>
 

@@ -1,46 +1,29 @@
 {% load i18n %}
-
-
 <script type="text/javascript">
-	
+	/* Annule la demande d'ami envoyée au membre `id`.
+	   Le rappel d'interface n'est appelé qu'en cas de SUCCÈS : avant, il partait
+	   dans `complete`, et la page se mettait à jour même quand le serveur refusait. */
 	function cancelFriendRequest(id, uiUpdateFunction){
-		payload = {
-			"csrfmiddlewaretoken": "{{ csrf_token }}",
-			"receiver_user_id": id,
-		}
 		$.ajax({
 			type: 'POST',
 			dataType: "json",
 			url: "{% url 'friend:friend-request-cancel' %}",
-			data: payload,
-			timeout: 5000,
+			data: { csrfmiddlewaretoken: "{{ csrf_token }}", receiver_user_id: id },
+			timeout: 8000,
 			success: function(data) {
-				console.log("SUCCESS", data)
 				if(data['response'] == "Friend request canceled."){
 					vzToast('{% trans "Demande annulée"|escapejs %}', 'success')
+					if (typeof uiUpdateFunction === 'function') uiUpdateFunction()
 				}
 				else if(data['response'] != null){
 					vzAlert(data['response'])
 				}
 			},
-			error: function(data) {
-				console.error("ERROR...", data)
-				vzAlert("{% trans 'Une erreur est survenue'|escapejs %}")
-			},
-			complete: function(data){
-				uiUpdateFunction()
+			error: function(xhr) {
+				var msg = "{% trans 'Une erreur est survenue'|escapejs %}"
+				if (xhr && xhr.responseJSON && xhr.responseJSON.response) msg = xhr.responseJSON.response
+				vzAlert(msg)
 			}
 		});
 	}
-	
-
 </script>
-
-
-
-
-
-
-
-
-

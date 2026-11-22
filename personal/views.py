@@ -5,17 +5,6 @@ from django.db import models
 
 from .models import Announcement, HeroSettings
 
-DEBUG = False
-
-
-def home_screen_view(request):
-	context = {}
-	context['debug_mode'] = settings.DEBUG
-	context['debug'] = DEBUG
-	context['room_id'] = "1"
-	return render(request, "personal/home.html", context)
-
-
 def _landing_stats():
 	"""Chiffres réels de la plateforme, pour la landing page.
 
@@ -101,11 +90,11 @@ def landing_view(request):
 
 	context = {
 		'announcements': announcements,
-		'page_title': 'Vazimba — le réseau social malgache',
+		'page_title': 'Vazimba — le réseau social africain',
 		'meta_description': (
-			"Vazimba réunit la communauté malgache : fil d'actualité, stories, "
-			"Bazar pour acheter et vendre, groupes, lives et découverte du pays. "
-			"Gratuit, en français et en malgache."
+			"Vazimba réunit l'Afrique et sa diaspora : fil d'actualité, stories, "
+			"Bazar pour acheter et vendre, groupes, lives et découverte du continent. "
+			"Gratuit, en trois langues."
 		),
 		'hero': hero,
 		'stats': _landing_stats(),

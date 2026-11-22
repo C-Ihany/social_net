@@ -9,7 +9,7 @@ Vue d'ensemble :
                           └─ OrderEvent                    (historique des statuts)
     Cart ─ CartItem ─ (options)                            (panier serveur, 1 resto à la fois)
 
-Toutes les sommes sont en ariary, sans décimales (comme dans le Bazar).
+Toutes les sommes sont en monnaie locale, sans décimales (comme dans le Bazar).
 """
 import secrets
 
@@ -20,13 +20,24 @@ from django.utils.text import slugify
 from django.utils.translation import gettext_lazy as _
 
 from regions import REGION_CHOICES
+from ZOOT.storage import private_storage
 
 
 def _fmt_ar(value):
     """12500 → '12 500 Ar' (même rendu que Annonce.formatted_price)."""
     if value is None:
         return ''
-    return f'{int(value):,} Ar'.replace(',', ' ')
+    # Même rendu que le filtre vz_ariary : espace fine insécable entre les milliers,
+    # espace insécable avant l'unité (le montant ne se coupe jamais en fin de ligne).
+    return f'{int(value):,}'.replace(',', '\u202f') + '\u00a0Ar'
+
+
+def identity_upload_to(instance, filename):
+    """Scans de pièce d'identité : nom aléatoire (le nom d'origine ne doit rien révéler ni être devinable)."""
+    ext = filename.rsplit('.', 1)[-1].lower() if '.' in filename else 'jpg'
+    if ext not in ('jpg', 'jpeg', 'png', 'webp', 'heic', 'heif'):
+        ext = 'jpg'
+    return f'resto/identite/{timezone.now():%Y/%m}/{secrets.token_urlsafe(24)}.{ext}'
 
 
 # ═══════════════════════════════════════════════════════════════════════════════
@@ -42,7 +53,7 @@ class Restaurant(models.Model):
     CATEGORY_CHOICES = [
         ('restaurant', _('Restaurant')),
         ('fast_food',  _('Fast-food & Snack')),
-        ('gargote',    _('Gargote & Hotely')),
+        ('gargote',    _('Cuisine de quartier')),
         ('patisserie', _('Pâtisserie & Boulangerie')),
         ('boissons',   _('Boissons & Jus')),
         ('traiteur',   _('Traiteur & Plats maison')),
@@ -68,7 +79,7 @@ class Restaurant(models.Model):
     phone   = models.CharField(max_length=30, blank=True, default='', verbose_name=_('Téléphone / WhatsApp'))
     address = models.CharField(
         max_length=250, verbose_name=_('Adresse'),
-        help_text=_('Quartier, rue, repère (ex: Analakely, en face de la pharmacie)'),
+        help_text=_('Quartier, rue, repère (ex : en face de la pharmacie)'),
     )
     region = models.CharField(
         max_length=30, choices=REGION_CHOICES, blank=True, default='',
@@ -348,14 +359,18 @@ class Courier(models.Model):
     is_approved  = models.BooleanField(default=False, verbose_name=_('Approuvé'), db_index=True)
 
     # ── Identité (confiance) ──────────────────────────────────────────────────
-    full_name = models.CharField(max_length=120, blank=True, default='', verbose_name=_('Nom complet (comme sur la CIN)'))
+    full_name = models.CharField(max_length=120, blank=True, default='', verbose_name=_("Nom complet (comme sur la pièce d'identité)"))
     photo = models.ImageField(upload_to='resto/couriers/%Y/%m/', null=True, blank=True, verbose_name=_('Photo (visage bien visible)'))
     bio = models.TextField(blank=True, default='', verbose_name=_('Présentation'),
                            help_text=_('Quelques mots sur vous : expérience, ponctualité, ce que les clients peuvent attendre.'))
-    # CIN malgache : 12 chiffres. Numéro et scans visibles uniquement par l'équipe Vazimba (admin).
-    cin_number = models.CharField(max_length=20, blank=True, default='', verbose_name=_('N° de CIN (12 chiffres)'))
-    cin_front = models.ImageField(upload_to='resto/cin/%Y/%m/', null=True, blank=True, verbose_name=_('CIN recto'))
-    cin_back  = models.ImageField(upload_to='resto/cin/%Y/%m/', null=True, blank=True, verbose_name=_('CIN verso'))
+    # Pièce d'identité nationale (format variable selon le pays). Numéro et scans visibles uniquement par l'équipe Vazimba (admin).
+    cin_number = models.CharField(max_length=20, blank=True, default='', verbose_name=_("N° de pièce d'identité"))
+    # Rangés dans le seau PRIVÉ (liens signés de 5 minutes, comme les pièces jointes du chat),
+    # sous un nom de fichier aléatoire : jamais dans le seau public des médias.
+    cin_front = models.ImageField(upload_to=identity_upload_to, storage=private_storage, null=True, blank=True,
+                                  verbose_name=_("Pièce d'identité, recto"))
+    cin_back  = models.ImageField(upload_to=identity_upload_to, storage=private_storage, null=True, blank=True,
+                                  verbose_name=_("Pièce d'identité, verso"))
     cin_verified = models.BooleanField(default=False, verbose_name=_('Identité vérifiée par Vazimba'), db_index=True)
     verified_at = models.DateTimeField(null=True, blank=True)
     verified_by = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, blank=True,
@@ -368,25 +383,30 @@ class Courier(models.Model):
 
     # ── Zone & disponibilités ─────────────────────────────────────────────────
     zones = models.CharField(max_length=250, blank=True, default='', verbose_name=_('Quartiers couverts'),
-                             help_text=_('Ex : Analakely, Isoraka, Ankorondrano, 67 Ha'))
+                             help_text=_('Ex : les quartiers où vous livrez, séparés par des virgules'))
     hours = models.CharField(max_length=120, blank=True, default='', verbose_name=_('Disponibilités'),
                              help_text=_('Ex : Lun–Sam 10h–22h'))
-    languages = models.CharField(max_length=120, blank=True, default='Malagasy, Français', verbose_name=_('Langues parlées'))
+    languages = models.CharField(max_length=120, blank=True, default='', verbose_name=_('Langues parlées'))
     years_experience = models.PositiveSmallIntegerField(default=0, verbose_name=_('Années d\'expérience en livraison'))
 
     # ── Paiement des frais de livraison ───────────────────────────────────────
     MM_CHOICES = [
         ('',       _('Espèces uniquement')),
-        ('mvola',  'MVola'),
         ('orange', 'Orange Money'),
+        ('mtn',    'MTN MoMo'),
+        ('mpesa',  'M-Pesa'),
         ('airtel', 'Airtel Money'),
+        ('wave',   'Wave'),
+        ('moov',   'Moov Money'),
+        ('mvola',  'MVola'),
+        ('autre',  _('Autre mobile money')),
     ]
     mm_provider = models.CharField(max_length=10, choices=MM_CHOICES, blank=True, default='', verbose_name=_('Mobile money'))
     mm_number   = models.CharField(max_length=30, blank=True, default='', verbose_name=_('Numéro mobile money'))
 
     # ── Garant (personne de confiance joignable) ──────────────────────────────
     guarantor_name  = models.CharField(max_length=120, blank=True, default='', verbose_name=_('Nom du garant'),
-                                       help_text=_('Une personne de confiance (famille, employeur, fokontany) qui répond de vous.'))
+                                       help_text=_('Une personne de confiance (famille, employeur, chef de quartier) qui répond de vous.'))
     guarantor_phone = models.CharField(max_length=30, blank=True, default='', verbose_name=_('Téléphone du garant'))
 
     # Dernière position connue (mise à jour par le navigateur du livreur)
@@ -406,6 +426,15 @@ class Courier(models.Model):
     @property
     def display_name(self):
         return self.full_name or self.user.username
+
+    @property
+    def can_deliver(self):
+        """
+        Peut prendre des commandes : validé par Vazimba (indépendant, sa région), ou rattaché
+        à un restaurant — qui répond de lui pour SES commandes seulement. Le rattachement ne
+        vaut jamais validation : retiré du restaurant, un livreur non validé ne voit plus rien.
+        """
+        return self.is_approved or self.restaurant_id is not None
 
     # ── Confiance ─────────────────────────────────────────────────────────────
     @property
@@ -572,9 +601,14 @@ class Order(models.Model):
 
     PAYMENT_CHOICES = [
         ('cash',   _('Espèces à la livraison')),
-        ('mvola',  _('MVola')),
-        ('orange', _('Orange Money')),
-        ('airtel', _('Airtel Money')),
+        ('orange', 'Orange Money'),
+        ('mtn',    'MTN MoMo'),
+        ('mpesa',  'M-Pesa'),
+        ('airtel', 'Airtel Money'),
+        ('wave',   'Wave'),
+        ('moov',   'Moov Money'),
+        ('mvola',  'MVola'),
+        ('autre',  _('Autre mobile money')),
     ]
 
     number = models.CharField(max_length=12, unique=True, editable=False, verbose_name=_('N° de commande'))
@@ -700,14 +734,20 @@ class Order(models.Model):
 
     # Libellés d'ACTION des boutons (différents des libellés d'état) : « Je pars livrer » plutôt que « En cours de livraison »
     ACTION_LABELS = {
-        STATUS_ACCEPTED:   _('✅ Accepter la commande'),
-        STATUS_REFUSED:    _('✕ Refuser'),
-        STATUS_PREPARING:  _('👩‍🍳 Lancer la préparation'),
-        STATUS_READY:      _('📦 Commande prête'),
-        STATUS_PICKED_UP:  _('📦 J\'ai récupéré la commande'),
-        STATUS_DELIVERING: _('🛵 Je pars livrer'),
-        STATUS_DELIVERED:  _('✅ Commande remise au client'),
+        STATUS_ACCEPTED:   _('Accepter la commande'),
+        STATUS_REFUSED:    _('Refuser'),
+        STATUS_PREPARING:  _('Lancer la préparation'),
+        STATUS_READY:      _('Commande prête'),
+        STATUS_PICKED_UP:  _('J\'ai récupéré la commande'),
+        STATUS_DELIVERING: _('Je pars livrer'),
+        STATUS_DELIVERED:  _('Commande remise au client'),
         STATUS_CANCELLED:  _('Annuler la commande'),
+    }
+    # Icône Material de chaque action (le libellé reste du texte pur, traduisible)
+    ACTION_ICONS = {
+        STATUS_ACCEPTED: 'check', STATUS_REFUSED: 'close', STATUS_PREPARING: 'soup_kitchen',
+        STATUS_READY: 'inventory_2', STATUS_PICKED_UP: 'shopping_bag', STATUS_DELIVERING: 'two_wheeler',
+        STATUS_DELIVERED: 'task_alt', STATUS_CANCELLED: 'cancel',
     }
 
     def allowed_transitions(self, actor):
@@ -741,14 +781,20 @@ class Order(models.Model):
         return table.get(s, [])
 
     def actions_for(self, roles):
-        """[(statut, libellé d'action)] cumulés pour tous les rôles de l'utilisateur, sans doublon."""
+        """
+        [(statut, libellé d'action)] cumulés pour tous les rôles de l'utilisateur, sans doublon.
+        Ordre d'affichage : « Refuser » / « Annuler » d'abord, l'action principale en dernier (à droite).
+        """
         seen, out = set(), []
         for role in roles:
             for code in self.allowed_transitions(role):
                 if code not in seen:
                     seen.add(code)
                     out.append((code, str(self.ACTION_LABELS.get(code, dict(self.STATUS_CHOICES)[code]))))
-        return out
+        negative = [a for a in out if a[0] in (self.STATUS_REFUSED, self.STATUS_CANCELLED)]
+        positive = [a for a in out if a[0] not in (self.STATUS_REFUSED, self.STATUS_CANCELLED)]
+        # L'étape suivante naturelle (la première permise) est l'action principale : elle va en dernier.
+        return negative + positive[1:] + positive[:1]
 
     def set_status(self, new_status, by=None, note=''):
         """Change le statut, horodate, journalise. Ne vérifie PAS les droits (voir vues)."""

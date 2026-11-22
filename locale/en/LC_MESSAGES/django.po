@@ -647,8 +647,8 @@ msgid "Create the first post"
 msgstr "Create the first post"
 
 # ── Footer ──
-msgid "Social network · Madagascar · 2025"
-msgstr "Social network · Madagascar · 2025"
+msgid "Social network · Africa"
+msgstr "Social network · Africa"
 
 msgid "News feed"
 msgstr "News feed"
@@ -662,8 +662,8 @@ msgstr "© 2025"
 msgid "All rights reserved."
 msgstr "All rights reserved."
 
-msgid "Built with ❤️ for the Malagasy community."
-msgstr "Built with ❤️ for the Malagasy community."
+msgid "Built with ❤️ for the African community."
+msgstr "Built with ❤️ for the African community."
 
 msgid "See more"
 msgstr "See more"
@@ -675,13 +675,13 @@ msgstr "See less"
 msgid "Bazar"
 msgstr "Marketplace"
 
-msgid "Acheter et vendre entre Malgaches — simple, rapide, local"
-msgstr "Buy and sell between Malagasy — simple, fast, local"
+msgid "Acheter et vendre entre voisins — simple, rapide, local"
+msgstr "Buy and sell with people near you — simple, fast, local"
 
 msgid "Chercher une annonce…"
 msgstr "Search for an ad…"
 
-msgid "Chercher"
+msgid "Rechercher"
 msgstr "Search"
 
 msgid "Publier une annonce"
@@ -858,8 +858,8 @@ msgstr "Sold"
 msgid "Vous n'avez aucune annonce"
 msgstr "You have no ads yet"
 
-msgid "Publiez votre première annonce et touchez des milliers de Malgaches."
-msgstr "Post your first ad and reach thousands of Malagasy people."
+msgid "Publiez votre première annonce et touchez des milliers de personnes à travers l'Afrique."
+msgstr "Post your first ad and reach thousands of people across Africa."
 
 msgid "Publier maintenant"
 msgstr "Post now"
@@ -962,7 +962,7 @@ msgid "Tous les avantages sont actifs sur votre compte."
 msgstr "All benefits are active on your account."
 
 msgid "Demande refusée"
-msgstr "Request rejected"
+msgstr "Request declined"
 
 msgid "Examinée le {{ date }}."
 msgstr "Reviewed on {{ date }}."
@@ -1000,14 +1000,14 @@ msgstr "Become a verified seller"
 msgid "Badge ✓, priorité dans les résultats, 12 photos par annonce."
 msgstr "✓ badge, priority in results, 12 photos per ad."
 
-msgid "Faire une demande →"
-msgstr "Apply →"
+msgid "Faire une demande"
+msgstr "Apply"
 
 msgid "Demande de vérification en attente"
 msgstr "Verification request pending"
 
-msgid "l'admin examinera votre compte prochainement."
-msgstr "the admin will review your account shortly."
+msgid "l'équipe de modération examinera votre compte prochainement."
+msgstr "the moderation team will review your account shortly."
 
 msgid "Vendeur vérifié"
 msgstr "Verified Seller"
@@ -1018,8 +1018,8 @@ msgstr "verified badge active on all your ads, 12 photos allowed."
 msgid "Demande refusée."
 msgstr "Request rejected."
 
-msgid "Réessayer"
-msgstr "Try again"
+msgid "Refaire une demande"
+msgstr "Apply again"
 
 msgid "Vendeurs vérifiés"
 msgstr "Verified sellers"
@@ -1219,8 +1219,8 @@ msgstr "Save Dina"
 msgid "What is a Dina?"
 msgstr "What is a Dina?"
 
-msgid "In Malagasy culture, the Dina is a community agreement — a set of rules and commitments freely accepted by all members of a community to live together with respect and solidarity (Fihavanana)."
-msgstr "In Malagasy culture, the Dina is a community agreement — a set of rules and commitments freely accepted by all members of a community to live together with respect and solidarity (Fihavanana)."
+msgid "The Dina is a community agreement — a set of rules and commitments freely accepted by all members of a community to live together with respect and solidarity."
+msgstr "The Dina is a community agreement — a set of rules and commitments freely accepted by all members of a community to live together with respect and solidarity."
 
 msgid "No Dina defined yet for this group."
 msgstr "No Dina defined yet for this group."
@@ -1322,7 +1322,7 @@ msgid "Enregistrement…"
 msgstr "Saving…"
 
 msgid "Erreur réseau. Réessayez."
-msgstr "Network error. Try again."
+msgstr "Network error. Please try again."
 
 # bazar/detail.html
 msgid "Image non disponible"
@@ -1344,11 +1344,11 @@ msgstr "Copied!"
 msgid "Près de chez moi :"
 msgstr "Near me:"
 
-msgid "Toute Madagascar"
-msgstr "All of Madagascar"
+msgid "Toute l'Afrique"
+msgstr "All of Africa"
 
-msgid "Détecter ma région automatiquement"
-msgstr "Auto-detect my region"
+msgid "Détecter mon pays automatiquement"
+msgstr "Detect my country automatically"
 
 msgid "Près de moi"
 msgstr "Near me"
@@ -1472,8 +1472,8 @@ msgid "Stories"
 msgstr "Stories"
 
 # post/tendances.html
-msgid "Tendances Malgaches"
-msgstr "Malagasy Trends"
+msgid "Tendances en Afrique"
+msgstr "Trending in Africa"
 
 msgid "Les hashtags les plus utilisés sur Vazimba — %(hours_label)s"
 msgstr "The most used hashtags on Vazimba — %(hours_label)s"
@@ -1487,11 +1487,11 @@ msgstr "Updated every 15 minutes"
 msgid "Actualiser"
 msgstr "Refresh"
 
-msgid "Aucune tendance sur les %(hours_label)s"
-msgstr "No trends in the past %(hours_label)s"
+msgid "Aucune tendance sur %(hours_label)s"
+msgstr "No trends over %(hours_label)s"
 
-msgid "Publiez des posts avec des hashtags pour alimenter les tendances !"
-msgstr "Post with hashtags to feed the trends!"
+msgid "Publiez des posts avec des hashtags pour alimenter les tendances."
+msgstr "Publish posts with hashtags to feed the trends."
 
 msgid "Essayez sur une période plus longue →"
 msgstr "Try a longer time period →"
@@ -1502,7 +1502,7 @@ msgstr "Try a longer time period →"
 msgid "Sauvegarder"
 msgstr "Save"
 
-msgid "Sauvegardé"
+msgid "Enregistrée"
 msgstr "Saved"
 
 msgid "Chargement…"
@@ -1523,8 +1523,8 @@ msgstr "Price on request"
 msgid "Aucun favori pour l'instant"
 msgstr "No favorites yet"
 
-msgid "Sauvegardez des annonces qui vous intéressent pour les retrouver facilement ici."
-msgstr "Save listings you're interested in to find them easily here."
+msgid "Enregistrez les annonces qui vous intéressent pour les retrouver facilement ici."
+msgstr "Save the ads you are interested in to find them easily here."
 
 msgid "Parcourir le Bazar"
 msgstr "Browse the Marketplace"
@@ -1545,7 +1545,7 @@ msgid "Appel vidéo en cours…"
 msgstr "Video call in progress…"
 
 msgid "Appel audio entrant"
-msgstr "Incoming audio call"
+msgstr "Incoming voice call"
 
 msgid "Appel vidéo entrant"
 msgstr "Incoming video call"
@@ -1804,7 +1804,7 @@ msgstr "Order your favourite dishes nearby and track the delivery live, with no 
 msgid "Resto Vazimba"
 msgstr "Vazimba Food"
 
-msgid "Commande ton plat, choisis tes suppléments, suis ton livreur sur la carte."
+msgid "Commandez votre plat, choisissez vos suppléments, suivez votre livreur sur la carte."
 msgstr "Order your dish, pick your extras, follow your courier on the map."
 
 msgid "Un plat, un restaurant, un quartier…"
@@ -1822,7 +1822,7 @@ msgstr "Sell my dishes"
 msgid "Espace livreur"
 msgstr "Courier area"
 
-msgid "Connexion pour commander"
+msgid "Se connecter pour commander"
 msgstr "Log in to order"
 
 msgid "Ouverts d'abord"
@@ -1846,8 +1846,8 @@ msgstr "Closed"
 msgid "Aucun restaurant pour l'instant"
 msgstr "No restaurant yet"
 
-msgid "Sois le premier : crée ta page, ajoute ton menu, et tes clients te retrouveront ici au lieu de chercher ta page Facebook."
-msgstr "Be the first: create your page, add your menu, and your customers will find you here instead of hunting for your Facebook page."
+msgid "Soyez le premier : créez votre page, ajoutez votre menu, et vos clients vous retrouveront ici en un clic."
+msgstr "Be the first: create your page, add your menu, and your customers will find you here in one tap."
 
 msgid "Créer mon restaurant"
 msgstr "Create my restaurant"
@@ -1858,8 +1858,8 @@ msgstr "item"
 msgid "En cours"
 msgstr "In progress"
 
-msgid "article(s)"
-msgstr "item(s)"
+msgid "articles"
+msgstr "items"
 
 msgid "Aucune commande en cours."
 msgstr "No order in progress."
@@ -2005,11 +2005,11 @@ msgstr "Orders ready for pickup"
 msgid "Je prends cette livraison"
 msgstr "I take this delivery"
 
-msgid "Rien à récupérer pour le moment. La page se rafraîchit toute seule."
-msgstr "Nothing to pick up right now. This page refreshes by itself."
+msgid "Rien à récupérer pour le moment. La liste se met à jour toute seule."
+msgstr "Nothing to pick up right now. The list updates by itself."
 
-msgid "Votre profil doit être validé pour voir les commandes."
-msgstr "Your profile must be approved to see orders."
+msgid "Votre profil doit être validé par Vazimba, ou rattaché à un restaurant, pour voir les commandes."
+msgstr "Your profile must be approved by Vazimba, or attached to a restaurant, to see orders."
 
 msgid "Dernières livraisons"
 msgstr "Latest deliveries"
@@ -2026,8 +2026,8 @@ msgstr "Become a courier"
 msgid "Mon profil livreur"
 msgstr "My courier profile"
 
-msgid "Un restaurant peut vous rattacher directement (vous êtes alors validé aussitôt). Les livreurs indépendants sont validés par l'équipe Vazimba."
-msgstr "A restaurant can attach you directly (you are then approved at once). Independent couriers are approved by the Vazimba team."
+msgid "Un restaurant peut vous rattacher directement : vous livrez alors ses commandes sans attendre. Les livreurs indépendants sont validés par l'équipe Vazimba."
+msgstr "A restaurant can attach you directly: you then deliver its orders straight away. Independent couriers are approved by the Vazimba team."
 
 msgid "Livreurs"
 msgstr "Couriers"
@@ -2035,8 +2035,8 @@ msgstr "Couriers"
 msgid "Mes restaurants"
 msgstr "My restaurants"
 
-msgid "Ajoutez vos livreurs par leur nom d'utilisateur Vazimba. Ils recevront vos commandes prêtes et partageront leur position avec le client."
-msgstr "Add your couriers by their Vazimba username. They will receive your ready orders and share their location with the customer."
+msgid "Ajoutez vos livreurs par leur nom d'utilisateur Vazimba. La personne doit d'abord avoir créé son profil livreur (Espace livreur). Elle recevra vos commandes prêtes et partagera sa position avec le client."
+msgstr "Add your couriers by their Vazimba username. The person must first have created their courier profile (Courier area). They will receive your ready orders and share their position with the customer."
 
 msgid "Nom d'utilisateur"
 msgstr "Username"
@@ -2125,8 +2125,8 @@ msgstr "Order"
 msgid "Enregistrer le plat"
 msgstr "Save the dish"
 
-msgid "Comme sur Uber Eats : un groupe = une question posée au client (« Sauce ? », « Suppléments ? »). Minimum 1 = choix obligatoire. Maximum 1 = un seul choix, 0 = illimité."
-msgstr "Like Uber Eats: one group = one question asked to the customer (\"Sauce?\", \"Extras?\"). Minimum 1 = required choice. Maximum 1 = single choice, 0 = unlimited."
+msgid "Un groupe = une question posée au client (« Sauce ? », « Suppléments ? »). Minimum 1 = choix obligatoire. Maximum 1 = un seul choix, 0 = illimité."
+msgstr "One group = one question asked to the customer (“Sauce?”, “Extras?”). Minimum 1 = a choice is required. Maximum 1 = a single choice, 0 = unlimited."
 
 msgid "Ajouter un groupe"
 msgstr "Add a group"
@@ -2155,8 +2155,8 @@ msgstr "Edit dish"
 msgid "Nouvelles"
 msgstr "New"
 
-msgid "Cette page se rafraîchit automatiquement à chaque nouvelle commande."
-msgstr "This page refreshes automatically on every new order."
+msgid "La liste se met à jour toute seule à chaque nouvelle commande."
+msgstr "The list updates by itself with every new order."
 
 msgid "Retrait"
 msgstr "Pickup"
@@ -2179,8 +2179,8 @@ msgstr "Create and go to the menu"
 msgid "Après création, votre page reste invisible au public jusqu'à validation par l'équipe Vazimba. Vous pouvez déjà préparer votre menu."
 msgstr "After creation your page stays hidden until the Vazimba team approves it. You can already prepare your menu."
 
-msgid "Ex : Hotely Mamy, Pizza Tana…"
-msgstr "E.g. Hotely Mamy, Pizza Tana…"
+msgid "Le nom de votre établissement"
+msgstr "The name of your business"
 
 msgid "Spécialités, ambiance, ce qui vous distingue"
 msgstr "Specialities, atmosphere, what makes you different"
@@ -2200,8 +2200,8 @@ msgstr "The amount cannot be negative."
 msgid "Ex : Plats, Boissons, Desserts"
 msgstr "E.g. Mains, Drinks, Desserts"
 
-msgid "Ex : Ravitoto sy henakisoa"
-msgstr "E.g. Ravitoto sy henakisoa"
+msgid "Ex : Poulet braisé, riz et légumes"
+msgstr "E.g. Grilled chicken, rice and vegetables"
 
 msgid "Ingrédients, portion, accompagnement"
 msgstr "Ingredients, portion, side"
@@ -2248,8 +2248,8 @@ msgstr "Phone / WhatsApp"
 msgid "Adresse"
 msgstr "Address"
 
-msgid "Quartier, rue, repère (ex: Analakely, en face de la pharmacie)"
-msgstr "Neighbourhood, street, landmark (e.g. Analakely, opposite the pharmacy)"
+msgid "Quartier, rue, repère (ex : en face de la pharmacie)"
+msgstr "Neighbourhood, street, landmark (e.g. opposite the pharmacy)"
 
 msgid "Région"
 msgstr "Region"
@@ -2446,8 +2446,8 @@ msgstr "Minimum order: %(m)s Ar."
 msgid "Nouvelle commande %(n)s chez %(r)s (%(t)s)"
 msgstr "New order %(n)s at %(r)s (%(t)s)"
 
-msgid "🍽️ Nouvelle commande"
-msgstr "🍽️ New order"
+msgid "Nouvelle commande"
+msgstr "New order"
 
 msgid "Commande %(n)s envoyée ! Le restaurant va la confirmer."
 msgstr "Order %(n)s sent! The restaurant will confirm it."
@@ -2473,8 +2473,8 @@ msgstr "Order %(n)s: %(s)s"
 msgid "Commande %(n)s prête à récupérer chez %(r)s"
 msgstr "Order %(n)s ready for pickup at %(r)s"
 
-msgid "🛵 Livraison disponible"
-msgstr "🛵 Delivery available"
+msgid "Livraison disponible"
+msgstr "Delivery available"
 
 msgid "Commande %(n)s → %(s)s"
 msgstr "Order %(n)s → %(s)s"
@@ -2521,8 +2521,8 @@ msgstr "User not found: %(u)s"
 msgid "%(r)s vous a ajouté comme livreur"
 msgstr "%(r)s added you as a courier"
 
-msgid "🛵 Vazimba Resto"
-msgstr "🛵 Vazimba Food"
+msgid "Vazimba Resto"
+msgstr "Vazimba Resto"
 
 msgid "%(u)s est maintenant livreur de %(r)s."
 msgstr "%(u)s is now a courier for %(r)s."
@@ -2530,8 +2530,8 @@ msgstr "%(u)s is now a courier for %(r)s."
 msgid "Profil livreur enregistré."
 msgstr "Courier profile saved."
 
-msgid "Demande envoyée. Un restaurant peut vous rattacher, ou Vazimba validera votre profil."
-msgstr "Request sent. A restaurant can attach you, or Vazimba will approve your profile."
+msgid "Profil créé. Un restaurant peut vous rattacher pour ses commandes ; les livreurs indépendants sont validés par Vazimba."
+msgstr "Profile created. A restaurant can attach you for its orders; independent couriers are approved by Vazimba."
 
 msgid "Profil livreur non validé."
 msgstr "Courier profile not approved."
@@ -2548,8 +2548,8 @@ msgstr "Taken by %(c)s"
 msgid "%(c)s a récupéré votre commande %(n)s"
 msgstr "%(c)s picked up your order %(n)s"
 
-msgid "🛵 En route !"
-msgstr "🛵 On the way!"
+msgid "En route !"
+msgstr "On the way!"
 
 msgid "Commande %(n)s prise par %(c)s"
 msgstr "Order %(n)s taken by %(c)s"
@@ -2595,8 +2595,8 @@ msgstr "Add ingredient"
 msgid "retirable"
 msgstr "removable"
 
-msgid "Ex : Porc mijoté 2 h avec les feuilles de manioc pilées, servi avec du riz blanc"
-msgstr "E.g. Pork simmered 2 h with pounded cassava leaves, served with white rice"
+msgid "Ex : Mijoté 2 h à feu doux, servi avec du riz blanc"
+msgstr "E.g. Simmered for 2 hours over low heat, served with white rice"
 
 msgid "Comment le plat est préparé : cuisson, mode de préparation, temps, particularités."
 msgstr "How the dish is prepared: cooking, method, time, specifics."
@@ -2705,8 +2705,8 @@ msgstr "Identity verified, 20+ deliveries, rating ≥ 4.5, no payment issue"
 msgid "Livreur confirmé"
 msgstr "Confirmed courier"
 
-msgid "CIN contrôlée par l'équipe Vazimba"
-msgstr "ID card checked by the Vazimba team"
+msgid "Pièce d'identité contrôlée par l'équipe Vazimba"
+msgstr "ID checked by the Vazimba team"
 
 msgid "Identité vérifiée"
 msgstr "Identity verified"
@@ -2720,7 +2720,7 @@ msgstr "New courier"
 msgid "Profil de confiance"
 msgstr "Trust profile"
 
-msgid "Compléter mon profil (photo, CIN, garant…) pour être vérifié"
+msgid "Compléter mon profil (photo, pièce d'identité, garant…) pour être vérifié"
 msgstr "Complete my profile (photo, ID, guarantor…) to get verified"
 
 msgid "Voir mon profil public"
@@ -2783,8 +2783,8 @@ msgstr "No reviews yet."
 msgid "Ce qui rend un profil fiable"
 msgstr "What makes a profile trustworthy"
 
-msgid "Ces informations servent à vérifier qui vous êtes. Le numéro et les photos de CIN ne sont jamais publiés : seule l'équipe Vazimba les voit."
-msgstr "This information is used to verify who you are. The ID number and photos are never published: only the Vazimba team sees them."
+msgid "Ces informations servent à vérifier qui vous êtes. Le numéro et les photos de votre pièce d'identité ne sont jamais publiés : seule l'équipe Vazimba les voit."
+msgstr "This information is used to verify who you are. Your ID number and photos are never published: only the Vazimba team sees them."
 
 msgid "Identité vérifiée par Vazimba"
 msgstr "Identity verified by Vazimba"
@@ -2795,20 +2795,20 @@ msgstr "Area & availability"
 msgid "Paiement des frais de livraison"
 msgstr "Delivery fee payment"
 
-msgid "Le garant est une pratique de confiance courante à Madagascar : une personne joignable qui répond de vous en cas de problème."
-msgstr "A guarantor is a common trust practice in Madagascar: a reachable person who vouches for you if there is a problem."
+msgid "Le garant est une pratique de confiance courante : une personne joignable qui répond de vous en cas de problème."
+msgstr "A guarantor is a common trust practice: a reachable person who vouches for you if there is a problem."
 
 msgid "Enregistrer mon profil"
 msgstr "Save my profile"
 
-msgid "Ex : RAKOTO Jean Mamy"
-msgstr "E.g. RAKOTO Jean Mamy"
+msgid "Votre nom et vos prénoms"
+msgstr "Your full name"
 
-msgid "Ex : 1234 TAB"
-msgstr "E.g. 1234 TAB"
+msgid "N° d'immatriculation"
+msgstr "Plate number"
 
-msgid "La CIN malgache comporte 12 chiffres."
-msgstr "The Malagasy ID number has 12 digits."
+msgid "Le numéro de pièce d'identité comporte 6 à 20 lettres ou chiffres."
+msgstr "The ID number has 6 to 20 letters or digits."
 
 msgid "Indiquez le numéro mobile money."
 msgstr "Enter the mobile money number."
@@ -2816,8 +2816,8 @@ msgstr "Enter the mobile money number."
 msgid "Indiquez l'immatriculation du véhicule."
 msgstr "Enter the vehicle licence plate."
 
-msgid "Nom complet (comme sur la CIN)"
-msgstr "Full name (as on your ID card)"
+msgid "Nom complet (comme sur la pièce d'identité)"
+msgstr "Full name (as on your ID)"
 
 msgid "Photo (visage bien visible)"
 msgstr "Photo (face clearly visible)"
@@ -2828,14 +2828,14 @@ msgstr "About you"
 msgid "Quelques mots sur vous : expérience, ponctualité, ce que les clients peuvent attendre."
 msgstr "A few words about you: experience, punctuality, what customers can expect."
 
-msgid "N° de CIN (12 chiffres)"
-msgstr "National ID number (12 digits)"
+msgid "N° de pièce d'identité"
+msgstr "ID number"
 
-msgid "CIN recto"
-msgstr "ID card front"
+msgid "Pièce d'identité, recto"
+msgstr "ID, front"
 
-msgid "CIN verso"
-msgstr "ID card back"
+msgid "Pièce d'identité, verso"
+msgstr "ID, back"
 
 msgid "Notes admin"
 msgstr "Admin notes"
@@ -2849,8 +2849,8 @@ msgstr "Vehicle photo"
 msgid "Quartiers couverts"
 msgstr "Neighbourhoods covered"
 
-msgid "Ex : Analakely, Isoraka, Ankorondrano, 67 Ha"
-msgstr "E.g. Analakely, Isoraka, Ankorondrano, 67 Ha"
+msgid "Ex : les quartiers où vous livrez, séparés par des virgules"
+msgstr "E.g. the neighbourhoods you deliver to, separated by commas"
 
 msgid "Langues parlées"
 msgstr "Languages spoken"
@@ -2867,8 +2867,8 @@ msgstr "Mobile money number"
 msgid "Nom du garant"
 msgstr "Guarantor name"
 
-msgid "Une personne de confiance (famille, employeur, fokontany) qui répond de vous."
-msgstr "A trusted person (family, employer, fokontany) who vouches for you."
+msgid "Une personne de confiance (famille, employeur, chef de quartier) qui répond de vous."
+msgstr "Someone trusted (family, employer, community leader) who vouches for you."
 
 msgid "Téléphone du garant"
 msgstr "Guarantor phone"
@@ -2880,8 +2880,8 @@ msgstr "Check the highlighted fields."
 msgid "photo réelle"
 msgstr "real photo"
 
-msgid "CIN contrôlée"
-msgstr "ID card checked"
+msgid "pièce d'identité contrôlée"
+msgstr "ID checked"
 
 msgid "téléphone vérifié"
 msgstr "verified phone"
@@ -2943,26 +2943,26 @@ msgstr "I received my order"
 msgid "Une fois la commande remise et payée, appuyez sur « Commande remise au client » : le client pourra ensuite vous noter."
 msgstr "Once the order is handed over and paid, tap \"Handed to the customer\": the customer can then rate you."
 
-msgid "✅ Accepter la commande"
-msgstr "✅ Accept the order"
+msgid "Accepter la commande"
+msgstr "Accept the order"
 
-msgid "✕ Refuser"
-msgstr "✕ Refuse"
+msgid "Refuser"
+msgstr "Decline"
 
-msgid "👩‍🍳 Lancer la préparation"
-msgstr "👩‍🍳 Start cooking"
+msgid "Lancer la préparation"
+msgstr "Start preparing"
 
-msgid "📦 Commande prête"
-msgstr "📦 Order ready"
+msgid "Commande prête"
+msgstr "Order ready"
 
-msgid "📦 J'ai récupéré la commande"
-msgstr "📦 I picked up the order"
+msgid "J'ai récupéré la commande"
+msgstr "I have picked up the order"
 
-msgid "🛵 Je pars livrer"
-msgstr "🛵 On my way to deliver"
+msgid "Je pars livrer"
+msgstr "I'm leaving to deliver"
 
-msgid "✅ Commande remise au client"
-msgstr "✅ Handed to the customer"
+msgid "Commande remise au client"
+msgstr "Order handed to the customer"
 
 msgid "Réception confirmée par le client"
 msgstr "Receipt confirmed by the customer"
@@ -3094,8 +3094,8 @@ msgstr "Privacy"
 msgid "Vazimba sur Google Play"
 msgstr "Vazimba on Google Play"
 
-msgid "Le réseau social malgache."
-msgstr "The Malagasy social network."
+msgid "Le réseau social africain."
+msgstr "The African social network."
 
 msgid "Téléchargez l'application Android"
 msgstr "Download the Android app"
@@ -3333,8 +3333,8 @@ msgstr "No approved place yet."
 msgid "Aucun lieu trouvé"
 msgstr "No place found"
 
-msgid "Aucun live en cours — sois le premier à diffuser !"
-msgstr "No live right now — be the first to go live!"
+msgid "Aucun live en cours"
+msgstr "No live right now"
 
 msgid "Bio / Présentation"
 msgstr "Bio / About"
@@ -3355,10 +3355,10 @@ msgid "Cliquez ou glissez vos nouvelles photos ici"
 msgstr "Click or drag your new photos here"
 
 msgid "Cliquez ou glissez vos photos ici"
-msgstr "Click or drag your photos here"
+msgstr "Click or drop your photos here"
 
-msgid "Cliquez sur une photo pour la marquer à supprimer (fond rouge = sera supprimée)."
-msgstr "Click a photo to mark it for deletion (red = will be deleted)."
+msgid "Touchez une photo pour la marquer à supprimer (fond rouge = sera supprimée)."
+msgstr "Tap a photo to mark it for deletion (red overlay = will be deleted)."
 
 msgid "Commencer le live"
 msgstr "Start the live"
@@ -3411,35 +3411,35 @@ msgstr "Save changes"
 msgid "Espèces endémiques"
 msgstr "Endemic species"
 
-msgid "Essayez d'autres termes ou"
-msgstr "Try other terms or"
+msgid "Essayez d'autres termes ou effacez les filtres."
+msgstr "Try other words or clear the filters."
 
-msgid "Ex : 🇲🇬 Madagascar vs France — Coupe du Monde !"
-msgstr "E.g. 🇲🇬 Madagascar vs France — World Cup!"
+msgid "Ex : la finale de la CAN en direct !"
+msgstr "E.g. the AFCON final, live!"
 
-msgid "Ex: -18.9249, 44.8237 ou nom du village"
-msgstr "E.g. -18.9249, 44.8237 or village name"
+msgid "Ex : ville ou village le plus proche, ou coordonnées GPS"
+msgstr "E.g. nearest town or village, or GPS coordinates"
 
-msgid "Ex: Avril à Novembre"
-msgstr "E.g. April to November"
+msgid "Ex : saison sèche, de mai à octobre"
+msgstr "E.g. dry season, May to October"
 
-msgid "Ex: Gratuit, 5 000 Ar…"
-msgstr "E.g. Free, 5,000 Ar…"
+msgid "Ex : gratuit, ou prix du billet"
+msgstr "E.g. free, or ticket price"
 
-msgid "Ex: Observation des lémuriens, Randonnée, Circuit culturel, Plongée"
-msgstr "E.g. Lemur watching, Hiking, Cultural tour, Diving"
+msgid "Ex : Observation de la faune, Randonnée, Circuit culturel, Plongée"
+msgstr "E.g. Wildlife watching, Hiking, Cultural tour, Diving"
 
 msgid "Ex: Prix incluant le carburant et le chauffeur. Hébergement non inclus. Demi-tarif pour les enfants de moins de 12 ans…"
 msgstr "E.g. Price includes fuel and driver. Accommodation not included. Half price for children under 12…"
 
-msgid "Ex: Tsingy de Bemaraha, Nosy Be, Isalo…"
-msgstr "E.g. Tsingy de Bemaraha, Nosy Be, Isalo…"
+msgid "Ex : nom du parc, de la plage, du site…"
+msgstr "E.g. name of the park, beach or site…"
 
 msgid "Explorer par catégorie"
 msgstr "Browse by category"
 
-msgid "Faune endémique, Randonnée, Culturel, Plage"
-msgstr "Endemic wildlife, Hiking, Culture, Beach"
+msgid "Faune, Randonnée, Culturel, Plage"
+msgstr "Wildlife, Hiking, Culture, Beach"
 
 msgid "Format international recommandé. Ex: +261 32 00 000 00"
 msgstr "International format recommended. E.g. +261 32 00 000 00"
@@ -3477,8 +3477,8 @@ msgstr "Main information"
 msgid "Inscrivez-vous gratuitement et soyez trouvé par des milliers de voyageurs."
 msgstr "Sign up for free and get found by thousands of travellers."
 
-msgid "JPG, PNG, WEBP — max 8 photos. La première sera la photo principale."
-msgstr "JPG, PNG, WEBP — max 8 photos. The first one is the main photo."
+msgid "JPG, PNG, WebP ou HEIC — 10 Mo par photo, 8 photos au maximum par lieu."
+msgstr "JPG, PNG, WebP or HEIC — 10 MB per photo, up to 8 photos per place."
 
 msgid "JPG, PNG, WEBP — maximum 8 photos au total"
 msgstr "JPG, PNG, WEBP — 8 photos maximum in total"
@@ -3486,8 +3486,8 @@ msgstr "JPG, PNG, WEBP — 8 photos maximum in total"
 msgid "L'hôte a mis fin à la diffusion."
 msgstr "The host ended the stream."
 
-msgid "L'île rouge vous attend — baobabs, plages de corail, lémuriens et paysages à couper le souffle."
-msgstr "The red island awaits you — baobabs, coral beaches, lemurs and breathtaking landscapes."
+msgid "Un continent vous attend — savanes, déserts, plages de corail, forêts et paysages à couper le souffle."
+msgstr "A continent awaits — savannahs, deserts, coral beaches, forests and breathtaking landscapes."
 
 msgid "LIVE"
 msgstr "LIVE"
@@ -3510,14 +3510,14 @@ msgstr "Similar places"
 msgid "Lieux touristiques"
 msgstr "Tourist places"
 
-msgid "Listez les régions, noms de parcs, zones géographiques que vous couvrez."
-msgstr "List the regions, park names and areas you cover."
+msgid "Listez les pays, régions, noms de parcs et zones que vous couvrez : c'est ce texte que lit le filtre par pays."
+msgstr "List the countries, regions, parks and areas you cover: the country filter searches this text."
 
 msgid "Lives en cours"
 msgstr "Lives in progress"
 
-msgid "Malagasy, Français, Anglais"
-msgstr "Malagasy, French, English"
+msgid "Français, Anglais, Swahili"
+msgstr "French, English, Swahili"
 
 msgid "Meilleure période"
 msgstr "Best time to visit"
@@ -3546,8 +3546,8 @@ msgstr "Share your screen to stream the match, or use your camera."
 msgid "Partager l'écran"
 msgstr "Share screen"
 
-msgid "Partagez un lieu que vous connaissez et aidez les voyageurs à découvrir Madagascar."
-msgstr "Share a place you know and help travellers discover Madagascar."
+msgid "Partagez un lieu que vous connaissez et aidez les voyageurs à découvrir l'Afrique."
+msgstr "Share a place you know and help travellers discover Africa."
 
 msgid "Partagez votre écran pour diffuser le match en direct à vos amis sur Vazimba."
 msgstr "Share your screen to stream the match live to your friends on Vazimba."
@@ -3600,8 +3600,8 @@ msgstr "Search for a place…"
 msgid "Regardez le match ensemble"
 msgstr "Watch the match together"
 
-msgid "Rejoignez notre réseau de guides touristiques et aidez les voyageurs à découvrir l'île."
-msgstr "Join our network of tour guides and help travellers discover the island."
+msgid "Rejoignez notre réseau de guides touristiques et aidez les voyageurs à découvrir le continent."
+msgstr "Join our network of tour guides and help travellers discover the continent."
 
 msgid "Rejoindre"
 msgstr "Join"
@@ -3636,8 +3636,8 @@ msgstr "Be the first to review this place!"
 msgid "Spécialités"
 msgstr "Specialities"
 
-msgid "Séparez par des virgules. Ex: Malagasy, Français, Anglais"
-msgstr "Separate with commas. E.g. Malagasy, French, English"
+msgid "Séparez par des virgules. Ex : Français, Anglais, Swahili"
+msgstr "Separate with commas. E.g. French, English, Swahili"
 
 msgid "Séparez par des virgules. Ex: Voiture, 4×4, Pirogue"
 msgstr "Separate with commas. E.g. Car, 4×4, Dugout canoe"
@@ -3660,8 +3660,8 @@ msgstr "End"
 msgid "Tous"
 msgstr "All"
 
-msgid "Tous formats image (JPG, PNG, HEIC, GIF…) — max 10 Mo"
-msgstr "All image formats (JPG, PNG, HEIC, GIF…) — max 10 MB"
+msgid "JPG, PNG, WebP ou HEIC — 10 Mo au maximum"
+msgstr "JPG, PNG, WebP or HEIC — 10 MB maximum"
 
 msgid "Tous les guides"
 msgstr "All guides"
@@ -3693,17 +3693,17 @@ msgstr "See all"
 msgid "Voiture, 4×4, Pirogue, À pied"
 msgstr "Car, 4×4, Dugout canoe, On foot"
 
-msgid "Votre profil sera examiné par un administrateur avant d'être publié."
-msgstr "Your profile will be reviewed by an administrator before being published."
+msgid "Votre profil est visible dans la liste des guides dès son enregistrement. Le badge « Guide vérifié » est attribué après contrôle par un administrateur."
+msgstr "Your profile appears in the guide list as soon as it is saved. The “Verified guide” badge is granted after a check by an administrator."
 
-msgid "Votre soumission sera vérifiée par un administrateur avant d'être publiée. Vous recevrez une notification dès qu'elle sera approuvée."
-msgstr "Your submission will be checked by an administrator before publication. You will be notified once it is approved."
+msgid "Votre proposition sera vérifiée par un administrateur avant d'être publiée. Vous recevrez une notification dès qu'elle sera approuvée."
+msgstr "Your suggestion will be reviewed by an administrator before it is published. You will get a notification as soon as it is approved."
 
-msgid "Vous connaissez Madagascar ?"
-msgstr "Do you know Madagascar?"
+msgid "Vous connaissez un coin d'Afrique ?"
+msgstr "Do you know a corner of Africa?"
 
-msgid "Vous guidez des voyageurs à Madagascar ?"
-msgstr "Do you guide travellers in Madagascar?"
+msgid "Vous guidez des voyageurs en Afrique ?"
+msgstr "Do you guide travellers in Africa?"
 
 msgid "Vérifiés"
 msgstr "Verified"
@@ -3783,8 +3783,8 @@ msgstr "Pro Shop"
 msgid "Brouillon"
 msgstr "Draft"
 
-msgid "Brouillons & Programmés"
-msgstr "Drafts & Scheduled"
+msgid "Brouillons et posts programmés"
+msgstr "Drafts and scheduled posts"
 
 msgid "Catégorie principale"
 msgstr "Main category"
@@ -3825,8 +3825,8 @@ msgstr "Display"
 msgid "Début du clip (30 s max)"
 msgstr "Clip start (30 s max)"
 
-msgid "Découvrir Madagascar"
-msgstr "Discover Madagascar"
+msgid "Découvrir l'Afrique"
+msgstr "Discover Africa"
 
 msgid "Effacer"
 msgstr "Clear"
@@ -4101,17 +4101,17 @@ msgstr "Load"
 msgid "Envoyer ma demande"
 msgstr "Send my request"
 
-msgid "Proposer ce lieu"
-msgstr "Suggest this place"
+msgid "Envoyer la proposition"
+msgstr "Send suggestion"
 
 msgid "Badge Vérifié sur vos annonces"
-msgstr "Verified badge on your listings"
+msgstr "Verified badge on your ads"
 
 msgid "Badge vérifié actif, 12 photos par annonce."
-msgstr "Verified badge active, 12 photos per listing."
+msgstr "Verified badge active, 12 photos per ad."
 
 msgid "Badge Boutique Pro doré"
-msgstr "Golden Pro Shop badge"
+msgstr "Gold Pro Shop badge"
 
 msgid "Badge, priorité dans les résultats, plus de photos — et une page boutique dédiée pour les pros."
 msgstr "Badge, priority in results, more photos — and a dedicated shop page for professionals."
@@ -4122,8 +4122,8 @@ msgstr "Shop banner"
 msgid "Bonjour, je suis intéressé(e) par votre annonce : "
 msgstr "Hello, I am interested in your listing: "
 
-msgid "Clique sur l'icône 🔖 d'un post pour le retrouver ici."
-msgstr "Tap the 🔖 icon on a post to find it here."
+msgid "Touchez le signet sous un post pour le retrouver ici."
+msgstr "Tap the bookmark under a post to find it here."
 
 msgid "Construit pour d'ici, pas adapté depuis ailleurs."
 msgstr "Built for here, not adapted from elsewhere."
@@ -4141,10 +4141,10 @@ msgid "Devenez Vendeur Vérifié ou Boutique Pro"
 msgstr "Become a Verified Seller or Pro Shop"
 
 msgid "Facilite le filtre « Près de chez moi »"
-msgstr "Makes the “Near me” filter work"
+msgstr "Helps the “Near me” filter"
 
-msgid "Image horizontale recommandée (ex : 1200×300 px). Formats : JPG, PNG, WebP."
-msgstr "Landscape image recommended (e.g. 1200×300 px). Formats: JPG, PNG, WebP."
+msgid "Image horizontale recommandée (ex : 1200×300 px). Formats : JPG, PNG, WebP — 10 Mo max."
+msgstr "Landscape image recommended (e.g. 1200×300 px). Formats: JPG, PNG, WebP — 10 MB max."
 
 msgid "Informations de votre boutique"
 msgstr "Your shop details"
@@ -4170,8 +4170,8 @@ msgstr "The courier's position will appear here once they share their GPS."
 msgid "Les lieux région par région, les avis de ceux qui y sont allés, et des guides locaux à contacter."
 msgstr "Places region by region, reviews from those who went, and local guides to contact."
 
-msgid "Les régions de Madagascar structurent la recherche, les prix sont en ariary, et un mode économie charge les médias à la demande pour que le site reste utilisable quand le réseau ne suit pas."
-msgstr "Madagascar's regions structure the search, prices are in ariary, and a data-saver mode loads media on demand so the site stays usable when the network lags."
+msgid "La recherche se fait pays par pays, les annonces et les restaurants sont ceux de votre région, et un mode économie charge les médias à la demande pour que le site reste utilisable quand le réseau ne suit pas."
+msgstr "Search works country by country, listings and restaurants are the ones near you, and a data-saver mode loads media on demand so the site stays usable when the network lags."
 
 msgid "Page boutique publique dédiée"
 msgstr "Dedicated public shop page"
@@ -4189,13 +4189,13 @@ msgid "Présentez votre boutique, vos produits, votre expérience…"
 msgstr "Introduce your shop, your products, your experience…"
 
 msgid "Présentez-vous, décrivez votre activité, expliquez pourquoi vous méritez d'être vérifié…"
-msgstr "Introduce yourself, describe your activity, explain why you deserve verification…"
+msgstr "Introduce yourself, describe your activity, explain why you should be verified…"
 
 msgid "Textes, photos, vidéos. Stories qui disparaissent en 24 h, réactions et messages privés en temps réel."
 msgstr "Text, photos, videos. Stories that vanish after 24 h, reactions and real-time private messages."
 
 msgid "Un compte vérifié renforce la confiance des acheteurs. Choisissez le profil qui correspond à votre activité."
-msgstr "A verified account builds buyers' trust. Choose the profile that matches your activity."
+msgstr "A verified account builds buyer trust. Choose the profile that matches your activity."
 
 msgid "Une annonce en quelques minutes, filtrée par catégorie et par région. Les commerçants sérieux portent un badge vérifié."
 msgstr "A listing in minutes, filtered by category and region. Serious sellers carry a verified badge."
@@ -4210,7 +4210,7 @@ msgid "Visible sur votre annonce pour que les acheteurs vous contactent directem
 msgstr "Shown on your listing so buyers can reach you directly by call or WhatsApp."
 
 msgid "Votre activité a grandi ? Passez au niveau supérieur : page boutique dédiée, badge doré, 20 photos par annonce, priorité maximale dans les résultats."
-msgstr "Has your business grown? Step up: dedicated shop page, golden badge, 20 photos per listing, top priority in results."
+msgstr "Has your business grown? Move up a level: dedicated shop page, gold badge, 20 photos per ad, top priority in results."
 
 msgid "Votre page boutique est visible par tous les acheteurs."
 msgstr "Your shop page is visible to all buyers."
@@ -4219,7 +4219,7 @@ msgid "Vérification vendeur / Boutique Pro"
 msgstr "Seller verification / Pro Shop"
 
 msgid "badge doré, page boutique publique, 20 photos par annonce."
-msgstr "golden badge, public shop page, 20 photos per listing."
+msgstr "gold badge, public shop page, 20 photos per ad."
 
 msgid "« En pause » masque votre annonce sans la supprimer."
 msgstr "“Paused” hides your listing without deleting it."
@@ -4339,3 +4339,1867 @@ msgstr "Country"
 
 msgid "Choose (or write +country code below)"
 msgstr "Choose (or write +country code below)"
+
+msgid "The Kabary is a traditional African oral art form — a structured speech that opens with a salutation, develops ideas with imagery and proverbs, and closes with a blessing. Share your thoughts in this timeless format."
+msgstr "The Kabary is a traditional African oral art form — a structured speech that opens with a salutation, develops ideas with imagery and proverbs, and closes with a blessing. Share your thoughts in this timeless format."
+
+msgid "A proverb to illuminate your message."
+msgstr "A proverb to illuminate your message."
+
+msgid "Afrique"
+msgstr "Africa"
+
+msgid "l'Afrique"
+msgstr "Africa"
+
+msgid "Format international, avec l'indicatif du pays (+…)."
+msgstr "International format, with the country code (+…)."
+
+msgid "Ex : quartier, ville"
+msgstr "E.g. neighbourhood, city"
+
+msgid "Autre mobile money"
+msgstr "Other mobile money"
+
+msgid "Océan Indien"
+msgstr "Indian Ocean"
+
+msgid "Non précisé"
+msgstr "Not specified"
+
+msgid "Pays ou région (Près de chez moi)"
+msgstr "Country or region (Near me)"
+
+msgid "Permet de filtrer le fil, les groupes et le Bazar par pays ou par région."
+msgstr "Lets you filter the feed, groups and Bazar by country or region."
+
+msgid "<strong>%(n)s</strong> restaurant"
+msgid_plural "<strong>%(n)s</strong> restaurants"
+msgstr[0] "<strong>%(n)s</strong> restaurant"
+msgstr[1] "<strong>%(n)s</strong> restaurants"
+
+msgid "%(n)s article"
+msgid_plural "%(n)s articles"
+msgstr[0] "%(n)s item"
+msgstr[1] "%(n)s items"
+
+msgid "%(n)s plat"
+msgid_plural "%(n)s plats"
+msgstr[0] "%(n)s dish"
+msgstr[1] "%(n)s dishes"
+
+msgid "%(n)s groupe d'options"
+msgid_plural "%(n)s groupes d'options"
+msgstr[0] "%(n)s option group"
+msgstr[1] "%(n)s option groups"
+
+msgid "Ajouter %(n)s au panier"
+msgstr "Add %(n)s to the basket"
+
+msgid "Retour au panier"
+msgstr "Back to the basket"
+
+msgid "Retirer un"
+msgstr "Remove one"
+
+msgid "Ajouter un"
+msgstr "Add one"
+
+msgid "Impossible de charger ce plat. Vérifiez votre connexion et réessayez."
+msgstr "This dish could not be loaded. Check your connection and try again."
+
+msgid "Une erreur est survenue. Réessayez."
+msgstr "Something went wrong. Please try again."
+
+msgid "Vider le panier"
+msgstr "Empty the basket"
+
+msgid "Commande minimum : %(m)s"
+msgstr "Minimum order: %(m)s"
+
+msgid "Refuser cette commande ?"
+msgstr "Decline this order?"
+
+msgid "Ajouter une option"
+msgstr "Add an option"
+
+msgid "Ingrédient"
+msgstr "Ingredient"
+
+msgid "Retirer ce livreur"
+msgstr "Remove this courier"
+
+msgid "Cuisine de quartier"
+msgstr "Neighbourhood eatery"
+
+msgid "Cette commande n'est pas dans votre zone."
+msgstr "This order is not in your area."
+
+msgid "%(u)s n'a pas encore de profil livreur. Demandez-lui de le créer depuis « Espace livreur », puis ajoutez-le ici."
+msgstr "%(u)s has no courier profile yet. Ask them to create it from “Courier area”, then add them here."
+
+msgid "%(u)s est déjà livreur de %(r)s."
+msgstr "%(u)s is already a courier for %(r)s."
+
+msgid "%(u)s livre déjà pour un autre restaurant. Il doit d'abord le quitter."
+msgstr "%(u)s already delivers for another restaurant. They must leave it first."
+
+msgid "Bazar Vazimba"
+msgstr "Vazimba Bazaar"
+
+msgid "À vendre"
+msgstr "For sale"
+
+msgid "À louer"
+msgstr "For rent"
+
+msgid "Filtrer"
+msgstr "Filter"
+
+msgid "dans <em>%(c)s</em>"
+msgstr "in <em>%(c)s</em>"
+
+msgid "pour « <em>%(q)s</em> »"
+msgstr "for “<em>%(q)s</em>”"
+
+msgid "Aucune annonce ne correspond à ces filtres pour le moment."
+msgstr "No ads match these filters for now."
+
+msgid "Soumise le %(date)s."
+msgstr "Submitted on %(date)s."
+
+msgid "Retour à mes annonces"
+msgstr "Back to my ads"
+
+msgid "Boutique Pro active"
+msgstr "Pro Shop active"
+
+msgid "Approuvée le %(date)s."
+msgstr "Approved on %(date)s."
+
+msgid "Approuvé le %(date)s."
+msgstr "Approved on %(date)s."
+
+msgid "Pendant l'examen de la demande, votre badge Vérifié est suspendu."
+msgstr "While the request is under review, your Verified badge is suspended."
+
+msgid "Examinée le %(date)s."
+msgstr "Reviewed on %(date)s."
+
+msgid "Mettre en pause"
+msgstr "Pause"
+
+msgid "Réactiver"
+msgstr "Reactivate"
+
+msgid "Louée"
+msgstr "Rented"
+
+msgid "Expirée"
+msgstr "Expired"
+
+msgid "Marquer cette annonce comme louée ?"
+msgstr "Mark this ad as rented?"
+
+msgid "Marquer comme louée"
+msgstr "Mark as rented"
+
+msgid "Annonce remontée en tête."
+msgstr "Ad bumped to the top."
+
+msgid "Photos (%(n)s max)"
+msgstr "Photos (%(n)s max)"
+
+msgid "JPG, PNG, WebP, HEIC · %(n)s photos max · La première est la photo principale"
+msgstr "JPG, PNG, WebP, HEIC · %(n)s photos max · The first one is the main photo"
+
+msgid "Visible sur votre annonce pour que les acheteurs vous contactent par appel ou WhatsApp. Indiquez l'indicatif du pays (+…) pour activer le bouton WhatsApp."
+msgstr "Shown on your ad so buyers can reach you by phone or WhatsApp. Include the country code (+…) to enable the WhatsApp button."
+
+msgid "LOUÉE"
+msgstr "RENTED"
+
+msgid "PRINCIPALE"
+msgstr "MAIN"
+
+msgid "Supprimer cette photo"
+msgstr "Delete this photo"
+
+msgid "JPG, PNG, WebP, HEIC · %(n)s photos max au total"
+msgstr "JPG, PNG, WebP, HEIC · %(n)s photos max in total"
+
+msgid "Retirer cette photo"
+msgstr "Remove this photo"
+
+msgid "La photo n'a pas pu être supprimée."
+msgstr "The photo could not be deleted."
+
+msgid "Nombre maximum de photos atteint."
+msgstr "Maximum number of photos reached."
+
+msgid "Type de vendeur"
+msgstr "Seller type"
+
+msgid "Concessionnaire / Boutique Pro"
+msgstr "Dealer / Pro Shop"
+
+msgid "Ex : Auto Plus, Électro Service…"
+msgstr "E.g. Auto Plus, Electro Service…"
+
+msgid "Avec l'indicatif du pays (+…) pour activer le bouton WhatsApp."
+msgstr "With the country code (+…) to enable the WhatsApp button."
+
+msgid "Ex : Lun–Sam 8h–18h"
+msgstr "E.g. Mon–Sat 8am–6pm"
+
+msgid "Fil d'Ariane"
+msgstr "Breadcrumb"
+
+msgid "Agrandir la photo"
+msgstr "Enlarge photo"
+
+msgid "Photo précédente"
+msgstr "Previous photo"
+
+msgid "Photo suivante"
+msgstr "Next photo"
+
+msgid "Photo %(n)s"
+msgstr "Photo %(n)s"
+
+msgid "Conditions de location"
+msgstr "Rental terms"
+
+msgid "Caution"
+msgstr "Deposit"
+
+msgid "Durée min."
+msgstr "Min. duration"
+
+msgid "Pièces"
+msgstr "Rooms"
+
+msgid "Surface"
+msgstr "Area"
+
+msgid "Meublé"
+msgstr "Furnished"
+
+msgid "Charges"
+msgstr "Utilities"
+
+msgid "Incluses"
+msgstr "Included"
+
+msgid "Chauffeur"
+msgstr "Driver"
+
+msgid "Inclus"
+msgstr "Included"
+
+msgid "Bonjour, je suis intéressé(e) par votre annonce :"
+msgstr "Hello, I am interested in your ad:"
+
+msgid "Photos de l'annonce"
+msgstr "Ad photos"
+
+msgid "Vente d'un objet ou d'un service"
+msgstr "Selling an item or a service"
+
+msgid "Location d'un véhicule ou d'un logement"
+msgstr "Renting out a vehicle or a home"
+
+msgid "logement"
+msgstr "housing"
+
+msgid "Annonce supprimée."
+msgstr "Ad deleted."
+
+msgid "Vous ne pouvez pas modifier cette annonce."
+msgstr "You cannot edit this ad."
+
+msgid "Action non autorisée."
+msgstr "Action not allowed."
+
+msgid "Annonce marquée comme louée."
+msgstr "Ad marked as rented."
+
+msgid "Annonce marquée comme vendue."
+msgstr "Ad marked as sold."
+
+msgid "Votre annonce est publiée."
+msgstr "Your ad is published."
+
+msgid "Annonce mise à jour."
+msgstr "Ad updated."
+
+msgid "Cette annonce n'existe pas ou a déjà été supprimée."
+msgstr "This ad does not exist or has already been deleted."
+
+msgid "Seules les annonces actives peuvent être remontées."
+msgstr "Only active ads can be bumped."
+
+msgid "Cette annonce est clôturée : modifiez-la pour la republier."
+msgstr "This ad is closed: edit it to publish it again."
+
+msgid "Vous avez déjà une demande en cours."
+msgstr "You already have a pending request."
+
+msgid "Le nom de la boutique est obligatoire pour une demande Pro."
+msgstr "The shop name is required for a Pro request."
+
+msgid "Demande envoyée. L'équipe de modération l'examinera prochainement."
+msgstr "Request sent. The moderation team will review it shortly."
+
+msgid "Votre boutique Pro est déjà active."
+msgstr "Your Pro Shop is already active."
+
+msgid "Votre compte est déjà vérifié."
+msgstr "Your account is already verified."
+
+msgid "Vous pourrez remonter cette annonce dans %(h)d h."
+msgstr "You can bump this ad again in %(h)d h."
+
+msgid "Titre de l'annonce"
+msgstr "Ad title"
+
+msgid "Prix (Ariary)"
+msgstr "Price (Ariary)"
+
+msgid "Prix négociable"
+msgstr "Negotiable price"
+
+msgid "Prix de location (Ariary)"
+msgstr "Rental price (Ariary)"
+
+msgid "Période"
+msgstr "Period"
+
+msgid "Caution (Ariary)"
+msgstr "Deposit (Ariary)"
+
+msgid "Durée minimale (jours)"
+msgstr "Minimum duration (days)"
+
+msgid "Nombre de pièces"
+msgstr "Number of rooms"
+
+msgid "Surface (m²)"
+msgstr "Area (m²)"
+
+msgid "Charges incluses"
+msgstr "Utilities included"
+
+msgid "Avec chauffeur"
+msgstr "With driver"
+
+msgid "Ville / quartier"
+msgstr "City / neighbourhood"
+
+msgid "Afficher le numéro publiquement"
+msgstr "Show the number publicly"
+
+msgid "Choisissez un statut valide."
+msgstr "Choose a valid status."
+
+msgid "Le prix de location ne peut pas être négatif."
+msgstr "The rental price cannot be negative."
+
+msgid "La caution ne peut pas être négative."
+msgstr "The deposit cannot be negative."
+
+msgid "Ex: Samsung Galaxy A54 128Go"
+msgstr "E.g. Samsung Galaxy A54 128GB"
+
+msgid "Décrivez votre article : marque, modèle, défauts éventuels…"
+msgstr "Describe your item: brand, model, any defects…"
+
+msgid "Ex : Dakar, Plateau"
+msgstr "E.g. Dakar, Plateau"
+
+msgid "Numéro avec indicatif du pays (+…)"
+msgstr "Number with country code (+…)"
+
+msgid "Expirée — choisissez « Active » pour la republier"
+msgstr "Expired — choose “Active” to publish it again"
+
+msgid "Active — visible par tous"
+msgstr "Active — visible to everyone"
+
+msgid "En pause — masquée temporairement"
+msgstr "Paused — temporarily hidden"
+
+msgid "Vendue — archivée"
+msgstr "Sold — archived"
+
+msgid "Louée — archivée"
+msgstr "Rented — archived"
+
+msgid "Vente"
+msgstr "Sale"
+
+msgid "/ jour"
+msgstr "/ day"
+
+msgid "/ semaine"
+msgstr "/ week"
+
+msgid "/ mois"
+msgstr "/ month"
+
+msgid "Aucun fichier reçu."
+msgstr "No file received."
+
+msgid "« %(name)s » dépasse %(mb)d Mo."
+msgstr "“%(name)s” exceeds %(mb)d MB."
+
+msgid "« %(name)s » n'est pas une image lisible (JPG, PNG, WebP, HEIC)."
+msgstr "“%(name)s” is not a readable image (JPG, PNG, WebP, HEIC)."
+
+msgid "<strong>%(n)s</strong> annonce trouvée"
+msgid_plural "<strong>%(n)s</strong> annonces trouvées"
+msgstr[0] "<strong>%(n)s</strong> ad found"
+msgstr[1] "<strong>%(n)s</strong> ads found"
+
+msgid "clôturée"
+msgid_plural "clôturées"
+msgstr[0] "closed"
+msgstr[1] "closed"
+
+msgid "active"
+msgid_plural "actives"
+msgstr[0] "active"
+msgstr[1] "active"
+
+msgid "%(n)s vue"
+msgid_plural "%(n)s vues"
+msgstr[0] "%(n)s view"
+msgstr[1] "%(n)s views"
+
+msgid "<strong>%(n)s</strong> annonce"
+msgid_plural "<strong>%(n)s</strong> annonces"
+msgstr[0] "<strong>%(n)s</strong> ad"
+msgstr[1] "<strong>%(n)s</strong> ads"
+
+msgid "%(n)s jour"
+msgid_plural "%(n)s jours"
+msgstr[0] "%(n)s day"
+msgstr[1] "%(n)s days"
+
+msgid "%(n)s pièce"
+msgid_plural "%(n)s pièces"
+msgstr[0] "%(n)s room"
+msgstr[1] "%(n)s rooms"
+
+msgid "%(n)s destination à découvrir en Afrique"
+msgid_plural "%(n)s destinations à découvrir en Afrique"
+msgstr[0] "%(n)s destination to discover in Africa"
+msgstr[1] "%(n)s destinations to discover in Africa"
+
+msgid "%(n)s guide disponible en Afrique"
+msgid_plural "%(n)s guides disponibles en Afrique"
+msgstr[0] "%(n)s guide available in Africa"
+msgstr[1] "%(n)s guides available in Africa"
+
+msgid "%(n)s résultat"
+msgid_plural "%(n)s résultats"
+msgstr[0] "%(n)s result"
+msgstr[1] "%(n)s results"
+
+msgid "%(n)s avis"
+msgid_plural "%(n)s avis"
+msgstr[0] "%(n)s review"
+msgstr[1] "%(n)s reviews"
+
+msgid "%(n)s an d'expérience"
+msgid_plural "%(n)s ans d'expérience"
+msgstr[0] "%(n)s year of experience"
+msgstr[1] "%(n)s years of experience"
+
+msgid "An d'expérience"
+msgid_plural "Ans d'expérience"
+msgstr[0] "Year of experience"
+msgstr[1] "Years of experience"
+
+msgid "Lieu couvert"
+msgid_plural "Lieux couverts"
+msgstr[0] "Place covered"
+msgstr[1] "Places covered"
+
+msgid "Jusqu'à %(n)s personne"
+msgid_plural "Jusqu'à %(n)s personnes"
+msgstr[0] "Up to %(n)s person"
+msgstr[1] "Up to %(n)s people"
+
+msgid "Lieux à visiter et guides locaux à travers l'Afrique, recommandés par la communauté."
+msgstr "Places to visit and local guides across Africa, recommended by the community."
+
+msgid "Pays"
+msgstr "Countries"
+
+msgid "Millions de km²"
+msgstr "Million km²"
+
+msgid "Se connecter"
+msgstr "Sign in"
+
+msgid "Tous les pays"
+msgstr "All countries"
+
+msgid "Pays ou région"
+msgstr "Country or region"
+
+msgid "pour « %(q)s »"
+msgstr "for “%(q)s”"
+
+msgid "Afficher la photo %(n)s"
+msgstr "Show photo %(n)s"
+
+msgid "Même catégorie"
+msgstr "Same category"
+
+msgid "Avis des visiteurs"
+msgstr "Visitor reviews"
+
+msgid "Laisser un avis"
+msgstr "Leave a review"
+
+msgid "Modifier votre avis"
+msgstr "Edit your review"
+
+msgid "Visité le %(d)s"
+msgstr "Visited on %(d)s"
+
+msgid "Veuillez renseigner un commentaire et une note valide."
+msgstr "Please enter a comment and a valid rating."
+
+msgid "La date de visite n'est pas valide."
+msgstr "The visit date is not valid."
+
+msgid "Erreur lors de l'enregistrement de votre avis."
+msgstr "Your review could not be saved."
+
+msgid "Principale"
+msgstr "Main"
+
+msgid "Supprimer la photo %(n)s"
+msgstr "Delete photo %(n)s"
+
+msgid "Ce lieu est publié. Après modification, il sera de nouveau vérifié par un administrateur avant de réapparaître."
+msgstr "This place is published. After you edit it, an administrator will review it again before it reappears."
+
+msgid "Le nom et la description sont obligatoires."
+msgstr "Name and description are required."
+
+msgid "Choisissez une catégorie dans la liste."
+msgstr "Choose a category from the list."
+
+msgid "Choisissez un pays ou une région dans la liste."
+msgstr "Choose a country or region from the list."
+
+msgid "Seules %(n)d photos sont conservées par lieu."
+msgstr "Only %(n)d photos are kept per place."
+
+msgid "Votre lieu a été envoyé ! Il sera visible après validation par un administrateur."
+msgstr "Your place has been sent! It will be visible once an administrator has approved it."
+
+msgid "Modifications enregistrées. Le lieu sera de nouveau visible après validation par un administrateur."
+msgstr "Changes saved. The place will be visible again once an administrator has approved it."
+
+msgid "Lieu mis à jour."
+msgstr "Place updated."
+
+msgid "Vous ne pouvez pas modifier ce lieu."
+msgstr "You cannot edit this place."
+
+msgid "Votre lieu « %(name)s » a été approuvé : il est maintenant visible par tous."
+msgstr "Your place “%(name)s” has been approved: everyone can now see it."
+
+msgid "Vazimba Tourisme"
+msgstr "Vazimba Tourism"
+
+msgid "Guide touristique"
+msgstr "Tour guide"
+
+msgid "Ar/j"
+msgstr "Ar/day"
+
+msgid "Jusqu'à %(n)s pers."
+msgstr "Up to %(n)s people"
+
+msgid "Par jour"
+msgstr "Per day"
+
+msgid "Lieux couverts"
+msgstr "Places covered"
+
+msgid "Devenir guide touristique"
+msgstr "Become a tour guide"
+
+msgid "Modifier mon profil de guide"
+msgstr "Edit my guide profile"
+
+msgid "Partagez votre connaissance du terrain avec des voyageurs du monde entier."
+msgstr "Share your local knowledge with travellers from around the world."
+
+msgid "Mettez à jour vos informations pour être trouvé par davantage de voyageurs."
+msgstr "Update your details so more travellers can find you."
+
+msgid "Ex : guide depuis 10 ans, spécialisé dans les randonnées en parc national et les circuits côtiers…"
+msgstr "E.g. guide for 10 years, specialising in national park hikes and coastal tours…"
+
+msgid "Ex : pays, régions, villes et parcs où vous accompagnez des voyageurs…"
+msgstr "E.g. countries, regions, towns and parks where you guide travellers…"
+
+msgid "Votre profil de guide est enregistré et visible dans la liste des guides. Le badge « Guide vérifié » est attribué après contrôle par un administrateur."
+msgstr "Your guide profile is saved and visible in the guide list. The “Verified guide” badge is granted after a check by an administrator."
+
+msgid "La présentation est obligatoire."
+msgstr "The introduction is required."
+
+msgid "jour"
+msgstr "day"
+
+msgid "Taxi collectif"
+msgstr "Shared taxi"
+
+msgid "Nature & Paysages"
+msgstr "Nature & Landscapes"
+
+msgid "Plages & Côtes"
+msgstr "Beaches & Coasts"
+
+msgid "Histoire & Culture"
+msgstr "History & Culture"
+
+msgid "Faune & Parcs naturels"
+msgstr "Wildlife & Nature parks"
+
+msgid "Montagnes & Randonnées"
+msgstr "Mountains & Hiking"
+
+msgid "Circuits & Routes"
+msgstr "Tours & Routes"
+
+msgid "Villes & Villages"
+msgstr "Towns & Villages"
+
+msgid "Aventure & Sport"
+msgstr "Adventure & Sport"
+
+msgid "Rechercher une conversation"
+msgstr "Search conversations"
+
+msgid "Aucune conversation"
+msgstr "No conversations yet"
+
+msgid "Écrivez à quelqu'un depuis son profil ou depuis une annonce : la conversation apparaîtra ici."
+msgstr "Message someone from their profile or from a listing: the conversation will appear here."
+
+msgid "Trouver quelqu'un"
+msgstr "Find someone"
+
+msgid "Conversation secrète"
+msgstr "Secret conversation"
+
+msgid "Plus d’actions"
+msgstr "More actions"
+
+msgid "Vos messages s'affichent ici."
+msgstr "Your messages appear here."
+
+msgid "Retirer le fichier"
+msgstr "Remove file"
+
+msgid "Envoi…"
+msgstr "Sending…"
+
+msgid "Haut-parleur"
+msgstr "Speaker"
+
+msgid "Retourner la caméra"
+msgstr "Flip camera"
+
+msgid "Choisir une réaction"
+msgstr "Choose a reaction"
+
+msgid "Image agrandie"
+msgstr "Enlarged image"
+
+msgid "L'envoi a échoué."
+msgstr "Sending failed."
+
+msgid "Erreur du serveur. Réessayez."
+msgstr "Server error. Please try again."
+
+msgid "Erreur réseau. Vérifiez votre connexion."
+msgstr "Network error. Check your connection."
+
+msgid "Connexion…"
+msgstr "Connecting…"
+
+msgid "Hors connexion — reconnexion en cours…"
+msgstr "Offline — reconnecting…"
+
+msgid "Impossible d'accéder au micro. Vérifiez les autorisations."
+msgstr "Cannot access the microphone. Check permissions."
+
+msgid "Le message vocal n'est pas parti. Réessayez."
+msgstr "The voice message was not sent. Please try again."
+
+msgid "Accès refusé à cette conversation."
+msgstr "Access to this conversation denied."
+
+msgid "Conversation introuvable."
+msgstr "Conversation not found."
+
+msgid "Cette conversation n'est pas disponible."
+msgstr "This conversation is not available."
+
+msgid "Erreur de connexion"
+msgstr "Connection error"
+
+msgid "Réagir"
+msgstr "React"
+
+msgid "fichier"
+msgstr "file"
+
+msgid "Connexion en cours…"
+msgstr "Connecting…"
+
+msgid "Connecté"
+msgstr "Connected"
+
+msgid "Reconnexion…"
+msgstr "Reconnecting…"
+
+msgid "Échec réseau"
+msgstr "Network failure"
+
+msgid "Échec de connexion réseau. Vérifiez votre connexion et réessayez."
+msgstr "Network connection failed. Check your connection and try again."
+
+msgid "Aucun son ni image reçu : le réseau, un VPN ou un pare-feu bloque l'appel."
+msgstr "No sound or picture received: the network, a VPN or a firewall is blocking the call."
+
+msgid "Son coupé — appuyez pour l'activer"
+msgstr "Sound is off — tap to turn it on"
+
+msgid "Les appels nécessitent une connexion sécurisée (https)."
+msgstr "Calls require a secure connection (https)."
+
+msgid "Ce navigateur ne prend pas en charge les appels. Mettez-le à jour, ou utilisez Chrome, Firefox ou Safari."
+msgstr "This browser does not support calls. Update it, or use Chrome, Firefox or Safari."
+
+msgid "Accès au micro ou à la caméra refusé. Autorisez-le dans les réglages du navigateur, puis réessayez."
+msgstr "Microphone or camera access denied. Allow it in your browser settings, then try again."
+
+msgid "Aucun micro détecté sur cet appareil."
+msgstr "No microphone found on this device."
+
+msgid "Le micro ou la caméra est déjà utilisé par une autre application. Fermez-la, puis réessayez."
+msgstr "The microphone or camera is already in use by another app. Close it, then try again."
+
+msgid "Caméra indisponible — appel converti en audio."
+msgstr "Camera unavailable — call switched to audio."
+
+msgid "Caméra indisponible — votre vidéo ne sera pas envoyée."
+msgstr "Camera unavailable — your video will not be sent."
+
+msgid "Pas de réponse."
+msgstr "No answer."
+
+msgid "Activer la conversation secrète"
+msgstr "Turn on secret conversation"
+
+msgid "Couper la conversation secrète"
+msgstr "Turn off secret conversation"
+
+msgid "Message chiffré"
+msgstr "Encrypted message"
+
+msgid "Fichier chiffré"
+msgstr "Encrypted file"
+
+msgid "Un instant…"
+msgstr "One moment…"
+
+msgid "Conversation secrète (activée)"
+msgstr "Secret conversation (on)"
+
+msgid "Conversation secrète : les messages sont chiffrés de bout en bout, sur vos appareils."
+msgstr "Secret conversation: messages are end-to-end encrypted, on your devices."
+
+msgid "Ce navigateur ne permet pas les conversations secrètes."
+msgstr "This browser does not support secret conversations."
+
+msgid "Vous avez activé la conversation secrète : les nouveaux messages sont chiffrés de bout en bout."
+msgstr "You turned on secret conversation: new messages are end-to-end encrypted."
+
+msgid "Vous avez coupé la conversation secrète : les messages suivants ne sont plus chiffrés."
+msgstr "You turned off secret conversation: the following messages are no longer encrypted."
+
+msgid "{name} a activé la conversation secrète : les nouveaux messages sont chiffrés de bout en bout."
+msgstr "{name} turned on secret conversation: new messages are end-to-end encrypted."
+
+msgid "{name} a coupé la conversation secrète : les messages suivants ne sont plus chiffrés."
+msgstr "{name} turned off secret conversation: the following messages are no longer encrypted."
+
+msgid "Activer la conversation secrète ?"
+msgstr "Turn on secret conversation?"
+
+msgid "Les nouveaux messages et fichiers seront chiffrés sur vos appareils avant de partir. Les anciens messages restent tels quels."
+msgstr "New messages and files will be encrypted on your devices before they are sent. Older messages stay as they are."
+
+msgid "Couper la conversation secrète ?"
+msgstr "Turn off secret conversation?"
+
+msgid "Les messages suivants ne seront plus chiffrés de bout en bout. Votre contact en sera prévenu."
+msgstr "The following messages will no longer be end-to-end encrypted. Your contact will be told."
+
+msgid "Couper"
+msgstr "Turn off"
+
+msgid "Le changement n'a pas pu être enregistré."
+msgstr "The change could not be saved."
+
+msgid "Créer mon code secret"
+msgstr "Create my secret code"
+
+msgid "Saisir mon code secret"
+msgstr "Enter my secret code"
+
+msgid "Votre code secret"
+msgstr "Your secret code"
+
+msgid "Il protège la sauvegarde de vos clés. Avec lui, vous retrouverez vos messages secrets sur un nouveau téléphone ou un autre navigateur. Vazimba ne le connaît pas et ne peut pas le retrouver : notez-le en lieu sûr. (8 caractères au moins.)"
+msgstr "It protects the backup of your keys. With it, you can read your secret messages again on a new phone or another browser. Vazimba does not know it and cannot recover it: write it down somewhere safe. (At least 8 characters.)"
+
+msgid "Code secret"
+msgstr "Secret code"
+
+msgid "Le même, encore une fois"
+msgstr "The same, once more"
+
+msgid "Au moins 8 caractères."
+msgstr "At least 8 characters."
+
+msgid "Les deux codes ne sont pas les mêmes."
+msgstr "The two codes do not match."
+
+msgid "Code secret enregistré : vos clés sont sauvegardées."
+msgstr "Secret code saved: your keys are backed up."
+
+msgid "Le code secret n'a pas pu être enregistré. Réessayez."
+msgstr "The secret code could not be saved. Please try again."
+
+msgid "Un code secret existe déjà pour ce compte : saisissez-le."
+msgstr "A secret code already exists for this account: enter it."
+
+msgid "Pour lire sur cet appareil les messages secrets envoyés avant."
+msgstr "To read, on this device, the secret messages sent before."
+
+msgid "Déverrouiller"
+msgstr "Unlock"
+
+msgid "Code secret incorrect."
+msgstr "Incorrect secret code."
+
+msgid "Impossible de retrouver la sauvegarde. Réessayez plus tard."
+msgstr "The backup could not be found. Try again later."
+
+msgid "La sauvegarde de vos clés n'a pas pu être vérifiée (connexion ?)."
+msgstr "The backup of your keys could not be checked (connection?)."
+
+msgid "Le message n'a pas pu être chiffré : il n'est pas parti."
+msgstr "The message could not be encrypted: it was not sent."
+
+msgid "Fichier trop volumineux (25 Mo au plus)."
+msgstr "File too large (25 MB at most)."
+
+msgid "L'envoi du fichier a échoué."
+msgstr "The file could not be sent."
+
+msgid "Le fichier n'a pas pu être chiffré : il n'est pas parti."
+msgstr "The file could not be encrypted: it was not sent."
+
+msgid "Chiffré de bout en bout"
+msgstr "End-to-end encrypted"
+
+msgid "Message illisible sur cet appareil"
+msgstr "Message cannot be read on this device"
+
+msgid "Fichier illisible sur cet appareil"
+msgstr "File cannot be read on this device"
+
+msgid "Déchiffrement…"
+msgstr "Decrypting…"
+
+msgid "Toucher pour télécharger et déchiffrer"
+msgstr "Tap to download and decrypt"
+
+msgid "Hors ligne"
+msgstr "Offline"
+
+msgid "Vous êtes hors ligne"
+msgstr "You are offline"
+
+msgid "Pas de connexion internet détectée."
+msgstr "No internet connection detected."
+
+msgid "Les pages déjà visitées restent accessibles."
+msgstr "Pages you already visited remain available."
+
+msgid "Retour à l'accueil"
+msgstr "Back to home"
+
+msgid "Disponible hors ligne"
+msgstr "Available offline"
+
+msgid "Le fil d'actualité déjà chargé"
+msgstr "The news feed already loaded"
+
+msgid "Les profils déjà consultés"
+msgstr "Profiles already viewed"
+
+msgid "Les groupes déjà visités"
+msgstr "Groups already visited"
+
+msgid "Vos posts en attente seront envoyés à la reconnexion"
+msgstr "Your pending posts will be sent when you are back online"
+
+msgid "Connexion rétablie — rechargement…"
+msgstr "Back online — reloading…"
+
+msgid "Ouvrir"
+msgstr "Open"
+
+msgid "Appel entrant"
+msgstr "Incoming call"
+
+msgid "Changer la photo de profil"
+msgstr "Change profile photo"
+
+msgid "Score Fihavanana — solidarité et engagement dans la communauté"
+msgstr "Fihavanana score — solidarity and community involvement"
+
+msgid "Sections du profil"
+msgstr "Profile sections"
+
+msgid "À propos"
+msgstr "About"
+
+msgid "Score Fihavanana"
+msgstr "Fihavanana score"
+
+msgid "Voir tous les amis"
+msgstr "See all friends"
+
+msgid "Friends' stories"
+msgstr "Friends' stories"
+
+msgid "%(n)s fichier sélectionné"
+msgstr "%(n)s file selected"
+
+msgid "%(n)s fichiers sélectionnés"
+msgstr "%(n)s files selected"
+
+msgid "La publication a échoué. Réessayez."
+msgstr "Publishing failed. Please try again."
+
+msgid "Seuls ses amis peuvent voir la liste d’amis de ce membre."
+msgstr "Only this member's friends can see their friends list."
+
+msgid "Partager le profil"
+msgstr "Share profile"
+
+msgid "Retirer cette personne de vos amis ?"
+msgstr "Remove this person from your friends?"
+
+msgid "Écrire une réponse…"
+msgstr "Write a reply…"
+
+msgid "Suivant"
+msgstr "Next"
+
+msgid "L’envoi de la photo de couverture a échoué."
+msgstr "The cover photo could not be uploaded."
+
+msgid "%(username)s vous a envoyé une demande d’ami."
+msgstr "%(username)s sent you a friend request."
+
+msgid "%(n)s demande"
+msgid_plural "%(n)s demandes"
+msgstr[0] "%(n)s request"
+msgstr[1] "%(n)s requests"
+
+msgid "%(n)s ami"
+msgid_plural "%(n)s amis"
+msgstr[0] "%(n)s friend"
+msgstr[1] "%(n)s friends"
+
+msgid "Écrivez exactement le mot %(delete_word)s pour confirmer."
+msgstr "Type the word %(delete_word)s exactly to confirm."
+
+msgid "Pour confirmer, écrivez le mot %(delete_word)s"
+msgstr "To confirm, type the word %(delete_word)s"
+
+msgid "Se déconnecter"
+msgstr "Sign out"
+
+msgid "Voulez-vous vous déconnecter de Vazimba sur cet appareil ?"
+msgstr "Do you want to sign out of Vazimba on this device?"
+
+msgid "Valider"
+msgstr "Confirm"
+
+msgid "vous@exemple.com"
+msgstr "you@example.com"
+
+msgid "Parlez un peu de vous…"
+msgstr "Tell us a little about yourself…"
+
+msgid "Ville, pays"
+msgstr "City, country"
+
+msgid "Numéro de téléphone"
+msgstr "Phone number"
+
+msgid "Changer"
+msgstr "Change"
+
+msgid "Votre numéro de mobile"
+msgstr "Your mobile number"
+
+msgid "Envoyer le code"
+msgstr "Send the code"
+
+msgid "Tous les pays sont acceptés. Un numéro de mobile, pour recevoir le code."
+msgstr "All countries are accepted. Use a mobile number, to receive the code."
+
+msgid "Code reçu"
+msgstr "Code received"
+
+msgid "Vérifier"
+msgstr "Verify"
+
+msgid "Code valable 10 minutes."
+msgstr "The code is valid for 10 minutes."
+
+msgid "Renvoyer le code"
+msgstr "Resend the code"
+
+msgid "Le recadrage de la photo a échoué. Réessayez avec une autre image."
+msgstr "The photo could not be cropped. Try again with another image."
+
+msgid "Choisissez une image de moins de 10 Mo."
+msgstr "Choose an image smaller than 10 MB."
+
+msgid "Entrez votre numéro de téléphone."
+msgstr "Enter your phone number."
+
+msgid "envoyé à"
+msgstr "sent to"
+
+msgid "Code envoyé ! Regardez WhatsApp."
+msgstr "Code sent! Check WhatsApp."
+
+msgid "Code envoyé ! Vérifiez vos SMS."
+msgstr "Code sent! Check your text messages."
+
+msgid "Entrez le code à 6 chiffres."
+msgstr "Enter the 6-digit code."
+
+msgid "Numéro vérifié ! Merci."
+msgstr "Number verified! Thank you."
+
+msgid "ou"
+msgstr "or"
+
+msgid "Vous devez accepter les CGU et la politique de confidentialité pour continuer."
+msgstr "You must accept the Terms of Use and the Privacy Policy to continue."
+
+msgid "Moyen"
+msgstr "Fair"
+
+msgid "Fort"
+msgstr "Strong"
+
+msgid "J’ai lu et j’accepte les <a href=\"%(cgu_url)s\" target=\"_blank\" rel=\"noopener\">Conditions générales d’utilisation</a> et la <a href=\"%(conf_url)s\" target=\"_blank\" rel=\"noopener\">Politique de confidentialité</a> de Vazimba."
+msgstr "I have read and accept the Vazimba <a href=\"%(cgu_url)s\" target=\"_blank\" rel=\"noopener\">Terms of Use</a> and <a href=\"%(conf_url)s\" target=\"_blank\" rel=\"noopener\">Privacy Policy</a>."
+
+msgid "Amis communs"
+msgstr "Mutual friends"
+
+msgid "Amis de %(name)s"
+msgstr "%(name)s's friends"
+
+msgid "Demande acceptée"
+msgstr "Request accepted"
+
+msgid "Demande annulée"
+msgstr "Request cancelled"
+
+msgid "Ami retiré"
+msgstr "Friend removed"
+
+msgid "Demande d’ami envoyée"
+msgstr "Friend request sent"
+
+msgid "Impossible d’envoyer la demande d’ami."
+msgstr "The friend request could not be sent."
+
+msgid "Ce membre est introuvable."
+msgstr "This member could not be found."
+
+msgid "Vous ne pouvez pas vous envoyer une demande d’ami."
+msgstr "You cannot send yourself a friend request."
+
+msgid "Cette action n’est pas disponible."
+msgstr "This action is not available."
+
+msgid "Vous avez déjà envoyé une demande d’ami à cette personne."
+msgstr "You have already sent this person a friend request."
+
+msgid "Cette demande ne vous est pas adressée."
+msgstr "This request was not sent to you."
+
+msgid "Cette demande d’ami n’est plus en attente."
+msgstr "This friend request is no longer pending."
+
+msgid "Impossible de retirer cet ami."
+msgstr "This friend could not be removed."
+
+msgid "Ce membre ne fait pas partie de vos amis."
+msgstr "This member is not one of your friends."
+
+msgid "Impossible d’annuler cette demande."
+msgstr "This request could not be cancelled."
+
+msgid "Aucune demande en attente à annuler."
+msgstr "There is no pending request to cancel."
+
+msgid "Cette demande d’ami est introuvable."
+msgstr "This friend request could not be found."
+
+msgid "Les demandes d’ami, réactions et commentaires apparaîtront ici."
+msgstr "Friend requests, reactions and comments will appear here."
+
+msgid "Cette page a expiré"
+msgstr "This page has expired"
+
+msgid "Le formulaire a été ouvert avant une connexion ou une déconnexion faite dans un autre onglet. Par sécurité, il n’est plus accepté : rien n’a été envoyé."
+msgstr "The form was opened before you signed in or out in another tab. For your safety it is no longer accepted: nothing was sent."
+
+msgid "Rechargez la page et recommencez. (Un code déjà reçu reste valable 10 minutes.)"
+msgstr "Reload the page and try again. (A code you already received stays valid for 10 minutes.)"
+
+msgid "Recommencer"
+msgstr "Start again"
+
+msgid "Page introuvable"
+msgstr "Page not found"
+
+msgid "Cette page n’existe pas, a été déplacée, ou l’adresse est incorrecte."
+msgstr "This page does not exist, has been moved, or the address is wrong."
+
+msgid "Ou ouvrez l’une de ces sections :"
+msgstr "Or open one of these sections:"
+
+msgid "Erreur du serveur"
+msgstr "Server error"
+
+msgid "Quelque chose s’est mal passé de notre côté. Réessayez dans quelques instants."
+msgstr "Something went wrong on our side. Please try again in a moment."
+
+msgid "Réessayer"
+msgstr "Try again"
+
+msgid "Si le problème persiste, écrivez-nous :"
+msgstr "If the problem persists, write to us:"
+
+msgid "Post sauvegardé"
+msgstr "Post saved"
+
+msgid "Retiré des sauvegardes"
+msgstr "Removed from saved posts"
+
+msgid "Masquer ce post"
+msgstr "Hide this post"
+
+msgid "Post masqué"
+msgstr "Post hidden"
+
+msgid "Republier"
+msgstr "Repost"
+
+msgid "Annuler la republication"
+msgstr "Undo repost"
+
+msgid "Republié sur votre profil"
+msgstr "Reposted on your profile"
+
+msgid "Republication annulée"
+msgstr "Repost undone"
+
+msgid "Bloquer cette personne ? Vous ne verrez plus ses publications."
+msgstr "Block this person? You will no longer see their posts."
+
+msgid "Supprimer ce post ?"
+msgstr "Delete this post?"
+
+msgid "maintenant !"
+msgstr "now!"
+
+msgid "Afficher le mot de passe"
+msgstr "Show password"
+
+msgid "Masquer le mot de passe"
+msgstr "Hide password"
+
+msgid "Mode clair"
+msgstr "Light mode"
+
+msgid "Hors ligne — le contenu déjà consulté reste disponible"
+msgstr "Offline — content you have already viewed is still available"
+
+msgid "Connexion rétablie"
+msgstr "Back online"
+
+msgid "%(n)s publication(s) en attente de connexion…"
+msgstr "%(n)s post(s) waiting for a connection…"
+
+msgid "Tout marquer lu"
+msgstr "Mark all as read"
+
+msgid "Mon compte"
+msgstr "My account"
+
+msgid "Activer les notifications"
+msgstr "Turn on notifications"
+
+msgid "%(name)s a publié quelque chose"
+msgstr "%(name)s posted something"
+
+msgid "%(name)s est en direct"
+msgstr "%(name)s is live"
+
+msgid "Rejoignez le direct"
+msgstr "Join the live"
+
+msgid "Voir tous les résultats"
+msgstr "See all results"
+
+msgid "Notifications activées"
+msgstr "Notifications on"
+
+msgid "Notifications bloquées"
+msgstr "Notifications blocked"
+
+msgid "Votre navigateur ne prend pas en charge les notifications."
+msgstr "Your browser does not support notifications."
+
+msgid "Les notifications sont bloquées. Autorisez-les dans les réglages de votre navigateur."
+msgstr "Notifications are blocked. Allow them in your browser settings."
+
+msgid "Notifications désactivées sur cet appareil."
+msgstr "Notifications turned off on this device."
+
+msgid "Numéro invalide. Choisissez votre pays, ou écrivez le numéro avec l'indicatif (+…). Il faut un numéro de mobile."
+msgstr "Invalid number. Choose your country, or write the number with its country code (+…). A mobile number is required."
+
+msgid "Si ce numéro est lié à un compte Vazimba, un code vient d'y être envoyé."
+msgstr "If this number is linked to a Vazimba account, a code has just been sent to it."
+
+msgid "Si ce numéro est lié à un compte Vazimba, un code vient d'être envoyé à l'adresse e-mail de ce compte (regardez aussi dans les indésirables)."
+msgstr "If this number is linked to a Vazimba account, a code has just been sent to that account's email address (check your spam folder too)."
+
+msgid "Connexion requise."
+msgstr "Please sign in."
+
+msgid "Aucune image reçue."
+msgstr "No image received."
+
+msgid "Non authentifié."
+msgstr "Not signed in."
+
+msgid "Méthode non autorisée."
+msgstr "Method not allowed."
+
+msgid "Format non supporté (jpeg, png, webp, gif, heic…)."
+msgstr "Unsupported format (jpeg, png, webp, gif, heic…)."
+
+msgid "Fichier trop volumineux (max 10 Mo)."
+msgstr "File too large (10 MB max)."
+
+msgid "Ce numéro est déjà lié à un autre compte."
+msgstr "This number is already linked to another account."
+
+msgid "Trop de tentatives. Attendez 1 heure avant de demander un nouveau code."
+msgstr "Too many attempts. Wait 1 hour before asking for a new code."
+
+msgid "Numéro invalide."
+msgstr "Invalid number."
+
+msgid "Numéro vérifié avec succès !"
+msgstr "Number verified!"
+
+msgid "Recommencez : indiquez votre numéro."
+msgstr "Start again: enter your number."
+
+msgid "Le recadrage de l'image a échoué."
+msgstr "The image could not be cropped."
+
+msgid "L'envoi de l'image a échoué."
+msgstr "The image could not be uploaded."
+
+msgid "Trop de codes demandés pour ce numéro. Réessayez dans une heure."
+msgstr "Too many codes requested for this number. Try again in an hour."
+
+msgid "Ce compte est désactivé."
+msgstr "This account is disabled."
+
+msgid "Le SMS n'est pas proposé vers ce pays : choisissez un autre moyen de recevoir le code."
+msgstr "Text messages are not available for this country: choose another way to receive the code."
+
+msgid "Les SMS sont momentanément indisponibles : choisissez un autre moyen de recevoir le code."
+msgstr "Text messages are temporarily unavailable: choose another way to receive the code."
+
+msgid "L'envoi du code a échoué. Vérifiez le numéro et réessayez."
+msgstr "The code could not be sent. Check the number and try again."
+
+msgid "Le code doit comporter 6 chiffres."
+msgstr "The code must have 6 digits."
+
+msgid "Aucun code en cours pour ce numéro. Demandez-en un nouveau."
+msgstr "No active code for this number. Request a new one."
+
+msgid "Code expiré. Demandez un nouveau code."
+msgstr "Code expired. Request a new code."
+
+msgid "Trop de tentatives incorrectes. Demandez un nouveau code."
+msgstr "Too many wrong attempts. Request a new code."
+
+msgid "Code incorrect. %(left)s tentative(s) restante(s)."
+msgstr "Wrong code. %(left)s attempt(s) left."
+
+msgid "Le nom d’utilisateur ne peut contenir que des lettres, des chiffres, des espaces et les signes . _ - (2 caractères au moins)."
+msgstr "The username may only contain letters, digits, spaces and the characters . _ - (at least 2 characters)."
+
+msgid "Obligatoire. Indiquez une adresse e-mail valide."
+msgstr "Required. Enter a valid email address."
+
+msgid "Cette adresse e-mail est déjà utilisée."
+msgstr "This email address is already in use."
+
+msgid "Ce nom d’utilisateur est déjà pris."
+msgstr "This username is already taken."
+
+msgid "Mot de passe"
+msgstr "Password"
+
+msgid "E-mail ou mot de passe incorrect."
+msgstr "Incorrect email or password."
+
+msgid "Quatre raisons d'ouvrir Vazimba"
+msgstr "Four reasons to open Vazimba"
+
+msgid "%(name)s a rejoint le groupe."
+msgstr "%(name)s joined the group."
+
+msgid "%(name)s a été ajouté au groupe."
+msgstr "%(name)s was added to the group."
+
+msgid "%(name)s a été retiré du groupe."
+msgstr "%(name)s was removed from the group."
+
+msgid "%(name)s est déjà membre."
+msgstr "%(name)s is already a member."
+
+msgid "%(name)s est maintenant membre."
+msgstr "%(name)s is now a member."
+
+msgid "%(name)s est maintenant modérateur."
+msgstr "%(name)s is now a moderator."
+
+msgid "%a fichier(s) enregistré(s) sur %b."
+msgstr "%a of %b file(s) saved."
+
+msgid "%n an"
+msgstr "%n year"
+
+msgid "%n ans"
+msgstr "%n years"
+
+msgid "%n heure"
+msgstr "%n hour"
+
+msgid "%n heures"
+msgstr "%n hours"
+
+msgid "%n jour"
+msgstr "%n day"
+
+msgid "%n jours"
+msgstr "%n days"
+
+msgid "%n minute"
+msgstr "%n minute"
+
+msgid "%n minutes"
+msgstr "%n minutes"
+
+msgid "%n mois"
+msgstr "%n months"
+
+msgid "%s a publié un nouveau post"
+msgstr "%s published a new post"
+
+msgid "%s fichier sélectionné"
+msgstr "%s file selected"
+
+msgid "%s fichiers sélectionnés"
+msgstr "%s files selected"
+
+msgid "%s nouveaux posts"
+msgstr "%s new posts"
+
+msgid "24 h"
+msgstr "24 h"
+
+msgid "30 jours"
+msgstr "30 days"
+
+msgid "7 jours"
+msgstr "7 days"
+
+msgid "<em>Vintana</em> signifie <em>destin</em>."
+msgstr "<em>Vintana</em> means <em>destiny</em>."
+
+msgid "<strong>Vintana</strong> désigne le destin, la destinée liée aux astres et au temps. Une Capsule Vintana est un message que vous vous réservez ou que vous adressez à la communauté, mais qui ne se dévoilera qu'au moment voulu. Personne ne peut lire le contenu avant la date de révélation, pas même vous. Le titre, lui, reste visible."
+msgstr "<strong>Vintana</strong> means destiny, the fate tied to the stars and to time. A Vintana Capsule is a message you keep for yourself or address to the community, revealed only when the time comes. Nobody can read its content before the reveal date, not even you. The title, however, stays visible."
+
+msgid "Annonces Bazar"
+msgstr "Bazar listings"
+
+msgid "Aperçu de la capsule dans le fil"
+msgstr "Preview of the capsule in the feed"
+
+msgid "Aucun résultat"
+msgstr "No results"
+
+msgid "Aucune publication pour %(tag)s"
+msgstr "No posts for %(tag)s"
+
+msgid "Aucune vue pour l'instant."
+msgstr "No views yet."
+
+msgid "Bravo"
+msgstr "Applause"
+
+msgid "Capsule Vintana"
+msgstr "Vintana Capsule"
+
+msgid "Capsule Vintana créée ! Elle sera révélée le %(date)s."
+msgstr "Vintana Capsule created! It will be revealed on %(date)s."
+
+msgid "Ce live est terminé."
+msgstr "This live has ended."
+
+msgid "Ce message est scellé et sera révélé le"
+msgstr "This message is sealed and will be revealed on"
+
+msgid "Ce message sera révélé à la date choisie."
+msgstr "This message will be revealed on the chosen date."
+
+msgid "Cette action est irréversible : le post sera supprimé définitivement."
+msgstr "This cannot be undone: the post will be permanently deleted."
+
+msgid "Cette story n'est plus disponible."
+msgstr "This story is no longer available."
+
+msgid "Cher moi du futur… Que voulez-vous vous dire dans quelques mois ou quelques années ?"
+msgstr "Dear future me… What do you want to tell yourself in a few months or years?"
+
+msgid "Commenter"
+msgstr "Comment"
+
+msgid "Créer l'événement"
+msgstr "Create event"
+
+msgid "Créer le groupe"
+msgstr "Create group"
+
+msgid "Dans 1 an"
+msgstr "In 1 year"
+
+msgid "Dans 1 mois"
+msgstr "In 1 month"
+
+msgid "Dans 1 semaine"
+msgstr "In 1 week"
+
+msgid "Dans 3 ans"
+msgstr "In 3 years"
+
+msgid "Dans 6 mois"
+msgstr "In 6 months"
+
+msgid "Date de révélation"
+msgstr "Reveal date"
+
+msgid "Demande de %(name)s refusée."
+msgstr "%(name)s's request was declined."
+
+msgid "Dina enregistré."
+msgstr "Dina saved."
+
+msgid "Donnez un titre à votre capsule…"
+msgstr "Give your capsule a title…"
+
+msgid "Donnez un titre à votre post…"
+msgstr "Give your post a title…"
+
+msgid "Décrivez votre groupe…"
+msgstr "Describe your group…"
+
+msgid "Désépingler"
+msgstr "Unpin"
+
+msgid "Erreur lors de la création de l'événement."
+msgstr "The event could not be created."
+
+msgid "Erreur lors de la création de la capsule."
+msgstr "The capsule could not be created."
+
+msgid "Erreur lors de la création du Kabary. Réessayez dans quelques instants."
+msgstr "The Kabary could not be created. Please try again in a moment."
+
+msgid "Erreur lors de la publication."
+msgstr "Publishing failed."
+
+msgid "Erreur lors de la publication. Réessayez."
+msgstr "Publishing failed. Please try again."
+
+msgid "Essayez un autre terme ou vérifiez l'orthographe."
+msgstr "Try another term or check the spelling."
+
+msgid "Feu"
+msgstr "Fire"
+
+msgid "Filtrer les groupes"
+msgstr "Filter groups"
+
+msgid "Format de date invalide."
+msgstr "Invalid date format."
+
+msgid "Fête"
+msgstr "Party"
+
+msgid "Groupe créé avec succès."
+msgstr "Group created."
+
+msgid "Groupe mis à jour."
+msgstr "Group updated."
+
+msgid "Groupe supprimé."
+msgstr "Group deleted."
+
+msgid "Impossible de retirer le créateur du groupe."
+msgstr "The group's creator cannot be removed."
+
+msgid "Kabary"
+msgstr "Kabary"
+
+msgid "La capsule sera révélée dans %s, le %d."
+msgstr "The capsule will be revealed in %s, on %d."
+
+msgid "La date de révélation doit être dans le futur."
+msgstr "The reveal date must be in the future."
+
+msgid "La date de révélation est obligatoire."
+msgstr "The reveal date is required."
+
+msgid "La date est obligatoire."
+msgstr "The date is required."
+
+msgid "Lancer un live"
+msgstr "Start a live"
+
+msgid "Le Dina est trop long (3000 caractères au maximum)."
+msgstr "The Dina is too long (3000 characters maximum)."
+
+msgid "Le contenu principal (Vato misaina) est obligatoire."
+msgstr "The main content (Vato misaina) is required."
+
+msgid "Le créateur ne peut pas quitter son propre groupe."
+msgstr "The creator cannot leave their own group."
+
+msgid "Le message de la capsule est obligatoire."
+msgstr "The capsule's message is required."
+
+msgid "Le message est obligatoire."
+msgstr "The message is required."
+
+msgid "Le message est vide."
+msgstr "The message is empty."
+
+msgid "Le nom doit contenir au moins 3 caractères."
+msgstr "The name must be at least 3 characters long."
+
+msgid "Le post ne peut pas être vide."
+msgstr "The post cannot be empty."
+
+msgid "Le titre est obligatoire."
+msgstr "The title is required."
+
+msgid "Les fichiers joints n'ont pas pu être enregistrés."
+msgstr "The attached files could not be saved."
+
+msgid "Live dans %(name)s"
+msgstr "Live in %(name)s"
+
+msgid "Live de %(name)s"
+msgstr "%(name)s's live"
+
+msgid "Ma région"
+msgstr "My region"
+
+msgid "Message envoyé"
+msgstr "Message sent"
+
+msgid "Message pour le futur"
+msgstr "Message for the future"
+
+msgid "Nom du groupe"
+msgstr "Group name"
+
+msgid "Nouveaux posts"
+msgstr "New posts"
+
+msgid "Onglets du fil"
+msgstr "Feed tabs"
+
+msgid "Participer"
+msgstr "Attend"
+
+msgid "Photo publiée par %(name)s"
+msgstr "Photo posted by %(name)s"
+
+msgid "Post publié dans le groupe."
+msgstr "Post published in the group."
+
+msgid "Post supprimé."
+msgstr "Post deleted."
+
+msgid "Prix à négocier"
+msgstr "Price negotiable"
+
+msgid "Publication"
+msgstr "Post"
+
+msgid "Publier la capsule"
+msgstr "Publish capsule"
+
+msgid "Quitter ce groupe ?"
+msgstr "Leave this group?"
+
+msgid "Recherche"
+msgstr "Search"
+
+msgid "Rechercher dans les posts, annonces, utilisateurs…"
+msgstr "Search posts, listings, users…"
+
+msgid "Rechercher par nom d’utilisateur…"
+msgstr "Search by username…"
+
+msgid "Republications"
+msgstr "Reposts"
+
+msgid "Retirer %s du groupe ?"
+msgstr "Remove %s from the group?"
+
+msgid "Réaction inconnue."
+msgstr "Unknown reaction."
+
+msgid "Rédigez le Dina du groupe — règles, engagements et traditions de la communauté…"
+msgstr "Write the group's Dina — rules, commitments and traditions of the community…"
+
+msgid "Répondre dans le chat"
+msgstr "Reply in chat"
+
+msgid "Résultats pour"
+msgstr "Results for"
+
+msgid "Révélation dans %s"
+msgstr "Reveal in %s"
+
+msgid "Révélation dans :"
+msgstr "Reveal in:"
+
+msgid "Sans titre"
+msgstr "Untitled"
+
+msgid "Sections du groupe"
+msgstr "Group sections"
+
+msgid "Seul un admin peut retirer un modérateur."
+msgstr "Only an admin can remove a moderator."
+
+msgid "Soyez la première personne à diffuser."
+msgstr "Be the first to go live."
+
+msgid "Soyez la première personne à publier avec ce hashtag."
+msgstr "Be the first to post with this hashtag."
+
+msgid "Supprimer ce média"
+msgstr "Delete this media"
+
+msgid "Supprimer le post"
+msgstr "Delete post"
+
+msgid "Sélectionnez une date dans le futur"
+msgstr "Pick a date in the future"
+
+msgid "Sélectionnez une date…"
+msgstr "Pick a date…"
+
+msgid "Titre"
+msgstr "Title"
+
+msgid "Titre (facultatif)"
+msgstr "Title (optional)"
+
+msgid "Titre du live"
+msgstr "Live title"
+
+msgid "Toutes les tendances"
+msgstr "All trends"
+
+msgid "Une erreur est survenue. Réessayez ou rechargez la page."
+msgstr "Something went wrong. Try again or reload the page."
+
+msgid "Utilisateurs"
+msgstr "Users"
+
+msgid "Valider la date"
+msgstr "Confirm date"
+
+msgid "Veuillez remplir les champs obligatoires."
+msgstr "Please fill in the required fields."
+
+msgid "Vintana"
+msgstr "Vintana"
+
+msgid "Voir l'offre"
+msgstr "See the offer"
+
+msgid "Voir la story de %(name)s"
+msgstr "View %(name)s's story"
+
+msgid "Voir mes stories"
+msgstr "View my stories"
+
+msgid "Voir sur 30 jours"
+msgstr "See the last 30 days"
+
+msgid "Voir tous (%(n)s)"
+msgstr "See all (%(n)s)"
+
+msgid "Votre demande a été envoyée aux modérateurs du groupe."
+msgstr "Your request has been sent to the group's moderators."
+
+msgid "Votre demande est déjà en attente."
+msgstr "Your request is already pending."
+
+msgid "Votre post est publié."
+msgstr "Your post is published."
+
+msgid "Vous avez quitté le groupe."
+msgstr "You left the group."
+
+msgid "Vous avez rejoint le groupe."
+msgstr "You joined the group."
+
+msgid "Vous devez être membre du groupe pour publier."
+msgstr "You must be a member of the group to post."
+
+msgid "Vous devez être membre du groupe."
+msgstr "You must be a member of the group."
+
+msgid "Vous ne pouvez pas répondre à votre propre story."
+msgstr "You cannot reply to your own story."
+
+msgid "Vous ne pouvez pas vous retirer vous-même."
+msgstr "You cannot remove yourself."
+
+msgid "blanc"
+msgstr "white"
+
+msgid "bleu"
+msgstr "blue"
+
+msgid "cyan"
+msgstr "cyan"
+
+msgid "lagon"
+msgstr "lagoon"
+
+msgid "noir"
+msgstr "black"
+
+msgid "nuit"
+msgstr "night"
+
+msgid "or"
+msgstr "gold"
+
+msgid "orange"
+msgstr "orange"
+
+msgid "quelques secondes"
+msgstr "a few seconds"
+
+msgid "rose"
+msgstr "pink"
+
+msgid "rouge"
+msgstr "red"
+
+msgid "sunset"
+msgstr "sunset"
+
+msgid "vert"
+msgstr "green"
+
+msgid "violet"
+msgstr "purple"
+
+msgid "vue(s)"
+msgstr "view(s)"
+
+msgid "À propos de Vintana"
+msgstr "About Vintana"
+
+msgid "Écrivez un message destiné au futur : il restera scellé jusqu'à la date que vous choisissez."
+msgstr "Write a message for the future: it stays sealed until the date you choose."
+
+msgid "Épingler"
+msgstr "Pin"
+
+msgid "Événement créé."
+msgstr "Event created."
+
+msgid "%(n)s post"
+msgid_plural "%(n)s posts"
+msgstr[0] "%(n)s post"
+msgstr[1] "%(n)s posts"
+
+msgid "%(n)s publication"
+msgid_plural "%(n)s publications"
+msgstr[0] "%(n)s post"
+msgstr[1] "%(n)s posts"
+
+msgid "Post supprimé"
+msgstr "Post deleted"

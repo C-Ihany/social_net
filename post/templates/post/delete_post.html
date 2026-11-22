@@ -2,39 +2,34 @@
 {% load static %}
 {% load i18n %}
 
+{% block page_title %}{% trans "Supprimer le post" %} — Vazimba{% endblock %}
+
 {% block content %}
 <link rel="stylesheet" href="{% static 'css/pages/post-delete_post.css' %}">
 
+{% comment %} Page de repli sans JavaScript : depuis le menu ⋯, la suppression
+   passe par vzConfirm puis un POST direct (post:delete-post-now). {% endcomment %}
 <div class="delete-wrapper">
-    <div class="delete-card">
-
-        <div class="delete-card-icon">
-            <span class="material-icons">delete_forever</span>
-            <h4>{% trans "Delete post?" %}</h4>
-        </div>
-
-        <div class="delete-card-body">
-            <p>{% trans "This action is" %} <strong>{% trans "irreversible" %}</strong>. {% trans "The post will be permanently deleted." %}</p>
+    <div class="vz-card vz-card--block delete-card">
+        <div class="vz-card__body">
+            <h1 class="vz-page-title"><span class="material-icons" aria-hidden="true">delete_forever</span>{% trans "Supprimer ce post ?" %}</h1>
+            <p class="delete-text">{% trans "Cette action est irréversible : le post sera supprimé définitivement." %}</p>
 
             <div class="post-preview">
-                <div class="post-preview-title">{{ object.title }}</div>
-                <div class="post-preview-date">{% trans "Published on" %} {{ object.post_date|date:"d F Y" }}</div>
+                <div class="post-preview-title">{{ object.title|default:_("Sans titre") }}</div>
+                <div class="post-preview-date">{% trans "Published on" %} {{ object.post_date|date:"DATE_FORMAT" }}</div>
             </div>
+
+            <form method="POST">
+                {% csrf_token %}
+                <div class="vz-actions">
+                    <a class="vz-btn vz-btn--muted" href="{% url 'post:post-view' %}">{% trans "Annuler" %}</a>
+                    <button class="vz-btn vz-btn--danger" type="submit">
+                        <span class="material-icons" aria-hidden="true">delete</span> {% trans "Supprimer" %}
+                    </button>
+                </div>
+            </form>
         </div>
-
-        <form method="POST">
-            {% csrf_token %}
-            <div class="delete-actions">
-                <a class="btn-cancel-delete" href="{% url 'post:post-view' %}">
-                    <span class="material-icons">arrow_back</span> {% trans "Cancel" %}
-                </a>
-                <button class="btn-confirm-delete" type="submit">
-                    <span class="material-icons">delete</span> {% trans "Yes, delete" %}
-                </button>
-            </div>
-        </form>
-
     </div>
 </div>
-
 {% endblock content %}

@@ -6,6 +6,8 @@ from django.http import FileResponse, Http404, HttpResponse, HttpResponseRedirec
 from django.conf import settings
 from django.contrib.auth.decorators import login_required
 from django.views.decorators.http import require_POST
+from django.views.decorators.csrf import csrf_exempt
+from django.utils import timezone
 from itertools import chain
 
 import json
@@ -59,11 +61,14 @@ def private_chat_room_view(request, *args, **kwargs):
 		# Ouvrir (ou créer) la conversation avec l'utilisateur demandé
 		try:
 			other_user = Account.objects.get(pk=user_id)
-			# (compte « Pola seulement » : pas de nouvelle conversation sans son numéro)
-			if other_user != user and other_user.visible_to(user):
+			from account.models import UserBlock
+			# (compte « Pola seulement » : pas de nouvelle conversation sans son numéro ;
+			#  personne bloquée ou qui a bloqué : pas de conversation non plus)
+			if other_user != user and other_user.visible_to(user) \
+					and not UserBlock.is_blocked_between(user, other_user):
 				room = find_or_create_private_chat(user, other_user)
 				context["room"] = room
-		except Account.DoesNotExist:
+		except (Account.DoesNotExist, ValueError):
 			pass
 
 	# La conversation ouverte est lue : sidebar, cloche et badge repartent de zéro
@@ -132,6 +137,14 @@ def private_chat_room_view(request, *args, **kwargs):
 
 	# Tri : conversation la plus récente en premier
 	m_and_f_raw.sort(key=lambda x: x['_ts'], reverse=True)
+	# La conversation ouverte n'a pas encore de message (elle n'est donc pas « active ») : on la
+	# montre quand même en tête de liste, sinon on écrit à quelqu'un qui n'apparaît nulle part.
+	opened = context.get("room")
+	if opened is not None and all(r.pk != opened.pk for r in rooms):
+		m_and_f_raw.insert(0, {
+			'message': '', 'unread': 0, '_ts': None,
+			'friend': opened.user2 if opened.user1_id == user.id else opened.user1,
+		})
 	context['m_and_f'] = [{'message': e['message'], 'friend': e['friend'], 'unread': e['unread']}
 	                       for e in m_and_f_raw]
 
@@ -234,11 +247,14 @@ def upload_chat_file(request):
     # Permission check
     try:
         room = PrivateChatRoom.objects.get(pk=room_id)
-    except PrivateChatRoom.DoesNotExist:
+    except (PrivateChatRoom.DoesNotExist, ValueError):
         return JsonResponse({'error': 'Salon introuvable.'}, status=404)
 
     if request.user != room.user1 and request.user != room.user2:
         return JsonResponse({'error': 'Non autorisé.'}, status=403)
+    from account.models import UserBlock
+    if UserBlock.is_blocked_between(room.user1, room.user2):
+        return JsonResponse({'error': "Cette conversation n'est pas disponible."}, status=403)
 
     if room.encrypted != encrypted:
         return JsonResponse({'error': ('Conversation secrète : ce fichier n\'était pas chiffré, il n\'est pas parti.'
@@ -292,7 +308,7 @@ def upload_chat_file(request):
 
 def _broadcast_file(request, room, msg, file_name):
     """Annonce un fichier du chat aux deux personnes (et le compte comme non lu)."""
-    from chat.constants import SECRET_FILE_PREVIEW
+    from chat.constants import SECRET_FILE_PREVIEW, file_preview
     from chat.e2ee_check import ms
     file_type = msg.file_type
     file_url  = msg.file_link        # (jamais l'adresse directe du stockage : voir chat_file)
@@ -303,7 +319,7 @@ def _broadcast_file(request, room, msg, file_name):
     broadcast_done = False
     try:
         channel_layer = get_channel_layer()
-        preview = SECRET_FILE_PREVIEW if msg.encrypted else ('[🎤 vocal]' if file_type == 'voice' else f'[📎 {file_name}]')
+        preview = SECRET_FILE_PREVIEW if msg.encrypted else file_preview(file_type, file_name)
 
         # Incrémenter non-lus pour l'autre utilisateur s'il n'est pas dans la room
         other = room.user2 if request.user == room.user1 else room.user1
@@ -345,13 +361,16 @@ def _broadcast_file(request, room, msg, file_name):
                     "msg_type":     MSG_TYPE_UNREAD_NOTIF,
                     "from_user_id": request.user.id,
                     "count":        unread_count,
+                    "from_username": request.user.username,
+                    "from_image":    request.user.profile_image.url if request.user.profile_image else "",
+                    "preview":       preview[:60],
                 }
             )
 
         broadcast_done = True
-    except Exception as e:
+    except Exception:
         # Fallback : le client enverra la commande WS manuellement
-        print(f"[upload_chat_file] broadcast error: {e}")
+        logger.exception('upload_chat_file : diffusion')
 
     return JsonResponse({
         'ok':        True,
@@ -369,11 +388,16 @@ def _broadcast_file(request, room, msg, file_name):
 def set_secret(request):
     """POST room_id, on=1|0 : l'une des deux personnes active ou coupe la conversation secrète.
     Les deux voient aussitôt le changement (et qui l'a fait)."""
-    room = PrivateChatRoom.objects.filter(pk=request.POST.get('room_id') or 0).first()
+    try:
+        room = PrivateChatRoom.objects.filter(pk=request.POST.get('room_id') or 0).first()
+    except ValueError:
+        room = None
     if room is None or request.user.pk not in (room.user1_id, room.user2_id):
         return JsonResponse({'error': 'Salon introuvable.'}, status=404)
     room.encrypted = request.POST.get('on') == '1'
-    room.save(update_fields=['encrypted'])
+    # (gardé : l'autre personne verra qui a changé le réglage, même si elle n'était pas là)
+    room.secret_changed_by, room.secret_changed_at = request.user, timezone.now()
+    room.save(update_fields=['encrypted', 'secret_changed_by', 'secret_changed_at'])
     try:
         async_to_sync(get_channel_layer().group_send)(room.group_name, {
             'type': 'chat.secret', 'encrypted': room.encrypted,
@@ -396,15 +420,21 @@ def create_or_return_private_chat(request, *args, **kwargs):
 				from account.models import UserBlock
 				if UserBlock.is_blocked_between(user1, user2) or not user2.visible_to(user1):
 					# (bloqué, ou compte « Pola seulement » qu'on n'a pas trouvé par son numéro)
+					payload['ok'] = False
 					payload['response'] = "Cette conversation n'est pas disponible."
 					return HttpResponse(json.dumps(payload), content_type="application/json", status=403)
 				chat = find_or_create_private_chat(user1, user2)
+				# `ok` est ce que lisent les pages ; la phrase anglaise reste pour une page
+				# gardée en cache qui la comparait encore.
+				payload['ok'] = True
 				payload['response'] = "Successfully got the chat."
 				payload['chatroom_id'] = chat.id
-			except Account.DoesNotExist:
-				payload['response'] = "Unable to start a chat with that user."
+			except (Account.DoesNotExist, ValueError):
+				payload['ok'] = False
+				payload['response'] = "Cette conversation n'est pas disponible."
 	else:
-		payload['response'] = "You can't start a chat if you are not authenticated."
+		payload['ok'] = False
+		payload['response'] = "Connectez-vous pour écrire à quelqu'un."
 	return HttpResponse(json.dumps(payload), content_type="application/json")
 
 
@@ -438,7 +468,8 @@ def send_story_reply(request):
         author = User.objects.get(pk=author_id)
     except User.DoesNotExist:
         return JsonResponse({'ok': False, 'error': 'User not found'}, status=404)
-    if not author.visible_to(request.user):
+    from account.models import UserBlock
+    if not author.visible_to(request.user) or UserBlock.is_blocked_between(request.user, author):
         return JsonResponse({'ok': False, 'error': 'User not found'}, status=404)
 
     # Trouver ou créer la room (bidirectionnel)
@@ -458,6 +489,13 @@ def send_story_reply(request):
         room.is_active = True
         room.save(update_fields=['is_active'])
 
+    # Conversation secrète : le serveur n'y écrit jamais de texte en clair (la réponse à une story
+    # part d'ici, sans chiffrement). La personne répond depuis la messagerie, où c'est chiffré.
+    if room.encrypted:
+        return JsonResponse({'ok': False, 'code': 'SECRET_ROOM', 'chatroom_id': room.id,
+                             'error': 'Vous avez une conversation secrète avec cette personne : '
+                                      'répondez depuis la messagerie.'}, status=409)
+
     # Créer le message
     msg = RoomChatMessage.objects.create(
         user=request.user,
@@ -476,6 +514,18 @@ def send_story_reply(request):
         unread.save(update_fields=['count', 'most_recent_message', 'reset_timestamp'])
     except Exception:
         pass  # non-bloquant
+
+    # La conversation, si elle est ouverte chez l'un ou l'autre, montre la réponse tout de suite.
+    try:
+        from chat.e2ee_check import ms
+        async_to_sync(get_channel_layer().group_send)(room.group_name, {
+            "type": "chat.message",
+            "profile_image": request.user.profile_image.url if request.user.profile_image else "",
+            "username": request.user.username, "user_id": request.user.id,
+            "message": message, "msg_id": msg.id, "encrypted": False, "ts": ms(msg.timestamp),
+        })
+    except Exception:
+        logger.exception('send_story_reply : diffusion')
 
     # Notification push + WebSocket au destinataire
     try:
@@ -558,7 +608,7 @@ def get_ice_servers(request):
             pass  # fall through to open relay
 
     # Fallback : plusieurs TURN publics communautaires (ordre de fiabilité décroissant)
-    # freestun.net = serveur européen, souvent plus accessible depuis Madagascar
+    # freestun.net = serveur européen, souvent plus accessible depuis l'Afrique
     # openrelay.metered.ca = communauté US, souvent surchargé/bloqué
     servers.extend([
         {
@@ -578,6 +628,8 @@ def get_ice_servers(request):
     return JsonResponse({"iceServers": servers, "source": "community-fallback"})
 
 
+@csrf_exempt          # (appelé par le service worker, qui n'a pas de jeton CSRF ; la session suffit :
+@require_POST         #  son cookie est « SameSite=Lax », un autre site ne peut pas l'envoyer en POST)
 @login_required(login_url="login")
 def call_reject_push(request):
     """
@@ -591,7 +643,11 @@ def call_reject_push(request):
 
     try:
         room = PrivateChatRoom.objects.get(pk=room_id)
-    except PrivateChatRoom.DoesNotExist:
+    except (PrivateChatRoom.DoesNotExist, ValueError):
+        room = None
+    # Seule l'une des deux personnes de la conversation peut refuser l'appel (avant, n'importe
+    # quel membre connecté pouvait couper l'appel d'un autre).
+    if room is None or request.user.pk not in (room.user1_id, room.user2_id):
         return JsonResponse({'ok': False, 'error': 'Room introuvable'}, status=404)
 
     # Identifier le caller (l'autre participant)
@@ -608,7 +664,8 @@ def call_reject_push(request):
                 "user_id":  request.user.id,
             }
         )
-    except Exception as e:
-        return JsonResponse({'ok': False, 'error': str(e)}, status=500)
+    except Exception:
+        logger.exception('call_reject_push')
+        return JsonResponse({'ok': False, 'error': 'Erreur interne.'}, status=500)
 
     return JsonResponse({'ok': True})

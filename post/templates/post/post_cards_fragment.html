@@ -2,15 +2,15 @@
 {% load post_tags %}
 {% load i18n %}
 {% for post in posts_of_the_page %}
-<article class="post-card{% if post.post_type == 'kabary' %} post-card-kabary{% endif %}{% if post.post_type == 'vintana' %} post-card-vintana{% endif %}" id="post-{{ post.id }}">
+<article class="post-card{% if post.post_type == 'kabary' %} post-card-kabary{% endif %}{% if post.post_type == 'vintana' %} post-card-vintana{% endif %}{% if detail %} post-card--detail{% endif %}" id="post-{{ post.id }}">
     {% if post.post_type == 'kabary' %}
     <div class="pc-kabary-badge">
-        <span class="material-icons">record_voice_over</span> Kabary
+        <span class="material-icons" aria-hidden="true">record_voice_over</span> {% trans "Kabary" %}
     </div>
     {% endif %}
     {% if post.post_type == 'vintana' %}
     <div class="pc-vintana-badge">
-        <span class="material-icons">lock_clock</span> Capsule Vintana
+        <span class="material-icons" aria-hidden="true">lock_clock</span> {% trans "Capsule Vintana" %}
     </div>
     {% endif %}
 
@@ -36,7 +36,7 @@
             <img src="{% static 'logo/vazimba_icon.png' %}" alt="Vazimba"
                  class="pc-vintana-logo">
         </div>
-        <div class="pc-vintana-lock-title">{{ post.title|default:"Capsule Vintana" }}</div>
+        {% trans "Capsule Vintana" as vt_default_title %}<div class="pc-vintana-lock-title">{{ post.title|default:vt_default_title }}</div>
         <p class="pc-vintana-lock-sub">
             {% trans "Ce message est scellé et sera révélé le" %}<br>
             <strong>{{ post.reveal_date|date:"DATETIME_FORMAT" }}</strong>.
@@ -113,19 +113,19 @@
     {% endif %}
 
     {% if post.body %}
-    <div class="pc-body" onclick="expandBody(this)">{{ post.body|safe_html }}</div>
-    <span class="pc-read-more"
-          data-more="{% trans 'See more'|escapejs %}"
-          data-less="{% trans 'See less'|escapejs %}"
-          onclick="expandBodyBtn(this)">{% trans "See more" %}</span>
+    <div class="pc-body{% if detail %} expanded pc-body--full{% endif %}">{{ post.body|safe_html }}</div>
+    {% if not detail %}
+    <button type="button" class="pc-read-more" aria-expanded="false"
+            data-more="{% trans 'See more' %}"
+            data-less="{% trans 'See less' %}">{% trans "See more" %}</button>
+    {% endif %}
     {% endif %}
 
     {% include 'post/_post_media.html' %}
     {% include 'post/_post_product.html' %}
 
     <!-- Reaction summary bar -->
-    <div class="pc-reaction-bar" id="reaction-bar-{{ post.id }}"
-         {% if not post.total_reactions %}style="display:none"{% endif %}>
+    <div class="pc-reaction-bar" id="reaction-bar-{{ post.id }}"{% if not post.total_reactions %} hidden{% endif %}>
         <div class="rc-emoji-group" id="reaction-summary-{{ post.id }}">
             {% for rtype, cnt in post.reaction_counts.items %}
             <span class="rc-emoji" data-type="{{ rtype }}">
@@ -142,10 +142,10 @@
              onmouseenter="openPicker({{ post.id }})"
              onmouseleave="closePicker({{ post.id }})">
             <button class="pc-footer-btn {% if post.user_reaction %}liked{% endif %}"
-                    id="react-btn-{{ post.id }}"
+                    id="react-btn-{{ post.id }}" data-reaction="{{ post.user_reaction|default:'' }}"
                     onclick="quickReact({{ post.id }})"
                     aria-label="{% trans 'Réagir' %}" type="button">
-                <span id="react-icon-{{ post.id }}" style="font-size:1.05rem;line-height:1;">
+                <span id="react-icon-{{ post.id }}" class="pc-react-icon">
                     {% if post.user_reaction == 'like' %}👍
                     {% elif post.user_reaction == 'heart' %}❤️
                     {% elif post.user_reaction == 'laugh' %}😂
@@ -165,46 +165,50 @@
             </button>
             <div class="reaction-picker" id="picker-{{ post.id }}">
                 <button class="reaction-emoji-btn {% if post.user_reaction == 'like' %}selected{% endif %}"
-                        onclick="sendReaction({{ post.id }}, 'like')" title="{% trans "J'aime" %}" type="button">👍</button>
+                        data-reaction="like" onclick="sendReaction({{ post.id }}, 'like')" title="{% trans "J'aime" %}" aria-label="{% trans "J'aime" %}" type="button">👍</button>
                 <button class="reaction-emoji-btn {% if post.user_reaction == 'heart' %}selected{% endif %}"
-                        onclick="sendReaction({{ post.id }}, 'heart')" title="{% trans "J'adore" %}" type="button">❤️</button>
+                        data-reaction="heart" onclick="sendReaction({{ post.id }}, 'heart')" title="{% trans "J'adore" %}" aria-label="{% trans "J'adore" %}" type="button">❤️</button>
                 <button class="reaction-emoji-btn {% if post.user_reaction == 'laugh' %}selected{% endif %}"
-                        onclick="sendReaction({{ post.id }}, 'laugh')" title="{% trans "Haha" %}" type="button">😂</button>
+                        data-reaction="laugh" onclick="sendReaction({{ post.id }}, 'laugh')" title="{% trans "Haha" %}" aria-label="{% trans "Haha" %}" type="button">😂</button>
                 <button class="reaction-emoji-btn {% if post.user_reaction == 'wow' %}selected{% endif %}"
-                        onclick="sendReaction({{ post.id }}, 'wow')" title="{% trans "Wow" %}" type="button">😮</button>
+                        data-reaction="wow" onclick="sendReaction({{ post.id }}, 'wow')" title="{% trans "Wow" %}" aria-label="{% trans "Wow" %}" type="button">😮</button>
                 <button class="reaction-emoji-btn {% if post.user_reaction == 'sad' %}selected{% endif %}"
-                        onclick="sendReaction({{ post.id }}, 'sad')" title="{% trans "Triste" %}" type="button">😢</button>
+                        data-reaction="sad" onclick="sendReaction({{ post.id }}, 'sad')" title="{% trans "Triste" %}" aria-label="{% trans "Triste" %}" type="button">😢</button>
             </div>
         </div>
 
         <button class="pc-footer-btn" id="comment-btn-{{ post.id }}"
-                onclick="toggleComments({{ post.id }})" style="flex:1;" type="button">
-            <span class="material-icons">chat_bubble_outline</span>
-            <span id="comment-count-{{ post.id }}" class="pc-footer-count"
-                  {% if not post.total_comments %}style="display:none"{% endif %}>
-                {% if post.total_comments %}({{ post.total_comments }}){% endif %}
-            </span>
+                onclick="toggleComments({{ post.id }})" type="button"
+                aria-label="{% trans 'Commenter' %}" aria-controls="comment-panel-{{ post.id }}"
+                aria-expanded="{% if detail %}true{% else %}false{% endif %}">
+            <span class="material-icons" aria-hidden="true">chat_bubble_outline</span>
+            <span id="comment-count-{{ post.id }}" class="pc-footer-count"{% if not post.total_comments %} hidden{% endif %}>{% if post.total_comments %}({{ post.total_comments }}){% endif %}</span>
         </button>
 
-        <button class="pc-footer-btn" type="button" style="flex:1;"
+        <button class="pc-footer-btn" type="button"
                 onclick="vzShare({title:'{{ post.title|escapejs }}', url:'{% url 'post:post-detail' post.id %}'})"
                 aria-label="{% trans 'Partager' %}">
-            <span class="material-icons">share</span>
-            <span id="repost-count-{{ post.id }}" class="pc-footer-count"
-                  {% if not post.repost_count %}style="display:none"{% endif %}>{% if post.repost_count %}{{ post.repost_count }}{% endif %}</span>
+            <span class="material-icons" aria-hidden="true">share</span>
         </button>
 
-        <button class="pc-footer-btn{% if post.is_bookmarked %} bookmarked{% endif %}" type="button" style="flex:1;"
+        {% comment %} Compteur de republications : informatif, mis à jour par vzPostRepost (menu ⋯). {% endcomment %}
+        <span class="pc-repost-count" id="repost-count-wrap-{{ post.id }}" title="{% trans 'Republications' %}"{% if not post.repost_count %} hidden{% endif %}>
+            <span class="material-icons" aria-hidden="true">repeat</span>
+            <span id="repost-count-{{ post.id }}">{% if post.repost_count %}{{ post.repost_count }}{% endif %}</span>
+            <span class="vz-sr-only">{% trans "Republications" %}</span>
+        </span>
+
+        <button class="pc-footer-btn{% if post.is_bookmarked %} bookmarked{% endif %}" type="button"
                 id="bk-btn-{{ post.id }}"
                 onclick="vzPostBookmark({{ post.id }}, this)"
                 aria-pressed="{% if post.is_bookmarked %}true{% else %}false{% endif %}"
                 aria-label="{% if post.is_bookmarked %}{% trans 'Retirer des sauvegardes' %}{% else %}{% trans 'Sauvegarder' %}{% endif %}">
-            <span class="material-icons">{% if post.is_bookmarked %}bookmark{% else %}bookmark_border{% endif %}</span>
+            <span class="material-icons" aria-hidden="true">{% if post.is_bookmarked %}bookmark{% else %}bookmark_border{% endif %}</span>
         </button>
     </div>
 
     <!-- Comment panel -->
-    <div class="pc-comment-panel" id="comment-panel-{{ post.id }}">
+    <div class="pc-comment-panel{% if detail %} open pc-comment-panel--static{% endif %}" id="comment-panel-{{ post.id }}">
         <div class="pc-comment-list" id="comment-list-{{ post.id }}">
             {% for c in post.page_comments %}
             <div class="pc-comment-item" id="comment-item-{{ c.id }}">
@@ -218,17 +222,17 @@
                     </div>
                     <div class="pc-comment-footer">
                         <span class="pc-comment-time">{{ c.created_at|vz_since }}</span>
-                        <button class="pc-comment-reply-btn"
+                        <button class="pc-comment-reply-btn vz-tap"
                                 onclick="toggleReplyForm({{ c.id }}, {{ post.id }}, '{% url 'post:add-comment' post.id %}')" type="button">
                             {% trans "Reply" %}
                         </button>
                         {% if request.user == c.author or request.user == post.author %}
-                        <button class="pc-comment-del"
+                        <button class="pc-comment-del vz-tap"
                                 onclick="deleteComment({{ c.id }}, '{% url 'post:delete-comment' c.id %}')" type="button">
                             {% trans "Delete" %}
                         </button>
                         {% else %}
-                        <button type="button" class="pc-comment-del" onclick="openReportModal('comment','{{ c.id }}')">{% trans "Signaler" %}</button>
+                        <button type="button" class="pc-comment-del vz-tap" onclick="openReportModal('comment','{{ c.id }}')">{% trans "Signaler" %}</button>
                         {% endif %}
                     </div>
 
@@ -247,12 +251,12 @@
                                 <div class="pc-comment-footer">
                                     <span class="pc-comment-time">{{ reply.created_at|vz_since }}</span>
                                     {% if request.user == reply.author or request.user == post.author %}
-                                    <button class="pc-comment-del"
+                                    <button class="pc-comment-del vz-tap"
                                             onclick="deleteComment({{ reply.id }}, '{% url 'post:delete-comment' reply.id %}')" type="button">
                                         {% trans "Delete" %}
                                     </button>
                                     {% else %}
-                                    <button type="button" class="pc-comment-del" onclick="openReportModal('comment','{{ reply.id }}')">{% trans "Signaler" %}</button>
+                                    <button type="button" class="pc-comment-del vz-tap" onclick="openReportModal('comment','{{ reply.id }}')">{% trans "Signaler" %}</button>
                                     {% endif %}
                                 </div>
                             </div>
@@ -260,7 +264,7 @@
                         {% endfor %}
                     </div>
                     {% else %}
-                    <div class="pc-comment-replies" id="replies-{{ c.id }}" style="display:none;"></div>
+                    <div class="pc-comment-replies" id="replies-{{ c.id }}" hidden></div>
                     {% endif %}
 
                     <div class="pc-reply-form-wrap" id="reply-form-{{ c.id }}">
@@ -275,8 +279,8 @@
                         </div>
                         <button class="pc-comment-send"
                                 onclick="submitReply({{ c.id }}, {{ post.id }}, '{% url 'post:add-comment' post.id %}')"
-                                title="{% trans 'Reply' %}" type="button">
-                            <span class="material-icons">send</span>
+                                aria-label="{% trans 'Reply' %}" type="button">
+                            <span class="material-icons" aria-hidden="true">send</span>
                         </button>
                     </div>
                 </div>
@@ -284,6 +288,7 @@
             {% endfor %}
         </div>
 
+        {% if request.user.is_authenticated %}
         <div class="pc-comment-form">
             <img class="cmt-form-avatar" src="{{ request.user.profile_image.url }}" alt="{{ request.user.username }}">
             <div class="pc-comment-input-wrap">
@@ -292,15 +297,15 @@
                           placeholder="{% trans "Écrire un commentaire…" %}"
                           rows="1" maxlength="1000"
                           onkeydown="handleCommentKey(event, {{ post.id }}, '{% url 'post:add-comment' post.id %}')"
-                          oninput="autoResize(this)"
-                          onclick="this.focus()"></textarea>
+                          oninput="autoResize(this)"></textarea>
             </div>
             <button class="pc-comment-send" id="comment-send-{{ post.id }}"
                     onclick="submitComment({{ post.id }}, '{% url 'post:add-comment' post.id %}')"
-                    title="{% trans 'Send' %}" type="button">
-                <span class="material-icons">send</span>
+                    aria-label="{% trans 'Envoyer' %}" type="button">
+                <span class="material-icons" aria-hidden="true">send</span>
             </button>
         </div>
+        {% endif %}
     </div>
 
     {% endif %}{# end is_locked #}

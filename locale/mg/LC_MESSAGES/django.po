@@ -195,11 +195,11 @@ msgid "Strong"
 msgstr "Matanjaka"
 
 msgid "Excellent"
-msgstr "Tsara be"
+msgstr "Tena tsara"
 
 # ── Fampandrenesana ──
 msgid "Notifications"
-msgstr "Famantarana"
+msgstr "Fampandrenesana"
 
 msgid "No notifications"
 msgstr "Tsy misy famantarana"
@@ -415,7 +415,7 @@ msgid "About you"
 msgstr "Momba anao"
 
 msgid "Bio"
-msgstr "Tantara fohy"
+msgstr "Momba ahy"
 
 msgid "Email address"
 msgstr "Adiresy email"
@@ -665,8 +665,8 @@ msgid "Create the first post"
 msgstr "Mamorona ny lahatsoratra voalohany"
 
 # ── Footer ──
-msgid "Social network · Madagascar · 2025"
-msgstr "Tambajotra sosialy · Madagasikara · 2025"
+msgid "Social network · Africa"
+msgstr "Tambajotra sosialy · Afrika"
 
 msgid "News feed"
 msgstr "Fil vaovao"
@@ -680,8 +680,8 @@ msgstr "© 2025"
 msgid "All rights reserved."
 msgstr "Zo rehetra voatokana."
 
-msgid "Built with ❤️ for the Malagasy community."
-msgstr "Natao tamin'ny ❤️ ho an'ny fiaraha-monina malagasy."
+msgid "Built with ❤️ for the African community."
+msgstr "Natao tamin'ny ❤️ ho an'ny fiaraha-monina afrikanina."
 
 # ── Groupes / Vondrona ──
 msgid "Groups"
@@ -845,15 +845,15 @@ msgstr "Hadisoana amin'ny mpizara. Andramo indray."
 msgid "What is a Dina?"
 msgstr "Inona ny Dina ?"
 
-msgid "In Malagasy culture, the Dina is a community agreement — a set of rules and commitments freely accepted by all members of a community to live together with respect and solidarity (Fihavanana)."
-msgstr "Ao amin'ny kolontsaina malagasy, ny Dina dia fifanarahana iombonana — andian-dàlana sy fanekempihavanana nekena an-tsitrapo nataon'ny mpikambana rehetra amin'ny vondrona iray mba hiara-monina amin'ny fanajana sy ny Fihavanana."
+msgid "The Dina is a community agreement — a set of rules and commitments freely accepted by all members of a community to live together with respect and solidarity."
+msgstr "Ny Dina dia fifanarahana iombonana — andian-dàlana sy fanekena nekena an-tsitrapo nataon'ny mpikambana rehetra amin'ny vondrona iray mba hiara-monina amin'ny fanajana sy ny firaisankina."
 
 # ── Kabary ──
 msgid "Kabary numérique"
 msgstr "Kabary nomerika"
 
-msgid "The Kabary is a traditional Malagasy oral art form — a structured speech that opens with a salutation, develops ideas with imagery and proverbs, and closes with a blessing. Share your thoughts in this timeless format."
-msgstr "Ny Kabary dia karazan-kira Malagasy nentim-paharazana — resaka voamboatra izay manomboka amin'ny fiarahabana, mamolavola hevitra amin'ny sary sy ohabolana, ary mihidy amin'ny tsodrano. Zarao ny sainao amin'ity endrika mandrakizay ity."
+msgid "The Kabary is a traditional African oral art form — a structured speech that opens with a salutation, develops ideas with imagery and proverbs, and closes with a blessing. Share your thoughts in this timeless format."
+msgstr "Ny Kabary dia zavakanto am-bava afrikanina nentim-paharazana — lahateny voarafitra izay manomboka amin'ny fiarahabana, mamelabelatra hevitra amin'ny sary sy ohabolana, ary mifarana amin'ny tsodrano. Zarao ny hevitrao amin'ity endrika tsy lany andro ity."
 
 msgid "Title (optional)"
 msgstr "Lohateny (tsy voatery)"
@@ -885,8 +885,8 @@ msgstr "Fo-po ny Kabary — ny hafatrao, ny hevitrao ary ny fisainanao. (Ilaina)
 msgid "Develop your thoughts, ideas, stories…"
 msgstr "Ampitomboy ny sainao, hevitrao, tantaranao…"
 
-msgid "A Malagasy proverb to illuminate your message."
-msgstr "Ohabolana malagasy mampihazava ny hafatrao."
+msgid "A proverb to illuminate your message."
+msgstr "Ohabolana mampihazava ny hafatrao."
 
 msgid "Ny teny mamy, toy ny tantely… (Sweet words, like honey…)"
 msgstr "Ny teny mamy, toy ny tantely…"
@@ -929,7 +929,7 @@ msgid "Add"
 msgstr "Manampy"
 
 msgid "Publier"
-msgstr "Mamoaka"
+msgstr "Avoaka"
 
 msgid "Photo / Vidéo"
 msgstr "Sary / Video"
@@ -950,14 +950,14 @@ msgstr "Hijery kely"
 msgid "Bazar"
 msgstr "Bazar"
 
-msgid "Acheter et vendre entre Malgaches — simple, rapide, local"
-msgstr "Hividy sy hivarotra amin'ny Malagasy — tsotra, haingana, eto amintsika"
+msgid "Acheter et vendre entre voisins — simple, rapide, local"
+msgstr "Hividy sy hivarotra amin'ny mpifanolo-bodirindrina — tsotra, haingana, eo an-toerana"
 
 msgid "Chercher une annonce…"
 msgstr "Hitady fivarotana…"
 
-msgid "Chercher"
-msgstr "Hitady"
+msgid "Rechercher"
+msgstr "Hikaroka"
 
 msgid "Publier une annonce"
 msgstr "Mamoaka fivarotana"
@@ -1086,7 +1086,7 @@ msgid "Localisation & Contact"
 msgstr "Toerana & Fifandraisan-kira"
 
 msgid "Annuler"
-msgstr "Foana"
+msgstr "Hanafoana"
 
 msgid "Publier l'annonce"
 msgstr "Mamoaka ny fivarotana"
@@ -1110,7 +1110,7 @@ msgid "Aucune photo pour le moment."
 msgstr "Tsy misy sary mbola."
 
 msgid "Enregistrer"
-msgstr "Tehirizo"
+msgstr "Tehirizina"
 
 msgid "Les modifications seront visibles immédiatement."
 msgstr "Hita avy hatrany ny fanovana."
@@ -1133,8 +1133,8 @@ msgstr "Namidy"
 msgid "Vous n'avez aucune annonce"
 msgstr "Tsy manana fivarotana ianao"
 
-msgid "Publiez votre première annonce et touchez des milliers de Malgaches."
-msgstr "Mamoaka ny fivarotanao voalohany ary tratra an'arivony Malagasy."
+msgid "Publiez votre première annonce et touchez des milliers de personnes à travers l'Afrique."
+msgstr "Avoahy ny filazanao voalohany ary tratraro ny olona an'arivony manerana an'i Afrika."
 
 msgid "Publier maintenant"
 msgstr "Mamoaka aloha"
@@ -1237,7 +1237,7 @@ msgid "Tous les avantages sont actifs sur votre compte."
 msgstr "Ny tombontsoa rehetra dia mavitrika ao amin'ny kaontinao."
 
 msgid "Demande refusée"
-msgstr "Fangatahana nolavina"
+msgstr "Nolavina ny fangatahana"
 
 msgid "Examinée le {{ date }}."
 msgstr "Nojerejereina ny {{ date }}."
@@ -1275,14 +1275,14 @@ msgstr "Ho mpivarotra voamarina"
 msgid "Badge ✓, priorité dans les résultats, 12 photos par annonce."
 msgstr "Badge ✓, aloha amin'ny valiny, 12 sary isaky ny fivarotana."
 
-msgid "Faire une demande →"
-msgstr "Mangata →"
+msgid "Faire une demande"
+msgstr "Hanao fangatahana"
 
 msgid "Demande de vérification en attente"
 msgstr "Fangatahana fanamarinana andrasana"
 
-msgid "l'admin examinera votre compte prochainement."
-msgstr "ny admin hamaritra ny kaontinao tsy ho ela."
+msgid "l'équipe de modération examinera votre compte prochainement."
+msgstr "handinika ny kaontinao tsy ho ela ny ekipa mpanara-maso."
 
 msgid "Vendeur vérifié"
 msgstr "Mpivarotra voamarina"
@@ -1293,8 +1293,8 @@ msgstr "Badge mavitrika amin'ny fivarotana rehetra, 12 sary azo ampiasaina."
 msgid "Demande refusée."
 msgstr "Fangatahana nolavina."
 
-msgid "Réessayer"
-msgstr "Andramo indray"
+msgid "Refaire une demande"
+msgstr "Hanao fangatahana indray"
 
 msgid "Vendeurs vérifiés"
 msgstr "Mpivarotra voamarina"
@@ -1314,7 +1314,7 @@ msgstr "Nolavina"
 # ── Vondrona mifanaraka amin'ny lohahevitra ───────────────────────────────────
 
 msgid "My groups"
-msgstr "Ny vondronako"
+msgstr "Ny vondrona misy ahy"
 
 msgid "Recommended"
 msgstr "Torohevitra"
@@ -1422,7 +1422,7 @@ msgstr "Finday voamarina tamin'ny SMS"
 
 # bazar/create.html
 msgid "Publication…"
-msgstr "Mamoaka…"
+msgstr "Eo am-pamoahana…"
 
 msgid "Erreur réseau. Vérifiez votre connexion et réessayez."
 msgstr "Hadisoana tambajotra. Jereo ny fifandraisanao ary andramo indray."
@@ -1435,7 +1435,7 @@ msgid "Enregistrement…"
 msgstr "Tehirizina…"
 
 msgid "Erreur réseau. Réessayez."
-msgstr "Hadisoana tambajotra. Andramo indray."
+msgstr "Olana amin'ny tambajotra. Andramo indray."
 
 # bazar/detail.html
 msgid "Image non disponible"
@@ -1457,11 +1457,11 @@ msgstr "Voaadika !"
 msgid "Près de chez moi :"
 msgstr "Akaikin'ny fonenako :"
 
-msgid "Toute Madagascar"
-msgstr "Madagasikara manontolo"
+msgid "Toute l'Afrique"
+msgstr "Afrika manontolo"
 
-msgid "Détecter ma région automatiquement"
-msgstr "Mahita ny faritra amin'ny toerana misy ahy"
+msgid "Détecter mon pays automatiquement"
+msgstr "Tadiavo ho azy ny fireneko"
 
 msgid "Près de moi"
 msgstr "Akaiky ahy"
@@ -1585,8 +1585,8 @@ msgid "Stories"
 msgstr "Tantara"
 
 # post/tendances.html
-msgid "Tendances Malgaches"
-msgstr "Hevitra Malaza Malagasy"
+msgid "Tendances en Afrique"
+msgstr "Malaza eto Afrika"
 
 msgid "Les hashtags les plus utilisés sur Vazimba — %(hours_label)s"
 msgstr "Ny hashtag ampiasaina indrindra amin'ny Vazimba — %(hours_label)s"
@@ -1600,11 +1600,11 @@ msgstr "Havaozina isaky ny 15 minitra"
 msgid "Actualiser"
 msgstr "Havaozy"
 
-msgid "Aucune tendance sur les %(hours_label)s"
-msgstr "Tsy misy hevitra malaza nandritra ny %(hours_label)s"
+msgid "Aucune tendance sur %(hours_label)s"
+msgstr "Aucune tendance sur %(hours_label)s"
 
-msgid "Publiez des posts avec des hashtags pour alimenter les tendances !"
-msgstr "Mamoaka paositra misy hashtag mba hamelona ny hevitra malaza !"
+msgid "Publiez des posts avec des hashtags pour alimenter les tendances."
+msgstr "Publiez des posts avec des hashtags pour alimenter les tendances."
 
 msgid "Essayez sur une période plus longue →"
 msgstr "Andramo amin'ny fotoana lava kokoa →"
@@ -1614,11 +1614,11 @@ msgstr "Andramo amin'ny fotoana lava kokoa →"
 msgid "Sauvegarder"
 msgstr "Tehirizo"
 
-msgid "Sauvegardé"
+msgid "Enregistrée"
 msgstr "Voatahiry"
 
 msgid "Chargement…"
-msgstr "Ampidirana…"
+msgstr "Eo am-pamakiana…"
 
 msgid "Retirer des favoris"
 msgstr "Esorina amin'ny tiana"
@@ -1635,8 +1635,8 @@ msgstr "Vidiny hifampiraharahana"
 msgid "Aucun favori pour l'instant"
 msgstr "Tsy misy tiana ambin'izao"
 
-msgid "Sauvegardez des annonces qui vous intéressent pour les retrouver facilement ici."
-msgstr "Tehirizo ny filazana mahaliana anao mba hahita azy mora eto."
+msgid "Enregistrez les annonces qui vous intéressent pour les retrouver facilement ici."
+msgstr "Tehirizo ireo fivarotana mahaliana anao mba ho hitanao mora eto."
 
 msgid "Parcourir le Bazar"
 msgstr "Hitety ny Tsena"
@@ -1663,10 +1663,10 @@ msgid "Appel vidéo entrant"
 msgstr "Antso video miditra"
 
 msgid "Annuler"
-msgstr "Ajanona"
+msgstr "Hanafoana"
 
 msgid "Refuser"
-msgstr "Mandà"
+msgstr "Lavina"
 
 msgid "Accepter"
 msgstr "Ekena"
@@ -1732,7 +1732,7 @@ msgid "Aucun ami pour l'instant"
 msgstr "Tsy misy sakaiza"
 
 msgid "Chargement…"
-msgstr "Mampiditra..."
+msgstr "Eo am-pamakiana…"
 
 msgid "Écrire un message…"
 msgstr "Soraty ny hafatra…"
@@ -1744,7 +1744,7 @@ msgid "Envoyer (Entrée)"
 msgstr "Alefa (Entrée)"
 
 msgid "Envoyer"
-msgstr "Alefa"
+msgstr "Alefaso"
 
 msgid "Entrée pour envoyer · Maj+Entrée pour aller à la ligne"
 msgstr "Entrée hialefa · Shift+Entrée ho an'ny andalana vaovao"
@@ -1857,7 +1857,7 @@ msgid "Vider le panier ?"
 msgstr "Hofoanana ve ny sobika ?"
 
 msgid "Vider"
-msgstr "Foanana"
+msgstr "Hanafoana"
 
 msgid "Votre panier est vide."
 msgstr "Tsy misy na inona na inona ao anaty sobikanao."
@@ -1919,8 +1919,8 @@ msgstr "Manaova kaomandy ny sakafo tianao eo akaikinao ary araho mivantana ny fa
 msgid "Resto Vazimba"
 msgstr "Sakafo Vazimba"
 
-msgid "Commande ton plat, choisis tes suppléments, suis ton livreur sur la carte."
-msgstr "Manaova kaomandy, fidio ny fanampiny, araho eo amin'ny sarintany ny mpanatitra anao."
+msgid "Commandez votre plat, choisissez vos suppléments, suivez votre livreur sur la carte."
+msgstr "Manafatra ny sakafonao, misafidiana ny fanampiny, araho eo amin'ny sarintany ny mpanatitra."
 
 msgid "Un plat, un restaurant, un quartier…"
 msgstr "Sakafo, hotely, fokontany…"
@@ -1937,8 +1937,8 @@ msgstr "Hivarotra ny sakafoko"
 msgid "Espace livreur"
 msgstr "Toeran'ny mpanatitra"
 
-msgid "Connexion pour commander"
-msgstr "Midira raha hanao kaomandy"
+msgid "Se connecter pour commander"
+msgstr "Midira vao manafatra"
 
 msgid "Ouverts d'abord"
 msgstr "Misokatra aloha"
@@ -1964,8 +1964,8 @@ msgstr "Mihidy"
 msgid "Aucun restaurant pour l'instant"
 msgstr "Mbola tsy misy hotely"
 
-msgid "Sois le premier : crée ta page, ajoute ton menu, et tes clients te retrouveront ici au lieu de chercher ta page Facebook."
-msgstr "Aoka ianao no voalohany : forony ny pejinao, ampidiro ny menu-nao, dia hahita anao eto ny mpanjifanao fa tsy hitady ny pejy Facebook-nao intsony."
+msgid "Soyez le premier : créez votre page, ajoutez votre menu, et vos clients vous retrouveront ici en un clic."
+msgstr "Aoka ianao no voalohany: mamorona ny pejinao, ampio ny sakafo atolotrao, dia hahita anao eto avy hatrany ny mpanjifanao."
 
 msgid "Créer mon restaurant"
 msgstr "Hamorona ny hoteliko"
@@ -1976,7 +1976,7 @@ msgstr "entana"
 msgid "En cours"
 msgstr "Eo am-pandehanana"
 
-msgid "article(s)"
+msgid "articles"
 msgstr "entana"
 
 msgid "Aucune commande en cours."
@@ -2132,11 +2132,11 @@ msgstr "Kaomandy vonona halaina"
 msgid "Je prends cette livraison"
 msgstr "Alaiko ity fanaterana ity"
 
-msgid "Rien à récupérer pour le moment. La page se rafraîchit toute seule."
-msgstr "Tsy misy halaina aloha. Mihavao ho azy ity pejy ity."
+msgid "Rien à récupérer pour le moment. La liste se met à jour toute seule."
+msgstr "Tsy misy halaina aloha izao. Mihavao ho azy ny lisitra."
 
-msgid "Votre profil doit être validé pour voir les commandes."
-msgstr "Tsy maintsy ankatoavina ny mombamomba anao vao mahita ny kaomandy."
+msgid "Votre profil doit être validé par Vazimba, ou rattaché à un restaurant, pour voir les commandes."
+msgstr "Tsy maintsy ankatoavin'i Vazimba ny mombamomba anao, na mifandray amin'ny trano fisakafoanana iray, vao hahita ny kaomandy."
 
 msgid "Dernières livraisons"
 msgstr "Fanaterana farany"
@@ -2153,8 +2153,8 @@ msgstr "Ho lasa mpanatitra"
 msgid "Mon profil livreur"
 msgstr "Ny mombamomba ahy mpanatitra"
 
-msgid "Un restaurant peut vous rattacher directement (vous êtes alors validé aussitôt). Les livreurs indépendants sont validés par l'équipe Vazimba."
-msgstr "Afaka mampiditra anao mivantana ny hotely iray (voankatoa avy hatrany ianao amin'izay). Ny mpanatitra mahaleo tena dia ankatoavin'ny ekipa Vazimba."
+msgid "Un restaurant peut vous rattacher directement : vous livrez alors ses commandes sans attendre. Les livreurs indépendants sont validés par l'équipe Vazimba."
+msgstr "Afaka mampifandray anao mivantana ny trano fisakafoanana iray: manatitra ny kaomandiny avy hatrany ianao amin'izay. Ny ekipan'i Vazimba no manaiky ny mpanatitra mahaleo tena."
 
 msgid "Livreurs"
 msgstr "Mpanatitra"
@@ -2162,8 +2162,8 @@ msgstr "Mpanatitra"
 msgid "Mes restaurants"
 msgstr "Ny hoteliko"
 
-msgid "Ajoutez vos livreurs par leur nom d'utilisateur Vazimba. Ils recevront vos commandes prêtes et partageront leur position avec le client."
-msgstr "Ampidiro ny mpanatitrao amin'ny anaran'ny mpampiasa Vazimba. Handray ny kaomandy vonona izy ireo ary hizara ny toerany amin'ny mpanjifa."
+msgid "Ajoutez vos livreurs par leur nom d'utilisateur Vazimba. La personne doit d'abord avoir créé son profil livreur (Espace livreur). Elle recevra vos commandes prêtes et partagera sa position avec le client."
+msgstr "Ampio amin'ny alalan'ny anaran'ny mpampiasa Vazimba ny mpanatitrao. Tsy maintsy efa namorona ny mombamomba azy amin'ny maha-mpanatitra (Faritry ny mpanatitra) ilay olona. Handray ny kaomandinao vonona izy ary hizara ny toerana misy azy amin'ny mpanjifa."
 
 msgid "Nom d'utilisateur"
 msgstr "Anaran'ny mpampiasa"
@@ -2255,8 +2255,8 @@ msgstr "Filaharana"
 msgid "Enregistrer le plat"
 msgstr "Tehirizo ny sakafo"
 
-msgid "Comme sur Uber Eats : un groupe = une question posée au client (« Sauce ? », « Suppléments ? »). Minimum 1 = choix obligatoire. Maximum 1 = un seul choix, 0 = illimité."
-msgstr "Toy ny ao amin'ny Uber Eats : vondrona iray = fanontaniana iray apetraka amin'ny mpanjifa (« Lasaosy ? », « Fanampiny ? »). Farany ambany 1 = safidy tsy maintsy. Farany ambony 1 = safidy tokana, 0 = tsy voafetra."
+msgid "Un groupe = une question posée au client (« Sauce ? », « Suppléments ? »). Minimum 1 = choix obligatoire. Maximum 1 = un seul choix, 0 = illimité."
+msgstr "Vondrona iray = fanontaniana iray apetraka amin'ny mpanjifa (« Saosy? », « Fanampiny? »). Kely indrindra 1 = tsy maintsy misafidy. Be indrindra 1 = safidy tokana, 0 = tsy voafetra."
 
 msgid "Ajouter un groupe"
 msgstr "Hanampy vondrona"
@@ -2279,8 +2279,8 @@ msgstr "Ambany"
 msgid "Max"
 msgstr "Ambony"
 
-msgid "+ option"
-msgstr "+ safidy"
+msgid "Ajouter une option"
+msgstr "Hanampy safidy"
 
 msgid "Supprimer le groupe"
 msgstr "Fafao ny vondrona"
@@ -2294,8 +2294,8 @@ msgstr "Ovay ny sakafo"
 msgid "Nouvelles"
 msgstr "Vaovao"
 
-msgid "Cette page se rafraîchit automatiquement à chaque nouvelle commande."
-msgstr "Mihavao ho azy ity pejy ity isaky ny misy kaomandy vaovao."
+msgid "La liste se met à jour toute seule à chaque nouvelle commande."
+msgstr "Mihavao ho azy ny lisitra isaky ny misy kaomandy vaovao."
 
 msgid "Retrait"
 msgstr "Alaina eo an-toerana"
@@ -2318,8 +2318,8 @@ msgstr "Forony dia mandroso amin'ny menu"
 msgid "Après création, votre page reste invisible au public jusqu'à validation par l'équipe Vazimba. Vous pouvez déjà préparer votre menu."
 msgstr "Rehefa voaforona, tsy hitan'ny besinimaro ny pejinao mandra-pankatoavan'ny ekipa Vazimba azy. Afaka manomana ny menu-nao sahady ianao."
 
-msgid "Ex : Hotely Mamy, Pizza Tana…"
-msgstr "Ohatra : Hotely Mamy, Pizza Tana…"
+msgid "Le nom de votre établissement"
+msgstr "Ny anaran'ny toeram-pisakafoananao"
 
 msgid "Spécialités, ambiance, ce qui vous distingue"
 msgstr "Sakafo manokana, endrika, izay mampiavaka anao"
@@ -2339,8 +2339,8 @@ msgstr "Tsy azo atao latsaky ny aotra ny vola."
 msgid "Ex : Plats, Boissons, Desserts"
 msgstr "Ohatra : Sakafo, Zava-pisotro, Mamy"
 
-msgid "Ex : Ravitoto sy henakisoa"
-msgstr "Ohatra : Ravitoto sy henakisoa"
+msgid "Ex : Poulet braisé, riz et légumes"
+msgstr "Oh: Akoho atono, vary sy legioma"
 
 msgid "Ingrédients, portion, accompagnement"
 msgstr "Akora, habetsahana, loka"
@@ -2384,8 +2384,8 @@ msgstr "Finday / WhatsApp"
 msgid "Adresse"
 msgstr "Adiresy"
 
-msgid "Quartier, rue, repère (ex: Analakely, en face de la pharmacie)"
-msgstr "Fokontany, lalana, marika (ohatra : Analakely, tandrifin'ny farmasia)"
+msgid "Quartier, rue, repère (ex : en face de la pharmacie)"
+msgstr "Fokontany, arabe, famantarana (oh: manoloana ny farmasia)"
 
 msgid "Région"
 msgstr "Faritra"
@@ -2591,8 +2591,8 @@ msgstr "Kaomandy farany ambany : %(m)s Ar."
 msgid "Nouvelle commande %(n)s chez %(r)s (%(t)s)"
 msgstr "Kaomandy vaovao %(n)s ao amin'ny %(r)s (%(t)s)"
 
-msgid "🍽️ Nouvelle commande"
-msgstr "🍽️ Kaomandy vaovao"
+msgid "Nouvelle commande"
+msgstr "Kaomandy vaovao"
 
 msgid "Commande %(n)s envoyée ! Le restaurant va la confirmer."
 msgstr "Lasa ny kaomandy %(n)s ! Hanamarina azy ny hotely."
@@ -2618,8 +2618,8 @@ msgstr "Kaomandy %(n)s : %(s)s"
 msgid "Commande %(n)s prête à récupérer chez %(r)s"
 msgstr "Vonona halaina ao amin'ny %(r)s ny kaomandy %(n)s"
 
-msgid "🛵 Livraison disponible"
-msgstr "🛵 Misy fanaterana"
+msgid "Livraison disponible"
+msgstr "Misy fanaterana azo raisina"
 
 msgid "Commande %(n)s → %(s)s"
 msgstr "Kaomandy %(n)s → %(s)s"
@@ -2666,8 +2666,8 @@ msgstr "Tsy hita ny mpampiasa : %(u)s"
 msgid "%(r)s vous a ajouté comme livreur"
 msgstr "Nampiditra anao ho mpanatitra i %(r)s"
 
-msgid "🛵 Vazimba Resto"
-msgstr "🛵 Sakafo Vazimba"
+msgid "Vazimba Resto"
+msgstr "Vazimba Resto"
 
 msgid "%(u)s est maintenant livreur de %(r)s."
 msgstr "Lasa mpanatitr'i %(r)s i %(u)s."
@@ -2675,8 +2675,8 @@ msgstr "Lasa mpanatitr'i %(r)s i %(u)s."
 msgid "Profil livreur enregistré."
 msgstr "Voatahiry ny mombamomba ny mpanatitra."
 
-msgid "Demande envoyée. Un restaurant peut vous rattacher, ou Vazimba validera votre profil."
-msgstr "Lasa ny fangatahana. Afaka mampiditra anao ny hotely iray, na hankatoa ny mombamomba anao i Vazimba."
+msgid "Profil créé. Un restaurant peut vous rattacher pour ses commandes ; les livreurs indépendants sont validés par Vazimba."
+msgstr "Voaforona ny mombamomba anao. Afaka mampifandray anao amin'ny kaomandiny ny trano fisakafoanana iray; i Vazimba no manaiky ny mpanatitra mahaleo tena."
 
 msgid "Profil livreur non validé."
 msgstr "Mbola tsy nankatoavina ny mombamomba ny mpanatitra."
@@ -2693,8 +2693,8 @@ msgstr "Nalain'i %(c)s"
 msgid "%(c)s a récupéré votre commande %(n)s"
 msgstr "Nalain'i %(c)s ny kaomandinao %(n)s"
 
-msgid "🛵 En route !"
-msgstr "🛵 An-dalana !"
+msgid "En route !"
+msgstr "Eny an-dalana!"
 
 msgid "Commande %(n)s prise par %(c)s"
 msgstr "Nalain'i %(c)s ny kaomandy %(n)s"
@@ -2740,8 +2740,8 @@ msgstr "Ampidiro ny akora"
 msgid "retirable"
 msgstr "azo esorina"
 
-msgid "Ex : Porc mijoté 2 h avec les feuilles de manioc pilées, servi avec du riz blanc"
-msgstr "Ohatra : Henakisoa nandrahoina 2 ora miaraka amin'ny ravitoto, aroso miaraka amin'ny vary fotsy"
+msgid "Ex : Mijoté 2 h à feu doux, servi avec du riz blanc"
+msgstr "Oh: Nandrahoina 2 ora tamin'ny afo malefaka, aroso miaraka amin'ny vary fotsy"
 
 msgid "Comment le plat est préparé : cuisson, mode de préparation, temps, particularités."
 msgstr "Ahoana no fanomanana ny sakafo : fandrahoana, fomba, fotoana, mampiavaka."
@@ -2787,10 +2787,10 @@ msgid "Communication, disponibilité à la livraison, paiement…"
 msgstr "Fifandraisana, fisiana rehefa aterina, fandoavam-bola…"
 
 msgid "Modifier mon avis"
-msgstr "Ovay ny hevitro"
+msgstr "Hanova ny hevitro"
 
 msgid "Envoyer mon avis"
-msgstr "Alefa ny hevitro"
+msgstr "Handefa ny hevitro"
 
 msgid "Problème de paiement"
 msgstr "Olana tamin'ny fandoavam-bola"
@@ -2841,7 +2841,7 @@ msgid "⭐ Vazimba Resto"
 msgstr "⭐ Sakafo Vazimba"
 
 msgid "Merci pour votre avis !"
-msgstr "Misaotra tamin'ny hevitrao !"
+msgstr "Misaotra tamin'ny hevitrao!"
 
 # ── Resto Vazimba (commande & livraison de repas) ──
 msgid "Identité vérifiée, 20 livraisons ou plus, note ≥ 4,5, aucun problème de paiement"
@@ -2850,8 +2850,8 @@ msgstr "Mombamomba voamarina, fanaterana 20 na mihoatra, naoty ≥ 4,5, tsy nisy
 msgid "Livreur confirmé"
 msgstr "Mpanatitra voamarina tanteraka"
 
-msgid "CIN contrôlée par l'équipe Vazimba"
-msgstr "Karapanondro nomarin'ny ekipa Vazimba"
+msgid "Pièce d'identité contrôlée par l'équipe Vazimba"
+msgstr "Kara-panondro nohamarinin'ny ekipan'i Vazimba"
 
 msgid "Identité vérifiée"
 msgstr "Mombamomba voamarina"
@@ -2865,8 +2865,8 @@ msgstr "Mpanatitra vaovao"
 msgid "Profil de confiance"
 msgstr "Mombamomba azo itokisana"
 
-msgid "Compléter mon profil (photo, CIN, garant…) pour être vérifié"
-msgstr "Fenoy ny mombamomba ahy (sary, karapanondro, mpiantoka…) mba hohamarinina"
+msgid "Compléter mon profil (photo, pièce d'identité, garant…) pour être vérifié"
+msgstr "Fenoy ny mombamomba ahy (sary, karapanondro, mpiantoka…) mba ho voamarina"
 
 msgid "Voir mon profil public"
 msgstr "Hijery ny mombamomba ahy ho an'ny rehetra"
@@ -2928,8 +2928,8 @@ msgstr "Mbola tsy misy hevitra."
 msgid "Ce qui rend un profil fiable"
 msgstr "Izay mahatonga ny mombamomba ho azo itokisana"
 
-msgid "Ces informations servent à vérifier qui vous êtes. Le numéro et les photos de CIN ne sont jamais publiés : seule l'équipe Vazimba les voit."
-msgstr "Ampiasaina hanamarinana hoe iza ianao ireto. Tsy avoaka mihitsy ny laharana sy ny sarin'ny karapanondro : ny ekipa Vazimba ihany no mahita azy."
+msgid "Ces informations servent à vérifier qui vous êtes. Le numéro et les photos de votre pièce d'identité ne sont jamais publiés : seule l'équipe Vazimba les voit."
+msgstr "Ireo fampahalalana ireo dia entina hanamarinana hoe iza ianao. Tsy avoaka mihitsy ny laharana sy ny sarin'ny karapanondronao : ny ekipa Vazimba ihany no mahita azy."
 
 msgid "Identité vérifiée par Vazimba"
 msgstr "Mombamomba voamarin'i Vazimba"
@@ -2940,20 +2940,20 @@ msgstr "Faritra & fotoana ahafahana"
 msgid "Paiement des frais de livraison"
 msgstr "Fandoavana ny saran'ny fanaterana"
 
-msgid "Le garant est une pratique de confiance courante à Madagascar : une personne joignable qui répond de vous en cas de problème."
-msgstr "Fomba fitokisana mahazatra eto Madagasikara ny mpiantoka : olona azo antsoina izay miantoka anao raha misy olana."
+msgid "Le garant est une pratique de confiance courante : une personne joignable qui répond de vous en cas de problème."
+msgstr "Fomba fitokisana mahazatra ny mpiantoka : olona azo antsoina izay miantoka anao raha misy olana."
 
 msgid "Enregistrer mon profil"
 msgstr "Tehirizo ny mombamomba ahy"
 
-msgid "Ex : RAKOTO Jean Mamy"
-msgstr "Ohatra : RAKOTO Jean Mamy"
+msgid "Votre nom et vos prénoms"
+msgstr "Ny anarana sy fanampin'anaranao"
 
-msgid "Ex : 1234 TAB"
-msgstr "Ohatra : 1234 TAB"
+msgid "N° d'immatriculation"
+msgstr "Laharan'ny fiara"
 
-msgid "La CIN malgache comporte 12 chiffres."
-msgstr "Isa 12 ny laharan'ny karapanondro malagasy."
+msgid "Le numéro de pièce d'identité comporte 6 à 20 lettres ou chiffres."
+msgstr "Litera na isa 6 ka hatramin'ny 20 ny laharan'ny karapanondro."
 
 msgid "Indiquez le numéro mobile money."
 msgstr "Lazao ny nomerao mobile money."
@@ -2961,8 +2961,8 @@ msgstr "Lazao ny nomerao mobile money."
 msgid "Indiquez l'immatriculation du véhicule."
 msgstr "Lazao ny nomeraon'ny fiara."
 
-msgid "Nom complet (comme sur la CIN)"
-msgstr "Anarana feno (toy ny ao amin'ny karapanondro)"
+msgid "Nom complet (comme sur la pièce d'identité)"
+msgstr "Anarana feno (araka ny karapanondro)"
 
 msgid "Photo (visage bien visible)"
 msgstr "Sary (hita tsara ny tarehy)"
@@ -2973,14 +2973,14 @@ msgstr "Fampahafantarana"
 msgid "Quelques mots sur vous : expérience, ponctualité, ce que les clients peuvent attendre."
 msgstr "Teny vitsivitsy momba anao : traikefa, fahatongavana ara-potoana, izay azon'ny mpanjifa andrasana."
 
-msgid "N° de CIN (12 chiffres)"
-msgstr "Laharan'ny karapanondro (isa 12)"
+msgid "N° de pièce d'identité"
+msgstr "Laharan'ny karapanondro"
 
-msgid "CIN recto"
-msgstr "Karapanondro anoloana"
+msgid "Pièce d'identité, recto"
+msgstr "Karapanondro, anoloana"
 
-msgid "CIN verso"
-msgstr "Karapanondro ambadika"
+msgid "Pièce d'identité, verso"
+msgstr "Karapanondro, aoriana"
 
 msgid "Notes admin"
 msgstr "Fanamarihan'ny admin"
@@ -2994,8 +2994,8 @@ msgstr "Sarin'ny fiara"
 msgid "Quartiers couverts"
 msgstr "Fokontany aterina"
 
-msgid "Ex : Analakely, Isoraka, Ankorondrano, 67 Ha"
-msgstr "Ohatra : Analakely, Isoraka, Ankorondrano, 67 Ha"
+msgid "Ex : les quartiers où vous livrez, séparés par des virgules"
+msgstr "Ohatra : ireo fokontany anateranao, sarahina faingo"
 
 msgid "Langues parlées"
 msgstr "Fiteny hainao"
@@ -3012,8 +3012,8 @@ msgstr "Nomerao mobile money"
 msgid "Nom du garant"
 msgstr "Anaran'ny mpiantoka"
 
-msgid "Une personne de confiance (famille, employeur, fokontany) qui répond de vous."
-msgstr "Olona azo itokisana (fianakaviana, mpampiasa, fokontany) miantoka anao."
+msgid "Une personne de confiance (famille, employeur, chef de quartier) qui répond de vous."
+msgstr "Olona azo itokisana (fianakaviana, mpampiasa, lehiben'ny fokontany) miantoka anao."
 
 msgid "Téléphone du garant"
 msgstr "Findain'ny mpiantoka"
@@ -3025,7 +3025,7 @@ msgstr "Jereo ny saha voamarika."
 msgid "photo réelle"
 msgstr "sary tena izy"
 
-msgid "CIN contrôlée"
+msgid "pièce d'identité contrôlée"
 msgstr "karapanondro voamarina"
 
 msgid "téléphone vérifié"
@@ -3088,26 +3088,26 @@ msgstr "Voaraiko tsara ny kaomandiko"
 msgid "Une fois la commande remise et payée, appuyez sur « Commande remise au client » : le client pourra ensuite vous noter."
 msgstr "Rehefa voatolotra sy voaloa ny kaomandy, tsindrio ny « Voatolotra ny mpanjifa » : afaka manome naoty anao ny mpanjifa avy eo."
 
-msgid "✅ Accepter la commande"
-msgstr "✅ Ekena ny kaomandy"
+msgid "Accepter la commande"
+msgstr "Hanaiky ny kaomandy"
 
-msgid "✕ Refuser"
-msgstr "✕ Lavina"
+msgid "Refuser"
+msgstr "Lavina"
 
-msgid "👩‍🍳 Lancer la préparation"
-msgstr "👩‍🍳 Atomboka ny fanomanana"
+msgid "Lancer la préparation"
+msgstr "Hanomboka ny fikarakarana"
 
-msgid "📦 Commande prête"
-msgstr "📦 Vonona ny kaomandy"
+msgid "Commande prête"
+msgstr "Vonona ny kaomandy"
 
-msgid "📦 J'ai récupéré la commande"
-msgstr "📦 Nalaiko ny kaomandy"
+msgid "J'ai récupéré la commande"
+msgstr "Efa noraisiko ny kaomandy"
 
-msgid "🛵 Je pars livrer"
-msgstr "🛵 Lasa manatitra aho"
+msgid "Je pars livrer"
+msgstr "Handeha hanatitra aho"
 
-msgid "✅ Commande remise au client"
-msgstr "✅ Voatolotra ny mpanjifa"
+msgid "Commande remise au client"
+msgstr "Voatolotra ny mpanjifa ny kaomandy"
 
 msgid "Réception confirmée par le client"
 msgstr "Nohamarinin'ny mpanjifa ny fandraisana"
@@ -3239,8 +3239,8 @@ msgstr "Tsiambaratelo"
 msgid "Vazimba sur Google Play"
 msgstr "Vazimba ao amin'ny Google Play"
 
-msgid "Le réseau social malgache."
-msgstr "Ny tambajotra sosialy malagasy."
+msgid "Le réseau social africain."
+msgstr "Ny tambajotra sosialy afrikanina."
 
 msgid "Téléchargez l'application Android"
 msgstr "Alaivo ny rindrambaiko Android"
@@ -3273,7 +3273,7 @@ msgid "Fil d'actualité"
 msgstr "Vaovao"
 
 msgid "Tourisme"
-msgstr "Fizahan-tany"
+msgstr "Fizahantany"
 
 # ── Socle d’interface commun (toasts, confirmation, signalement) ──
 
@@ -3434,7 +3434,7 @@ msgid "Compte débloqué."
 msgstr "Nesorina ny sakana."
 
 msgid "Signaler ce profil"
-msgstr "Hitatitra ity mombamomba ity"
+msgstr "Hitoroka ity mombamomba ity"
 
 msgid "Signaler"
 msgstr "Hitatitra"
@@ -3478,8 +3478,8 @@ msgstr "Mbola tsy misy toerana nankatoavina."
 msgid "Aucun lieu trouvé"
 msgstr "Tsy nisy toerana hita"
 
-msgid "Aucun live en cours — sois le premier à diffuser !"
-msgstr "Tsy misy live mandeha — aoka ianao no voalohany !"
+msgid "Aucun live en cours"
+msgstr "Tsy misy live amin'izao"
 
 msgid "Bio / Présentation"
 msgstr "Mombamomba"
@@ -3500,10 +3500,10 @@ msgid "Cliquez ou glissez vos nouvelles photos ici"
 msgstr "Tsindrio na tariho eto ny sary vaovao"
 
 msgid "Cliquez ou glissez vos photos ici"
-msgstr "Tsindrio na tariho eto ny sarinao"
+msgstr "Tsindrio na asintony eto ny sarinao"
 
-msgid "Cliquez sur une photo pour la marquer à supprimer (fond rouge = sera supprimée)."
-msgstr "Tsindrio ny sary hofafana (mena = hofafana)."
+msgid "Touchez une photo pour la marquer à supprimer (fond rouge = sera supprimée)."
+msgstr "Tsindrio ny sary iray hanamarihana azy hofafana (loko mena = hofafana)."
 
 msgid "Commencer le live"
 msgstr "Hanomboka ny live"
@@ -3556,23 +3556,23 @@ msgstr "Tehirizo ny fanovana"
 msgid "Espèces endémiques"
 msgstr "Karazana tsy misy afa-tsy eto"
 
-msgid "Essayez d'autres termes ou"
-msgstr "Andramo teny hafa na"
+msgid "Essayez d'autres termes ou effacez les filtres."
+msgstr "Andramo teny hafa na fafao ny sivana."
 
-msgid "Ex : 🇲🇬 Madagascar vs France — Coupe du Monde !"
-msgstr "Ohatra : 🇲🇬 Madagasikara vs Frantsa — Fiadiana ny amboara eran-tany !"
+msgid "Ex : la finale de la CAN en direct !"
+msgstr "Ohatra : ny famaranana CAN mivantana !"
 
-msgid "Ex: -18.9249, 44.8237 ou nom du village"
-msgstr "Ohatra : -18.9249, 44.8237 na anaran-tanàna"
+msgid "Ex : ville ou village le plus proche, ou coordonnées GPS"
+msgstr "Oh: tanàna akaiky indrindra, na koordinatry GPS"
 
-msgid "Ex: Avril à Novembre"
-msgstr "Ohatra : Aprily ka hatramin'ny Novambra"
+msgid "Ex : saison sèche, de mai à octobre"
+msgstr "Oh: main-tany, Mey ka hatramin'ny Oktobra"
 
-msgid "Ex: Gratuit, 5 000 Ar…"
-msgstr "Ohatra : Maimaim-poana, 5 000 Ar…"
+msgid "Ex : gratuit, ou prix du billet"
+msgstr "Oh: maimaim-poana, na vidin'ny tapakila"
 
-msgid "Ex: Tsingy de Bemaraha, Nosy Be, Isalo…"
-msgstr "Ohatra : Tsingy Bemaraha, Nosy Be, Isalo…"
+msgid "Ex : nom du parc, de la plage, du site…"
+msgstr "Oh: anaran'ny valan-javaboary, ny moron-dranomasina, ny toerana…"
 
 msgid "Explorer par catégorie"
 msgstr "Hizaha isaky ny sokajy"
@@ -3610,8 +3610,8 @@ msgstr "Fampahalalana fototra"
 msgid "Inscrivez-vous gratuitement et soyez trouvé par des milliers de voyageurs."
 msgstr "Misorata anarana maimaim-poana ary ho hitan'ny mpandeha an'arivony."
 
-msgid "JPG, PNG, WEBP — max 8 photos. La première sera la photo principale."
-msgstr "JPG, PNG, WEBP — 8 sary farafahabetsany. Ny voalohany no sary fototra."
+msgid "JPG, PNG, WebP ou HEIC — 10 Mo par photo, 8 photos au maximum par lieu."
+msgstr "JPG, PNG, WebP na HEIC — 10 Mo isaky ny sary, sary 8 farafahabetsany isaky ny toerana."
 
 msgid "JPG, PNG, WEBP — maximum 8 photos au total"
 msgstr "JPG, PNG, WEBP — 8 sary farafahabetsany"
@@ -3619,8 +3619,8 @@ msgstr "JPG, PNG, WEBP — 8 sary farafahabetsany"
 msgid "L'hôte a mis fin à la diffusion."
 msgstr "Nahatsahatra ny fandefasana ny tompon-trano."
 
-msgid "L'île rouge vous attend — baobabs, plages de corail, lémuriens et paysages à couper le souffle."
-msgstr "Miandry anao ny Nosy Mena — baobab, torapasika, varika ary tontolo mahavariana."
+msgid "Un continent vous attend — savanes, déserts, plages de corail, forêts et paysages à couper le souffle."
+msgstr "Kaontinanta iray miandry anao — tanety, tany efitra, morontsiraka, ala ary tontolo mahavariana."
 
 msgid "LIVE"
 msgstr "LIVE"
@@ -3646,8 +3646,8 @@ msgstr "Toerana fizahan-tany"
 msgid "Lives en cours"
 msgstr "Live mandeha"
 
-msgid "Malagasy, Français, Anglais"
-msgstr "Malagasy, Frantsay, Anglisy"
+msgid "Français, Anglais, Swahili"
+msgstr "Frantsay, Anglisy, Swahili"
 
 msgid "Meilleure période"
 msgstr "Fotoana tsara indrindra"
@@ -3668,7 +3668,7 @@ msgid "Nombre max de voyageurs"
 msgstr "Isan'ny mpandeha farafahabetsany"
 
 msgid "Pagination"
-msgstr "Pejy"
+msgstr "Fizarana pejy"
 
 msgid "Partage ton écran pour diffuser le match, ou utilise ta caméra."
 msgstr "Zarao ny efijerinao handefasana ny lalao, na ampiasao ny fakan-tsarinao."
@@ -3676,8 +3676,8 @@ msgstr "Zarao ny efijerinao handefasana ny lalao, na ampiasao ny fakan-tsarinao.
 msgid "Partager l'écran"
 msgstr "Hizara efijery"
 
-msgid "Partagez un lieu que vous connaissez et aidez les voyageurs à découvrir Madagascar."
-msgstr "Zarao ny toerana fantatrao ary ampio ny mpandeha hahita an'i Madagasikara."
+msgid "Partagez un lieu que vous connaissez et aidez les voyageurs à découvrir l'Afrique."
+msgstr "Zarao ny toerana fantatrao ary ampio ny mpandeha hahita an'i Afrika."
 
 msgid "Pas d'image disponible"
 msgstr "Tsy misy sary"
@@ -3727,8 +3727,8 @@ msgstr "Hitady toerana…"
 msgid "Regardez le match ensemble"
 msgstr "Jereo miaraka ny lalao"
 
-msgid "Rejoignez notre réseau de guides touristiques et aidez les voyageurs à découvrir l'île."
-msgstr "Midira ao amin'ny tambajotran'ny mpitari-dalana ary ampio ny mpandeha hahita ny Nosy."
+msgid "Rejoignez notre réseau de guides touristiques et aidez les voyageurs à découvrir le continent."
+msgstr "Midira ao amin'ny tambajotran'ny mpitari-dalana ary ampio ny mpandeha hahita ny kaontinanta."
 
 msgid "Rejoindre"
 msgstr "Hiditra"
@@ -3763,8 +3763,8 @@ msgstr "Aoka ianao no voalohany hanome hevitra !"
 msgid "Spécialités"
 msgstr "Fahaizana manokana"
 
-msgid "Séparez par des virgules. Ex: Malagasy, Français, Anglais"
-msgstr "Sarao amin'ny faingo. Ohatra : Malagasy, Frantsay, Anglisy"
+msgid "Séparez par des virgules. Ex : Français, Anglais, Swahili"
+msgstr "Sarao amin'ny faingo. Ohatra : Frantsay, Anglisy, Swahili"
 
 msgid "Séparez par des virgules. Ex: Voiture, 4×4, Pirogue"
 msgstr "Sarao amin'ny faingo. Ohatra : Fiara, 4×4, Lakana"
@@ -3787,8 +3787,8 @@ msgstr "Hamarana"
 msgid "Tous"
 msgstr "Rehetra"
 
-msgid "Tous formats image (JPG, PNG, HEIC, GIF…) — max 10 Mo"
-msgstr "Endrika sary rehetra (JPG, PNG, HEIC, GIF…) — 10 Mo farafahabetsany"
+msgid "JPG, PNG, WebP ou HEIC — 10 Mo au maximum"
+msgstr "JPG, PNG, WebP na HEIC — 10 Mo farafahabetsany"
 
 msgid "Tous les guides"
 msgstr "Mpitari-dalana rehetra"
@@ -3820,26 +3820,26 @@ msgstr "Hijery ny rehetra"
 msgid "Voiture, 4×4, Pirogue, À pied"
 msgstr "Fiara, 4×4, Lakana, An-tongotra"
 
-msgid "Votre profil sera examiné par un administrateur avant d'être publié."
-msgstr "Hodinihin'ny mpitantana ny mombamomba anao alohan'ny hamoahana azy."
+msgid "Votre profil est visible dans la liste des guides dès son enregistrement. Le badge « Guide vérifié » est attribué après contrôle par un administrateur."
+msgstr "Hita ao amin'ny lisitry ny mpitari-dalana ny mombamomba anao raha vao voatahiry. Ny marika « Mpitari-dalana voamarina » dia omena rehefa voamarin'ny mpitantana."
 
-msgid "Votre soumission sera vérifiée par un administrateur avant d'être publiée. Vous recevrez une notification dès qu'elle sera approuvée."
-msgstr "Hohamarinin'ny mpitantana ny tolotrao alohan'ny hamoahana azy. Hahazo fampandrenesana ianao rehefa ankatoavina."
+msgid "Votre proposition sera vérifiée par un administrateur avant d'être publiée. Vous recevrez une notification dès qu'elle sera approuvée."
+msgstr "Hohamarinin'ny mpitantana ny tolotrao alohan'ny hamoahana azy. Hahazo fampandrenesana ianao raha vao ekena izy."
 
-msgid "Vous connaissez Madagascar ?"
-msgstr "Fantatrao ve i Madagasikara ?"
+msgid "Vous connaissez un coin d'Afrique ?"
+msgstr "Mahafantatra zoro iray eto Afrika ve ianao ?"
 
-msgid "Vous guidez des voyageurs à Madagascar ?"
-msgstr "Mitarika mpandeha eto Madagasikara ve ianao ?"
+msgid "Vous guidez des voyageurs en Afrique ?"
+msgstr "Mitarika mpandeha eto Afrika ve ianao ?"
 
 msgid "Vérifiés"
 msgstr "Voamarina"
 
 msgid "Vérifiés seulement"
-msgstr "Ny voamarina ihany"
+msgstr "Voamarina ihany"
 
 msgid "pour laisser un avis."
-msgstr "raha hanome hevitra."
+msgstr "mba hametrahana hevitra."
 
 msgid "réinitialisez les filtres"
 msgstr "avereno ny sivana"
@@ -3910,8 +3910,8 @@ msgstr "Boutique Pro"
 msgid "Brouillon"
 msgstr "Drafitra"
 
-msgid "Brouillons & Programmés"
-msgstr "Drafitra sy voalahatra"
+msgid "Brouillons et posts programmés"
+msgstr "Brouillons et posts programmés"
 
 msgid "Catégorie principale"
 msgstr "Sokajy fototra"
@@ -3952,8 +3952,8 @@ msgstr "Fampisehoana"
 msgid "Début du clip (30 s max)"
 msgstr "Fiandohan'ny clip (30 s farafahabetsany)"
 
-msgid "Découvrir Madagascar"
-msgstr "Hizaha an'i Madagasikara"
+msgid "Découvrir l'Afrique"
+msgstr "Hizaha an'i Afrika"
 
 msgid "Effacer"
 msgstr "Fafao"
@@ -4228,8 +4228,8 @@ msgstr "Alaivo"
 msgid "Envoyer ma demande"
 msgstr "Alefaso ny fangatahako"
 
-msgid "Proposer ce lieu"
-msgstr "Atolory ity toerana ity"
+msgid "Envoyer la proposition"
+msgstr "Handefa ny tolotra"
 
 msgid "Bannière de la boutique"
 msgstr "Sora-baventin'ny fivarotana"
@@ -4237,8 +4237,8 @@ msgstr "Sora-baventin'ny fivarotana"
 msgid "Bonjour, je suis intéressé(e) par votre annonce : "
 msgstr "Salama, liana amin'ny dokam-barotrao aho : "
 
-msgid "Clique sur l'icône 🔖 d'un post pour le retrouver ici."
-msgstr "Tsindrio ny 🔖 eo amin'ny lahatsoratra raha te hahita azy eto."
+msgid "Touchez le signet sous un post pour le retrouver ici."
+msgstr "Touchez le signet sous un post pour le retrouver ici."
 
 msgid "Demander le statut Boutique Pro"
 msgstr "Hangataka ny sata Boutique Pro"
@@ -4351,7 +4351,7 @@ msgstr "Pejy manaraka"
 
 #: coquille (2026-11)
 msgid "Aucune notification"
-msgstr "Tsy misy famantarana"
+msgstr "Tsy misy fampandrenesana"
 
 #: coquille (2026-11)
 msgid "Aucun nouveau message"
@@ -4399,3 +4399,1903 @@ msgstr "Firenena"
 
 msgid "Choose (or write +country code below)"
 msgstr "Safidio (na soraty miaraka amin'ny +kaodin'ny firenena ny laharana)"
+
+msgid "La recherche se fait pays par pays, les annonces et les restaurants sont ceux de votre région, et un mode économie charge les médias à la demande pour que le site reste utilisable quand le réseau ne suit pas."
+msgstr "Isaky ny firenena ny fikarohana, ny filazana sy ny trano fisakafoanana dia ireo akaiky anao, ary misy fomba fitsitsiana mampiditra ny sary rehefa ilaina mba hahazoana mampiasa ny tranonkala na dia malemy aza ny tambajotra."
+
+msgid "Afrique"
+msgstr "Afrika"
+
+msgid "l'Afrique"
+msgstr "an'i Afrika"
+
+msgid "Format international, avec l'indicatif du pays (+…)."
+msgstr "Endrika iraisam-pirenena, miaraka amin'ny kaody ny firenena (+…)."
+
+msgid "Ex : quartier, ville"
+msgstr "Ohatra : fokontany, tanàna"
+
+msgid "Autre mobile money"
+msgstr "Mobile money hafa"
+
+msgid "Océan Indien"
+msgstr "Ranomasimbe Indianina"
+
+msgid "Non précisé"
+msgstr "Tsy voalaza"
+
+msgid "Pays ou région (Près de chez moi)"
+msgstr "Firenena na faritra (Akaikiko)"
+
+msgid "Permet de filtrer le fil, les groupes et le Bazar par pays ou par région."
+msgstr "Ahafahana manivana ny vaovao, ny vondrona ary ny Bazar araka ny firenena na faritra."
+
+msgid "<strong>%(n)s</strong> restaurant"
+msgid_plural "<strong>%(n)s</strong> restaurants"
+msgstr[0] "Trano fisakafoanana <strong>%(n)s</strong>"
+msgstr[1] "Trano fisakafoanana <strong>%(n)s</strong>"
+
+msgid "%(n)s article"
+msgid_plural "%(n)s articles"
+msgstr[0] "Entana %(n)s"
+msgstr[1] "Entana %(n)s"
+
+msgid "%(n)s plat"
+msgid_plural "%(n)s plats"
+msgstr[0] "Sakafo %(n)s"
+msgstr[1] "Sakafo %(n)s"
+
+msgid "%(n)s groupe d'options"
+msgid_plural "%(n)s groupes d'options"
+msgstr[0] "Vondrom-safidy %(n)s"
+msgstr[1] "Vondrom-safidy %(n)s"
+
+msgid "Ajouter %(n)s au panier"
+msgstr "Hampiditra %(n)s ao anaty harona"
+
+msgid "Retour au panier"
+msgstr "Hiverina any amin'ny harona"
+
+msgid "Retirer un"
+msgstr "Hanala iray"
+
+msgid "Ajouter un"
+msgstr "Hanampy iray"
+
+msgid "Impossible de charger ce plat. Vérifiez votre connexion et réessayez."
+msgstr "Tsy azo nalaina io sakafo io. Hamarino ny fifandraisanao dia andramo indray."
+
+msgid "Une erreur est survenue. Réessayez."
+msgstr "Nisy olana. Andramo indray."
+
+msgid "Vider le panier"
+msgstr "Hanafoana ny harona"
+
+msgid "Commande minimum : %(m)s"
+msgstr "Kaomandy kely indrindra: %(m)s"
+
+msgid "Refuser cette commande ?"
+msgstr "Holavina ve ity kaomandy ity?"
+
+msgid "Ingrédient"
+msgstr "Akora"
+
+msgid "Retirer ce livreur"
+msgstr "Hanala ity mpanatitra ity"
+
+msgid "Cuisine de quartier"
+msgstr "Hotely"
+
+msgid "Cette commande n'est pas dans votre zone."
+msgstr "Tsy ao amin'ny faritrao io kaomandy io."
+
+msgid "%(u)s n'a pas encore de profil livreur. Demandez-lui de le créer depuis « Espace livreur », puis ajoutez-le ici."
+msgstr "Mbola tsy manana mombamomba mpanatitra i %(u)s. Angataho izy hamorona izany ao amin'ny « Faritry ny mpanatitra », dia ampio eto avy eo."
+
+msgid "%(u)s est déjà livreur de %(r)s."
+msgstr "Efa mpanatitry %(r)s i %(u)s."
+
+msgid "%(u)s livre déjà pour un autre restaurant. Il doit d'abord le quitter."
+msgstr "Efa manatitra ho an'ny trano fisakafoanana hafa i %(u)s. Tsy maintsy miala ao aloha izy."
+
+msgid "Bazar Vazimba"
+msgstr "Bazar Vazimba"
+
+msgid "À vendre"
+msgstr "Amidy"
+
+msgid "À louer"
+msgstr "Ahofa"
+
+msgid "Filtrer"
+msgstr "Sivana"
+
+msgid "dans <em>%(c)s</em>"
+msgstr "ao amin'ny <em>%(c)s</em>"
+
+msgid "pour « <em>%(q)s</em> »"
+msgstr "ho an'ny « <em>%(q)s</em> »"
+
+msgid "Aucune annonce ne correspond à ces filtres pour le moment."
+msgstr "Tsy misy fivarotana mifanaraka amin'ireo sivana ireo aloha."
+
+msgid "Un compte vérifié renforce la confiance des acheteurs. Choisissez le profil qui correspond à votre activité."
+msgstr "Ny kaonty voamarina dia mampitombo ny fitokisan'ny mpividy. Fidio ny karazana mifanaraka amin'ny asanao."
+
+msgid "Soumise le %(date)s."
+msgstr "Nalefa tamin'ny %(date)s."
+
+msgid "Retour à mes annonces"
+msgstr "Hiverina amin'ny fivarotako"
+
+msgid "Boutique Pro active"
+msgstr "Boutique Pro mandeha"
+
+msgid "Approuvée le %(date)s."
+msgstr "Nekena tamin'ny %(date)s."
+
+msgid "Approuvé le %(date)s."
+msgstr "Nekena tamin'ny %(date)s."
+
+msgid "Badge vérifié actif, 12 photos par annonce."
+msgstr "Mandeha ny mari-pamantarana voamarina, sary 12 isaky ny fivarotana."
+
+msgid "Votre activité a grandi ? Passez au niveau supérieur : page boutique dédiée, badge doré, 20 photos par annonce, priorité maximale dans les résultats."
+msgstr "Votre activité a grandi ? Passez au niveau supérieur : page boutique dédiée, badge doré, 20 photos par annonce, priorité maximale dans les résultats."
+
+msgid "Pendant l'examen de la demande, votre badge Vérifié est suspendu."
+msgstr "Mandritra ny fandinihana ny fangatahana dia miato ny mari-pamantarana Voamarina anao."
+
+msgid "Examinée le %(date)s."
+msgstr "Nodinihina tamin'ny %(date)s."
+
+msgid "Badge, priorité dans les résultats, plus de photos — et une page boutique dédiée pour les pros."
+msgstr "Badge, priorité dans les résultats, plus de photos — et une page boutique dédiée pour les pros."
+
+msgid "badge doré, page boutique publique, 20 photos par annonce."
+msgstr "badge doré, page boutique publique, 20 photos par annonce."
+
+msgid "Mettre en pause"
+msgstr "Hampiato"
+
+msgid "Réactiver"
+msgstr "Hamerina hampandeha"
+
+msgid "Louée"
+msgstr "Nahofa"
+
+msgid "Expirée"
+msgstr "Lany daty"
+
+msgid "Marquer cette annonce comme louée ?"
+msgstr "Marihina ho nahofa ity fivarotana ity?"
+
+msgid "Marquer comme louée"
+msgstr "Marihina ho nahofa"
+
+msgid "Annonce remontée en tête."
+msgstr "Nasandratra eo aloha ny fivarotana."
+
+msgid "Photos (%(n)s max)"
+msgstr "Sary (%(n)s farafahabetsany)"
+
+msgid "JPG, PNG, WebP, HEIC · %(n)s photos max · La première est la photo principale"
+msgstr "JPG, PNG, WebP, HEIC · sary %(n)s farafahabetsany · Ny voalohany no sary fototra"
+
+msgid "Facilite le filtre « Près de chez moi »"
+msgstr "Manamora ny sivana « Akaiky ahy »"
+
+msgid "Visible sur votre annonce pour que les acheteurs vous contactent par appel ou WhatsApp. Indiquez l'indicatif du pays (+…) pour activer le bouton WhatsApp."
+msgstr "Visible sur votre annonce pour que les acheteurs vous contactent par appel ou WhatsApp. Indiquez l'indicatif du pays (+…) pour activer le bouton WhatsApp."
+
+msgid "LOUÉE"
+msgstr "NAHOFA"
+
+msgid "PRINCIPALE"
+msgstr "FOTOTRA"
+
+msgid "Supprimer cette photo"
+msgstr "Fafao ity sary ity"
+
+msgid "JPG, PNG, WebP, HEIC · %(n)s photos max au total"
+msgstr "JPG, PNG, WebP, HEIC · sary %(n)s farafahabetsany"
+
+msgid "Retirer cette photo"
+msgstr "Esory ity sary ity"
+
+msgid "La photo n'a pas pu être supprimée."
+msgstr "Tsy voafafa ny sary."
+
+msgid "Nombre maximum de photos atteint."
+msgstr "Tratra ny isan'ny sary farafahabetsany."
+
+msgid "Type de vendeur"
+msgstr "Karazana mpivarotra"
+
+msgid "Badge Vérifié sur vos annonces"
+msgstr "Badge Vérifié sur vos annonces"
+
+msgid "Concessionnaire / Boutique Pro"
+msgstr "Concessionnaire / Boutique Pro"
+
+msgid "Badge Boutique Pro doré"
+msgstr "Badge Boutique Pro doré"
+
+msgid "Ex : Auto Plus, Électro Service…"
+msgstr "Oh: Auto Plus, Électro Service…"
+
+msgid "Présentez votre boutique, vos produits, votre expérience…"
+msgstr "Ampahafantaro ny fivarotanao, ny entanao, ny traikefanao…"
+
+msgid "Avec l'indicatif du pays (+…) pour activer le bouton WhatsApp."
+msgstr "Miaraka amin'ny kaody an'ny firenena (+…) mba hampandeha ny bokotra WhatsApp."
+
+msgid "Ex : Lun–Sam 8h–18h"
+msgstr "Oh: Alats–Sab 8ora–18ora"
+
+msgid "Image horizontale recommandée (ex : 1200×300 px). Formats : JPG, PNG, WebP — 10 Mo max."
+msgstr "Sary mitsivalana no tsara (oh: 1200×300 px). Endrika: JPG, PNG, WebP — 10 Mo farafahabetsany."
+
+msgid "Présentez-vous, décrivez votre activité, expliquez pourquoi vous méritez d'être vérifié…"
+msgstr "Présentez-vous, décrivez votre activité, expliquez pourquoi vous méritez d'être vérifié…"
+
+msgid "Fil d'Ariane"
+msgstr "Lalana"
+
+msgid "Agrandir la photo"
+msgstr "Hanalehibe ny sary"
+
+msgid "Photo précédente"
+msgstr "Sary teo aloha"
+
+msgid "Photo suivante"
+msgstr "Sary manaraka"
+
+msgid "Photo %(n)s"
+msgstr "Sary %(n)s"
+
+msgid "Conditions de location"
+msgstr "Fepetran'ny fanofana"
+
+msgid "Caution"
+msgstr "Antoka"
+
+msgid "Durée min."
+msgstr "Faharetany kely indrindra"
+
+msgid "Pièces"
+msgstr "Efitra"
+
+msgid "Surface"
+msgstr "Velarana"
+
+msgid "Meublé"
+msgstr "Misy fanaka"
+
+msgid "Charges"
+msgstr "Charges"
+
+msgid "Incluses"
+msgstr "Tafiditra"
+
+msgid "Chauffeur"
+msgstr "Mpamily"
+
+msgid "Inclus"
+msgstr "Tafiditra"
+
+msgid "Bonjour, je suis intéressé(e) par votre annonce :"
+msgstr "Manao ahoana, liana amin'ny fivarotanao aho:"
+
+msgid "Photos de l'annonce"
+msgstr "Sarin'ny fivarotana"
+
+msgid "Vente d'un objet ou d'un service"
+msgstr "Fivarotana entana na tolotra"
+
+msgid "Location d'un véhicule ou d'un logement"
+msgstr "Fanofana fiara na trano"
+
+msgid "logement"
+msgstr "trano"
+
+msgid "Annonce supprimée."
+msgstr "Voafafa ny fivarotana."
+
+msgid "Vous ne pouvez pas modifier cette annonce."
+msgstr "Tsy afaka manova ity fivarotana ity ianao."
+
+msgid "Action non autorisée."
+msgstr "Tsy azo atao izany."
+
+msgid "Annonce marquée comme louée."
+msgstr "Voamarika ho nahofa ny fivarotana."
+
+msgid "Annonce marquée comme vendue."
+msgstr "Voamarika ho namidy ny fivarotana."
+
+msgid "Votre annonce est publiée."
+msgstr "Navoaka ny fivarotanao."
+
+msgid "Annonce mise à jour."
+msgstr "Nohavaozina ny fivarotana."
+
+msgid "Cette annonce n'existe pas ou a déjà été supprimée."
+msgstr "Tsy misy na efa voafafa ity fivarotana ity."
+
+msgid "Seules les annonces actives peuvent être remontées."
+msgstr "Ny fivarotana mavitrika ihany no azo asandratra."
+
+msgid "Cette annonce est clôturée : modifiez-la pour la republier."
+msgstr "Efa nakatona ity fivarotana ity: ovay mba hamoahana azy indray."
+
+msgid "Vous avez déjà une demande en cours."
+msgstr "Efa manana fangatahana andrasana ianao."
+
+msgid "Le nom de la boutique est obligatoire pour une demande Pro."
+msgstr "Tsy maintsy fenoina ny anaran'ny fivarotana ho an'ny fangatahana Pro."
+
+msgid "Demande envoyée. L'équipe de modération l'examinera prochainement."
+msgstr "Lasa ny fangatahana. Hodinihin'ny ekipa mpanara-maso tsy ho ela."
+
+msgid "Votre boutique Pro est déjà active."
+msgstr "Efa mandeha ny Boutique Pro anao."
+
+msgid "Votre compte est déjà vérifié."
+msgstr "Efa voamarina ny kaontinao."
+
+msgid "Vous pourrez remonter cette annonce dans %(h)d h."
+msgstr "Afaka manandratra ity fivarotana ity indray ianao afaka %(h)d ora."
+
+msgid "Titre de l'annonce"
+msgstr "Lohatenin'ny fivarotana"
+
+msgid "Prix (Ariary)"
+msgstr "Vidiny (Ariary)"
+
+msgid "Prix négociable"
+msgstr "Vidiny azo dinihana"
+
+msgid "Prix de location (Ariary)"
+msgstr "Hofany (Ariary)"
+
+msgid "Période"
+msgstr "Fe-potoana"
+
+msgid "Caution (Ariary)"
+msgstr "Antoka (Ariary)"
+
+msgid "Durée minimale (jours)"
+msgstr "Faharetany kely indrindra (andro)"
+
+msgid "Nombre de pièces"
+msgstr "Isan'ny efitra"
+
+msgid "Surface (m²)"
+msgstr "Velarana (m²)"
+
+msgid "Charges incluses"
+msgstr "Charges incluses"
+
+msgid "Avec chauffeur"
+msgstr "Misy mpamily"
+
+msgid "Ville / quartier"
+msgstr "Tanàna / fokontany"
+
+msgid "Afficher le numéro publiquement"
+msgstr "Asehoy amin'ny rehetra ny laharana"
+
+msgid "Choisissez un statut valide."
+msgstr "Misafidiana sata mety."
+
+msgid "Le prix de location ne peut pas être négatif."
+msgstr "Tsy azo atao latsaky ny aotra ny hofany."
+
+msgid "La caution ne peut pas être négative."
+msgstr "Tsy azo atao latsaky ny aotra ny antoka."
+
+msgid "Ex: Samsung Galaxy A54 128Go"
+msgstr "Oh: Samsung Galaxy A54 128Go"
+
+msgid "Décrivez votre article : marque, modèle, défauts éventuels…"
+msgstr "Lazalazao ny entanao: marika, modely, izay mety ho simba…"
+
+msgid "Ex : Dakar, Plateau"
+msgstr "Oh: Dakar, Plateau"
+
+msgid "Numéro avec indicatif du pays (+…)"
+msgstr "Laharana miaraka amin'ny kaody an'ny firenena (+…)"
+
+msgid "Expirée — choisissez « Active » pour la republier"
+msgstr "Lany daty — fidio « Mavitrika » mba hamoahana azy indray"
+
+msgid "Active — visible par tous"
+msgstr "Mavitrika — hitan'ny rehetra"
+
+msgid "En pause — masquée temporairement"
+msgstr "Napetraka — nafenina vonjimaika"
+
+msgid "Vendue — archivée"
+msgstr "Namidy — voatahiry"
+
+msgid "Louée — archivée"
+msgstr "Nahofa — voatahiry"
+
+msgid "Vente"
+msgstr "Fivarotana"
+
+msgid "/ jour"
+msgstr "/ andro"
+
+msgid "/ semaine"
+msgstr "/ herinandro"
+
+msgid "/ mois"
+msgstr "/ volana"
+
+msgid "Aucun fichier reçu."
+msgstr "Tsy nisy rakitra voaray."
+
+msgid "« %(name)s » dépasse %(mb)d Mo."
+msgstr "« %(name)s » dia mihoatra ny %(mb)d Mo."
+
+msgid "« %(name)s » n'est pas une image lisible (JPG, PNG, WebP, HEIC)."
+msgstr "« %(name)s » dia tsy sary azo vakina (JPG, PNG, WebP, HEIC)."
+
+msgid "<strong>%(n)s</strong> annonce trouvée"
+msgid_plural "<strong>%(n)s</strong> annonces trouvées"
+msgstr[0] "Fivarotana <strong>%(n)s</strong> hita"
+msgstr[1] "Fivarotana <strong>%(n)s</strong> hita"
+
+msgid "clôturée"
+msgid_plural "clôturées"
+msgstr[0] "nakatona"
+msgstr[1] "nakatona"
+
+msgid "active"
+msgid_plural "actives"
+msgstr[0] "mavitrika"
+msgstr[1] "mavitrika"
+
+msgid "%(n)s vue"
+msgid_plural "%(n)s vues"
+msgstr[0] "hitana %(n)s"
+msgstr[1] "hitana %(n)s"
+
+msgid "<strong>%(n)s</strong> annonce"
+msgid_plural "<strong>%(n)s</strong> annonces"
+msgstr[0] "Fivarotana <strong>%(n)s</strong>"
+msgstr[1] "Fivarotana <strong>%(n)s</strong>"
+
+msgid "%(n)s jour"
+msgid_plural "%(n)s jours"
+msgstr[0] "%(n)s andro"
+msgstr[1] "%(n)s andro"
+
+msgid "%(n)s pièce"
+msgid_plural "%(n)s pièces"
+msgstr[0] "efitra %(n)s"
+msgstr[1] "efitra %(n)s"
+
+msgid "%(n)s destination à découvrir en Afrique"
+msgid_plural "%(n)s destinations à découvrir en Afrique"
+msgstr[0] "Toerana %(n)s azo tsidihina eto Afrika"
+msgstr[1] "Toerana %(n)s azo tsidihina eto Afrika"
+
+msgid "%(n)s guide disponible en Afrique"
+msgid_plural "%(n)s guides disponibles en Afrique"
+msgstr[0] "Mpitari-dalana %(n)s eto Afrika"
+msgstr[1] "Mpitari-dalana %(n)s eto Afrika"
+
+msgid "%(n)s résultat"
+msgid_plural "%(n)s résultats"
+msgstr[0] "Valiny %(n)s"
+msgstr[1] "Valiny %(n)s"
+
+msgid "%(n)s avis"
+msgid_plural "%(n)s avis"
+msgstr[0] "Hevitra %(n)s"
+msgstr[1] "Hevitra %(n)s"
+
+msgid "%(n)s an d'expérience"
+msgid_plural "%(n)s ans d'expérience"
+msgstr[0] "Traikefa %(n)s taona"
+msgstr[1] "Traikefa %(n)s taona"
+
+msgid "An d'expérience"
+msgid_plural "Ans d'expérience"
+msgstr[0] "Taona niasana"
+msgstr[1] "Taona niasana"
+
+msgid "Lieu couvert"
+msgid_plural "Lieux couverts"
+msgstr[0] "Toerana tantanina"
+msgstr[1] "Toerana tantanina"
+
+msgid "Jusqu'à %(n)s personne"
+msgid_plural "Jusqu'à %(n)s personnes"
+msgstr[0] "Hatramin'ny olona %(n)s"
+msgstr[1] "Hatramin'ny olona %(n)s"
+
+msgid "Lieux à visiter et guides locaux à travers l'Afrique, recommandés par la communauté."
+msgstr "Toerana azo tsidihina sy mpitari-dalana eto an-toerana manerana an'i Afrika, atolotry ny fiaraha-monina."
+
+msgid "Pays"
+msgstr "Firenena"
+
+msgid "Millions de km²"
+msgstr "Tapitrisa km²"
+
+msgid "Se connecter"
+msgstr "Hiditra"
+
+msgid "Tous les pays"
+msgstr "Firenena rehetra"
+
+msgid "Pays ou région"
+msgstr "Firenena na faritra"
+
+msgid "pour « %(q)s »"
+msgstr "ho an'ny « %(q)s »"
+
+msgid "Afficher la photo %(n)s"
+msgstr "Asehoy ny sary %(n)s"
+
+msgid "Même catégorie"
+msgstr "Sokajy mitovy"
+
+msgid "Avis des visiteurs"
+msgstr "Hevitry ny mpitsidika"
+
+msgid "Laisser un avis"
+msgstr "Hametraka hevitra"
+
+msgid "Modifier votre avis"
+msgstr "Hanova ny hevitrao"
+
+msgid "Visité le %(d)s"
+msgstr "Notsidihina ny %(d)s"
+
+msgid "Veuillez renseigner un commentaire et une note valide."
+msgstr "Azafady, soraty ny fanamarihana sy naoty manan-kery."
+
+msgid "La date de visite n'est pas valide."
+msgstr "Tsy mety ny daty nitsidihana."
+
+msgid "Erreur lors de l'enregistrement de votre avis."
+msgstr "Nisy olana tamin'ny fitehirizana ny hevitrao."
+
+msgid "Principale"
+msgstr "Voalohany"
+
+msgid "Supprimer la photo %(n)s"
+msgstr "Hamafa ny sary %(n)s"
+
+msgid "Ce lieu est publié. Après modification, il sera de nouveau vérifié par un administrateur avant de réapparaître."
+msgstr "Efa navoaka ity toerana ity. Rehefa ovaina dia hohamarinin'ny mpitantana indray vao hiseho."
+
+msgid "Le nom et la description sont obligatoires."
+msgstr "Tsy maintsy fenoina ny anarana sy ny famaritana."
+
+msgid "Choisissez une catégorie dans la liste."
+msgstr "Misafidiana sokajy ao amin'ny lisitra."
+
+msgid "Choisissez un pays ou une région dans la liste."
+msgstr "Misafidiana firenena na faritra ao amin'ny lisitra."
+
+msgid "Seules %(n)d photos sont conservées par lieu."
+msgstr "Sary %(n)d ihany no tehirizina isaky ny toerana."
+
+msgid "Votre lieu a été envoyé ! Il sera visible après validation par un administrateur."
+msgstr "Voaray ny toeranao! Hiseho izy rehefa neken'ny mpitantana."
+
+msgid "Modifications enregistrées. Le lieu sera de nouveau visible après validation par un administrateur."
+msgstr "Voatahiry ny fanovana. Hiseho indray ny toerana rehefa neken'ny mpitantana."
+
+msgid "Lieu mis à jour."
+msgstr "Voavao ny toerana."
+
+msgid "Vous ne pouvez pas modifier ce lieu."
+msgstr "Tsy afaka manova ity toerana ity ianao."
+
+msgid "Votre lieu « %(name)s » a été approuvé : il est maintenant visible par tous."
+msgstr "Nekena ny toeranao « %(name)s »: hitan'ny rehetra izy izao."
+
+msgid "Vazimba Tourisme"
+msgstr "Vazimba Fizahantany"
+
+msgid "Guide touristique"
+msgstr "Mpitari-dalana mpizaha tany"
+
+msgid "Ar/j"
+msgstr "Ar/andro"
+
+msgid "Jusqu'à %(n)s pers."
+msgstr "Hatramin'ny olona %(n)s"
+
+msgid "Par jour"
+msgstr "Isan'andro"
+
+msgid "Lieux couverts"
+msgstr "Toerana tantanina"
+
+msgid "Devenir guide touristique"
+msgstr "Ho lasa mpitari-dalana"
+
+msgid "Modifier mon profil de guide"
+msgstr "Hanova ny mombamomba ahy amin'ny maha mpitari-dalana"
+
+msgid "Partagez votre connaissance du terrain avec des voyageurs du monde entier."
+msgstr "Zarao amin'ny mpandeha avy amin'izao tontolo izao ny fahalalanao ny toerana."
+
+msgid "Mettez à jour vos informations pour être trouvé par davantage de voyageurs."
+msgstr "Havaozy ny mombamomba anao mba ho hitan'ny mpandeha maro kokoa."
+
+msgid "Ex : guide depuis 10 ans, spécialisé dans les randonnées en parc national et les circuits côtiers…"
+msgstr "Oh: mpitari-dalana nandritra ny 10 taona, manam-pahaizana amin'ny dia an-tongotra any amin'ny valan-javaboary sy ny fitsangatsanganana amoron-dranomasina…"
+
+msgid "Ex : pays, régions, villes et parcs où vous accompagnez des voyageurs…"
+msgstr "Oh: firenena, faritra, tanàna ary valan-javaboary itondranao mpandeha…"
+
+msgid "Listez les pays, régions, noms de parcs et zones que vous couvrez : c'est ce texte que lit le filtre par pays."
+msgstr "Tanisao ny firenena, faritra, valan-javaboary ary faritra iasanao: io lahatsoratra io no tadiavin'ny sivana isaky ny firenena."
+
+msgid "Faune, Randonnée, Culturel, Plage"
+msgstr "Biby, Dia an-tongotra, Kolontsaina, Moron-dranomasina"
+
+msgid "Ex : Observation de la faune, Randonnée, Circuit culturel, Plongée"
+msgstr "Oh: Fijerena biby, Dia an-tongotra, Fitsidihana ara-kolontsaina, Fisitrihana"
+
+msgid "Votre profil de guide est enregistré et visible dans la liste des guides. Le badge « Guide vérifié » est attribué après contrôle par un administrateur."
+msgstr "Voatahiry ny mombamomba anao ary hita ao amin'ny lisitry ny mpitari-dalana. Ny marika « Mpitari-dalana voamarina » dia omena rehefa voamarin'ny mpitantana."
+
+msgid "La présentation est obligatoire."
+msgstr "Tsy maintsy fenoina ny fampahafantarana."
+
+msgid "jour"
+msgstr "andro"
+
+msgid "Taxi collectif"
+msgstr "Taksy iombonana"
+
+msgid "Nature & Paysages"
+msgstr "Zavaboary sy tontolo"
+
+msgid "Plages & Côtes"
+msgstr "Torapasika sy morontsiraka"
+
+msgid "Histoire & Culture"
+msgstr "Tantara sy kolontsaina"
+
+msgid "Faune & Parcs naturels"
+msgstr "Biby sy valan-javaboary"
+
+msgid "Montagnes & Randonnées"
+msgstr "Tendrombohitra sy dia an-tongotra"
+
+msgid "Circuits & Routes"
+msgstr "Fitsangatsanganana sy lalana"
+
+msgid "Villes & Villages"
+msgstr "Tanàn-dehibe sy tanàna"
+
+msgid "Aventure & Sport"
+msgstr "Traikefa mampientanentana sy fanatanjahantena"
+
+msgid "Rechercher une conversation"
+msgstr "Hitady resaka"
+
+msgid "Aucune conversation"
+msgstr "Tsy misy resaka"
+
+msgid "Écrivez à quelqu'un depuis son profil ou depuis une annonce : la conversation apparaîtra ici."
+msgstr "Manorata amin'olona avy ao amin'ny mombamomba azy na avy amin'ny filazana iray: hiseho eto ny resaka."
+
+msgid "Trouver quelqu'un"
+msgstr "Hitady olona"
+
+msgid "Conversation secrète"
+msgstr "Resaka miafina"
+
+msgid "Plus d’actions"
+msgstr "Safidy hafa"
+
+msgid "Vos messages s'affichent ici."
+msgstr "Miseho eto ny hafatrao."
+
+msgid "Retirer le fichier"
+msgstr "Esory ny rakitra"
+
+msgid "Envoi…"
+msgstr "Mandefa…"
+
+msgid "Haut-parleur"
+msgstr "Fanamafisam-peo"
+
+msgid "Retourner la caméra"
+msgstr "Avadiho ny fakantsary"
+
+msgid "Choisir une réaction"
+msgstr "Misafidiana fihetseham-po"
+
+msgid "Image agrandie"
+msgstr "Sary nalehibeazina"
+
+msgid "L'envoi a échoué."
+msgstr "Tsy lasa ny fandefasana."
+
+msgid "Erreur du serveur. Réessayez."
+msgstr "Nisy olana tamin'ny mpizara. Andramo indray."
+
+msgid "Erreur réseau. Vérifiez votre connexion."
+msgstr "Olana amin'ny tambajotra. Hamarino ny fifandraisanao."
+
+msgid "Connexion…"
+msgstr "Mifandray…"
+
+msgid "Hors connexion — reconnexion en cours…"
+msgstr "Tapaka ny fifandraisana — mifandray indray…"
+
+msgid "Impossible d'accéder au micro. Vérifiez les autorisations."
+msgstr "Tsy afaka mampiasa ny mikrô. Hamarino ny fahazoan-dàlana."
+
+msgid "Le message vocal n'est pas parti. Réessayez."
+msgstr "Tsy lasa ny hafatra am-peo. Andramo indray."
+
+msgid "Accès refusé à cette conversation."
+msgstr "Tsy azonao idirana ity resaka ity."
+
+msgid "Conversation introuvable."
+msgstr "Tsy hita ny resaka."
+
+msgid "Cette conversation n'est pas disponible."
+msgstr "Tsy azo ampiasaina ity resaka ity."
+
+msgid "Erreur de connexion"
+msgstr "Olana amin'ny fifandraisana"
+
+msgid "Réagir"
+msgstr "Hihetsika"
+
+msgid "fichier"
+msgstr "rakitra"
+
+msgid "Connexion en cours…"
+msgstr "Mifandray…"
+
+msgid "Connecté"
+msgstr "Mifandray"
+
+msgid "Reconnexion…"
+msgstr "Mifandray indray…"
+
+msgid "Échec réseau"
+msgstr "Olana amin'ny tambajotra"
+
+msgid "Échec de connexion réseau. Vérifiez votre connexion et réessayez."
+msgstr "Tsy nety ny fifandraisana. Hamarino ny fifandraisanao dia andramo indray."
+
+msgid "Aucun son ni image reçu : le réseau, un VPN ou un pare-feu bloque l'appel."
+msgstr "Aucun son ni image reçu : le réseau, un VPN ou un pare-feu bloque l'appel."
+
+msgid "Son coupé — appuyez pour l'activer"
+msgstr "Maty ny feo — tsindrio raha hampandeha azy"
+
+msgid "Les appels nécessitent une connexion sécurisée (https)."
+msgstr "Mila fifandraisana azo antoka (https) ny antso."
+
+msgid "Ce navigateur ne prend pas en charge les appels. Mettez-le à jour, ou utilisez Chrome, Firefox ou Safari."
+msgstr "Tsy mahazaka antso ity navigateur ity. Havaozy izy, na ampiasao Chrome, Firefox na Safari."
+
+msgid "Accès au micro ou à la caméra refusé. Autorisez-le dans les réglages du navigateur, puis réessayez."
+msgstr "Nolavina ny fampiasana ny mikrô na ny fakantsary. Avelao ao amin'ny fikirakiran'ny navigateur, dia andramo indray."
+
+msgid "Aucun micro détecté sur cet appareil."
+msgstr "Tsy misy mikrô hita amin'ity fitaovana ity."
+
+msgid "Le micro ou la caméra est déjà utilisé par une autre application. Fermez-la, puis réessayez."
+msgstr "Efa ampiasain'ny application hafa ny mikrô na ny fakantsary. Akatony izy, dia andramo indray."
+
+msgid "Caméra indisponible — appel converti en audio."
+msgstr "Tsy azo ampiasaina ny fakantsary — lasa antso am-peo."
+
+msgid "Caméra indisponible — votre vidéo ne sera pas envoyée."
+msgstr "Tsy azo ampiasaina ny fakantsary — tsy halefa ny videonao."
+
+msgid "Pas de réponse."
+msgstr "Tsy nisy namaly."
+
+msgid "Activer la conversation secrète"
+msgstr "Alefaso ny resaka miafina"
+
+msgid "Couper la conversation secrète"
+msgstr "Atsaharo ny resaka miafina"
+
+msgid "Message chiffré"
+msgstr "Hafatra voaaro"
+
+msgid "Fichier chiffré"
+msgstr "Rakitra voaaro"
+
+msgid "Un instant…"
+msgstr "Andraso kely…"
+
+msgid "Conversation secrète (activée)"
+msgstr "Resaka miafina (mandeha)"
+
+msgid "Conversation secrète : les messages sont chiffrés de bout en bout, sur vos appareils."
+msgstr "Resaka miafina: voaaro hatramin'ny farany ny hafatra, ao amin'ny fitaovanareo."
+
+msgid "Ce navigateur ne permet pas les conversations secrètes."
+msgstr "Tsy mahazaka resaka miafina ity navigateur ity."
+
+msgid "Vous avez activé la conversation secrète : les nouveaux messages sont chiffrés de bout en bout."
+msgstr "Nalefanao ny resaka miafina: voaaro hatramin'ny farany ny hafatra vaovao."
+
+msgid "Vous avez coupé la conversation secrète : les messages suivants ne sont plus chiffrés."
+msgstr "Natsahatrao ny resaka miafina: tsy voaaro intsony ny hafatra manaraka."
+
+msgid "{name} a activé la conversation secrète : les nouveaux messages sont chiffrés de bout en bout."
+msgstr "Nalefan'i {name} ny resaka miafina: voaaro hatramin'ny farany ny hafatra vaovao."
+
+msgid "{name} a coupé la conversation secrète : les messages suivants ne sont plus chiffrés."
+msgstr "Natsahatr'i {name} ny resaka miafina: tsy voaaro intsony ny hafatra manaraka."
+
+msgid "Activer la conversation secrète ?"
+msgstr "Halefa ve ny resaka miafina?"
+
+msgid "Les nouveaux messages et fichiers seront chiffrés sur vos appareils avant de partir. Les anciens messages restent tels quels."
+msgstr "Ho voaaro ao amin'ny fitaovanareo ny hafatra sy rakitra vaovao alohan'ny handefasana azy. Tsy miova ny hafatra taloha."
+
+msgid "Couper la conversation secrète ?"
+msgstr "Hatsahatra ve ny resaka miafina?"
+
+msgid "Les messages suivants ne seront plus chiffrés de bout en bout. Votre contact en sera prévenu."
+msgstr "Tsy ho voaaro hatramin'ny farany intsony ny hafatra manaraka. Hampahafantarina ny olona iresahanao."
+
+msgid "Couper"
+msgstr "Atsaharo"
+
+msgid "Le changement n'a pas pu être enregistré."
+msgstr "Tsy voatahiry ny fanovana."
+
+msgid "Créer mon code secret"
+msgstr "Hamorona ny kaody miafiko"
+
+msgid "Saisir mon code secret"
+msgstr "Hampiditra ny kaody miafiko"
+
+msgid "Votre code secret"
+msgstr "Ny kaody miafinao"
+
+msgid "Il protège la sauvegarde de vos clés. Avec lui, vous retrouverez vos messages secrets sur un nouveau téléphone ou un autre navigateur. Vazimba ne le connaît pas et ne peut pas le retrouver : notez-le en lieu sûr. (8 caractères au moins.)"
+msgstr "Il protège la sauvegarde de vos clés. Avec lui, vous retrouverez vos messages secrets sur un nouveau téléphone ou un autre navigateur. Vazimba ne le connaît pas et ne peut pas le retrouver : notez-le en lieu sûr. (8 caractères au moins.)"
+
+msgid "Code secret"
+msgstr "Kaody miafina"
+
+msgid "Le même, encore une fois"
+msgstr "Ilay kaody ihany, indray mandeha"
+
+msgid "Au moins 8 caractères."
+msgstr "Litera 8 farafahakeliny."
+
+msgid "Les deux codes ne sont pas les mêmes."
+msgstr "Tsy mitovy ireo kaody roa."
+
+msgid "Code secret enregistré : vos clés sont sauvegardées."
+msgstr "Voatahiry ny kaody miafina: voatahiry ny fanalahidinao."
+
+msgid "Le code secret n'a pas pu être enregistré. Réessayez."
+msgstr "Tsy voatahiry ny kaody miafina. Andramo indray."
+
+msgid "Un code secret existe déjà pour ce compte : saisissez-le."
+msgstr "Efa misy kaody miafina ho an'ity kaonty ity: ampidiro izy."
+
+msgid "Pour lire sur cet appareil les messages secrets envoyés avant."
+msgstr "Mba hamakiana amin'ity fitaovana ity ny hafatra miafina nalefa teo aloha."
+
+msgid "Déverrouiller"
+msgstr "Sokafy"
+
+msgid "Code secret incorrect."
+msgstr "Diso ny kaody miafina."
+
+msgid "Impossible de retrouver la sauvegarde. Réessayez plus tard."
+msgstr "Tsy hita ny tahiry. Andramo indray any aoriana."
+
+msgid "La sauvegarde de vos clés n'a pas pu être vérifiée (connexion ?)."
+msgstr "Tsy voamarina ny tahirin'ny fanalahidinao (fifandraisana?)."
+
+msgid "Le message n'a pas pu être chiffré : il n'est pas parti."
+msgstr "Tsy voaaro ny hafatra: tsy lasa izy."
+
+msgid "Fichier trop volumineux (25 Mo au plus)."
+msgstr "Lehibe loatra ny rakitra (25 Mo farafahabetsany)."
+
+msgid "L'envoi du fichier a échoué."
+msgstr "Tsy lasa ny rakitra."
+
+msgid "Le fichier n'a pas pu être chiffré : il n'est pas parti."
+msgstr "Tsy voaaro ny rakitra: tsy lasa izy."
+
+msgid "Chiffré de bout en bout"
+msgstr "Voaaro hatramin'ny farany"
+
+msgid "Message illisible sur cet appareil"
+msgstr "Tsy azo vakina amin'ity fitaovana ity ny hafatra"
+
+msgid "Fichier illisible sur cet appareil"
+msgstr "Tsy azo vakina amin'ity fitaovana ity ny rakitra"
+
+msgid "Déchiffrement…"
+msgstr "Déchiffrement…"
+
+msgid "Toucher pour télécharger et déchiffrer"
+msgstr "Tsindrio raha hampidina azy"
+
+msgid "Hors ligne"
+msgstr "Tsy misy fifandraisana"
+
+msgid "Vous êtes hors ligne"
+msgstr "Tsy misy fifandraisana ianao"
+
+msgid "Pas de connexion internet détectée."
+msgstr "Tsy misy fifandraisana Internet hita."
+
+msgid "Les pages déjà visitées restent accessibles."
+msgstr "Mbola azo jerena ireo pejy efa notsidihina."
+
+msgid "Retour à l'accueil"
+msgstr "Hiverina any am-piandohana"
+
+msgid "Disponible hors ligne"
+msgstr "Azo jerena tsy misy fifandraisana"
+
+msgid "Le fil d'actualité déjà chargé"
+msgstr "Ny vaovao efa voaray"
+
+msgid "Les profils déjà consultés"
+msgstr "Ireo mombamomba efa nojerena"
+
+msgid "Les groupes déjà visités"
+msgstr "Ireo vondrona efa notsidihina"
+
+msgid "Vos posts en attente seront envoyés à la reconnexion"
+msgstr "Halefa ireo lahatsoratrao miandry rehefa miverina ny fifandraisana"
+
+msgid "Connexion rétablie — rechargement…"
+msgstr "Tafaverina ny fifandraisana — mamerina…"
+
+msgid "Ouvrir"
+msgstr "Sokafy"
+
+msgid "Appel entrant"
+msgstr "Antso miditra"
+
+msgid "Changer la photo de profil"
+msgstr "Hanova ny sarin'ny mombamomba"
+
+msgid "Score Fihavanana — solidarité et engagement dans la communauté"
+msgstr "Isa Fihavanana — firaisankina sy fandraisana anjara eo amin'ny fiaraha-monina"
+
+msgid "Sections du profil"
+msgstr "Fizarana amin'ny mombamomba"
+
+msgid "À propos"
+msgstr "Momba"
+
+msgid "Score Fihavanana"
+msgstr "Isa Fihavanana"
+
+msgid "Voir tous les amis"
+msgstr "Hijery ny namana rehetra"
+
+msgid "Friends' stories"
+msgstr "Tantaran'ny namana"
+
+msgid "%(n)s fichier sélectionné"
+msgstr "Rakitra %(n)s voafidy"
+
+msgid "%(n)s fichiers sélectionnés"
+msgstr "Rakitra %(n)s voafidy"
+
+msgid "La publication a échoué. Réessayez."
+msgstr "Tsy nety ny famoahana. Andramo indray."
+
+msgid "Seuls ses amis peuvent voir la liste d’amis de ce membre."
+msgstr "Ny namany ihany no afaka mahita ny lisitry ny naman'ity mpikambana ity."
+
+msgid "Partager le profil"
+msgstr "Hizara ny mombamomba"
+
+msgid "Retirer cette personne de vos amis ?"
+msgstr "Esorina amin'ny namanao ve io olona io?"
+
+msgid "Écrire une réponse…"
+msgstr "Manorata valiny…"
+
+msgid "Suivant"
+msgstr "Manaraka"
+
+msgid "L’envoi de la photo de couverture a échoué."
+msgstr "Tsy lasa ny sary fonony."
+
+msgid "%(username)s vous a envoyé une demande d’ami."
+msgstr "Nandefa fangatahana ho namana taminao i %(username)s."
+
+msgid "%(n)s demande"
+msgid_plural "%(n)s demandes"
+msgstr[0] "Fangatahana %(n)s"
+msgstr[1] "Fangatahana %(n)s"
+
+msgid "%(n)s ami"
+msgid_plural "%(n)s amis"
+msgstr[0] "Namana %(n)s"
+msgstr[1] "Namana %(n)s"
+
+msgid "Écrivez exactement le mot %(delete_word)s pour confirmer."
+msgstr "Soraty tsara ny teny hoe %(delete_word)s mba hanamafisana."
+
+msgid "Pour confirmer, écrivez le mot %(delete_word)s"
+msgstr "Mba hanamafisana, soraty ny teny hoe %(delete_word)s"
+
+msgid "Se déconnecter"
+msgstr "Hivoaka"
+
+msgid "Voulez-vous vous déconnecter de Vazimba sur cet appareil ?"
+msgstr "Te hivoaka amin'ny Vazimba amin'ity fitaovana ity ve ianao?"
+
+msgid "Valider"
+msgstr "Ekena"
+
+msgid "vous@exemple.com"
+msgstr "ianao@ohatra.com"
+
+msgid "Parlez un peu de vous…"
+msgstr "Lazao kely ny momba anao…"
+
+msgid "Ville, pays"
+msgstr "Tanàna, firenena"
+
+msgid "Numéro de téléphone"
+msgstr "Laharana finday"
+
+msgid "Changer"
+msgstr "Hanova"
+
+msgid "Votre numéro de mobile"
+msgstr "Ny laharan'ny findainao"
+
+msgid "Envoyer le code"
+msgstr "Alefaso ny kaody"
+
+msgid "Tous les pays sont acceptés. Un numéro de mobile, pour recevoir le code."
+msgstr "Ekena ny firenena rehetra. Laharana finday, handraisana ny kaody."
+
+msgid "Code reçu"
+msgstr "Kaody voaray"
+
+msgid "Vérifier"
+msgstr "Hamarino"
+
+msgid "Code valable 10 minutes."
+msgstr "Manan-kery 10 minitra ny kaody."
+
+msgid "Renvoyer le code"
+msgstr "Alefaso indray ny kaody"
+
+msgid "Le recadrage de la photo a échoué. Réessayez avec une autre image."
+msgstr "Tsy nety ny fanapahana ny sary. Andramo amin'ny sary hafa."
+
+msgid "Choisissez une image de moins de 10 Mo."
+msgstr "Misafidiana sary latsaky ny 10 Mo."
+
+msgid "Entrez votre numéro de téléphone."
+msgstr "Ampidiro ny laharan'ny findainao."
+
+msgid "envoyé à"
+msgstr "nalefa tany amin'ny"
+
+msgid "Code envoyé ! Regardez WhatsApp."
+msgstr "Lasa ny kaody! Jereo ny WhatsApp."
+
+msgid "Code envoyé ! Vérifiez vos SMS."
+msgstr "Lasa ny kaody! Jereo ny SMS-nao."
+
+msgid "Entrez le code à 6 chiffres."
+msgstr "Ampidiro ny kaody misy tarehimarika 6."
+
+msgid "Numéro vérifié ! Merci."
+msgstr "Voamarina ny laharana! Misaotra."
+
+msgid "ou"
+msgstr "na"
+
+msgid "Vous devez accepter les CGU et la politique de confidentialité pour continuer."
+msgstr "Tsy maintsy ekenao ny Fepetra fampiasana sy ny Politikan'ny tsiambaratelo vao afaka manohy."
+
+msgid "Moyen"
+msgstr "Antonony"
+
+msgid "Fort"
+msgstr "Matanjaka"
+
+msgid "J’ai lu et j’accepte les <a href=\"%(cgu_url)s\" target=\"_blank\" rel=\"noopener\">Conditions générales d’utilisation</a> et la <a href=\"%(conf_url)s\" target=\"_blank\" rel=\"noopener\">Politique de confidentialité</a> de Vazimba."
+msgstr "Novakiako ary ekeko ny <a href=\"%(cgu_url)s\" target=\"_blank\" rel=\"noopener\">Fepetra ankapobeny fampiasana</a> sy ny <a href=\"%(conf_url)s\" target=\"_blank\" rel=\"noopener\">Politikan'ny tsiambaratelo</a> an'i Vazimba."
+
+msgid "Amis communs"
+msgstr "Namana iombonana"
+
+msgid "Amis de %(name)s"
+msgstr "Naman'i %(name)s"
+
+msgid "Demande acceptée"
+msgstr "Nekena ny fangatahana"
+
+msgid "Demande annulée"
+msgstr "Nofoanana ny fangatahana"
+
+msgid "Ami retiré"
+msgstr "Nesorina ny namana"
+
+msgid "Demande d’ami envoyée"
+msgstr "Lasa ny fangatahana ho namana"
+
+msgid "Impossible d’envoyer la demande d’ami."
+msgstr "Tsy lasa ny fangatahana ho namana."
+
+msgid "Ce membre est introuvable."
+msgstr "Tsy hita io mpikambana io."
+
+msgid "Vous ne pouvez pas vous envoyer une demande d’ami."
+msgstr "Tsy afaka mandefa fangatahana ho namana amin'ny tenanao ianao."
+
+msgid "Cette action n’est pas disponible."
+msgstr "Tsy azo atao io."
+
+msgid "Vous avez déjà envoyé une demande d’ami à cette personne."
+msgstr "Efa nandefa fangatahana ho namana tamin'io olona io ianao."
+
+msgid "Cette demande ne vous est pas adressée."
+msgstr "Tsy ho anao io fangatahana io."
+
+msgid "Cette demande d’ami n’est plus en attente."
+msgstr "Tsy miandry valiny intsony io fangatahana io."
+
+msgid "Impossible de retirer cet ami."
+msgstr "Tsy afaka nesorina io namana io."
+
+msgid "Ce membre ne fait pas partie de vos amis."
+msgstr "Tsy anisan'ny namanao io mpikambana io."
+
+msgid "Impossible d’annuler cette demande."
+msgstr "Tsy afaka nofoanana io fangatahana io."
+
+msgid "Aucune demande en attente à annuler."
+msgstr "Tsy misy fangatahana miandry hofoanana."
+
+msgid "Cette demande d’ami est introuvable."
+msgstr "Tsy hita io fangatahana ho namana io."
+
+msgid "Les demandes d’ami, réactions et commentaires apparaîtront ici."
+msgstr "Hiseho eto ny fangatahana ho namana, ny fihetseham-po ary ny fanehoan-kevitra."
+
+msgid "Cette page a expiré"
+msgstr "Lany daty ity pejy ity"
+
+msgid "Le formulaire a été ouvert avant une connexion ou une déconnexion faite dans un autre onglet. Par sécurité, il n’est plus accepté : rien n’a été envoyé."
+msgstr "Le formulaire a été ouvert avant une connexion ou une déconnexion faite dans un autre onglet. Par sécurité, il n’est plus accepté : rien n’a été envoyé."
+
+msgid "Rechargez la page et recommencez. (Un code déjà reçu reste valable 10 minutes.)"
+msgstr "Rechargez la page et recommencez. (Un code déjà reçu reste valable 10 minutes.)"
+
+msgid "Recommencer"
+msgstr "Averina"
+
+msgid "Page introuvable"
+msgstr "Tsy hita ny pejy"
+
+msgid "Cette page n’existe pas, a été déplacée, ou l’adresse est incorrecte."
+msgstr "Tsy misy io pejy io, nafindra, na diso ny adiresy."
+
+msgid "Ou ouvrez l’une de ces sections :"
+msgstr "Na sokafy ny iray amin'ireto fizarana ireto:"
+
+msgid "Erreur du serveur"
+msgstr "Olana amin'ny mpizara"
+
+msgid "Quelque chose s’est mal passé de notre côté. Réessayez dans quelques instants."
+msgstr "Nisy olana teo aminay. Andramo indray afaka fotoana fohy."
+
+msgid "Réessayer"
+msgstr "Andramo indray"
+
+msgid "Si le problème persiste, écrivez-nous :"
+msgstr "Raha mbola misy ny olana, manorata aminay:"
+
+msgid "Post sauvegardé"
+msgstr "Voatahiry ny lahatsoratra"
+
+msgid "Retiré des sauvegardes"
+msgstr "Nesorina tamin'ny voatahiry"
+
+msgid "Masquer ce post"
+msgstr "Afeno ity lahatsoratra ity"
+
+msgid "Post masqué"
+msgstr "Nafenina ny lahatsoratra"
+
+msgid "Republier"
+msgstr "Avoaka indray"
+
+msgid "Annuler la republication"
+msgstr "Foano ny famoahana indray"
+
+msgid "Republié sur votre profil"
+msgstr "Navoaka indray tao amin'ny mombamomba anao"
+
+msgid "Republication annulée"
+msgstr "Nofoanana ny famoahana indray"
+
+msgid "Bloquer cette personne ? Vous ne verrez plus ses publications."
+msgstr "Sakanana ve io olona io? Tsy hahita ny lahatsorany intsony ianao."
+
+msgid "Supprimer ce post ?"
+msgstr "Fafana ve ity lahatsoratra ity?"
+
+msgid "maintenant !"
+msgstr "izao!"
+
+msgid "Afficher le mot de passe"
+msgstr "Asehoy ny tenimiafina"
+
+msgid "Masquer le mot de passe"
+msgstr "Afeno ny tenimiafina"
+
+msgid "Mode clair"
+msgstr "Maody mazava"
+
+msgid "Hors ligne — le contenu déjà consulté reste disponible"
+msgstr "Tsy misy tambajotra — mbola azo jerena ny efa novakiana"
+
+msgid "Connexion rétablie"
+msgstr "Tafaverina ny tambajotra"
+
+msgid "%(n)s publication(s) en attente de connexion…"
+msgstr "Lahatsoratra %(n)s miandry tambajotra…"
+
+msgid "Tout marquer lu"
+msgstr "Mariho ho voavaky daholo"
+
+msgid "Mon compte"
+msgstr "Ny kaontiko"
+
+msgid "Activer les notifications"
+msgstr "Alefaso ny fampandrenesana"
+
+msgid "%(name)s a publié quelque chose"
+msgstr "Namoaka zavatra i %(name)s"
+
+msgid "%(name)s est en direct"
+msgstr "Mivantana i %(name)s"
+
+msgid "Rejoignez le direct"
+msgstr "Midira amin'ny mivantana"
+
+msgid "Voir tous les résultats"
+msgstr "Hijery ny valiny rehetra"
+
+msgid "Notifications activées"
+msgstr "Mandeha ny fampandrenesana"
+
+msgid "Notifications bloquées"
+msgstr "Voasakana ny fampandrenesana"
+
+msgid "Votre navigateur ne prend pas en charge les notifications."
+msgstr "Tsy mahazaka fampandrenesana ny navigateur-nao."
+
+msgid "Les notifications sont bloquées. Autorisez-les dans les réglages de votre navigateur."
+msgstr "Voasakana ny fampandrenesana. Avelao izy ireo ao amin'ny safidin'ny navigateur-nao."
+
+msgid "Notifications désactivées sur cet appareil."
+msgstr "Najanona ny fampandrenesana amin'ity fitaovana ity."
+
+msgid "Numéro invalide. Choisissez votre pays, ou écrivez le numéro avec l'indicatif (+…). Il faut un numéro de mobile."
+msgstr "Laharana tsy mety. Fidio ny firenenao, na soraty miaraka amin'ny kaodim-pirenena (+…) ny laharana. Laharana finday no ilaina."
+
+msgid "Si ce numéro est lié à un compte Vazimba, un code vient d'y être envoyé."
+msgstr "Raha mifandray amin'ny kaonty Vazimba io laharana io, dia vao nandefasana kaody."
+
+msgid "Si ce numéro est lié à un compte Vazimba, un code vient d'être envoyé à l'adresse e-mail de ce compte (regardez aussi dans les indésirables)."
+msgstr "Raha mifandray amin'ny kaonty Vazimba io laharana io, dia vao nandefasana kaody ny adiresy mailaka an'io kaonty io (jereo koa ny spam)."
+
+msgid "Connexion requise."
+msgstr "Mila miditra aloha."
+
+msgid "Aucune image reçue."
+msgstr "Tsy nisy sary voaray."
+
+msgid "Non authentifié."
+msgstr "Tsy tafiditra."
+
+msgid "Méthode non autorisée."
+msgstr "Fomba tsy azo ekena."
+
+msgid "Format non supporté (jpeg, png, webp, gif, heic…)."
+msgstr "Endrika tsy raisina (jpeg, png, webp, gif, heic…)."
+
+msgid "Fichier trop volumineux (max 10 Mo)."
+msgstr "Lehibe loatra ny rakitra (10 Mo farafahabetsany)."
+
+msgid "Ce numéro est déjà lié à un autre compte."
+msgstr "Efa mifandray amin'ny kaonty hafa io laharana io."
+
+msgid "Trop de tentatives. Attendez 1 heure avant de demander un nouveau code."
+msgstr "Be loatra ny andrana. Miandrasa 1 ora vao mangataka kaody vaovao."
+
+msgid "Numéro invalide."
+msgstr "Laharana tsy mety."
+
+msgid "Numéro vérifié avec succès !"
+msgstr "Voamarina soa aman-tsara ny laharana!"
+
+msgid "Recommencez : indiquez votre numéro."
+msgstr "Avereno: ampidiro ny laharanao."
+
+msgid "Le recadrage de l'image a échoué."
+msgstr "Tsy nety ny fanapahana ny sary."
+
+msgid "L'envoi de l'image a échoué."
+msgstr "Tsy lasa ny sary."
+
+msgid "Trop de codes demandés pour ce numéro. Réessayez dans une heure."
+msgstr "Be loatra ny kaody nangatahina ho an'io laharana io. Andramo indray afaka adiny iray."
+
+msgid "Ce compte est désactivé."
+msgstr "Tsy mandeha intsony io kaonty io."
+
+msgid "Le SMS n'est pas proposé vers ce pays : choisissez un autre moyen de recevoir le code."
+msgstr "Tsy misy SMS ho an'io firenena io: misafidiana fomba hafa handraisana ny kaody."
+
+msgid "Les SMS sont momentanément indisponibles : choisissez un autre moyen de recevoir le code."
+msgstr "Tsy mandeha vonjimaika ny SMS: misafidiana fomba hafa handraisana ny kaody."
+
+msgid "L'envoi du code a échoué. Vérifiez le numéro et réessayez."
+msgstr "Tsy lasa ny kaody. Hamarino ny laharana dia andramo indray."
+
+msgid "Le code doit comporter 6 chiffres."
+msgstr "Tsy maintsy misy tarehimarika 6 ny kaody."
+
+msgid "Aucun code en cours pour ce numéro. Demandez-en un nouveau."
+msgstr "Tsy misy kaody mandeha ho an'io laharana io. Mangataha vaovao."
+
+msgid "Code expiré. Demandez un nouveau code."
+msgstr "Lany daty ny kaody. Mangataha kaody vaovao."
+
+msgid "Trop de tentatives incorrectes. Demandez un nouveau code."
+msgstr "Be loatra ny andrana diso. Mangataha kaody vaovao."
+
+msgid "Code incorrect. %(left)s tentative(s) restante(s)."
+msgstr "Kaody diso. Andrana %(left)s sisa."
+
+msgid "Le nom d’utilisateur ne peut contenir que des lettres, des chiffres, des espaces et les signes . _ - (2 caractères au moins)."
+msgstr "Litera, tarehimarika, elanelana ary ny marika . _ - ihany no azo ampiasaina amin'ny anaran'ny mpampiasa (2 farafahakeliny)."
+
+msgid "Obligatoire. Indiquez une adresse e-mail valide."
+msgstr "Tsy maintsy fenoina. Ampidiro adiresy mailaka mety."
+
+msgid "Cette adresse e-mail est déjà utilisée."
+msgstr "Efa misy mampiasa io adiresy mailaka io."
+
+msgid "Ce nom d’utilisateur est déjà pris."
+msgstr "Efa misy mampiasa io anaran'ny mpampiasa io."
+
+msgid "Mot de passe"
+msgstr "Tenimiafina"
+
+msgid "E-mail ou mot de passe incorrect."
+msgstr "Diso ny mailaka na ny tenimiafina."
+
+msgid "Quatre raisons d'ouvrir Vazimba"
+msgstr "Quatre raisons d'ouvrir Vazimba"
+
+msgid "%(name)s a rejoint le groupe."
+msgstr "Niditra tao amin'ny vondrona i %(name)s."
+
+msgid "%(name)s a été ajouté au groupe."
+msgstr "Nampidirina tao amin'ny vondrona i %(name)s."
+
+msgid "%(name)s a été retiré du groupe."
+msgstr "Nesorina tao amin'ny vondrona i %(name)s."
+
+msgid "%(name)s est déjà membre."
+msgstr "Efa mpikambana i %(name)s."
+
+msgid "%(name)s est maintenant membre."
+msgstr "Mpikambana izao i %(name)s."
+
+msgid "%(name)s est maintenant modérateur."
+msgstr "Mpandrindra izao i %(name)s."
+
+msgid "%a fichier(s) enregistré(s) sur %b."
+msgstr "Rakitra %a amin'ny %b no voatahiry."
+
+msgid "%n an"
+msgstr "%n taona"
+
+msgid "%n ans"
+msgstr "%n taona"
+
+msgid "%n heure"
+msgstr "%n ora"
+
+msgid "%n heures"
+msgstr "%n ora"
+
+msgid "%n jour"
+msgstr "%n andro"
+
+msgid "%n jours"
+msgstr "%n andro"
+
+msgid "%n minute"
+msgstr "%n minitra"
+
+msgid "%n minutes"
+msgstr "%n minitra"
+
+msgid "%n mois"
+msgstr "%n volana"
+
+msgid "%s a publié un nouveau post"
+msgstr "%s a publié un nouveau post"
+
+msgid "%s fichier sélectionné"
+msgstr "Rakitra %s voafidy"
+
+msgid "%s fichiers sélectionnés"
+msgstr "Rakitra %s voafidy"
+
+msgid "%s nouveaux posts"
+msgstr "Lahatsoratra vaovao %s"
+
+msgid "24 h"
+msgstr "24 ora"
+
+msgid "30 jours"
+msgstr "30 andro"
+
+msgid "7 jours"
+msgstr "7 andro"
+
+msgid "<em>Vintana</em> signifie <em>destin</em>."
+msgstr "Ny <em>Vintana</em> dia midika hoe <em>anjara</em>."
+
+msgid "<strong>Vintana</strong> désigne le destin, la destinée liée aux astres et au temps. Une Capsule Vintana est un message que vous vous réservez ou que vous adressez à la communauté, mais qui ne se dévoilera qu'au moment voulu. Personne ne peut lire le contenu avant la date de révélation, pas même vous. Le titre, lui, reste visible."
+msgstr "<strong>Vintana</strong> désigne le destin, la destinée liée aux astres et au temps. Une Capsule Vintana est un message que vous vous réservez ou que vous adressez à la communauté, mais qui ne se dévoilera qu'au moment voulu. Personne ne peut lire le contenu avant la date de révélation, pas même vous. Le titre, lui, reste visible."
+
+msgid "Annonces Bazar"
+msgstr "Filazana Bazar"
+
+msgid "Aperçu de la capsule dans le fil"
+msgstr "Aperçu de la capsule dans le fil"
+
+msgid "Aucun résultat"
+msgstr "Tsy misy valiny"
+
+msgid "Aucune publication pour %(tag)s"
+msgstr "Tsy misy lahatsoratra ho an'ny %(tag)s"
+
+msgid "Aucune vue pour l'instant."
+msgstr "Mbola tsy misy nijery."
+
+msgid "Bravo"
+msgstr "Arahabaina"
+
+msgid "Capsule Vintana"
+msgstr "Kapsily Vintana"
+
+msgid "Capsule Vintana créée ! Elle sera révélée le %(date)s."
+msgstr "Capsule Vintana créée ! Elle sera révélée le %(date)s."
+
+msgid "Ce live est terminé."
+msgstr "Tapitra ity live ity."
+
+msgid "Ce message est scellé et sera révélé le"
+msgstr "Ce message est scellé et sera révélé le"
+
+msgid "Ce message sera révélé à la date choisie."
+msgstr "Ce message sera révélé à la date choisie."
+
+msgid "Cette action est irréversible : le post sera supprimé définitivement."
+msgstr "Cette action est irréversible : le post sera supprimé définitivement."
+
+msgid "Cette story n'est plus disponible."
+msgstr "Tsy misy intsony ity story ity."
+
+msgid "Cher moi du futur… Que voulez-vous vous dire dans quelques mois ou quelques années ?"
+msgstr "Cher moi du futur… Que voulez-vous vous dire dans quelques mois ou quelques années ?"
+
+msgid "Commenter"
+msgstr "Haneho hevitra"
+
+msgid "Créer l'événement"
+msgstr "Hamorona hetsika"
+
+msgid "Créer le groupe"
+msgstr "Hamorona vondrona"
+
+msgid "Dans 1 an"
+msgstr "Afaka 1 taona"
+
+msgid "Dans 1 mois"
+msgstr "Afaka 1 volana"
+
+msgid "Dans 1 semaine"
+msgstr "Afaka 1 herinandro"
+
+msgid "Dans 3 ans"
+msgstr "Afaka 3 taona"
+
+msgid "Dans 6 mois"
+msgstr "Afaka 6 volana"
+
+msgid "Date de révélation"
+msgstr "Daty hanehoana"
+
+msgid "Demande de %(name)s refusée."
+msgstr "Demande de %(name)s refusée."
+
+msgid "Dina enregistré."
+msgstr "Voatahiry ny Dina."
+
+msgid "Donnez un titre à votre capsule…"
+msgstr "Omeo lohateny ny kapsilinao…"
+
+msgid "Donnez un titre à votre post…"
+msgstr "Omeo lohateny ny lahatsoratrao…"
+
+msgid "Décrivez votre groupe…"
+msgstr "Lazalazao ny vondronao…"
+
+msgid "Désépingler"
+msgstr "Désépingler"
+
+msgid "Erreur lors de la création de l'événement."
+msgstr "Erreur lors de la création de l'événement."
+
+msgid "Erreur lors de la création de la capsule."
+msgstr "Erreur lors de la création de la capsule."
+
+msgid "Erreur lors de la création du Kabary. Réessayez dans quelques instants."
+msgstr "Erreur lors de la création du Kabary. Réessayez dans quelques instants."
+
+msgid "Erreur lors de la publication."
+msgstr "Tsy tafavoaka."
+
+msgid "Erreur lors de la publication. Réessayez."
+msgstr "Tsy tafavoaka. Andramo indray."
+
+msgid "Essayez un autre terme ou vérifiez l'orthographe."
+msgstr "Essayez un autre terme ou vérifiez l'orthographe."
+
+msgid "Feu"
+msgstr "Afo"
+
+msgid "Filtrer les groupes"
+msgstr "Sivano ny vondrona"
+
+msgid "Format de date invalide."
+msgstr "Tsy mety ny endriky ny daty."
+
+msgid "Fête"
+msgstr "Fety"
+
+msgid "Groupe créé avec succès."
+msgstr "Voaforona ny vondrona."
+
+msgid "Groupe mis à jour."
+msgstr "Nohavaozina ny vondrona."
+
+msgid "Groupe supprimé."
+msgstr "Voafafa ny vondrona."
+
+msgid "Impossible de retirer le créateur du groupe."
+msgstr "Impossible de retirer le créateur du groupe."
+
+msgid "Kabary"
+msgstr "Kabary"
+
+msgid "La capsule sera révélée dans %s, le %d."
+msgstr "La capsule sera révélée dans %s, le %d."
+
+msgid "La date de révélation doit être dans le futur."
+msgstr "La date de révélation doit être dans le futur."
+
+msgid "La date de révélation est obligatoire."
+msgstr "La date de révélation est obligatoire."
+
+msgid "La date est obligatoire."
+msgstr "Ilaina ny daty."
+
+msgid "Lancer un live"
+msgstr "Hanomboka live"
+
+msgid "Le Dina est trop long (3000 caractères au maximum)."
+msgstr "Le Dina est trop long (3000 caractères au maximum)."
+
+msgid "Le contenu principal (Vato misaina) est obligatoire."
+msgstr "Le contenu principal (Vato misaina) est obligatoire."
+
+msgid "Le créateur ne peut pas quitter son propre groupe."
+msgstr "Le créateur ne peut pas quitter son propre groupe."
+
+msgid "Le message de la capsule est obligatoire."
+msgstr "Le message de la capsule est obligatoire."
+
+msgid "Le message est obligatoire."
+msgstr "Ilaina ny hafatra."
+
+msgid "Le message est vide."
+msgstr "Foana ny hafatra."
+
+msgid "Le nom doit contenir au moins 3 caractères."
+msgstr "Le nom doit contenir au moins 3 caractères."
+
+msgid "Le post ne peut pas être vide."
+msgstr "Le post ne peut pas être vide."
+
+msgid "Le titre est obligatoire."
+msgstr "Ilaina ny lohateny."
+
+msgid "Les fichiers joints n'ont pas pu être enregistrés."
+msgstr "Les fichiers joints n'ont pas pu être enregistrés."
+
+msgid "Live dans %(name)s"
+msgstr "Live ao amin'ny %(name)s"
+
+msgid "Live de %(name)s"
+msgstr "Live an'i %(name)s"
+
+msgid "Ma région"
+msgstr "Ny faritro"
+
+msgid "Message envoyé"
+msgstr "Lasa ny hafatra"
+
+msgid "Message pour le futur"
+msgstr "Hafatra ho an'ny ho avy"
+
+msgid "Nom du groupe"
+msgstr "Anaran'ny vondrona"
+
+msgid "Nouveaux posts"
+msgstr "Lahatsoratra vaovao"
+
+msgid "Onglets du fil"
+msgstr "Onglets du fil"
+
+msgid "Participer"
+msgstr "Handray anjara"
+
+msgid "Photo publiée par %(name)s"
+msgstr "Photo publiée par %(name)s"
+
+msgid "Post publié dans le groupe."
+msgstr "Post publié dans le groupe."
+
+msgid "Post supprimé."
+msgstr "Voafafa ny lahatsoratra."
+
+msgid "Prix à négocier"
+msgstr "Vidiny azo ifampiraharahana"
+
+msgid "Publication"
+msgstr "Lahatsoratra"
+
+msgid "Publier la capsule"
+msgstr "Avoaka ny kapsily"
+
+msgid "Quitter ce groupe ?"
+msgstr "Hiala amin'ity vondrona ity?"
+
+msgid "Recherche"
+msgstr "Fikarohana"
+
+msgid "Rechercher dans les posts, annonces, utilisateurs…"
+msgstr "Rechercher dans les posts, annonces, utilisateurs…"
+
+msgid "Rechercher par nom d’utilisateur…"
+msgstr "Hikaroka amin'ny anaran'ny mpampiasa…"
+
+msgid "Republications"
+msgstr "Republications"
+
+msgid "Retirer %s du groupe ?"
+msgstr "Esorina ao amin'ny vondrona ve i %s?"
+
+msgid "Réaction inconnue."
+msgstr "Réaction inconnue."
+
+msgid "Rédigez le Dina du groupe — règles, engagements et traditions de la communauté…"
+msgstr "Rédigez le Dina du groupe — règles, engagements et traditions de la communauté…"
+
+msgid "Répondre dans le chat"
+msgstr "Hamaly ao amin'ny resaka"
+
+msgid "Résultats pour"
+msgstr "Valiny ho an'ny"
+
+msgid "Révélation dans %s"
+msgstr "Révélation dans %s"
+
+msgid "Révélation dans :"
+msgstr "Révélation dans :"
+
+msgid "Sans titre"
+msgstr "Tsy misy lohateny"
+
+msgid "Sections du groupe"
+msgstr "Sections du groupe"
+
+msgid "Seul un admin peut retirer un modérateur."
+msgstr "Seul un admin peut retirer un modérateur."
+
+msgid "Soyez la première personne à diffuser."
+msgstr "Soyez la première personne à diffuser."
+
+msgid "Soyez la première personne à publier avec ce hashtag."
+msgstr "Soyez la première personne à publier avec ce hashtag."
+
+msgid "Supprimer ce média"
+msgstr "Fafao ity haino aman-jery ity"
+
+msgid "Supprimer le post"
+msgstr "Fafao ny lahatsoratra"
+
+msgid "Sélectionnez une date dans le futur"
+msgstr "Sélectionnez une date dans le futur"
+
+msgid "Sélectionnez une date…"
+msgstr "Misafidiana daty…"
+
+msgid "Titre"
+msgstr "Lohateny"
+
+msgid "Titre (facultatif)"
+msgstr "Lohateny (tsy voatery)"
+
+msgid "Titre du live"
+msgstr "Lohatenin'ny live"
+
+msgid "Toutes les tendances"
+msgstr "Ny fironana rehetra"
+
+msgid "Une erreur est survenue. Réessayez ou rechargez la page."
+msgstr "Une erreur est survenue. Réessayez ou rechargez la page."
+
+msgid "Utilisateurs"
+msgstr "Mpampiasa"
+
+msgid "Valider la date"
+msgstr "Hamafiso ny daty"
+
+msgid "Veuillez remplir les champs obligatoires."
+msgstr "Fenoy azafady ireo saha ilaina."
+
+msgid "Vintana"
+msgstr "Vintana"
+
+msgid "Voir l'offre"
+msgstr "Jereo ny tolotra"
+
+msgid "Voir la story de %(name)s"
+msgstr "Jereo ny story an'i %(name)s"
+
+msgid "Voir mes stories"
+msgstr "Jereo ny story-ko"
+
+msgid "Voir sur 30 jours"
+msgstr "Jereo ny 30 andro farany"
+
+msgid "Voir tous (%(n)s)"
+msgstr "Jereo daholo (%(n)s)"
+
+msgid "Votre demande a été envoyée aux modérateurs du groupe."
+msgstr "Votre demande a été envoyée aux modérateurs du groupe."
+
+msgid "Votre demande est déjà en attente."
+msgstr "Votre demande est déjà en attente."
+
+msgid "Votre post est publié."
+msgstr "Tafavoaka ny lahatsoratrao."
+
+msgid "Vous avez quitté le groupe."
+msgstr "Niala tamin'ny vondrona ianao."
+
+msgid "Vous avez rejoint le groupe."
+msgstr "Niditra tao amin'ny vondrona ianao."
+
+msgid "Vous devez être membre du groupe pour publier."
+msgstr "Vous devez être membre du groupe pour publier."
+
+msgid "Vous devez être membre du groupe."
+msgstr "Vous devez être membre du groupe."
+
+msgid "Vous ne pouvez pas répondre à votre propre story."
+msgstr "Vous ne pouvez pas répondre à votre propre story."
+
+msgid "Vous ne pouvez pas vous retirer vous-même."
+msgstr "Vous ne pouvez pas vous retirer vous-même."
+
+msgid "blanc"
+msgstr "fotsy"
+
+msgid "bleu"
+msgstr "manga"
+
+msgid "cyan"
+msgstr "cyan"
+
+msgid "lagon"
+msgstr "lagon"
+
+msgid "noir"
+msgstr "mainty"
+
+msgid "nuit"
+msgstr "alina"
+
+msgid "or"
+msgstr "volamena"
+
+msgid "orange"
+msgstr "volomboasary"
+
+msgid "quelques secondes"
+msgstr "segondra vitsivitsy"
+
+msgid "rose"
+msgstr "mavokely"
+
+msgid "rouge"
+msgstr "mena"
+
+msgid "sunset"
+msgstr "sunset"
+
+msgid "vert"
+msgstr "maitso"
+
+msgid "violet"
+msgstr "volomparasy"
+
+msgid "vue(s)"
+msgstr "nijery"
+
+msgid "À propos de Vintana"
+msgstr "Momba ny Vintana"
+
+msgid "Écrivez un message destiné au futur : il restera scellé jusqu'à la date que vous choisissez."
+msgstr "Écrivez un message destiné au futur : il restera scellé jusqu'à la date que vous choisissez."
+
+msgid "Épingler"
+msgstr "Épingler"
+
+msgid "Événement créé."
+msgstr "Voaforona ny hetsika."
+
+msgid "%(n)s post"
+msgid_plural "%(n)s posts"
+msgstr[0] "Lahatsoratra %(n)s"
+msgstr[1] "Lahatsoratra %(n)s"
+
+msgid "%(n)s publication"
+msgid_plural "%(n)s publications"
+msgstr[0] "Lahatsoratra %(n)s"
+msgstr[1] "Lahatsoratra %(n)s"
+
+msgid "Post supprimé"
+msgstr "Voafafa ny lahatsoratra"

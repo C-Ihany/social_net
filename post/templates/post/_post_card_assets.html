@@ -1,0 +1,35 @@
+{% load static i18n %}
+{% comment %}
+  Feuille et configuration de la carte de post (post_cards_fragment.html).
+  À inclure une fois par page qui affiche des cartes : static/js/vz-post-card.js
+  (chargé en defer par base.html) y lit ses URL et ses libellés, et fournit
+  alors réactions, commentaires, réponses, « Voir plus », hashtags et mentions.
+  Paramètre facultatif : detail=True sur la page d'un post.
+{% endcomment %}
+<link rel="stylesheet" href="{% static 'css/pages/post-card.css' %}">
+<script>
+{% trans "Like" as pc_like %}{% trans "Love" as pc_love %}{% trans "Haha" as pc_haha %}{% trans "Wow" as pc_wow %}{% trans "Sad" as pc_sad %}
+{% trans "Reply" as pc_reply %}{% trans "Supprimer" as pc_del %}{% trans "Signaler" as pc_report %}
+{% trans "Écrire une réponse…" as pc_reply_ph %}{% trans "Supprimer ce commentaire ?" as pc_del_confirm %}
+window.VZ_CARD = {
+    userId: {{ request.user.id|default:0 }},
+    detail: {% if detail %}true{% else %}false{% endif %},
+    afterDelete: "{% url 'post:post-view' %}",
+    urls: {
+        react: "{% url 'post:react-post' %}",
+        addComment: "{% url 'post:add-comment' 0 %}",
+        newComments: "{% url 'post:new-comments' 0 %}",
+        delComment: "{% url 'post:delete-comment' 0 %}",
+        hashtag: "{% url 'post:hashtag' tag='__TAG__' %}",
+        profile: "{% url 'account:view' user_id=0 %}",
+        search: "{% url 'search' %}",
+        mentions: "{% url 'post:mention-autocomplete' %}"
+    },
+    i18n: {
+        like: "{{ pc_like|escapejs }}", love: "{{ pc_love|escapejs }}", haha: "{{ pc_haha|escapejs }}",
+        wow: "{{ pc_wow|escapejs }}", sad: "{{ pc_sad|escapejs }}",
+        reply: "{{ pc_reply|escapejs }}", del: "{{ pc_del|escapejs }}", report: "{{ pc_report|escapejs }}",
+        replyPh: "{{ pc_reply_ph|escapejs }}", delConfirm: "{{ pc_del_confirm|escapejs }}"
+    }
+};
+</script>

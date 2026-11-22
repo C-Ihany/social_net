@@ -3,117 +3,56 @@
 {% load post_tags %}
 {% load i18n %}
 
+{% block page_title %}{{ tag }} — Vazimba{% endblock %}
+
 {% block content %}
 <link rel="stylesheet" href="{% static 'css/pages/post-hashtag.css' %}">
+{% include 'post/_post_card_assets.html' %}
 
 <div class="hashtag-wrapper">
 
-    <a class="ht-back" href="{% url 'post:post-view' %}">
-        <span class="material-icons">arrow_back</span>
-        {% trans "Back to feed" %}
-    </a>
-
-    <div class="hashtag-hero">
-        <h1>{{ tag }}</h1>
-        <p>{{ posts.paginator.count }} publication{{ posts.paginator.count|pluralize }}</p>
+    <div class="vz-page-head">
+        <a class="vz-back" href="{% url 'post:post-view' %}">
+            <span class="material-icons" aria-hidden="true">arrow_back</span>
+            {% trans "Retour" %}
+        </a>
+        <div class="vz-page-head__main">
+            <h1 class="vz-page-title"><span class="material-icons" aria-hidden="true">tag</span>{{ tag|slice:"1:" }}</h1>
+            <p class="vz-page-sub">{% blocktrans count n=posts.paginator.count %}{{ n }} publication{% plural %}{{ n }} publications{% endblocktrans %}</p>
+        </div>
     </div>
 
     {% if posts %}
-        {% for post in posts %}
-        <article class="post-card">
-            <div class="pc-header">
-                <a href="{% url 'account:view' user_id=post.author.id %}">
-                    <img class="pc-avatar" src="{{ post.author.profile_image.url }}" alt="{{ post.author.username }}">
-                </a>
-                <div class="pc-meta">
-                    <a class="pc-author" href="{% url 'account:view' user_id=post.author.id %}">{{ post.author.username }}</a>
-                    <span class="pc-sub">
-                        <span class="material-icons">schedule</span>
-                        {{ post.created_at|default:post.post_date|vz_since }}
-                    </span>
-                </div>
-            </div>
-
-            {% if post.title %}
-            <div class="pc-title">{{ post.title }}</div>
-            {% endif %}
-
-            {% if post.body %}
-            <div class="pc-body ht-body">{{ post.body|safe_html }}</div>
-            {% endif %}
-
-            {% include 'post/_post_media.html' %}
-    {% include 'post/_post_product.html' %}
-
-            <div class="pc-footer">
-                <div class="pc-footer-info">
-                    <span class="material-icons">thumb_up</span>
-                    {{ post.total_likes }} réaction{{ post.total_likes|pluralize }}
-                    &nbsp;·&nbsp;
-                    <span class="material-icons">chat_bubble_outline</span>
-                    {{ post.n_comments }} commentaire{{ post.n_comments|pluralize }}
-                </div>
-                <a href="{% url 'post:post-view' %}" class="pc-footer-view">
-                    {% trans "View" %}
-                </a>
-            </div>
-        </article>
-        {% endfor %}
-
-        <div class="ht-pagination">
-            {% if posts.has_previous %}
-            <a class="page-btn" href="?page={{ posts.previous_page_number }}">
-                <span class="material-icons">chevron_left</span> {% trans "Previous" %}
-            </a>
-            {% endif %}
-            <span class="page-info">{{ posts.number }} / {{ posts.paginator.num_pages }}</span>
-            {% if posts.has_next %}
-            <a class="page-btn" href="?page={{ posts.next_page_number }}">
-                {% trans "Next" %} <span class="material-icons">chevron_right</span>
-            </a>
-            {% endif %}
+        <div class="vz-card-feed" data-hashtag-url='{% url "post:hashtag" tag="__TAG__" %}'>
+            {% include 'post/post_cards_fragment.html' with posts_of_the_page=posts %}
         </div>
 
+        {% if posts.paginator.num_pages > 1 %}
+        <nav class="vz-pager" aria-label="{% trans 'Pagination' %}">
+            {% if posts.has_previous %}
+            <a href="?page={{ posts.previous_page_number }}" rel="prev" aria-label="{% trans 'Page précédente' %}"><span class="material-icons" aria-hidden="true">chevron_left</span></a>
+            {% else %}
+            <span class="is-disabled" aria-hidden="true"><span class="material-icons">chevron_left</span></span>
+            {% endif %}
+            <span class="is-current" aria-current="page">{{ posts.number }} / {{ posts.paginator.num_pages }}</span>
+            {% if posts.has_next %}
+            <a href="?page={{ posts.next_page_number }}" rel="next" aria-label="{% trans 'Page suivante' %}"><span class="material-icons" aria-hidden="true">chevron_right</span></a>
+            {% else %}
+            <span class="is-disabled" aria-hidden="true"><span class="material-icons">chevron_right</span></span>
+            {% endif %}
+        </nav>
+        {% endif %}
+
     {% else %}
-        <div class="empty-ht">
-            <span class="material-icons ef-icon" aria-hidden="true">search</span>
-            <strong>Aucun post trouvé pour {{ tag }}</strong>
-            <p>{% trans "Be the first to post with this hashtag!" %}</p>
+        <div class="vz-empty">
+            <span class="material-icons" aria-hidden="true">search</span>
+            <p class="vz-empty-title">{% blocktrans %}Aucune publication pour {{ tag }}{% endblocktrans %}</p>
+            <p class="vz-empty-text">{% trans "Soyez la première personne à publier avec ce hashtag." %}</p>
+            <a class="vz-btn vz-btn--primary" href="{% url 'post:addPost' %}">
+                <span class="material-icons" aria-hidden="true">add</span> {% trans "Publier" %}
+            </a>
         </div>
     {% endif %}
 
 </div>
-
-<script>
-// Transformer les hashtags et mentions dans les corps de posts
-document.querySelectorAll('.ht-body').forEach(function(el) {
-    processHashtagsAndMentions(el);
-});
-
-function processHashtagsAndMentions(container) {
-    if (!container) return;
-    var walker = document.createTreeWalker(container, NodeFilter.SHOW_TEXT, null, false);
-    var nodes = [];
-    var node;
-    while (node = walker.nextNode()) {
-        if (node.parentElement && node.parentElement.tagName === 'A') continue;
-        nodes.push(node);
-    }
-    nodes.forEach(function(n) {
-        var html = n.textContent
-            .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')
-            .replace(/#([a-zA-ZÀ-ÿ0-9_]{2,30})/g, function(m, tag) {
-                return '<a class="hashtag" href="' + '{% url "post:hashtag" tag="__TAG__" %}'.replace('__TAG__', encodeURIComponent(tag.toLowerCase())) + '">' + m + '</a>';
-            })
-            .replace(/@([a-zA-Z0-9_]{2,30})/g, function(m, user) {
-                return '<a class="mention" href="/account/search/?q=' + encodeURIComponent(user) + '">' + m + '</a>';
-            });
-        if (html !== n.textContent.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')) {
-            var span = document.createElement('span');
-            span.innerHTML = html;
-            n.parentNode.replaceChild(span, n);
-        }
-    });
-}
-</script>
 {% endblock content %}

@@ -9,21 +9,25 @@
 {% include 'stories/story_bar.html' %}
 
 <div class="sl-wrapper">
-    <h1 class="sl-title">{% trans "Stories" %}</h1>
+    <div class="vz-page-head">
+        <div class="vz-page-head__main">
+            <h1 class="vz-page-title"><span class="material-icons" aria-hidden="true">auto_stories</span>{% trans "Stories" %}</h1>
+        </div>
+    </div>
 
     <div class="sl-grid">
 
         <!-- ① Carte "Ma story" / créer ───────────────── -->
         {% if request.user.is_authenticated %}
-        <div class="sl-create-card"
-             onclick="window.zootStories && window.zootStories.openCreator()">
+        <button type="button" class="sl-create-card"
+                onclick="window.zootStories && window.zootStories.openCreator()">
 
             {% if my_group %}
                 {# Fond = ma dernière story #}
                 {% with s=my_group.stories.0 %}
                 {% if s.story_type == 'text' %}
                     {# Gradient seul, pas d'image : même palette que les cartes .sl-card.grad_* #}
-                    <div class="sl-create-bg {{ s.bg_gradient }}"></div>
+                    <span class="sl-create-bg {{ s.bg_gradient }}"></span>
                 {% elif s.media %}
                     {% if s.media_type == 'video' %}
                     <video src="{{ s.media.url }}" muted playsinline preload="none"></video>
@@ -34,22 +38,25 @@
                 {% endwith %}
             {% endif %}
 
-            <div class="sl-create-plus">
-                <div class="sl-create-plus-circle">
-                    <span class="material-icons">add</span>
-                </div>
-            </div>
-            <div class="sl-create-name">
+            <span class="sl-create-plus">
+                <span class="sl-create-plus-circle">
+                    <span class="material-icons" aria-hidden="true">add</span>
+                </span>
+            </span>
+            <span class="sl-create-name">
                 {% if my_group %}{% trans "Ma story" %}{% else %}{% trans "Créer une story" %}{% endif %}
-            </div>
-        </div>
+            </span>
+        </button>
         {% endif %}
 
         <!-- ② Cartes des autres utilisateurs ────────── -->
         {% for group in seller_groups %}
         {% with s=group.stories.0 %}
-        <div class="sl-card {% if s.story_type == 'text' %}{{ s.bg_gradient }}{% endif %}"
-             onclick="window.zootStories && window.zootStories.openViewer({{ s.id }}, {{ group.user.id }})">
+        <div class="sl-card {% if s.story_type == 'text' %}{{ s.bg_gradient }}{% endif %}">
+            {# Le bouton couvre la carte ; le lien d'offre reste cliquable au-dessus #}
+            <button type="button" class="sl-card-open"
+                    aria-label="{% blocktrans with name=group.user.username %}Voir la story de {{ name }}{% endblocktrans %}"
+                    onclick="window.zootStories && window.zootStories.openViewer({{ s.id }}, {{ group.user.id }})"></button>
 
             {% if s.story_type != 'text' and s.media %}
                 {% if s.media_type == 'video' %}
@@ -64,10 +71,9 @@
             <img class="sl-card-avatar" src="{{ group.avatar }}" alt="{{ group.user.username }}">
 
             {% if s.link %}
-            <a class="sl-card-link" href="{{ s.link }}" target="_blank" rel="noopener"
-               onclick="event.stopPropagation()">
-                <span class="material-icons">open_in_new</span>
-                {{ s.link_label|default:"Voir l'offre" }}
+            <a class="sl-card-link" href="{{ s.link }}" target="_blank" rel="noopener">
+                <span class="material-icons" aria-hidden="true">open_in_new</span>
+                {% trans "Voir l'offre" as sl_offer %}{{ s.link_label|default:sl_offer }}
             </a>
             {% endif %}
 
@@ -77,14 +83,14 @@
         {% endfor %}
 
         <!-- ③ Vide ───────────────────────────────────── -->
-        {% if not seller_groups and not my_group and not request.user.is_authenticated %}
-        <div class="sl-empty">
-            <span class="material-icons">campaign</span>
-            <p>{% trans "Aucune story active pour l'instant." %}</p>
-        </div>
-        {% endif %}
-
     </div>
+
+    {% if not seller_groups and not my_group %}
+    <div class="vz-empty">
+        <span class="material-icons" aria-hidden="true">auto_stories</span>
+        <p class="vz-empty-title">{% trans "Aucune story active pour l'instant." %}</p>
+    </div>
+    {% endif %}
 </div>
 
 {% endblock %}

@@ -22,16 +22,6 @@
 }
 .sugg-title .material-icons { font-size: 1.05rem; color: var(--accent); }
 .sugg-nav-group { display: flex; gap: .3rem; }
-.sugg-nav {
-    width: 28px; height: 28px; padding: 0;
-    border: none; border-radius: 50%;
-    background: var(--btn-bg); color: var(--text-muted);
-    display: inline-flex; align-items: center; justify-content: center;
-    cursor: pointer; transition: background .15s, color .15s, opacity .15s;
-}
-.sugg-nav:hover { background: var(--btn-hover); color: var(--text); }
-.sugg-nav:disabled { opacity: .3; cursor: default; }
-.sugg-nav .material-icons { font-size: 1.1rem; }
 /* Sur mobile on swipe : les fleches ne servent a rien */
 @media (hover: none) { .sugg-nav-group { display: none; } }
 
@@ -105,3 +95,4 @@
     .sugg-scroller { padding-left: .75rem; padding-right: .75rem; }
     .sugg-head { padding-left: .85rem; padding-right: .85rem; }
 }
+.sugg-item .sugg-dismiss { opacity: 1; }

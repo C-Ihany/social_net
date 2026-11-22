@@ -1,69 +1,69 @@
 {% load i18n %}
-{# Formulaire partagé pour la première demande et la re-soumission après refus. #}
-{# initial_type : 'verified' ou 'pro' #}
+{% comment %}
+Formulaire partagé : première demande, nouvelle demande après refus, passage en Boutique Pro.
+Paramètres : initial_type ('verified' ou 'pro'), force_pro (masque le choix du type), draft (valeurs à réafficher).
+{% endcomment %}
 
-<!-- ── Choix du type ─────────────────────────────────────────────────────── -->
-<input type="hidden" name="seller_type" id="seller-type-input" value="{{ initial_type }}">
-
-<div class="verif-type-grid" id="verif-type-grid">
-    <!-- Vendeur Vérifié -->
-    <div class="verif-type-card {% if initial_type == 'verified' %}active-verified{% endif %}"
-         id="type-card-verified"
-         onclick="selectType('verified')">
+{% if force_pro %}
+<input type="hidden" name="seller_type" value="pro">
+{% else %}
+<!-- ── Choix du type : deux boutons radio présentés en cartes ───────────────── -->
+<div class="verif-type-grid" role="radiogroup" aria-label="{% trans 'Type de vendeur' %}">
+    <label class="verif-type-card verif-type-card--verified">
+        <input type="radio" name="seller_type" value="verified" {% if initial_type != 'pro' %}checked{% endif %}>
         <i class="material-icons verif-type-icon" aria-hidden="true">person</i>
-        <div class="verif-type-name">{% trans "Vendeur Vérifié" %}</div>
-        <div class="verif-type-desc">{% trans "Je vends des articles personnels de temps en temps." %}</div>
-        <div class="verif-type-perks">
-            <span class="verif-type-perk">{% trans "Badge Vérifié sur vos annonces" %}</span>
-            <span class="verif-type-perk">{% trans "Priorité dans les résultats" %}</span>
-            <span class="verif-type-perk">{% trans "Jusqu'à 12 photos par annonce" %}</span>
-        </div>
-    </div>
+        <span class="verif-type-name">{% trans "Vendeur Vérifié" %}</span>
+        <span class="verif-type-desc">{% trans "Je vends des articles personnels de temps en temps." %}</span>
+        <span class="verif-type-perks">
+            <span class="verif-type-perk"><i class="material-icons" aria-hidden="true">check</i>{% trans "Badge Vérifié sur vos annonces" %}</span>
+            <span class="verif-type-perk"><i class="material-icons" aria-hidden="true">check</i>{% trans "Priorité dans les résultats" %}</span>
+            <span class="verif-type-perk"><i class="material-icons" aria-hidden="true">check</i>{% trans "Jusqu'à 12 photos par annonce" %}</span>
+        </span>
+    </label>
 
-    <!-- Concessionnaire / Boutique Pro -->
-    <div class="verif-type-card {% if initial_type == 'pro' %}active-pro{% endif %}"
-         id="type-card-pro"
-         onclick="selectType('pro')">
+    <label class="verif-type-card verif-type-card--pro">
+        <input type="radio" name="seller_type" value="pro" {% if initial_type == 'pro' %}checked{% endif %}>
         <i class="material-icons verif-type-icon" aria-hidden="true">star</i>
-        <div class="verif-type-name">{% trans "Concessionnaire / Boutique Pro" %}</div>
-        <div class="verif-type-desc">{% trans "Je vends régulièrement à titre professionnel ou commercial." %}</div>
-        <div class="verif-type-perks">
-            <span class="verif-type-perk">{% trans "Badge Boutique Pro doré" %}</span>
-            <span class="verif-type-perk">{% trans "Page boutique publique dédiée" %}</span>
-            <span class="verif-type-perk">{% trans "Jusqu'à 20 photos par annonce" %}</span>
-            <span class="verif-type-perk">{% trans "Priorité maximale dans les résultats" %}</span>
-        </div>
-    </div>
+        <span class="verif-type-name">{% trans "Concessionnaire / Boutique Pro" %}</span>
+        <span class="verif-type-desc">{% trans "Je vends régulièrement à titre professionnel ou commercial." %}</span>
+        <span class="verif-type-perks">
+            <span class="verif-type-perk"><i class="material-icons" aria-hidden="true">check</i>{% trans "Badge Boutique Pro doré" %}</span>
+            <span class="verif-type-perk"><i class="material-icons" aria-hidden="true">check</i>{% trans "Page boutique publique dédiée" %}</span>
+            <span class="verif-type-perk"><i class="material-icons" aria-hidden="true">check</i>{% trans "Jusqu'à 20 photos par annonce" %}</span>
+            <span class="verif-type-perk"><i class="material-icons" aria-hidden="true">check</i>{% trans "Priorité maximale dans les résultats" %}</span>
+        </span>
+    </label>
 </div>
+{% endif %}
 
-<!-- ── Champs boutique (type='pro') ──────────────────────────────────────── -->
-<div id="verif-boutique-fields" class="{% if initial_type == 'pro' %}visible{% endif %}">
-    <div class="verif-section-title"><i class="material-icons" aria-hidden="true">storefront</i>{% trans "Informations de votre boutique" %}</div>
+<!-- ── Champs boutique (type « pro ») ─────────────────────────────────────── -->
+<div id="verif-boutique-fields"{% if initial_type != 'pro' and not force_pro %} hidden{% endif %}>
+    <h2 class="verif-section-title"><i class="material-icons" aria-hidden="true">storefront</i>{% trans "Informations de votre boutique" %}</h2>
 
     <div class="vz-field">
         <label for="boutique-name">
-            {% trans "Nom de la boutique" %}<span class="vz-req">*</span>
+            {% trans "Nom de la boutique" %} <span class="vz-req" aria-hidden="true">*</span>
         </label>
         <input type="text" id="boutique-name" name="boutique_name"
                maxlength="120"
-               placeholder="{% trans "Ex : AutoShop Tana, BoutiqueElec Fianarantsoa…" %}"
-               value="{{ verification.boutique_name|default:'' }}">
+               placeholder="{% trans "Ex : Auto Plus, Électro Service…" %}"
+               value="{{ draft.boutique_name|default:'' }}">
     </div>
 
     <div class="vz-field">
-        <label for="boutique-cat">{% trans "Catégorie principale" %}<span class="vz-req">*</span></label>
+        <label for="boutique-cat">{% trans "Catégorie principale" %}</label>
         <select id="boutique-cat" name="boutique_category">
             <option value="">— {% trans "Choisir une catégorie" %} —</option>
-            <option value="auto"         {% if verification.boutique_category == 'auto' %}selected{% endif %}>{% trans "Automobile & Moto" %}</option>
-            <option value="electronique" {% if verification.boutique_category == 'electronique' %}selected{% endif %}>{% trans "Électronique & Informatique" %}</option>
-            <option value="mode"         {% if verification.boutique_category == 'mode' %}selected{% endif %}>{% trans "Mode & Vêtements" %}</option>
-            <option value="maison"       {% if verification.boutique_category == 'maison' %}selected{% endif %}>{% trans "Maison & Mobilier" %}</option>
-            <option value="alimentation" {% if verification.boutique_category == 'alimentation' %}selected{% endif %}>{% trans "Alimentation & Boissons" %}</option>
-            <option value="materiaux"    {% if verification.boutique_category == 'materiaux' %}selected{% endif %}>{% trans "Matériaux & BTP" %}</option>
-            <option value="agriculture"  {% if verification.boutique_category == 'agriculture' %}selected{% endif %}>{% trans "Agriculture & Élevage" %}</option>
-            <option value="immobilier"   {% if verification.boutique_category == 'immobilier' %}selected{% endif %}>{% trans "Immobilier" %}</option>
-            <option value="services"     {% if verification.boutique_category == 'services' %}selected{% endif %}>{% trans "Services & Prestations" %}</option>
-            <option value="autre"        {% if verification.boutique_category == 'autre' %}selected{% endif %}>{% trans "Autre" %}</option>
+            <option value="auto"         {% if draft.boutique_category == 'auto' %}selected{% endif %}>{% trans "Automobile & Moto" %}</option>
+            <option value="electronique" {% if draft.boutique_category == 'electronique' %}selected{% endif %}>{% trans "Électronique & Informatique" %}</option>
+            <option value="mode"         {% if draft.boutique_category == 'mode' %}selected{% endif %}>{% trans "Mode & Vêtements" %}</option>
+            <option value="maison"       {% if draft.boutique_category == 'maison' %}selected{% endif %}>{% trans "Maison & Mobilier" %}</option>
+            <option value="alimentation" {% if draft.boutique_category == 'alimentation' %}selected{% endif %}>{% trans "Alimentation & Boissons" %}</option>
+            <option value="materiaux"    {% if draft.boutique_category == 'materiaux' %}selected{% endif %}>{% trans "Matériaux & BTP" %}</option>
+            <option value="agriculture"  {% if draft.boutique_category == 'agriculture' %}selected{% endif %}>{% trans "Agriculture & Élevage" %}</option>
+            <option value="immobilier"   {% if draft.boutique_category == 'immobilier' %}selected{% endif %}>{% trans "Immobilier" %}</option>
+            <option value="services"     {% if draft.boutique_category == 'services' %}selected{% endif %}>{% trans "Services & Prestations" %}</option>
+            <option value="autre"        {% if draft.boutique_category == 'autre' %}selected{% endif %}>{% trans "Autre" %}</option>
         </select>
     </div>
 
@@ -71,7 +71,7 @@
         <label for="boutique-desc">{% trans "Description de votre boutique" %}</label>
         <textarea id="boutique-desc" name="boutique_description"
                   maxlength="2000"
-                  placeholder="{% trans "Présentez votre boutique, vos produits, votre expérience…" %}">{{ verification.boutique_description|default:'' }}</textarea>
+                  placeholder="{% trans "Présentez votre boutique, vos produits, votre expérience…" %}">{{ draft.boutique_description|default:'' }}</textarea>
     </div>
 
     <div class="verif-row-2">
@@ -79,15 +79,16 @@
             <label for="boutique-phone">{% trans "Téléphone / WhatsApp" %}</label>
             <input type="tel" id="boutique-phone" name="boutique_phone"
                    maxlength="30"
-                   placeholder="+261 34 00 000 00"
-                   value="{{ verification.boutique_phone|default:'' }}">
+                   placeholder="+…"
+                   value="{{ draft.boutique_phone|default:'' }}">
+            <div class="vz-field-help">{% trans "Avec l'indicatif du pays (+…) pour activer le bouton WhatsApp." %}</div>
         </div>
         <div class="vz-field">
             <label for="boutique-hours">{% trans "Horaires d'ouverture" %}</label>
             <input type="text" id="boutique-hours" name="boutique_hours"
                    maxlength="250"
                    placeholder="{% trans "Ex : Lun–Sam 8h–18h" %}"
-                   value="{{ verification.boutique_hours|default:'' }}">
+                   value="{{ draft.boutique_hours|default:'' }}">
         </div>
     </div>
 
@@ -95,66 +96,58 @@
         <label for="boutique-address">{% trans "Adresse / Localisation" %}</label>
         <input type="text" id="boutique-address" name="boutique_address"
                maxlength="250"
-               placeholder="{% trans "Ex : Analakely, Antananarivo" %}"
-               value="{{ verification.boutique_address|default:'' }}">
+               placeholder="{% trans "Ex : quartier, ville" %}"
+               value="{{ draft.boutique_address|default:'' }}">
     </div>
 
     <div class="vz-field">
         <label for="boutique-banner">{% trans "Bannière de la boutique" %}</label>
-        {% if verification.boutique_banner %}
-        <img src="{{ verification.boutique_banner.url }}" class="banner-preview visible" id="banner-preview" alt="">
-        {% else %}
-        <img src="" class="banner-preview" id="banner-preview" alt="">
-        {% endif %}
+        <img {% if verification.boutique_banner %}src="{{ verification.boutique_banner.url }}"{% else %}hidden{% endif %} class="banner-preview" id="banner-preview" alt="">
         <input type="file" class="verif-file-input" id="boutique-banner" name="boutique_banner"
-               accept="image/*"
-               onchange="previewBanner(this)">
-        <div class="vz-field-help">{% trans "Image horizontale recommandée (ex : 1200×300 px). Formats : JPG, PNG, WebP." %}</div>
+               accept="image/*,.heic,.heif">
+        <div class="vz-field-help">{% trans "Image horizontale recommandée (ex : 1200×300 px). Formats : JPG, PNG, WebP — 10 Mo max." %}</div>
     </div>
 </div>
 
 <!-- ── Message libre (tous types) ────────────────────────────────────────── -->
-<div class="verif-section-title"><i class="material-icons" aria-hidden="true">mail</i>{% trans "Message" %}</div>
+<h2 class="verif-section-title"><i class="material-icons" aria-hidden="true">mail</i>{% trans "Message" %}</h2>
 <div class="vz-field">
     <label for="msg">{% trans "Votre message (facultatif)" %}</label>
     <textarea id="msg" name="message"
               maxlength="2000"
-              placeholder="{% trans "Présentez-vous, décrivez votre activité, expliquez pourquoi vous méritez d'être vérifié…" %}">{{ verification.message|default:'' }}</textarea>
+              placeholder="{% trans "Présentez-vous, décrivez votre activité, expliquez pourquoi vous méritez d'être vérifié…" %}">{{ draft.message|default:'' }}</textarea>
     <div class="vz-field-help">{% trans "Maximum 2 000 caractères." %}</div>
 </div>
 
-<button type="submit" class="vz-btn vz-btn--primary verif-submit">
-    <i class="material-icons" aria-hidden="true">verified_user</i>{% trans "Envoyer ma demande" %}
-</button>
+<div class="vz-actions">
+    <a href="{% url 'bazar:mes_annonces' %}" class="vz-btn vz-btn--secondary">{% trans "Annuler" %}</a>
+    <button type="submit" class="vz-btn vz-btn--primary">
+        <i class="material-icons" aria-hidden="true">send</i>{% trans "Envoyer ma demande" %}
+    </button>
+</div>
 
 <script>
-function selectType(type) {
-    document.getElementById('seller-type-input').value = type;
-    var cardVerified = document.getElementById('type-card-verified');
-    var cardPro      = document.getElementById('type-card-pro');
-    var boutiqueFields = document.getElementById('verif-boutique-fields');
-
-    cardVerified.classList.remove('active-verified', 'active-pro');
-    cardPro.classList.remove('active-verified', 'active-pro');
-
-    if (type === 'pro') {
-        cardPro.classList.add('active-pro');
-        boutiqueFields.classList.add('visible');
-    } else {
-        cardVerified.classList.add('active-verified');
-        boutiqueFields.classList.remove('visible');
+(function () {
+    var fields = document.getElementById('verif-boutique-fields');
+    var name   = document.getElementById('boutique-name');
+    var forced = {{ force_pro|yesno:"true,false" }};
+    function update() {
+        var checked = document.querySelector('input[name="seller_type"]:checked');
+        var isPro = forced || (!!checked && checked.value === 'pro');
+        if (fields) fields.hidden = !isPro;
+        if (name) name.required = isPro;     /* le nom n'est exigé que pour une boutique */
     }
-}
+    Array.prototype.forEach.call(document.querySelectorAll('input[name="seller_type"]'), function (r) {
+        r.addEventListener('change', update);
+    });
+    update();
 
-function previewBanner(input) {
+    var banner  = document.getElementById('boutique-banner');
     var preview = document.getElementById('banner-preview');
-    if (input.files && input.files[0]) {
-        var reader = new FileReader();
-        reader.onload = function(e) {
-            preview.src = e.target.result;
-            preview.classList.add('visible');
-        };
-        reader.readAsDataURL(input.files[0]);
-    }
-}
+    if (banner && preview) banner.addEventListener('change', function () {
+        if (!banner.files || !banner.files[0]) return;
+        preview.src = URL.createObjectURL(banner.files[0]);
+        preview.hidden = false;
+    });
+})();
 </script>

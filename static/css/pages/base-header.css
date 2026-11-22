@@ -15,9 +15,9 @@
     display: flex;
     align-items: center;
     gap: .75rem;
-    background: var(--bg-card, #fff);
-    border: 1px solid var(--border, #e0e0e0);
-    border-left: 4px solid var(--accent, #1877f2);
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-left: 4px solid var(--accent);
     border-radius: 12px;
     padding: .75rem 1rem;
     box-shadow: 0 8px 32px rgba(0,0,0,.18);
@@ -36,17 +36,14 @@
 .zoot-toast-avatar {
     width: 40px; height: 40px;
     border-radius: 50%; object-fit: cover;
-    border: 2px solid var(--accent, #1877f2);
+    border: 2px solid var(--accent);
     flex-shrink: 0;
 }
 .zoot-toast-body { flex: 1; min-width: 0; }
-.zoot-toast-user { font-weight: 700; font-size: .88rem; color: var(--text, #1c1e21); }
-.zoot-toast-msg  { font-size: .82rem; color: var(--text-muted, #65676b); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.zoot-toast-close {
-    font-size: 1rem; color: var(--text-muted, #65676b);
-    background: none; border: none; cursor: pointer;
-    padding: 0; line-height: 1; flex-shrink: 0;
-}
+.zoot-toast-user { font-weight: 700; font-size: .88rem; color: var(--text); }
+.zoot-toast-msg  { font-size: .82rem; color: var(--text-muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.zoot-toast-close { flex-shrink: 0; width: 36px; height: 36px; }
+.zoot-toast-close .material-icons { font-size: 1.1rem; }
 
 /* ── Reset & Base ── */
 #header * { box-sizing: border-box; }
@@ -327,7 +324,7 @@
     top: 4px; right: 4px;
     min-width: 17px; height: 17px;
     background: var(--accent3);
-    color: #fff;
+    color: var(--on-accent);
     border-radius: 9px;
     font-size: .65rem;
     font-weight: 800;
@@ -908,7 +905,7 @@
 #theme-toggle-btn .material-icons { font-size: 1.2rem; line-height: 1; }
 
 /* Boutons déguisés en liens dans les menus */
-button.zoot-dropdown-header-link { background: none; border: 0; padding: 0; font: inherit; cursor: pointer; }
+button.zoot-dropdown-header-link { background: none; border: 0; font-family: inherit; cursor: pointer; }
 .zoot-nav-right button.dropdown-item { background: none; border: none; width: 100%; text-align: left; cursor: pointer; }
 .zoot-profile-menu { min-width: 260px; }
 
@@ -959,8 +956,8 @@ button.zoot-dropdown-header-link { background: none; border: 0; padding: 0; font
 }
 .gco-avatar-wrap { position: relative; width: 96px; height: 96px; display: flex; align-items: center; justify-content: center; }
 #gco-pulse { position: absolute; inset: 0; border-radius: 50%; background: rgba(255,255,255,.12); animation: gcoPulse 1.4s ease-out infinite; }
-#gco-img { width: 80px; height: 80px; border-radius: 50%; object-fit: cover; border: 3px solid #fff; position: relative; z-index: 1; }
-.gco-info { text-align: center; color: #fff; }
+#gco-img { width: 80px; height: 80px; border-radius: 50%; object-fit: cover; border: 3px solid white; position: relative; z-index: 1; }
+.gco-info { text-align: center; color: white; }
 #gco-name { font-size: 1.25rem; font-weight: 800; margin: 0 0 .3rem; }
 #gco-type { font-size: .9rem; color: rgba(255,255,255,.8); margin: 0; display: flex; align-items: center; justify-content: center; gap: .35rem; }
 #gco-type .material-icons { font-size: 1.1rem; }
@@ -970,3 +967,19 @@ button.zoot-dropdown-header-link { background: none; border: 0; padding: 0; font
 .gco-action-label { color: rgba(255,255,255,.8); font-size: .75rem; }
 .gco-reject { box-shadow: 0 4px 18px rgba(var(--danger-rgb),.5); }
 .gco-accept { box-shadow: 0 4px 18px rgba(var(--success-rgb),.5); animation: gcoBounce .6s ease-in-out infinite alternate; }
+
+/* ── Lot 2026-11-22 : vrais boutons dans l'en-tête ─────────────────────── */
+/* Messages, notifications, avatar : <button> (avant : <div role="button">) */
+button.zoot-icon-btn, button.zoot-avatar-btn { font: inherit; -webkit-appearance: none; appearance: none; }
+.zoot-icon-btn:focus-visible, .zoot-avatar-btn:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+/* Cible tactile portée à 44 px sans changer la mise en page (bouton de 40 px) */
+.zoot-icon-btn::after { content: ''; position: absolute; inset: -2px; border-radius: inherit; }
+/* Liens d'en-tête des menus (« Tout marquer lu », « See all ») : hauteur utile de 36 px */
+.zoot-dropdown-header-link { display: inline-flex; align-items: center; min-height: 36px; padding: 0 .55rem; }
+/* Déconnexion en POST : le bouton reprend l'allure des liens du menu */
+form[data-vz-logout] { margin: 0; }
+button.zoot-mobile-link { width: 100%; background: none; border: 0; text-align: left; font-family: inherit; cursor: pointer; }
+/* État du bouton des notifications push (classes posées par le JS) */
+#push-notif-btn.is-on .material-icons { color: var(--accent); }
+#push-notif-btn.is-blocked .material-icons { color: var(--danger); }
+#push-notif-btn[hidden] { display: none; }

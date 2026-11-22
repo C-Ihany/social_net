@@ -1,4 +1,5 @@
-{% load static %}
+{% load static %}{% load i18n %}
+{% trans "Répondre" as sw_answer %}{% trans "Refuser" as sw_decline %}{% trans "Ouvrir" as sw_open %}{% trans "Ignorer" as sw_dismiss %}{% trans "Appel entrant" as sw_incoming %}
 /**
  * VAZIMBA — Service Worker PWA
  * Stratégies de cache + Background Sync + Push Notifications
@@ -7,7 +8,7 @@
 /* ── Version ─────────────────────────────────────────────────────────────────
    Incrémenter SW_VERSION pour forcer la mise à jour chez tous les clients.
    ─────────────────────────────────────────────────────────────────────────── */
-const SW_VERSION  = 'vazimba-v27';
+const SW_VERSION  = 'vazimba-v28';
 const STATIC_CACHE = SW_VERSION + '-static';
 const PAGES_CACHE  = SW_VERSION + '-pages';
 const IMG_CACHE    = SW_VERSION + '-images';
@@ -36,10 +37,15 @@ const PRECACHE_PAGES = [
 const MAX_PAGES  = 80;   // Pages HTML conservées (augmenté)
 const MAX_IMAGES = 150;  // Images conservées (augmenté)
 
-/* ── Pages qui ne doivent PAS être servies depuis le cache (données fraîches) */
+/* ── Pages qui ne sont JAMAIS gardées en cache : elles montrent des données privées
+      (conversations, aperçus de messages, jetons) qu'il ne faut pas resservir hors
+      connexion, peut-être à quelqu'un d'autre sur un téléphone partagé. ───────────── */
+const NO_CACHE_EXACT = ['/'];
 const NO_CACHE_PATHS = [
-    '/',
-    '/chat/', '/admin/', '/logout/', '/login/', '/register/', '/feed/', '/stories/',
+    '/chat/', '/e2ee/', '/api/', '/notif/', '/admin/', '/logout/', '/login/', '/register/',
+    '/connexion-telephone/', '/password_', '/reset/', '/account/supprimer/',
+    // (le fil, les stories et les profils restent consultables hors connexion : ils sont lus
+    //  sur le réseau d'abord, et le cache est vidé à la déconnexion — voir CLEAR_CACHE)
     // Bazar — pages personnalisées qui doivent toujours être fraîches
     '/bazar/mes-annonces/', '/bazar/vendre/', '/bazar/mes-favoris/',
     '/bazar/verification/',
@@ -47,7 +53,13 @@ const NO_CACHE_PATHS = [
     '/live/',
 ];
 function _isNoCachePath(url) {
+    if (NO_CACHE_EXACT.indexOf(url.pathname) !== -1) return true;
     return NO_CACHE_PATHS.some(function(p) { return url.pathname.startsWith(p); });
+}
+/* Une réponse que le serveur interdit de garder (« no-store », « private ») */
+function _isNoStore(response) {
+    var cc = (response.headers.get('Cache-Control') || '').toLowerCase();
+    return cc.indexOf('no-store') !== -1 || cc.indexOf('private') !== -1;
 }
 
 /* ═══════════════════════════════════════════════════════════════════════════
@@ -118,9 +130,7 @@ self.addEventListener('fetch', function(event) {
     }
 
     /* ── Images media locales : Stale-While-Revalidate ─────────────────── */
-    if (url.pathname.startsWith('/media/') ||
-        url.hostname.includes('r2.cloudflarestorage') ||
-        url.hostname.includes('cloudinary')) {
+    if (url.pathname.startsWith('/media/')) {
         event.respondWith(staleWhileRevalidate(req, IMG_CACHE, MAX_IMAGES));
         return;
     }
@@ -157,8 +167,9 @@ function cacheFirst(request, cacheName, limit) {
 
 /* ── Network-First HTML : essayer le réseau, fallback cache puis offline ─── */
 function networkFirstHTML(request) {
+    var noCache = _isNoCachePath(new URL(request.url));
     return fetch(request).then(function(response) {
-        if (response && response.ok) {
+        if (response && response.ok && !noCache && !_isNoStore(response)) {
             var clone = response.clone();
             caches.open(PAGES_CACHE).then(function(cache) {
                 cache.put(request, clone);
@@ -168,30 +179,11 @@ function networkFirstHTML(request) {
         return response;
     }).catch(function() {
         return caches.open(PAGES_CACHE).then(function(cache) {
+            if (noCache) return cache.match(OFFLINE_URL);
             return cache.match(request).then(function(cached) {
                 if (cached) return cached;
                 return cache.match(OFFLINE_URL);
             });
-        });
-    });
-}
-
-/* ── Stale-While-Revalidate pour les pages HTML ─────────────────────────── */
-function staleWhileRevalidateHTML(request) {
-    return caches.open(PAGES_CACHE).then(function(cache) {
-        return cache.match(request).then(function(cached) {
-            /* Lancer la mise à jour réseau en parallèle (sans attendre) */
-            var fetchPromise = fetch(request).then(function(response) {
-                if (response && response.ok) {
-                    cache.put(request, response.clone());
-                    trimCache(PAGES_CACHE, MAX_PAGES);
-                }
-                return response;
-            }).catch(function() {
-                return caches.match(OFFLINE_URL);
-            });
-            /* Retourner le cache immédiatement si disponible, sinon attendre le réseau */
-            return cached || fetchPromise;
         });
     });
 }
@@ -318,7 +310,7 @@ self.addEventListener('push', function(event) {
        à la fois), boutons Répondre / Refuser, reste à l'écran.              */
     if (data.type === 'incoming_call') {
         options = {
-            body:             data.body || 'Appel entrant',
+            body:             data.body || '{{ sw_incoming|escapejs }}',
             icon:             data.icon || '/static/logo/vazimba_v2_icon.png',
             badge:            '/static/logo/vazimba_icon.png',
             // Sonnerie : 3 pulses longs puis pause, répétés par le navigateur
@@ -335,8 +327,8 @@ self.addEventListener('push', function(event) {
                 type:      'incoming_call',
             },
             actions: [
-                { action: 'accept',  title: 'Répondre' },
-                { action: 'decline', title: 'Refuser'  },
+                { action: 'accept',  title: '{{ sw_answer|escapejs }}' },
+                { action: 'decline', title: '{{ sw_decline|escapejs }}' },
             ],
         };
     } else {
@@ -349,8 +341,8 @@ self.addEventListener('push', function(event) {
             vibrate: [200, 100, 200],
             requireInteraction: true,
             actions: [
-                { action: 'open',    title: 'Ouvrir' },
-                { action: 'dismiss', title: 'Ignorer' },
+                { action: 'open',    title: '{{ sw_open|escapejs }}' },
+                { action: 'dismiss', title: '{{ sw_dismiss|escapejs }}' },
             ],
             tag:      'vazimba-' + (data.type || 'notif') + '-' + Date.now(),
             renotify: false,

@@ -10,13 +10,14 @@
 {% include 'resto/_style.html' %}
 <link rel="stylesheet" href="{% static 'css/pages/resto-order.css' %}">
 <div class="rs-wrap rs-wrap--lg">
-    <div class="rs-page-head rs-page-head--order">
-        <h1 class="rs-h1 rs-h1--sm"><i class="material-icons" aria-hidden="true">inventory_2</i> {% trans "Commande" %} {{ order.number }}</h1>
-        <span class="vz-chip vz-chip--static vz-chip--soft vz-chip--lg" id="rs-status-badge">{{ order.get_status_display }}</span>
+    <div class="vz-page-head">
+        <a class="vz-back" href="{% if actor == 'restaurant' %}{% url 'resto:vendor_orders' order.restaurant.slug %}{% elif actor == 'courier' %}{% url 'resto:courier_dashboard' %}{% else %}{% url 'resto:my_orders' %}{% endif %}" aria-label="{% trans 'Retour' %}"><i class="material-icons" aria-hidden="true">arrow_back</i></a>
+        <div class="vz-page-head__main"><h1 class="vz-page-title"><i class="material-icons" aria-hidden="true">inventory_2</i> {% trans "Commande" %} {{ order.number }}</h1></div>
+        <div class="vz-page-head__actions"><span class="vz-chip vz-chip--static vz-chip--soft vz-chip--lg" id="rs-status-badge">{{ order.get_status_display }}</span></div>
     </div>
 
     <!-- ── Progression ── -->
-    <div class="rs-card rs-card--pad">
+    <div class="vz-card rs-box rs-card--pad">
         <div class="rs-steps" id="rs-steps">
             {% for s in order.progress_steps %}
             <div class="rs-step {% if s.done %}done{% endif %} {% if s.current %}current{% endif %}"><div class="dot">{% if s.done %}<i class="material-icons" aria-hidden="true">check</i>{% endif %}</div>{{ s.label }}</div>
@@ -70,26 +71,27 @@
         {% endif %}
     </div>
 
-    <!-- ── Actions selon le rôle ── -->
+    <!-- ── Actions selon le rôle (zone rafraîchie sans recharger la page) ── -->
+    <div id="rs-actions-zone" data-rs-live>
     {% if transitions %}
-    <div class="rs-card rs-card--pad rs-card--mt">
+    <div class="vz-card rs-box rs-card--pad rs-card--mt">
         <p class="rs-card-title">
             {% if 'courier' in roles %}<i class="material-icons rs-ico" aria-hidden="true">delivery_dining</i> {% trans "Espace livreur" %}{% if 'restaurant' in roles %} · <i class="material-icons rs-ico" aria-hidden="true">storefront</i> {% trans "Espace restaurant" %}{% endif %}
             {% elif 'restaurant' in roles %}<i class="material-icons rs-ico" aria-hidden="true">storefront</i> {% trans "Espace restaurant" %}
             {% else %}{% trans "Votre commande" %}{% endif %}
         </p>
-        <div class="rs-actions">
+        <div class="vz-btn-row rs-order-actions">
             {% for code, label in transitions %}
             {% if code == 'cancelled' %}
-            <form method="post" action="{% url 'resto:order_cancel' order.number %}" data-vz-confirm="{% trans 'Annuler cette commande ?' %}" data-vz-danger>{% csrf_token %}
-                <button class="vz-btn vz-btn--danger" type="submit">{{ label }}</button></form>
+            <form method="post" action="{% url 'resto:order_cancel' order.number %}" data-vz-confirm="{% trans 'Annuler cette commande ?' %}" data-vz-confirm-label="{% trans 'Annuler la commande' %}" data-vz-danger>{% csrf_token %}
+                <button class="vz-btn vz-btn--danger" type="submit">{% include 'resto/_action_icon.html' with code=code %} {{ label }}</button></form>
             {% else %}
-            <form method="post" action="{% url 'resto:order_set_status' order.number %}" class="rs-inline-form"
-                  {% if code == 'delivered' %}data-vz-confirm="{% trans 'Confirmer : la commande a bien été remise ?' %}"{% endif %}>{% csrf_token %}
+            <form method="post" action="{% url 'resto:order_set_status' order.number %}" class="rs-inline-form rs-inline-form--wrap"
+                  {% if code == 'delivered' %}data-vz-confirm="{% trans 'Confirmer : la commande a bien été remise ?' %}"{% elif code == 'refused' %}data-vz-confirm="{% trans 'Refuser cette commande ?' %}" data-vz-confirm-label="{% trans 'Refuser' %}" data-vz-danger{% endif %}>{% csrf_token %}
                 <input type="hidden" name="status" value="{{ code }}">
-                {% if code == 'accepted' %}<input class="form-control rs-input-xs" name="estimated_minutes" type="number" min="5" max="240" value="{{ order.estimated_minutes|default:30 }}" title="{% trans 'Délai (min)' %}">{% endif %}
-                {% if code == 'refused' %}<input class="form-control rs-input-sm" name="note" placeholder="{% trans 'Motif' %}">{% endif %}
-                <button class="vz-btn {% if code == 'refused' %}vz-btn--danger{% elif code == 'delivered' or code == 'delivering' or code == 'accepted' %}vz-btn--primary{% else %}vz-btn--secondary{% endif %}" type="submit">{% if actor == 'customer' and code == 'delivered' %}<i class="material-icons" aria-hidden="true">check_circle</i> {% trans "J'ai bien reçu ma commande" %}{% else %}{{ label }}{% endif %}</button>
+                {% if code == 'accepted' %}<input class="form-control rs-input-xs" name="estimated_minutes" type="number" min="5" max="240" value="{{ order.estimated_minutes|default:30 }}" title="{% trans 'Délai (min)' %}" aria-label="{% trans 'Délai (min)' %}">{% endif %}
+                {% if code == 'refused' %}<input class="form-control rs-input-sm" name="note" placeholder="{% trans 'Motif' %}" aria-label="{% trans 'Motif' %}">{% endif %}
+                <button class="vz-btn {% if code == 'refused' %}vz-btn--danger-soft{% elif forloop.last %}vz-btn--primary{% else %}vz-btn--secondary{% endif %}" type="submit">{% include 'resto/_action_icon.html' with code=code %} {% if actor == 'customer' and code == 'delivered' %}{% trans "J'ai bien reçu ma commande" %}{% else %}{{ label }}{% endif %}</button>
             </form>
             {% endif %}
             {% endfor %}
@@ -99,9 +101,10 @@
         {% endif %}
     </div>
     {% endif %}
+    </div>
 
     <!-- ── Détail ── -->
-    <div class="rs-card rs-card--pad rs-card--mt">
+    <div class="vz-card rs-box rs-card--pad rs-card--mt">
         <p class="rs-card-title rs-card-title--sm">{% trans "Détail" %}</p>
         {% for l in items %}
         <div class="rs-order-line">
@@ -121,8 +124,9 @@
     </div>
 
     <!-- ── Avis croisés (après livraison) ── -->
+    <div id="rs-reviews-zone" data-rs-live>
     {% if review_targets or reviews %}
-    <div class="rs-card rs-card--pad rs-card--mt">
+    <div class="vz-card rs-box rs-card--pad rs-card--mt">
         <p class="rs-card-title rs-card-title--tight"><i class="material-icons rs-ico rs-star" aria-hidden="true">star</i> {% trans "Avis sur cette commande" %}</p>
         {% if customer_rating %}<p class="rs-muted rs-mb-s">{% trans "Fiabilité du client" %} : {% include 'resto/_rating.html' with r=customer_rating show_empty=1 %}</p>{% endif %}
         {% for target, label, existing in review_targets %}
@@ -167,15 +171,15 @@
         {% endif %}
     </div>
     {% endif %}
+    </div>
 
     <!-- ── Historique ── -->
-    <div class="rs-card rs-card--pad rs-card--mt">
+    <div class="vz-card rs-box rs-card--pad rs-card--mt">
         <p class="rs-card-title">{% trans "Historique" %}</p>
         <ul class="rs-timeline" id="rs-timeline">
             {% for e in order.events.all %}<li><strong>{{ e.get_status_display }}</strong> <span class="rs-muted">· {{ e.at|date:"H:i" }}{% if e.note %} · {{ e.note }}{% endif %}</span></li>{% endfor %}
         </ul>
     </div>
-    <p class="rs-back"><a href="{% if actor == 'restaurant' %}{% url 'resto:vendor_orders' order.restaurant.slug %}{% elif actor == 'courier' %}{% url 'resto:courier_dashboard' %}{% else %}{% url 'resto:my_orders' %}{% endif %}" class="rs-link"><i class="material-icons rs-ico" aria-hidden="true">arrow_back</i> {% trans "Retour" %}</a></p>
 </div>
 
 {{ order_state|json_script:"order-state" }}
@@ -196,9 +200,9 @@
     const pts = [];
     if(state.pickup.lat !== null){ mPick = L.marker([state.pickup.lat, state.pickup.lng], {icon:icon('storefront')}).addTo(map).bindTooltip(I18N.resto + ' · ' + state.pickup.name); pts.push([state.pickup.lat, state.pickup.lng]); }
     if(state.delivery.lat !== null){ mDrop = L.marker([state.delivery.lat, state.delivery.lng], {icon:icon('home')}).addTo(map).bindTooltip(I18N.you); pts.push([state.delivery.lat, state.delivery.lng]); }
-    const accent = getComputedStyle(document.documentElement).getPropertyValue('--accent').trim() || '#0f766e';
+    const accent = getComputedStyle(document.documentElement).getPropertyValue('--accent').trim() || 'currentColor';
     if(pts.length >= 2) line = L.polyline(pts, {color:accent, dashArray:'6 8', weight:3}).addTo(map);
-    if(pts.length) map.fitBounds(L.latLngBounds(pts).pad(.3)); else map.setView([-18.8792, 47.5079], 12);
+    if(pts.length) map.fitBounds(L.latLngBounds(pts).pad(.3)); else map.setView([1.5, 17.5], 3);   // aucune position connue : vue d'ensemble du continent
     window._rsIcon = icon;
   }
   function render(s){
@@ -227,13 +231,14 @@
   // ── Rafraîchissement : 5 s pendant la livraison, 12 s sinon, stop quand terminée ──
   let prevStatus = state.status;
   async function poll(){
-    if(state.is_final) return;
+    if(state.is_final && state.status === prevStatus) return;
     try{
       const r = await fetch(`/resto/commande/${NUMBER}/etat/`, {credentials:'same-origin', cache:'no-store'});
       if(r.ok){ const s = await r.json(); render(s);
-        if(s.status !== prevStatus){ prevStatus = s.status; if(navigator.vibrate) navigator.vibrate(120);
-          // Les boutons d'action dépendent du statut : on recharge la page pour les rafraîchir
-          window.location.reload(); return;
+        if(s.status !== prevStatus){
+          // Les boutons d'action et les avis dépendent du statut : on ne remplace que ces zones
+          // (et seulement si personne n'est en train d'écrire ; sinon on réessaie au tour suivant).
+          if(await rsRefresh()){ prevStatus = s.status; if(navigator.vibrate) navigator.vibrate(120); }
         } }
     }catch(e){}
     setTimeout(poll, ['picked_up','delivering'].includes(state.status) ? 5000 : 12000);

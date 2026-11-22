@@ -1,0 +1,212 @@
+{% load i18n %}
+{% comment %}
+Script commun à la création et à la modification d'une annonce : choix des photos
+(aperçus, quota), envoi, bascule des champs de location. Tout est dans une fonction
+anonyme : rien ne fuit dans la portée globale.
+{% endcomment %}
+<script>
+(function () {
+    var I18N = {
+        sending:  "{{ sending_label|escapejs }}",
+        network:  "{% trans 'Erreur réseau. Vérifiez votre connexion et réessayez.'|escapejs %}",
+        failed:   "{% trans 'Une erreur est survenue. Réessayez.'|escapejs %}",
+        primary:  "{% trans 'PRINCIPALE'|escapejs %}",
+        remove:   "{% trans 'Retirer cette photo'|escapejs %}",
+        delAsk:   "{% trans 'Supprimer cette photo ?'|escapejs %}",
+        del:      "{% trans 'Supprimer'|escapejs %}",
+        delFail:  "{% trans "La photo n'a pas pu être supprimée."|escapejs %}",
+        tooMany:  "{% trans 'Nombre maximum de photos atteint.'|escapejs %}"
+    };
+    var MAX_TOTAL = {{ max_images }};
+    var form        = document.getElementById('bazar-annonce-form');
+    var fileInput   = document.getElementById('id_images');
+    var previewGrid = document.getElementById('preview-grid');
+    var uploadZone  = document.getElementById('upload-zone');
+    var errorBox    = document.getElementById('bazar-form-errors');
+    var selectedFiles = [];
+
+    function existingCount() { return document.querySelectorAll('.existing-photo-item').length; }
+    function remaining()     { return Math.max(0, MAX_TOTAL - existingCount() - selectedFiles.length); }
+
+    /* ── L'input accepte-t-il qu'on lui affecte une liste de fichiers ? (non sur iOS Safari < 17) ── */
+    var supportsFileSync = (function () {
+        try {
+            var dt = new DataTransfer();
+            dt.items.add(new File([''], '_chk_', { type: 'text/plain' }));
+            var tmp = document.createElement('input');
+            tmp.type = 'file';
+            tmp.files = dt.files;
+            return tmp.files.length === 1;
+        } catch (e) { return false; }
+    })();
+
+    function syncInput() {
+        if (!supportsFileSync || !fileInput) return;   /* sinon : envoi par FormData au submit */
+        var dt = new DataTransfer();
+        selectedFiles.forEach(function (f) { dt.items.add(f); });
+        fileInput.files = dt.files;
+    }
+
+    function renderPreviews() {
+        if (!previewGrid) return;
+        previewGrid.innerHTML = '';
+        var noExisting = existingCount() === 0;
+        selectedFiles.forEach(function (file, i) {
+            var div = document.createElement('div');
+            div.className = 'bazar-preview-item';
+            var img = document.createElement('img');
+            img.alt = '';
+            img.src = URL.createObjectURL(file);
+            img.onload = function () { URL.revokeObjectURL(img.src); };
+            div.appendChild(img);
+            if (i === 0 && noExisting) {
+                var badge = document.createElement('span');
+                badge.className = 'bazar-preview-badge';
+                badge.textContent = I18N.primary;
+                div.appendChild(badge);
+            }
+            var btn = document.createElement('button');
+            btn.type = 'button';
+            btn.className = 'vz-icon-btn vz-icon-btn--over vz-tap bazar-photo-x';
+            btn.setAttribute('aria-label', I18N.remove);
+            btn.title = I18N.remove;
+            btn.innerHTML = '<i class="material-icons" aria-hidden="true">close</i>';
+            btn.addEventListener('click', function () {
+                selectedFiles.splice(i, 1);
+                renderPreviews(); syncInput();
+            });
+            div.appendChild(btn);
+            previewGrid.appendChild(div);
+        });
+        if (uploadZone) uploadZone.hidden = remaining() <= 0;
+    }
+
+    function addFiles(files) {
+        var refused = false;
+        files.forEach(function (file) {
+            if (remaining() <= 0) { refused = true; return; }
+            selectedFiles.push(file);
+        });
+        if (refused) vzToast(I18N.tooMany, {type: 'warning'});
+        renderPreviews(); syncInput();
+    }
+    function processAndAdd(files) {
+        if (window.ZootMediaConverter) {
+            ZootMediaConverter.processFiles(files)
+                .then(function (converted) { addFiles(converted); })
+                .catch(function () { addFiles(files); });
+        } else { addFiles(files); }
+    }
+
+    if (fileInput) {
+        fileInput.addEventListener('change', function () {
+            var captured = Array.prototype.slice.call(this.files);
+            try { this.value = ''; } catch (e) {}   /* permet de resélectionner les mêmes fichiers */
+            processAndAdd(captured);
+        });
+    }
+    if (uploadZone) {
+        uploadZone.addEventListener('dragover', function (e) { e.preventDefault(); uploadZone.classList.add('drag-over'); });
+        uploadZone.addEventListener('dragleave', function () { uploadZone.classList.remove('drag-over'); });
+        uploadZone.addEventListener('drop', function (e) {
+            e.preventDefault();
+            uploadZone.classList.remove('drag-over');
+            processAndAdd(Array.prototype.slice.call(e.dataTransfer.files).filter(function (f) {
+                return f.type.indexOf('image/') === 0 || (window.ZootMediaConverter && ZootMediaConverter.isHeic(f));
+            }));
+        });
+        uploadZone.hidden = remaining() <= 0;
+    }
+
+    /* ── Suppression d'une photo déjà enregistrée (page de modification) ── */
+    document.addEventListener('click', function (e) {
+        var btn = e.target.closest('[data-delete-photo]');
+        if (!btn) return;
+        vzConfirm({ text: I18N.delAsk, danger: true, confirmText: I18N.del }).then(function (ok) {
+            if (!ok) return;
+            btn.disabled = true;
+            fetch(btn.dataset.deletePhoto, {
+                method: 'POST', credentials: 'same-origin',
+                headers: { 'X-CSRFToken': form.querySelector('[name=csrfmiddlewaretoken]').value }
+            })
+            .then(function (r) { if (!r.ok) throw new Error(r.status); return r.json(); })
+            .then(function (data) {
+                if (!data.success) throw new Error('refused');
+                var item = btn.closest('.existing-photo-item');
+                var wasPrimary = !!item.querySelector('.existing-photo-primary');
+                item.remove();
+                /* La photo principale passe à la suivante (même règle que le serveur) */
+                var first = document.querySelector('.existing-photo-item');
+                if (wasPrimary && first && !first.querySelector('.existing-photo-primary')) {
+                    var badge = document.createElement('span');
+                    badge.className = 'existing-photo-primary';
+                    badge.textContent = I18N.primary;
+                    first.appendChild(badge);
+                }
+                var none = document.getElementById('bazar-no-photos');
+                if (none) none.hidden = existingCount() > 0;
+                renderPreviews();
+            })
+            .catch(function () { btn.disabled = false; vzToast(I18N.delFail, {type: 'error'}); });
+        });
+    });
+
+    /* ── Envoi ───────────────────────────────────────────────────────────────
+       Si l'input a pu recevoir les fichiers choisis, l'envoi est natif. Sinon
+       (iOS ancien) on envoie par fetch + FormData ; en cas d'erreur de
+       validation on affiche le récapitulatif renvoyé par le serveur SANS
+       remplacer la page : la saisie et les photos choisies sont conservées. */
+    if (form) {
+        form.addEventListener('submit', function (e) {
+            if (selectedFiles.length === 0 || supportsFileSync) return;
+            e.preventDefault();
+            var btn  = form.querySelector('button[type="submit"]');
+            var orig = btn ? btn.innerHTML : '';
+            function restore() {
+                if (btn) { btn.disabled = false; btn.innerHTML = orig; }
+                if (window.vzReleaseForm) window.vzReleaseForm(form);
+            }
+            if (btn) { btn.disabled = true; btn.textContent = I18N.sending; }
+
+            var fd = new FormData(form);
+            fd.delete('images');
+            selectedFiles.forEach(function (f) { fd.append('images', f); });
+
+            fetch(form.action || window.location.pathname, { method: 'POST', body: fd, credentials: 'same-origin' })
+            .then(function (r) {
+                if (r.redirected) { window.location.href = r.url; return; }
+                if (!r.ok) { restore(); vzToast(I18N.failed, {type: 'error'}); return; }
+                return r.text().then(function (html) {
+                    restore();
+                    var doc = new DOMParser().parseFromString(html, 'text/html');
+                    var fresh = doc.getElementById('bazar-form-errors');
+                    if (fresh && errorBox) {
+                        errorBox.innerHTML = fresh.innerHTML;
+                        errorBox.hidden = false;
+                        errorBox.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                    } else {
+                        vzToast(I18N.failed, {type: 'error'});
+                    }
+                });
+            })
+            .catch(function () { restore(); vzToast(I18N.network, {type: 'error'}); });
+        });
+    }
+
+    /* ── Champs de location : visibles seulement pour « À louer » ── */
+    var panel = document.getElementById('location-fields');
+    function updateType() {
+        var checked = document.querySelector('input[name="listing_type"]:checked');
+        var isLoc = !!checked && checked.value === 'location';
+        if (panel) panel.hidden = !isLoc;
+        Array.prototype.forEach.call(document.querySelectorAll('.type-radio-btn'), function (lbl) {
+            var radio = lbl.querySelector('input[type=radio]');
+            lbl.classList.toggle('selected', !!radio && radio.checked);
+        });
+    }
+    Array.prototype.forEach.call(document.querySelectorAll('input[name="listing_type"]'), function (r) {
+        r.addEventListener('change', updateType);
+    });
+    updateType();
+})();
+</script>

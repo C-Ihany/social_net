@@ -1,4 +1,5 @@
 from django import forms
+from django.utils.translation import gettext_lazy as _
 
 from .models import Group
 from regions import REGION_CHOICES
@@ -13,14 +14,14 @@ class GroupForm(forms.ModelForm):
         widgets = {
             'name': forms.TextInput(attrs={
                 'class': 'gp-input',
-                'placeholder': 'Nom du groupe',
+                'placeholder': _('Nom du groupe'),
                 'maxlength': 100,
                 'autofocus': True,
             }),
             'description': forms.Textarea(attrs={
                 'class': 'gp-input',
                 'rows': 4,
-                'placeholder': 'Décrivez votre groupe…',
+                'placeholder': _('Décrivez votre groupe…'),
                 'maxlength': 500,
             }),
             'category': forms.Select(attrs={'class': 'gp-input'}),
@@ -29,15 +30,15 @@ class GroupForm(forms.ModelForm):
             'dina': forms.Textarea(attrs={
                 'class': 'gp-input',
                 'rows': 6,
-                'placeholder': 'Rédigez le Dina du groupe — règles, engagements et traditions de la communauté…',
+                'placeholder': _('Rédigez le Dina du groupe — règles, engagements et traditions de la communauté…'),
                 'maxlength': 3000,
             }),
         }
         labels = {
             'name':     'Nom',
-            'category': 'Catégorie',
-            'region':   'Région',
-            'description': 'Description',
+            'category': _('Catégorie'),
+            'region':   'Pays ou région',
+            'description': _('Description'),
             'cover':    'Image de couverture',
             'privacy':  'Confidentialité',
             'dina':     'Dina (charte communautaire)',
@@ -46,5 +47,5 @@ class GroupForm(forms.ModelForm):
     def clean_name(self):
         name = self.cleaned_data['name'].strip()
         if len(name) < 3:
-            raise forms.ValidationError("Le nom doit contenir au moins 3 caractères.")
+            raise forms.ValidationError(_("Le nom doit contenir au moins 3 caractères."))
         return name

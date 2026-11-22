@@ -1,6 +1,8 @@
 import logging
 from django.shortcuts import render, redirect, get_object_or_404
 from django.utils import timezone
+from django.utils.html import escape
+from django.utils.translation import gettext as _
 from django.http import HttpResponse
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import LoginRequiredMixin
@@ -28,7 +30,7 @@ from .models import Post, Repost, Continent, Country, Follow, Comment, Reaction,
 from friend.models import FriendList
 from personal.models import HeroSettings
 from .media_utils import store_post_media
-from .visibility import get_visible_post_or_404, visible_posts
+from .visibility import get_visible_post_or_404, visible_posts, unsealed
 from .products import attach_products, apply_product_ref, user_products
 
 # Import différé pour éviter les imports circulaires
@@ -66,9 +68,13 @@ def get_trending_hashtags(limit=10, days=7, hours=None, with_preview=False):
 
     # Récupérer les posts récents avec leur id pour les previews
     # Post utilise post_date (DateField), pas created_at
-    posts_qs = Post.objects.filter(
-        post_date__gte=cutoff.date()
-    ).values_list('id', 'body', 'title', 'author__username', 'post_date')
+    # Uniquement ce que tout le monde peut voir : ni brouillon, ni post de
+    # groupe privé, ni capsule Vintana encore scellée (l'extrait affiché sur
+    # la page Tendances en divulguait le contenu).
+    from django.contrib.auth.models import AnonymousUser
+    posts_qs = unsealed(visible_posts(
+        Post.objects.filter(post_date__gte=cutoff.date()), AnonymousUser()
+    )).values_list('id', 'body', 'title', 'author__username', 'post_date')
 
     counts  = {}   # tag → count
     post_by_tag = {}   # tag → (id, preview_text, author, date) du post le plus récent
@@ -117,7 +123,7 @@ def get_trending_hashtags(limit=10, days=7, hours=None, with_preview=False):
 @login_required(login_url='login')
 def tendances_view(request):
     """Page /tendances/ — top hashtags sur 24h / 7j / 30j."""
-    valid_hours = {24: '24h', 168: '7 jours', 720: '30 jours'}
+    valid_hours = {24: _('24 h'), 168: _('7 jours'), 720: _('30 jours')}
     try:
         hours = int(request.GET.get('h', 24))
         if hours not in valid_hours:
@@ -363,6 +369,7 @@ def _decorate_feed_posts(posts, user):
         post.total_reactions = sum(post.reaction_counts.values())
         post.is_bookmarked   = post.id in bookmarked_ids
     _attach_media(posts, post_ids)
+    _attach_reposts(posts, post_ids, user)
     return posts
 
 
@@ -391,7 +398,7 @@ def post_feed_view(request):
             .distinct()[:6]
         )
 
-    from regions import REGION_LABELS
+    from regions import REGION_LABELS, REGION_SHORT
     from video.models import LiveRoom
     active_lives = LiveRoom.objects.visible_to(user).filter(
         host__in=list(friends) + [user],
@@ -418,7 +425,7 @@ def post_feed_view(request):
         # onglets
         "active_tab":         tab,
         "user_region":        user_region,
-        "user_region_label":  REGION_LABELS.get(user_region, ''),
+        "user_region_label":  REGION_SHORT.get(user_region, ''),
         # lives actifs des amis/soi
         "active_lives":       active_lives,
         # carrousel « Suggestions pour vous »
@@ -529,9 +536,9 @@ class AddPostView(LoginRequiredMixin, CreateView):
             except Exception as e:
                 _logger.exception("PostMedia FAILED (fichier=%s): %s", f.name, e)
         if saved:
-            messages.success(self.request, f"{saved} média(s) sauvegardé(s).")
+            pass
         elif files:
-            messages.warning(self.request, "Aucun fichier sauvegardé — voir les logs.")
+            messages.warning(self.request, _("Les fichiers joints n'ont pas pu être enregistrés."))
 
         # Notifier les amis seulement si le post est publié immédiatement
         if post.status == Post.STATUS_PUBLISHED:
@@ -599,6 +606,9 @@ class AddPostView(LoginRequiredMixin, CreateView):
                 'ok': True,
                 'html': card_html,
                 'post_id': post.id,
+                # La page « Créer un post » attend l'adresse de retour : sans elle,
+                # son script affichait « Erreur 200 » alors que le post était créé.
+                'redirect': redirect_url,
                 'received': len(files),
                 'saved': saved,
             })
@@ -645,6 +655,9 @@ class UpdatePostView(LoginRequiredMixin, UpdateView):
         return ctx
 
     def form_valid(self, form):
+        # Un brouillon édité peut être publié depuis le formulaire (action=publish).
+        if self.request.POST.get('action') == 'publish' and form.instance.status == Post.STATUS_DRAFT:
+            form.instance.status = Post.STATUS_PUBLISHED
         response = super().form_valid(form)
         post = self.object
         apply_product_ref(post, self.request.user, self.request.POST.get('product'), clear_if_empty=True)
@@ -673,7 +686,40 @@ class UpdatePostView(LoginRequiredMixin, UpdateView):
         return response
 
     def get_success_url(self):
-        return reverse_lazy("post:post-view")
+        if self.object.status in (Post.STATUS_DRAFT, Post.STATUS_SCHEDULED):
+            return reverse("post:mes-brouillons")
+        return reverse("post:post-detail", args=[self.object.pk])
+
+
+@login_required(login_url="login")
+@require_POST
+def publish_draft(request, pk):
+    """Publie un brouillon (ou un post programmé) de l'utilisateur, tel quel.
+
+    « Publier maintenant » postait auparavant sur la vue d'édition, qui
+    ignorait l'action et vidait le corps du brouillon (formulaire sans champs).
+    Ici on ne touche qu'au statut.
+    """
+    post = get_object_or_404(Post, pk=pk, author=request.user)
+    if post.status in (Post.STATUS_DRAFT, Post.STATUS_SCHEDULED):
+        post.status = Post.STATUS_PUBLISHED
+        post.scheduled_at = None
+        post.save(update_fields=['status', 'scheduled_at'])
+        messages.success(request, _("Votre post est publié."))
+    return redirect('post:post-detail', post_id=post.pk)
+
+
+@login_required(login_url="login")
+@require_POST
+def delete_post_now(request, pk):
+    """Supprime un post de l'utilisateur (POST, après confirmation côté client)."""
+    post = get_object_or_404(Post, pk=pk, author=request.user)
+    was_draft = post.status in (Post.STATUS_DRAFT, Post.STATUS_SCHEDULED)
+    post.delete()
+    if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+        return JsonResponse({'ok': True})
+    messages.success(request, _("Post supprimé."))
+    return redirect('post:mes-brouillons' if was_draft else 'post:post-view')
 
 
 # ──────────────────────────────────────────────
@@ -1107,19 +1153,19 @@ def hashtag_view(request, tag):
     """Affiche les posts contenant un hashtag donné."""
     from django.db.models import Q, Count
     tag_clean = tag.lstrip('#').lower()
-    posts = visible_posts(
+    posts = unsealed(visible_posts(
         Post.objects.filter(
             Q(body__icontains='#' + tag_clean) | Q(title__icontains='#' + tag_clean)
-        ).select_related('author', 'group').annotate(n_comments=Count('comments')).order_by('-id'),
+        ).select_related('author', 'group').order_by('-id'),
         request.user,
-    )
+    ))
 
     paginator = Paginator(posts, 10)
     page_number = request.GET.get('page')
     posts_page = paginator.get_page(page_number)
 
-    post_ids = [p.id for p in posts_page]
-    _attach_media(list(posts_page), post_ids)
+    # Même carte que le fil (réactions, commentaires, favoris, menu ⋯)
+    _decorate_feed_posts(posts_page, request.user)
 
     return render(request, 'post/hashtag.html', {
         'tag':   '#' + tag_clean,
@@ -1136,9 +1182,13 @@ def mention_autocomplete(request):
     q = request.GET.get('q', '').strip()
     if not q:
         return JsonResponse({'users': []})
-    users = User.objects.filter(username__istartswith=q).values(
-        'id', 'username'
-    )[:8]
+    # Mêmes exclusions que la recherche : ni comptes inactifs, ni « Pola
+    # seulement », ni comptes bloqués (dans un sens ou dans l'autre).
+    from account.models import UserBlock
+    users = (User.objects.filter(username__istartswith=q, is_active=True)
+             .exclude(pola_mode=Account.POLA_ONLY)
+             .exclude(id__in=UserBlock.hidden_user_ids(request.user))
+             .values('id', 'username')[:8])
     result = [
         {'id': u['id'], 'username': u['username']}
         for u in users
@@ -1181,7 +1231,7 @@ def repost_post(request):
             post_ct  = ContentType.objects.get_for_model(Post)
             post_url = request.build_absolute_uri(reverse('post:post-detail', args=[post.id]))
 
-            notif, _ = Notification.objects.get_or_create(
+            notif, _created = Notification.objects.get_or_create(
                 target=post.author,
                 from_user=request.user,
                 content_type=post_ct,
@@ -1214,47 +1264,35 @@ def post_detail(request, post_id):
     from django.db.models import Count
     from django.urls import reverse
 
-    post = get_visible_post_or_404(request.user, post_id, Post.objects.select_related('author'))
+    post = get_visible_post_or_404(request.user, post_id, Post.objects.select_related('author', 'group'))
 
-    # Reactions
-    reactions_qs = (
-        Reaction.objects.filter(post=post)
-        .values('reaction_type')
-        .annotate(c=Count('id'))
-    )
-    reaction_counts = {r['reaction_type']: r['c'] for r in reactions_qs}
-    user_reaction = None
-    if request.user.is_authenticated:
-        try:
-            user_reaction = Reaction.objects.get(post=post, user=request.user).reaction_type
-        except Reaction.DoesNotExist:
-            pass
+    # Même décoration que le fil : la page réutilise la carte commune
+    # (réactions, favoris, republications, médias, état « capsule scellée »).
+    _decorate_feed_posts([post], request.user)
 
-    post.reaction_counts = reaction_counts
-    post.total_reactions = sum(reaction_counts.values())
-    post.user_reaction = user_reaction
-
-    # Tous les commentaires (threaded)
-    all_comments = list(
-        Comment.objects.filter(post=post).select_related('author').order_by('created_at')
-    )
-    top_comments = [c for c in all_comments if c.parent_id is None]
-    replies_map = {}
-    for c in all_comments:
-        if c.parent_id:
-            replies_map.setdefault(c.parent_id, []).append(c)
-    for c in top_comments:
-        c.reply_list = replies_map.get(c.id, [])
-
-    post.page_comments = top_comments
-    post.total_comments = len(all_comments)
-
-    # Médias
-    _attach_media([post], [post.id])
+    # Ici on montre tous les commentaires (le fil n'en charge qu'une fenêtre).
+    if not post.is_locked:
+        from account.models import UserBlock
+        hidden = UserBlock.hidden_user_ids(request.user)
+        all_comments = [
+            c for c in Comment.objects.filter(post=post).select_related('author').order_by('created_at', 'id')
+            if c.author_id not in hidden
+        ]
+        top_comments = [c for c in all_comments if c.parent_id is None]
+        replies_map = {}
+        for c in all_comments:
+            if c.parent_id:
+                replies_map.setdefault(c.parent_id, []).append(c)
+        for c in top_comments:
+            c.reply_list = replies_map.get(c.id, [])
+        post.page_comments = top_comments
+        post.total_comments = len(all_comments)
+    else:
+        post.page_comments = []
 
     return render(request, 'post/post_detail.html', {
         'post': post,
-        'comment_url': reverse('post:add-comment', args=[post.id]),
+        'posts_of_the_page': [post],
     })
 
 
@@ -1267,14 +1305,17 @@ def kabary_create(request):
         # La page utilise TOUJOURS fetch() — on retourne toujours du JSON pour les POST.
         # Ne pas dépendre de X-Requested-With (peut être supprimé par Cloudflare).
 
-        fisaorana   = request.POST.get('fisaorana', '').strip()
-        fanafahana  = request.POST.get('fanafahana', '').strip()
-        vato        = request.POST.get('vato', '').strip()
-        ohabolana   = request.POST.get('ohabolana', '').strip()
-        famaranana  = request.POST.get('famaranana', '').strip()
+        raw_vato       = request.POST.get('vato', '').strip()
+        raw_fanafahana = request.POST.get('fanafahana', '').strip()
+        # La saisie est du texte brut : on l'échappe avant de l'assembler en HTML.
+        fisaorana   = escape(request.POST.get('fisaorana', '').strip())
+        fanafahana  = escape(raw_fanafahana)
+        vato        = escape(raw_vato)
+        ohabolana   = escape(request.POST.get('ohabolana', '').strip())
+        famaranana  = escape(request.POST.get('famaranana', '').strip())
 
         if not vato and not fanafahana:
-            return JsonResponse({'ok': False, 'error': 'Le contenu principal (Vato misaina) est obligatoire.'})
+            return JsonResponse({'ok': False, 'error': _('Le contenu principal (Vato misaina) est obligatoire.')})
 
         # Assembler le body structuré en HTML
         parts = []
@@ -1305,7 +1346,7 @@ def kabary_create(request):
             )
 
         body = '<div class="kbr-body">' + ''.join(parts) + '</div>'
-        title_text = request.POST.get('title', '').strip() or (vato or fanafahana)[:80]
+        title_text = request.POST.get('title', '').strip() or (raw_vato or raw_fanafahana)[:80]
 
         try:
             post = Post.objects.create(
@@ -1319,7 +1360,7 @@ def kabary_create(request):
             from django.conf import settings as _s
             err = (f'Erreur technique : {type(e).__name__}: {e}'
                    if _s.DEBUG
-                   else 'Erreur lors de la création du Kabary. Réessaie dans quelques instants.')
+                   else _('Erreur lors de la création du Kabary. Réessayez dans quelques instants.'))
             return JsonResponse({'ok': False, 'error': err})
 
         return JsonResponse({'ok': True, 'redirect': post.get_absolute_url()})
@@ -1327,7 +1368,7 @@ def kabary_create(request):
     return render(request, 'post/kabary_create.html', {})
 
 
-@login_required
+@login_required(login_url='login')
 def vintana_create(request):
     """Crée une Capsule Vintana (time-capsule post)."""
     from django.utils import timezone
@@ -1341,14 +1382,14 @@ def vintana_create(request):
 
         # Validation
         if not message:
-            err = 'Le message de la capsule est obligatoire.'
+            err = _('Le message de la capsule est obligatoire.')
             if is_ajax:
                 return JsonResponse({'ok': False, 'error': err})
             messages.error(request, err)
             return redirect('post:vintana-create')
 
         if not reveal_s:
-            err = 'La date de révélation est obligatoire.'
+            err = _('La date de révélation est obligatoire.')
             if is_ajax:
                 return JsonResponse({'ok': False, 'error': err})
             messages.error(request, err)
@@ -1361,14 +1402,14 @@ def vintana_create(request):
             tz = timezone.get_current_timezone()
             reveal_dt = timezone.make_aware(naive_dt, tz)
         except ValueError:
-            err = 'Format de date invalide.'
+            err = _('Format de date invalide.')
             if is_ajax:
                 return JsonResponse({'ok': False, 'error': err})
             messages.error(request, err)
             return redirect('post:vintana-create')
 
         if reveal_dt <= timezone.now():
-            err = 'La date de révélation doit être dans le futur.'
+            err = _('La date de révélation doit être dans le futur.')
             if is_ajax:
                 return JsonResponse({'ok': False, 'error': err})
             messages.error(request, err)
@@ -1377,10 +1418,12 @@ def vintana_create(request):
         # Corps HTML de la capsule
         body = (
             f'<div class="vintana-body">'
-            f'<p class="vintana-message">{message}</p>'
+            f'<p class="vintana-message">{escape(message)}</p>'
             f'</div>'
         )
-        title_text = title or message[:80]
+        # Sans titre, on ne recopie pas le début du message : le titre reste
+        # visible sur la carte scellée, en recherche et dans les favoris.
+        title_text = title or _('Capsule Vintana')
 
         try:
             post = Post.objects.create(
@@ -1392,7 +1435,7 @@ def vintana_create(request):
             )
         except Exception as e:
             logging.getLogger(__name__).exception("Vintana create failed: %s", e)
-            err = 'Erreur lors de la création de la capsule.'
+            err = _('Erreur lors de la création de la capsule.')
             if is_ajax:
                 return JsonResponse({'ok': False, 'error': err})
             messages.error(request, err)
@@ -1400,7 +1443,7 @@ def vintana_create(request):
 
         if is_ajax:
             return JsonResponse({'ok': True, 'redirect': post.get_absolute_url()})
-        messages.success(request, 'Capsule Vintana créée ! Elle sera révélée le ' + reveal_dt.strftime('%d/%m/%Y à %H:%M') + '.')
+        messages.success(request, _('Capsule Vintana créée ! Elle sera révélée le %(date)s.') % {'date': reveal_dt.strftime('%d/%m/%Y %H:%M')})
         return redirect('post:post-detail', post_id=post.id)
 
     now_plus_1day = __import__('datetime').datetime.now() + __import__('datetime').timedelta(days=1)
@@ -1494,12 +1537,12 @@ def global_search_view(request):
 
         # Posts — visible_posts() écarte brouillons, posts programmés non
         # échus et posts de groupes privés dont l'utilisateur n'est pas membre.
-        posts_qs = visible_posts(
+        posts_qs = unsealed(visible_posts(
             Post.objects.filter(
                 Q(title__icontains=query) | Q(body__icontains=query)
             ).select_related('author', 'group'),
             request.user,
-        )[:20]
+        ))[:20]
 
         # Hashtags
         hashtags_qs = Hashtag.objects.filter(tag__icontains=query)[:10]
@@ -1545,6 +1588,8 @@ def hide_post(request):
     """Masque un post du fil pour l'utilisateur courant (toggle). POST {post_id}."""
     from .models import PostHide
     post_id = request.POST.get('post_id')
+    if not str(post_id or '').isdigit():
+        return JsonResponse({'ok': False, 'error': 'bad_id'}, status=400)
     if request.POST.get('undo') == '1':
         # Le post masqué n'est plus « visible » : on ne passe pas par visible_posts()
         PostHide.objects.filter(user=request.user, post_id=post_id).delete()
@@ -1588,6 +1633,8 @@ def mes_favoris_posts(request):
     return render(request, 'post/mes_favoris_posts.html', {'bookmarks': bookmarks})
 
 
+# Conservé comme point d'API (couvert par ZOOT/tests_security.py) ; la modale
+# « qui a réagi » qui l'appelait a été retirée du fil.
 @login_required(login_url="login")
 def reactions_who(request, post_id):
     """GET /post/<id>/reactions/ — liste des utilisateurs qui ont réagi."""

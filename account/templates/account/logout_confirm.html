@@ -1,0 +1,25 @@
+{% extends 'base.html' %}
+{% load static i18n %}
+{% block page_title %}{% trans "Se déconnecter" %} — Vazimba{% endblock %}
+{% block content %}
+<link rel="stylesheet" href="{% static 'css/pages/account-delete_account.css' %}">
+{# Page affichée quand /logout/ est ouvert en GET (ancien lien, application) : la déconnexion elle-même est un POST. #}
+<div class="del-page">
+    <div class="del-card">
+        <div class="vz-dialog-head">
+            <span class="material-icons del-icon--neutral" aria-hidden="true">logout</span>
+            <h1 class="vz-dialog-title">{% trans "Se déconnecter" %}</h1>
+        </div>
+        <p class="vz-dialog-text">{% trans "Voulez-vous vous déconnecter de Vazimba sur cet appareil ?" %}</p>
+        <form method="post" action="{% url 'logout' %}" data-vz-logout>
+            {% csrf_token %}
+            <div class="vz-actions">
+                <a class="vz-btn vz-btn--secondary" href="{% url 'post:post-view' %}">{% trans "Annuler" %}</a>
+                <button type="submit" class="vz-btn vz-btn--primary">
+                    <span class="material-icons" aria-hidden="true">logout</span>{% trans "Se déconnecter" %}
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

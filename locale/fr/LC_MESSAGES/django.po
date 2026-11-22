@@ -665,8 +665,8 @@ msgid "Create the first post"
 msgstr "Créer le premier post"
 
 # ── Footer ──
-msgid "Social network · Madagascar · 2025"
-msgstr "Réseau social · Madagascar · 2025"
+msgid "Social network · Africa"
+msgstr "Réseau social · Afrique"
 
 msgid "News feed"
 msgstr "Fil d'actualités"
@@ -680,8 +680,8 @@ msgstr "© 2025"
 msgid "All rights reserved."
 msgstr "Tous droits réservés."
 
-msgid "Built with ❤️ for the Malagasy community."
-msgstr "Construit avec ❤️ pour la communauté malgache."
+msgid "Built with ❤️ for the African community."
+msgstr "Construit avec ❤️ pour la communauté africaine."
 
 # ── Groupes ──
 msgid "Groups"
@@ -845,15 +845,15 @@ msgstr "Erreur serveur. Veuillez réessayer."
 msgid "What is a Dina?"
 msgstr "Qu'est-ce qu'un Dina ?"
 
-msgid "In Malagasy culture, the Dina is a community agreement — a set of rules and commitments freely accepted by all members of a community to live together with respect and solidarity (Fihavanana)."
-msgstr "Dans la culture malgache, le Dina est un accord communautaire — un ensemble de règles et d'engagements librement acceptés par tous les membres d'une communauté pour vivre ensemble dans le respect et la solidarité (Fihavanana)."
+msgid "The Dina is a community agreement — a set of rules and commitments freely accepted by all members of a community to live together with respect and solidarity."
+msgstr "Le Dina est un accord communautaire — un ensemble de règles et d'engagements librement acceptés par tous les membres d'une communauté pour vivre ensemble dans le respect et la solidarité."
 
 # ── Kabary numérique ──
 msgid "Kabary numérique"
 msgstr "Kabary numérique"
 
-msgid "The Kabary is a traditional Malagasy oral art form — a structured speech that opens with a salutation, develops ideas with imagery and proverbs, and closes with a blessing. Share your thoughts in this timeless format."
-msgstr "Le Kabary est un art oratoire traditionnel malgache — un discours structuré qui s'ouvre par une salutation, développe des idées avec des images et des proverbes, et se conclut par une bénédiction. Partagez vos pensées dans ce format intemporel."
+msgid "The Kabary is a traditional African oral art form — a structured speech that opens with a salutation, develops ideas with imagery and proverbs, and closes with a blessing. Share your thoughts in this timeless format."
+msgstr "Le Kabary est un art oratoire traditionnel africain — un discours structuré qui s'ouvre par une salutation, développe des idées avec des images et des proverbes, et se conclut par une bénédiction. Partagez vos pensées dans ce format intemporel."
 
 msgid "Title (optional)"
 msgstr "Titre (optionnel)"
@@ -885,8 +885,8 @@ msgstr "Le cœur du Kabary — votre message principal, vos idées et réflexion
 msgid "Develop your thoughts, ideas, stories…"
 msgstr "Développez vos pensées, idées, récits…"
 
-msgid "A Malagasy proverb to illuminate your message."
-msgstr "Un proverbe malgache pour éclairer votre message."
+msgid "A proverb to illuminate your message."
+msgstr "Un proverbe pour éclairer votre message."
 
 msgid "Ny teny mamy, toy ny tantely… (Sweet words, like honey…)"
 msgstr "Ny teny mamy, toy ny tantely… (Les mots doux, comme le miel…)"
@@ -1257,3 +1257,9 @@ msgstr "Pays"
 
 msgid "Choose (or write +country code below)"
 msgstr "Choisir (ou écrire le numéro avec +indicatif)"
+
+msgid "My groups"
+msgstr "Mes groupes"
+
+msgid "Add a story"
+msgstr "Ajouter une story"

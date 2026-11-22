@@ -9,9 +9,9 @@
     <span class="material-icons lr-ended-icon">live_tv</span>
     <div class="lr-ended-title">{% trans "Le live est terminé" %}</div>
     <div class="lr-ended-sub">{% trans "L'hôte a mis fin à la diffusion." %}</div>
-    <button class="lr-ended-btn" onclick="window.location.href='{% url 'video:live-list' %}'" type="button">
+    <a class="vz-btn vz-btn--primary lr-ended-btn" href="{% url 'video:live-list' %}">
         {% trans "Voir d'autres lives" %}
-    </button>
+    </a>
 </div>
 
 <!-- ── Page ── -->
@@ -33,12 +33,12 @@
                 <span id="lr-viewer-count">{{ room.viewer_count }}</span>
             </span>
             <div class="lr-reactions-bar" id="lr-reactions-bar">
-                <button class="lr-react-btn" onclick="sendReaction('❤️')" type="button">❤️</button>
-                <button class="lr-react-btn" onclick="sendReaction('🔥')" type="button">🔥</button>
-                <button class="lr-react-btn" onclick="sendReaction('😂')" type="button">😂</button>
-                <button class="lr-react-btn" onclick="sendReaction('👏')" type="button">👏</button>
-                <button class="lr-react-btn" onclick="sendReaction('😮')" type="button">😮</button>
-                <button class="lr-react-btn" onclick="sendReaction('🎉')" type="button">🎉</button>
+                <button class="lr-react-btn" onclick="sendReaction('❤️')" type="button" aria-label="{% trans "J'adore" %}">❤️</button>
+                <button class="lr-react-btn" onclick="sendReaction('🔥')" type="button" aria-label="{% trans "Feu" %}">🔥</button>
+                <button class="lr-react-btn" onclick="sendReaction('😂')" type="button" aria-label="{% trans "Haha" %}">😂</button>
+                <button class="lr-react-btn" onclick="sendReaction('👏')" type="button" aria-label="{% trans "Bravo" %}">👏</button>
+                <button class="lr-react-btn" onclick="sendReaction('😮')" type="button" aria-label="{% trans "Wow" %}">😮</button>
+                <button class="lr-react-btn" onclick="sendReaction('🎉')" type="button" aria-label="{% trans "Fête" %}">🎉</button>
             </div>
             <a href="{% url 'video:live-list' %}" class="lr-leave-link">
                 <span class="material-icons" aria-hidden="true">arrow_back</span>

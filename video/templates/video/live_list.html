@@ -15,62 +15,18 @@
         </div>
         <p class="live-create-sub">{% trans "Partagez votre écran pour diffuser le match en direct à vos amis sur Vazimba." %}</p>
 
-        <div class="live-form" id="live-create-form">
+        {# Formulaire classique : la vue redirige vers la salle (plus de fetch ni de jeton lu en JS) #}
+        <form class="live-form" id="live-create-form" method="post" action="{% url 'video:live-create' %}">
             {% csrf_token %}
-            <input type="text" id="live-title-input" class="live-title-input"
-                   placeholder="{% trans 'Ex : 🇲🇬 Madagascar vs France — Coupe du Monde !' %}"
+            <input type="text" name="title" id="live-title-input" class="live-title-input"
+                   aria-label="{% trans 'Titre du live' %}"
+                   placeholder="{% trans 'Ex : la finale de la CAN en direct !' %}"
                    maxlength="200">
-            <button type="button" class="live-btn-start" id="live-btn-start" onclick="startLive()">
-                <span class="material-icons">live_tv</span>
+            <button type="submit" class="vz-btn vz-btn--primary live-btn-start" id="live-btn-start">
+                <span class="material-icons" aria-hidden="true">live_tv</span>
                 {% trans "Commencer le live" %}
             </button>
-        </div>
-        <script>
-        function startLive() {
-            var titleInput = document.getElementById('live-title-input');
-            var btn        = document.getElementById('live-btn-start');
-            var title      = (titleInput ? titleInput.value.trim() : '') || 'Live';
-
-            /* Lire le CSRF token : d'abord depuis le champ hidden, sinon depuis le cookie */
-            function getCsrf() {
-                var inp = document.querySelector('[name=csrfmiddlewaretoken]');
-                if (inp && inp.value) return inp.value;
-                var m = document.cookie.match(/(?:^|;\s*)csrftoken=([^;]+)/);
-                return m ? decodeURIComponent(m[1]) : '';
-            }
-
-            var csrfToken = getCsrf();
-            if (!csrfToken) {
-                vzAlert('Erreur de session. Rechargez la page et réessayez.');
-                return;
-            }
-
-            if (btn) { btn.disabled = true; btn.textContent = 'Création…'; }
-
-            var body = new URLSearchParams();
-            body.append('title', title);
-
-            fetch('{% url "video:live-create" %}', {
-                method:      'POST',
-                headers:     { 'X-CSRFToken': csrfToken, 'Content-Type': 'application/x-www-form-urlencoded' },
-                body:        body.toString(),
-                credentials: 'same-origin',
-                redirect:    'follow',
-            })
-            .then(function(r) {
-                /* Django redirige vers /live/{id}/ — on suit la redirection */
-                if (r.ok || r.redirected) {
-                    window.location.href = r.url;
-                } else {
-                    throw new Error('HTTP ' + r.status);
-                }
-            })
-            .catch(function(err) {
-                vzAlert('Impossible de créer le live : ' + err.message);
-                if (btn) { btn.disabled = false; btn.innerHTML = '<span class="material-icons">live_tv</span> Commencer le live'; }
-            });
-        }
-        </script>
+        </form>
     </div>
 
     <!-- ── Lives actifs ── -->
@@ -80,23 +36,22 @@
         <span id="live-count-badge" class="live-count-badge">{{ active_rooms|length }}</span>
     </div>
 
-    {% if active_rooms %}
-    <div class="live-grid" id="live-grid">
+    <div class="live-grid" id="live-grid"{% if not active_rooms %} hidden{% endif %}>
         {% for room in active_rooms %}
-        <a href="{% url 'video:live-room' room_id=room.pk %}" class="vz-card live-card">
+        <a href="{% url 'video:live-room' room_id=room.pk %}" class="vz-card live-card" data-live-id="{{ room.pk }}">
             <div class="vz-card__media vz-card__media--wide live-card-thumb">
                 <span class="material-icons live-card-thumb-icon" aria-hidden="true">live_tv</span>
                 <span class="vz-card__badge vz-card__badge--danger live-card-live-badge"><span class="dot"></span> {% trans "LIVE" %}</span>
                 <span class="vz-card__badge vz-card__badge--right">
                     <i class="material-icons" aria-hidden="true">visibility</i>
-                    {{ room.viewer_count }}
+                    <span class="live-card-viewers">{{ room.viewer_count }}</span>
                 </span>
             </div>
             <div class="vz-card__body">
                 <div class="live-card-host">
                     <img class="vz-card__avatar vz-card__avatar--sm live-card-avatar"
                          src="{{ room.host.profile_image.url }}"
-                         alt="{{ room.host.username }}">
+                         alt="">
                     <span class="live-card-username">{{ room.host.username }}</span>
                 </div>
                 <h3 class="vz-card__title">{{ room.title }}</h3>
@@ -105,30 +60,68 @@
                     <span class="vz-card__meta-item"><i class="material-icons" aria-hidden="true">groups</i><span>{{ room.group.name }}</span></span>
                 </div>
                 {% endif %}
+                {# Toute la carte est le lien : « Rejoindre » n'est qu'un repère visuel #}
                 <div class="vz-card__actions">
-                    <button class="vz-btn vz-btn--danger vz-btn--sm vz-btn--block" onclick="event.preventDefault();window.location.href=this.closest('a').href;" type="button">
+                    <span class="vz-btn vz-btn--tonal vz-btn--sm vz-btn--block">
                         <i class="material-icons" aria-hidden="true">play_circle</i>
                         {% trans "Rejoindre" %}
-                    </button>
+                    </span>
                 </div>
             </div>
         </a>
         {% endfor %}
     </div>
-    {% else %}
-    <div class="live-empty">
-        <span class="material-icons">live_tv</span>
-        <p>{% trans "Aucun live en cours — sois le premier à diffuser !" %}</p>
+    <div class="vz-empty live-empty" id="live-empty"{% if active_rooms %} hidden{% endif %}>
+        <span class="material-icons" aria-hidden="true">live_tv</span>
+        <p class="vz-empty-title">{% trans "Aucun live en cours" %}</p>
+        <p class="vz-empty-text">{% trans "Soyez la première personne à diffuser." %}</p>
     </div>
-    {% endif %}
 
 </div>
 </div>
 
-<!-- Auto-refresh toutes les 30s -->
 <script>
-(function() {
-    setTimeout(function() { location.reload(); }, 30000);
+/* Rafraîchit la grille par l'API toutes les 30 s — sans recharger la page, ce
+   qui effaçait le titre en cours de saisie et ramenait en haut. */
+(function () {
+    var API = "{% url 'video:live-api-active' %}";
+    var grid = document.getElementById('live-grid'), empty = document.getElementById('live-empty');
+    var badge = document.getElementById('live-count-badge');
+    {% trans "LIVE" as ll_live %}{% trans "Rejoindre" as ll_join %}
+    var T = { live: "{{ ll_live|escapejs }}", join: "{{ ll_join|escapejs }}" };
+    function esc(s) { return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) {
+        return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]; }); }
+    function card(l) {
+        return '<a href="' + esc(l.url) + '" class="vz-card live-card" data-live-id="' + l.id + '">'
+            + '<div class="vz-card__media vz-card__media--wide live-card-thumb">'
+            +   '<span class="material-icons live-card-thumb-icon" aria-hidden="true">live_tv</span>'
+            +   '<span class="vz-card__badge vz-card__badge--danger live-card-live-badge"><span class="dot"></span> ' + esc(T.live) + '</span>'
+            +   '<span class="vz-card__badge vz-card__badge--right"><i class="material-icons" aria-hidden="true">visibility</i> '
+            +     '<span class="live-card-viewers">' + (l.viewer_count || 0) + '</span></span>'
+            + '</div><div class="vz-card__body">'
+            +   '<div class="live-card-host">'
+            +     (l.host_avatar ? '<img class="vz-card__avatar vz-card__avatar--sm live-card-avatar" src="' + esc(l.host_avatar) + '" alt="">' : '')
+            +     '<span class="live-card-username">' + esc(l.host) + '</span></div>'
+            +   '<h3 class="vz-card__title">' + esc(l.title) + '</h3>'
+            +   (l.group ? '<div class="vz-card__meta"><span class="vz-card__meta-item"><i class="material-icons" aria-hidden="true">groups</i><span>' + esc(l.group) + '</span></span></div>' : '')
+            +   '<div class="vz-card__actions"><span class="vz-btn vz-btn--tonal vz-btn--sm vz-btn--block">'
+            +     '<i class="material-icons" aria-hidden="true">play_circle</i> ' + esc(T.join) + '</span></div>'
+            + '</div></a>';
+    }
+    function refresh() {
+        if (document.hidden) return;
+        fetch(API, { credentials: 'same-origin' })
+            .then(function (r) { return r.ok ? r.json() : null; })
+            .then(function (d) {
+                if (!d || !d.lives) return;
+                grid.innerHTML = d.lives.map(card).join('');
+                grid.hidden = !d.lives.length;
+                empty.hidden = !!d.lives.length;
+                if (badge) badge.textContent = d.lives.length;
+            })
+            .catch(function () {});
+    }
+    setInterval(refresh, 30000);
 })();
 </script>
 {% endblock content %}

@@ -40,7 +40,7 @@ class Group(models.Model):
         (CAT_BIENETRE,   'Bien-être'),
         (CAT_NATURE,     'Nature'),
         (CAT_HUMOUR,     'Humour'),
-        (CAT_MADAGASCAR, 'Madagascar'),
+        (CAT_MADAGASCAR, 'Afrique'),
         (CAT_FAMILLE,    'Famille'),
         (CAT_RELIGION,   'Religion & Spiritualité'),
         (CAT_AUTRE,      'Autre'),
@@ -67,7 +67,7 @@ class Group(models.Model):
     region      = models.CharField(
         max_length=30, blank=True, default='',
         verbose_name='Région',
-        help_text='Région de Madagascar (pour le filtre "Groupes locaux")',
+        help_text='Pays ou région (pour le filtre "Groupes locaux")',
         db_index=True,
     )
     created_at  = models.DateTimeField(auto_now_add=True)

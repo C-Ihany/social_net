@@ -6,6 +6,15 @@
     background: var(--bg);
     padding: 2rem 1rem 3rem;
 }
+.edit-head { max-width: 560px; margin-left: auto; margin-right: auto; }
+.edit-page [hidden] { display: none !important; }
+.edit-form-body .vz-actions { margin-top: 1.5rem; }
+.edit-help .vz-btn { vertical-align: baseline; }
+@media (max-width: 480px) {
+    .edit-row { flex-wrap: wrap; }
+    .edit-row .edit-row-btn { flex: 1 1 100%; }
+    .avatar-section, .edit-form-body { padding-left: 1.1rem; padding-right: 1.1rem; }
+}
 .edit-card {
     max-width: 560px;
     margin: 0 auto;
@@ -16,25 +25,6 @@
     overflow: hidden;
 }
 [data-theme="dark"] .edit-card { box-shadow: 0 4px 24px rgba(0,0,0,.35); }
-
-/* ── Card header ── */
-.edit-card-header {
-    padding: 1.5rem 2rem 1.25rem;
-    border-bottom: 1px solid var(--border);
-    display: flex;
-    align-items: center;
-    gap: .75rem;
-}
-.edit-card-header .material-icons {
-    font-size: 1.4rem;
-    color: var(--accent);
-}
-.edit-card-header h2 {
-    font-size: 1.15rem;
-    font-weight: 800;
-    color: var(--text);
-    margin: 0;
-}
 
 /* ── Avatar section ── */
 .avatar-section {
@@ -69,7 +59,7 @@
 }
 .image-container:hover #id_middle_container { opacity: 1; }
 #id_text {
-    color: #fff;
+    color: white;   /* sur le voile sombre de la photo, dans les deux thèmes */
     font-size: .78rem;
     font-weight: 700;
     letter-spacing: .04em;
@@ -80,22 +70,7 @@
 .avatar-info p  { font-size: .8rem; color: var(--text-muted); margin: 0; }
 
 /* Crop confirm buttons */
-#id_image_crop_confirm {
-    display: none;   /* passé en flex par le JS de recadrage */
-    gap: .75rem;
-    margin-bottom: .75rem;
-}
-#id_confirm, #id_cancel {
-    width: 36px; height: 36px;
-    border-radius: 50%;
-    display: flex; align-items: center; justify-content: center;
-    cursor: pointer;
-    font-size: 1.2rem !important;
-    transition: transform .15s;
-}
-#id_confirm { color: var(--success); background: rgba(var(--success-rgb),.12); border: 1.5px solid rgba(var(--success-rgb),.3); }
-#id_cancel  { color: var(--danger);  background: rgba(var(--danger-rgb),.12);  border: 1.5px solid rgba(var(--danger-rgb),.3); }
-#id_confirm:hover, #id_cancel:hover { transform: scale(1.1); }
+#id_image_crop_confirm { display: none; margin-bottom: .75rem; }   /* passé en flex par le JS de recadrage */
 
 /* ── Form body ── */
 .edit-form-body { padding: 1.5rem 2rem 2rem; }
@@ -166,20 +141,6 @@
     border-radius: 10px; padding: .6rem .9rem; margin-bottom: .75rem;
     font-size: .84rem; color: var(--danger);
 }
-.edit-save-btn {
-    display: flex; align-items: center; justify-content: center; gap: .5rem;
-    width: 100%; height: 50px;
-    background: var(--accent);
-    color: var(--on-accent); border: none; border-radius: var(--radius);
-    font-size: 1rem; font-weight: 700; cursor: pointer;
-    box-shadow: 0 4px 16px var(--accent-glow);
-    transition: opacity .2s, transform .15s;
-    margin-top: 1.5rem;
-}
-.edit-save-btn:hover { opacity: .92; transform: translateY(-1px); }
-.edit-save-btn .material-icons { font-size: 1.1rem; }
-
-
 /* ══════════════════════════════════════════════════════════════════
    Styles sortis des attributs style="" de edit_account.html (2026-11)
    ══════════════════════════════════════════════════════════════════ */
@@ -209,16 +170,11 @@
 .phone-verified-icon { font-size: 1.3rem; color: var(--success); }
 .phone-verified-title { font-size: .88rem; font-weight: 700; color: var(--success); }
 .phone-verified-num { font-size: .82rem; color: var(--text-muted); }
-.edit-link-btn {
-    background: none; border: none; padding: 0; color: var(--accent);
-    cursor: pointer; font-size: .78rem; text-decoration: underline; font-family: inherit;
-}
 .phone-change-btn { margin-left: auto; }
 .edit-row { display: flex; gap: .5rem; }
 .edit-input-wrap--grow { flex: 1; }
-.edit-row-btn { height: 48px; flex-shrink: 0; white-space: nowrap; }
+.edit-row-btn { min-height: 48px; flex-shrink: 0; white-space: nowrap; }
 #otp-input { font-size: 1.1rem; letter-spacing: .3em; font-weight: 700; }
-#otp-input-group { display: none; }   /* affiché par le JS après envoi du code */
 #phone-msg { display: none; border-radius: 10px; padding: .55rem .85rem; font-size: .84rem; margin-top: .5rem; }
 #phone-msg.phone-msg--error   { background: rgba(var(--danger-rgb),.1);  border: 1px solid rgba(var(--danger-rgb),.25);  color: var(--danger); }
 #phone-msg.phone-msg--success { background: rgba(var(--success-rgb),.1); border: 1px solid rgba(var(--success-rgb),.25); color: var(--success); }

@@ -85,7 +85,7 @@ def format_phone_display(e164: str) -> str:
 @lru_cache(maxsize=8)
 def country_choices(lang: str = 'fr') -> tuple:
     """Tous les pays pour la liste du formulaire : ((« DE », « Allemagne (+49) »), …), triés par nom.
-    (Le malgache n'a pas de noms de pays dans phonenumbers : ce sont alors les noms français.)"""
+    (La langue « mg » n'a pas de noms de pays dans phonenumbers : ce sont alors les noms français.)"""
     lang = 'fr' if lang in ('fr', 'mg') else 'en'
     choices = []
     for region in phonenumbers.SUPPORTED_REGIONS:

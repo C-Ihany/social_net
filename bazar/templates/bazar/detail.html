@@ -1,15 +1,17 @@
 {% extends 'base.html' %}
 {% load static i18n %}
+{% block page_title %}{{ annonce.title|truncatechars:60 }} — {% trans "Bazar" %} Vazimba{% endblock %}
+{% block meta_description %}{{ annonce.description|truncatechars:150 }}{% endblock %}
 
 {% block content %}
 <link rel="stylesheet" href="{% static 'css/pages/bazar-detail.css' %}">
 
 <!-- Fil d'Ariane -->
-<nav class="bazar-breadcrumb">
+<nav class="bazar-breadcrumb" aria-label="{% trans "Fil d'Ariane" %}">
     <a href="{% url 'bazar:index' %}">{% trans "Bazar" %}</a>
-    <span>›</span>
+    <span aria-hidden="true">›</span>
     <a href="{% url 'bazar:index' %}?cat={{ annonce.category }}">{{ annonce.get_category_display }}</a>
-    <span>›</span>
+    <span aria-hidden="true">›</span>
     <span class="bazar-breadcrumb-current">{{ annonce.title|truncatechars:50 }}</span>
 </nav>
 
@@ -21,19 +23,22 @@
         <div class="bazar-gallery">
             {% if images %}
             <div class="gallery-wrap">
-                <img id="main-photo" class="bazar-main-img" src="{{ images.0.image.url }}" alt="{{ annonce.title }}" onclick="openLightbox(this.src)">
+                <button type="button" class="bazar-main-btn" onclick="openLightbox()" aria-label="{% trans 'Agrandir la photo' %}">
+                    <img id="main-photo" class="bazar-main-img" src="{{ images.0.image.url }}" alt="{{ annonce.title }}">
+                </button>
                 {% if images|length > 1 %}
-                <button class="gallery-arrow gallery-prev-arrow" onclick="galleryNav(-1)" aria-label="Photo précédente" type="button">&#8249;</button>
-                <button class="gallery-arrow gallery-next-arrow" onclick="galleryNav(1)" aria-label="Photo suivante" type="button">&#8250;</button>
+                <button class="vz-icon-btn vz-icon-btn--lg vz-icon-btn--over gallery-arrow gallery-prev-arrow" onclick="galleryNav(-1)" aria-label="{% trans 'Photo précédente' %}" type="button"><i class="material-icons" aria-hidden="true">chevron_left</i></button>
+                <button class="vz-icon-btn vz-icon-btn--lg vz-icon-btn--over gallery-arrow gallery-next-arrow" onclick="galleryNav(1)" aria-label="{% trans 'Photo suivante' %}" type="button"><i class="material-icons" aria-hidden="true">chevron_right</i></button>
                 {% endif %}
             </div>
             {% if images|length > 1 %}
             <div class="bazar-thumbs">
                 {% for img in images %}
-                <img class="bazar-thumb {% if forloop.first %}active{% endif %}"
-                     src="{{ img.image.url }}"
-                     alt="Photo {{ forloop.counter }}"
-                     onclick="switchPhoto(this, {{ forloop.counter0 }})">
+                <button type="button" class="bazar-thumb {% if forloop.first %}active{% endif %}"
+                        onclick="switchPhoto({{ forloop.counter0 }})"
+                        aria-label="{% blocktrans with n=forloop.counter %}Photo {{ n }}{% endblocktrans %}">
+                    <img src="{{ img.image.url }}" alt="" loading="lazy">
+                </button>
                 {% endfor %}
             </div>
             {% endif %}
@@ -44,13 +49,13 @@
 
         <!-- Description -->
         <div class="vz-card bazar-desc-section">
-            <h4>{% trans "Description" %}</h4>
+            <h2>{% trans "Description" %}</h2>
             <p class="bazar-desc-text">{{ annonce.description }}</p>
         </div>
 
         <!-- Détails techniques -->
         <div class="vz-card bazar-desc-section">
-            <h4>{% trans "Détails" %}</h4>
+            <h2>{% trans "Détails" %}</h2>
             <table class="bazar-details-table">
                 <tr>
                     <td class="bazar-details-label">{% trans "Catégorie" %}</td>
@@ -81,66 +86,66 @@
         <div class="vz-card bazar-info-card">
             <!-- Statut -->
             {% if annonce.status == 'active' %}
-            <span class="vz-chip vz-chip--sm vz-chip--success bazar-status-badge"><i class="material-icons" aria-hidden="true">check</i>{% trans "Disponible" %}</span>
+            <span class="vz-chip vz-chip--sm vz-chip--static vz-chip--success bazar-status-badge"><i class="material-icons" aria-hidden="true">check</i>{% trans "Disponible" %}</span>
             {% elif annonce.status == 'vendue' %}
-            <span class="vz-chip vz-chip--sm vz-chip--danger bazar-status-badge"><i class="material-icons" aria-hidden="true">close</i>{% trans "Vendue" %}</span>
+            <span class="vz-chip vz-chip--sm vz-chip--static vz-chip--danger bazar-status-badge"><i class="material-icons" aria-hidden="true">close</i>{% trans "Vendue" %}</span>
+            {% elif annonce.status == 'louee' %}
+            <span class="vz-chip vz-chip--sm vz-chip--static vz-chip--danger bazar-status-badge"><i class="material-icons" aria-hidden="true">close</i>{% trans "Louée" %}</span>
+            {% elif annonce.status == 'expiree' %}
+            <span class="vz-chip vz-chip--sm vz-chip--static vz-chip--warning bazar-status-badge"><i class="material-icons" aria-hidden="true">event_busy</i>{% trans "Expirée" %}</span>
             {% else %}
-            <span class="vz-chip vz-chip--sm vz-chip--warning bazar-status-badge"><i class="material-icons" aria-hidden="true">pause</i>{% trans "En pause" %}</span>
+            <span class="vz-chip vz-chip--sm vz-chip--static vz-chip--warning bazar-status-badge"><i class="material-icons" aria-hidden="true">pause</i>{% trans "En pause" %}</span>
             {% endif %}
 
             <!-- Titre + Prix -->
-            <h1 class="bazar-title">{{ annonce.title }}{% if annonce.is_location %}<span class="vz-chip vz-chip--sm vz-chip--accent"><i class="material-icons" aria-hidden="true">vpn_key</i>Location</span>{% endif %}</h1>
+            <h1 class="bazar-title">{{ annonce.title }}{% if annonce.is_location %}<span class="vz-chip vz-chip--sm vz-chip--static vz-chip--accent"><i class="material-icons" aria-hidden="true">vpn_key</i>{% trans "Location" %}</span>{% endif %}</h1>
             <p class="bazar-price-big">
-                {% if annonce.is_location %}
-                {{ annonce.formatted_prix_location }}
-                {% else %}
-                {{ annonce.formatted_price }}
-                {% if annonce.price_negotiable and annonce.price %}
+                {{ annonce.display_price }}
+                {% if not annonce.is_location and annonce.price_negotiable and annonce.price %}
                 <small class="bazar-price-note">· {% trans "négociable" %}</small>
-                {% endif %}
                 {% endif %}
             </p>
 
             {% if annonce.is_location %}
             <div class="location-details-card">
-              <h4><i class="material-icons" aria-hidden="true">assignment</i> Conditions de location</h4>
+              <h2><i class="material-icons" aria-hidden="true">assignment</i> {% trans "Conditions de location" %}</h2>
               <div class="loc-grid">
                 <div class="loc-item">
-                  <span class="loc-label">Prix</span>
+                  <span class="loc-label">{% trans "Prix" %}</span>
                   <span class="loc-val">{{ annonce.formatted_prix_location }}</span>
                 </div>
                 {% if annonce.caution %}
                 <div class="loc-item">
-                  <span class="loc-label">Caution</span>
+                  <span class="loc-label">{% trans "Caution" %}</span>
                   <span class="loc-val">{{ annonce.caution|vz_ariary }}</span>
                 </div>
                 {% endif %}
                 {% if annonce.duree_min %}
                 <div class="loc-item">
-                  <span class="loc-label">Durée min.</span>
-                  <span class="loc-val">{{ annonce.duree_min }} jour{{ annonce.duree_min|pluralize }}</span>
+                  <span class="loc-label">{% trans "Durée min." %}</span>
+                  <span class="loc-val">{% blocktrans count n=annonce.duree_min %}{{ n }} jour{% plural %}{{ n }} jours{% endblocktrans %}</span>
                 </div>
                 {% endif %}
                 {% if annonce.nb_pieces %}
                 <div class="loc-item">
-                  <span class="loc-label">Pièces</span>
-                  <span class="loc-val">{{ annonce.nb_pieces }} pièce{{ annonce.nb_pieces|pluralize }}</span>
+                  <span class="loc-label">{% trans "Pièces" %}</span>
+                  <span class="loc-val">{% blocktrans count n=annonce.nb_pieces %}{{ n }} pièce{% plural %}{{ n }} pièces{% endblocktrans %}</span>
                 </div>
                 {% endif %}
                 {% if annonce.surface_m2 %}
                 <div class="loc-item">
-                  <span class="loc-label">Surface</span>
+                  <span class="loc-label">{% trans "Surface" %}</span>
                   <span class="loc-val">{{ annonce.surface_m2|floatformat:0 }} m²</span>
                 </div>
                 {% endif %}
                 {% if annonce.meuble %}
-                <div class="loc-item"><span class="loc-label">Meublé</span><span class="loc-val"><i class="material-icons" aria-hidden="true">check_circle</i> Oui</span></div>
+                <div class="loc-item"><span class="loc-label">{% trans "Meublé" %}</span><span class="loc-val"><i class="material-icons" aria-hidden="true">check_circle</i> {% trans "Oui" %}</span></div>
                 {% endif %}
                 {% if annonce.charges_incluses %}
-                <div class="loc-item"><span class="loc-label">Charges</span><span class="loc-val"><i class="material-icons" aria-hidden="true">check_circle</i> Incluses</span></div>
+                <div class="loc-item"><span class="loc-label">{% trans "Charges" %}</span><span class="loc-val"><i class="material-icons" aria-hidden="true">check_circle</i> {% trans "Incluses" %}</span></div>
                 {% endif %}
                 {% if annonce.avec_chauffeur %}
-                <div class="loc-item"><span class="loc-label">Chauffeur</span><span class="loc-val"><i class="material-icons" aria-hidden="true">check_circle</i> Inclus</span></div>
+                <div class="loc-item"><span class="loc-label">{% trans "Chauffeur" %}</span><span class="loc-val"><i class="material-icons" aria-hidden="true">check_circle</i> {% trans "Inclus" %}</span></div>
                 {% endif %}
               </div>
             </div>
@@ -159,20 +164,18 @@
                 </a>
                 <div>
                     <div class="bazar-seller-name">
-                        <a href="{% url 'account:view' user_id=annonce.seller.pk %}">
-                            {{ annonce.seller.get_full_name|default:annonce.seller.username }}
-                        </a>
+                        <a href="{% url 'account:view' user_id=annonce.seller.pk %}">{{ annonce.seller.username }}</a>
                         {% with sv=annonce.seller.seller_verification %}
                         {% if sv.status == 'approved' %}
                             {% if sv.seller_type == 'pro' %}
-                            <span class="vz-chip vz-chip--sm vz-chip--warning"><i class="material-icons" aria-hidden="true">star</i>{% trans "Boutique Pro" %}</span>
+                            <span class="vz-chip vz-chip--sm vz-chip--static vz-chip--warning"><i class="material-icons" aria-hidden="true">star</i>{% trans "Boutique Pro" %}</span>
                             {% else %}
-                            <span class="vz-chip vz-chip--sm vz-chip--success"><i class="material-icons" aria-hidden="true">verified</i>{% trans "Vérifié" %}</span>
+                            <span class="vz-chip vz-chip--sm vz-chip--static vz-chip--success"><i class="material-icons" aria-hidden="true">verified</i>{% trans "Vérifié" %}</span>
                             {% endif %}
                         {% endif %}
                         {% endwith %}
                         {% if annonce.seller.phone_verified %}
-                        <span class="vz-chip vz-chip--sm vz-chip--accent" title="Numéro de téléphone vérifié par SMS"><i class="material-icons" aria-hidden="true">phone_iphone</i>{% trans "Tél. vérifié" %}</span>
+                        <span class="vz-chip vz-chip--sm vz-chip--static vz-chip--accent" title="{% trans 'Numéro de téléphone vérifié par SMS' %}"><i class="material-icons" aria-hidden="true">phone_iphone</i>{% trans "Tél. vérifié" %}</span>
                         {% endif %}
                     </div>
                     <div class="bazar-seller-since">{% trans "Membre depuis" %} {{ annonce.seller.date_joined|date:"M Y" }}</div>
@@ -180,7 +183,7 @@
                     {% if sv.is_pro %}
                     <div class="bazar-seller-shop">
                         <a href="{% url 'bazar:boutique' username=annonce.seller.username %}" class="vz-chip vz-chip--sm vz-chip--warning">
-                            <i class="material-icons" aria-hidden="true">storefront</i>{% trans "Voir la boutique" %} →
+                            <i class="material-icons" aria-hidden="true">storefront</i>{% trans "Voir la boutique" %}
                         </a>
                     </div>
                     {% endif %}
@@ -188,109 +191,96 @@
                 </div>
             </div>
 
-            <!-- Actions propriétaire -->
+            <div class="bazar-actions">
             {% if is_owner %}
-            <a href="{% url 'bazar:edit' annonce.pk %}" class="bazar-contact-btn bazar-btn-outline">
-                <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
-                {% trans "Modifier l'annonce" %}
+            <!-- Actions propriétaire : modifier, clôturer, supprimer -->
+            <a href="{% url 'bazar:edit' annonce.pk %}" class="vz-btn vz-btn--secondary vz-btn--block">
+                <i class="material-icons" aria-hidden="true">edit</i>{% trans "Modifier l'annonce" %}
             </a>
             {% if annonce.status == 'active' %}
-            <form method="post" action="{% url 'bazar:mark_sold' annonce.pk %}" data-vz-confirm="{% trans 'Marquer cette annonce comme vendue ?' %}">
+            <form method="post" action="{% url 'bazar:mark_sold' annonce.pk %}"
+                  data-vz-confirm="{% if annonce.is_location %}{% trans 'Marquer cette annonce comme louée ?' %}{% else %}{% trans 'Marquer cette annonce comme vendue ?' %}{% endif %}">
                 {% csrf_token %}
-                <button type="submit" class="bazar-contact-btn bazar-btn-outline bazar-btn-outline--success">
-                    <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
-                {% trans "Marquer comme vendue" %}
+                <button type="submit" class="vz-btn vz-btn--success vz-btn--block">
+                    <i class="material-icons" aria-hidden="true">check</i>{% if annonce.is_location %}{% trans "Marquer comme louée" %}{% else %}{% trans "Marquer comme vendue" %}{% endif %}
                 </button>
             </form>
             {% endif %}
             <form method="post" action="{% url 'bazar:delete' annonce.pk %}" data-vz-confirm="{% trans 'Supprimer définitivement cette annonce ?' %}" data-vz-danger>
                 {% csrf_token %}
-                <button type="submit" class="bazar-contact-btn bazar-btn-danger">
-                    <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4h6v2"/></svg>
-                    {% trans "Supprimer" %}
+                <button type="submit" class="vz-btn vz-btn--danger-soft vz-btn--block">
+                    <i class="material-icons" aria-hidden="true">delete</i>{% trans "Supprimer" %}
                 </button>
             </form>
 
             {% else %}
             <!-- Actions acheteur -->
-
-            <!-- Bandeau "non disponible" si l'annonce n'est plus active -->
             {% if annonce.status != 'active' %}
             <div class="bazar-unavailable">
                 {% trans "Cette annonce n'est plus disponible." %}
             </div>
             {% endif %}
 
-            <!-- WhatsApp + Appel : uniquement si annonce active -->
+            {% trans "Bonjour, je suis intéressé(e) par votre annonce :" as wa_hello %}
             {% if annonce.status == 'active' and annonce.contact_phone and annonce.show_phone %}
-            <a href="https://wa.me/{{ annonce.contact_phone|cut:' '|cut:'+' }}?text=Bonjour%2C%20je%20suis%20int%C3%A9ress%C3%A9%20par%20votre%20annonce%20%3A%20{{ annonce.title|urlencode }}"
-               target="_blank" rel="noopener" class="bazar-contact-btn bazar-btn-primary">
-                <svg width="17" height="17" viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 0 1-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 0 1-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 0 1 2.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0 0 12.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 0 0 5.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 0 0-3.48-8.413Z"/></svg>
-                {% trans "WhatsApp" %}
+            <!-- WhatsApp (action principale, seulement si le numéro porte un indicatif) + Appel -->
+            {% if annonce.whatsapp_number %}
+            <a href="https://wa.me/{{ annonce.whatsapp_number }}?text={{ wa_hello|urlencode }}%20{{ annonce.title|urlencode }}"
+               target="_blank" rel="noopener" class="vz-btn vz-btn--whatsapp vz-btn--block">
+                <i class="material-icons" aria-hidden="true">chat</i>{% trans "WhatsApp" %}
             </a>
-            <a href="tel:{{ annonce.contact_phone|cut:' ' }}"
-               class="bazar-contact-btn bazar-btn-outline">
-                <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.69 12 19.79 19.79 0 0 1 1.63 3.32a2 2 0 0 1 1.99-2.18h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L7.91 8.96a16 16 0 0 0 6.13 6.13l.97-.97a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
-                {% trans "Appeler" %}
+            {% endif %}
+            <a href="tel:{{ annonce.tel_number }}" class="vz-btn {% if annonce.whatsapp_number %}vz-btn--secondary{% else %}vz-btn--primary{% endif %} vz-btn--block">
+                <i class="material-icons" aria-hidden="true">call</i>{% trans "Appeler" %}
             </a>
             {% endif %}
 
-            <!-- ── Messagerie interne — toujours visible (annonce active OU non) ── -->
-            {% if user != annonce.seller %}
+            <!-- Messagerie interne — toujours proposée -->
             {% if user.is_authenticated %}
-            <a href="{% url 'chat:private-chat-room' %}?user_id={{ annonce.seller.pk }}&annonce={{ annonce.pk }}"
-               class="bazar-contact-btn bazar-btn-outline">
-                <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
-                {% trans "Envoyer un message" %}
+            <a href="{% url 'chat:private-chat-room' %}?user_id={{ annonce.seller.pk }}&amp;annonce={{ annonce.pk }}"
+               class="vz-btn {% if annonce.status == 'active' and annonce.contact_phone and annonce.show_phone %}vz-btn--secondary{% else %}vz-btn--primary{% endif %} vz-btn--block">
+                <i class="material-icons" aria-hidden="true">forum</i>{% trans "Envoyer un message" %}
             </a>
             {% else %}
             <a href="{% url 'login' %}?next={% url 'bazar:detail' annonce.pk %}"
-               class="bazar-contact-btn bazar-btn-outline">
-                <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
-                {% trans "Envoyer un message" %}
+               class="vz-btn {% if annonce.status == 'active' and annonce.contact_phone and annonce.show_phone %}vz-btn--secondary{% else %}vz-btn--primary{% endif %} vz-btn--block">
+                <i class="material-icons" aria-hidden="true">forum</i>{% trans "Envoyer un message" %}
             </a>
             {% endif %}
-            {% endif %}
 
-            <!-- ── Bouton Sauvegarder ── -->
+            <!-- Favori -->
             {% if user.is_authenticated %}
-            <button id="fav-btn"
+            <button id="fav-btn" type="button"
                     onclick="toggleFavori({{ annonce.pk }})"
-                    class="bazar-contact-btn {% if is_saved %}bazar-btn-fav-saved{% else %}bazar-btn-outline{% endif %} mt-2" type="button">
-                <svg id="fav-icon" width="16" height="16" fill="{% if is_saved %}currentColor{% else %}none{% endif %}" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                    <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>
-                </svg>
-                <span id="fav-label">{% if is_saved %}{% trans "Sauvegardé" %}{% else %}{% trans "Enregistrer" %}{% endif %}</span>
-                <span id="fav-count" class="bazar-fav-count">
-                    {% if fav_count %}({{ fav_count }}){% endif %}
-                </span>
+                    aria-pressed="{% if is_saved %}true{% else %}false{% endif %}"
+                    class="vz-btn vz-btn--block {% if is_saved %}vz-btn--tonal{% else %}vz-btn--secondary{% endif %}">
+                <i class="material-icons" id="fav-icon" aria-hidden="true">{% if is_saved %}favorite{% else %}favorite_border{% endif %}</i>
+                <span id="fav-label">{% if is_saved %}{% trans "Enregistrée" %}{% else %}{% trans "Enregistrer" %}{% endif %}</span>
+                <span id="fav-count" class="bazar-fav-count">{% if fav_count %}({{ fav_count }}){% endif %}</span>
             </button>
             {% endif %}
-
-            <!-- ── Bouton Signaler ── -->
-            {% if user.is_authenticated and user != annonce.seller %}
-            <button onclick="openReportModal('annonce','{{ annonce.pk }}')"
-                    class="bazar-contact-btn bazar-btn-outline bazar-btn-report mt-2" type="button">
-                <span class="material-icons" aria-hidden="true">flag</span>
-                {% trans "Signaler cette annonce" %}
-            </button>
             {% endif %}
+            </div>
 
-            <!-- ── Boutons de partage ── -->
+            {% if not is_owner %}
+            <!-- Partage + signalement (actions discrètes) -->
             <div class="bazar-share">
                 <p class="bazar-share-title">{% trans "Partager" %}</p>
-                <div class="bazar-share-row">
-                    <!-- Partager sur WhatsApp -->
-                    <a href="https://wa.me/?text={{ annonce.title|urlencode }}%20%E2%80%94%20{{ annonce.formatted_price|urlencode }}%0A{{ request.build_absolute_uri }}"
-                       target="_blank" rel="noopener" class="vz-btn vz-btn--sm bazar-share-wa">
-                        <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 0 1-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 0 1-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 0 1 2.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0 0 12.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 0 0 5.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 0 0-3.48-8.413Z"/></svg>
-                        WhatsApp
+                <div class="vz-btn-row">
+                    <a href="https://wa.me/?text={{ annonce.title|urlencode }}%20%E2%80%94%20{{ annonce.display_price|urlencode }}%0A{{ request.build_absolute_uri|urlencode }}"
+                       target="_blank" rel="noopener" class="vz-btn vz-btn--sm vz-btn--secondary vz-tap">
+                        <i class="material-icons" aria-hidden="true">share</i>{% trans "WhatsApp" %}
                     </a>
-                    <!-- Copier le lien -->
-                    <button onclick="copyLink(this)" class="vz-btn vz-btn--sm vz-btn--secondary" type="button">
+                    <button onclick="copyLink(this)" class="vz-btn vz-btn--sm vz-btn--secondary vz-tap" type="button">
                         <i class="material-icons" aria-hidden="true">content_copy</i>
                         <span class="copy-label">{% trans "Copier le lien" %}</span>
                     </button>
+                    {% if user.is_authenticated %}
+                    <button onclick="openReportModal('annonce','{{ annonce.pk }}')"
+                            class="vz-btn vz-btn--sm vz-btn--muted vz-tap bazar-report-btn" type="button">
+                        <i class="material-icons" aria-hidden="true">flag</i>{% trans "Signaler" %}
+                    </button>
+                    {% endif %}
                 </div>
             </div>
             {% endif %}
@@ -301,7 +291,7 @@
 <!-- ── Annonces similaires ── -->
 {% if similaires %}
 <section class="bazar-similaires">
-    <h3>{% trans "Annonces similaires" %}</h3>
+    <h2>{% trans "Annonces similaires" %}</h2>
     <div class="vz-grid bazar-similaires-grid">
         {% for item in similaires %}
         <a href="{% url 'bazar:detail' item.pk %}" class="vz-card">
@@ -316,7 +306,7 @@
             </div>
             <div class="vz-card__body">
                 <h3 class="vz-card__title">{{ item.title }}</h3>
-                <span class="vz-card__price">{{ item.formatted_price }}</span>
+                <span class="vz-card__price">{{ item.display_price }}</span>
             </div>
         </a>
         {% endfor %}
@@ -324,163 +314,145 @@
 </section>
 {% endif %}
 
+{% if images %}
 <!-- Lightbox -->
-<div id="lightbox" onclick="closeLightbox()">
-    <button id="lightbox-close" onclick="closeLightbox()" type="button" aria-label="{% trans 'Fermer' %}"><i class="material-icons" aria-hidden="true">close</i></button>
+{% trans "Photos de l'annonce" as lb_label %}
+<div id="lightbox" role="dialog" aria-modal="true" aria-label="{{ lb_label }}" onclick="closeLightbox()">
+    <button id="lightbox-close" class="vz-icon-btn vz-icon-btn--lg vz-icon-btn--over" onclick="closeLightbox()" type="button" aria-label="{% trans 'Fermer' %}"><i class="material-icons" aria-hidden="true">close</i></button>
     {% if images|length > 1 %}
-    <button class="lb-nav-btn" id="lightbox-prev" onclick="event.stopPropagation(); lightboxNav(-1)" type="button">&#8249;</button>
+    <button class="vz-icon-btn vz-icon-btn--lg vz-icon-btn--over lb-nav-btn" id="lightbox-prev" onclick="event.stopPropagation(); lightboxNav(-1)" type="button" aria-label="{% trans 'Photo précédente' %}"><i class="material-icons" aria-hidden="true">chevron_left</i></button>
     {% endif %}
-    <img id="lightbox-img" src="" alt="Aperçu">
-    {# display:none basculé en JS (openLightbox / lightboxNav) : style dynamique conservé #}
-    <div id="lb-error" class="lb-error" style="display:none;">
+    <img id="lightbox-img" src="" alt="{{ annonce.title }}">
+    <div id="lb-error" class="lb-error" hidden>
         <i class="material-icons lb-error-icon" aria-hidden="true">broken_image</i>
         <span>{% trans "Image non disponible" %}</span>
     </div>
     {% if images|length > 1 %}
-    <button class="lb-nav-btn" id="lightbox-next" onclick="event.stopPropagation(); lightboxNav(1)" type="button">&#8250;</button>
+    <button class="vz-icon-btn vz-icon-btn--lg vz-icon-btn--over lb-nav-btn" id="lightbox-next" onclick="event.stopPropagation(); lightboxNav(1)" type="button" aria-label="{% trans 'Photo suivante' %}"><i class="material-icons" aria-hidden="true">chevron_right</i></button>
     <div id="lightbox-counter"></div>
     {% endif %}
 </div>
+{% endif %}
 
+{{ gallery_urls|json_script:"bazar-gallery" }}
 <script>
-var VZB_I18N = {
-    confirmSold: "{% trans 'Marquer cette annonce comme vendue ?'|escapejs %}",
-    confirmDelete: "{% trans 'Supprimer définitivement cette annonce ?'|escapejs %}",
+(function () {
+var I18N = {
     copyLink: "{% trans 'Copier le lien'|escapejs %}",
-    copied: "{% trans 'Copié !'|escapejs %}"
+    copied:   "{% trans 'Copié !'|escapejs %}",
+    save:     "{% trans 'Enregistrer'|escapejs %}",
+    saved:    "{% trans 'Enregistrée'|escapejs %}",
+    loading:  "{% trans 'Chargement…'|escapejs %}",
+    error:    "{% trans 'Erreur réseau. Vérifiez votre connexion et réessayez.'|escapejs %}"
 };
-</script>
-<script>
-// ── Gallery ────────────────────────────────────────────────────────────────────
-const galleryUrls = [{% for img in images %}"{{ img.image.url }}"{% if not forloop.last %},{% endif %}{% endfor %}];
-const galleryThumbs = Array.from(document.querySelectorAll('.bazar-thumb'));
-let currentIdx = 0;
+var FAV_URL = "{% url 'bazar:toggle_favori' annonce.pk %}";
 
-// Navigation sur la photo principale (flèches ‹ ›)
-function galleryNav(dir) {
-    currentIdx = (currentIdx + dir + galleryUrls.length) % galleryUrls.length;
-    const mp = document.getElementById('main-photo');
+// ── Galerie ───────────────────────────────────────────────────────────────────
+var galleryUrls   = JSON.parse(document.getElementById('bazar-gallery').textContent) || [];
+var galleryThumbs = Array.prototype.slice.call(document.querySelectorAll('.bazar-thumb'));
+var lightbox      = document.getElementById('lightbox');
+var currentIdx    = 0;
+
+function showMain(idx) {
+    currentIdx = (idx + galleryUrls.length) % galleryUrls.length;
+    var mp = document.getElementById('main-photo');
     if (mp) mp.src = galleryUrls[currentIdx];
-    galleryThumbs.forEach((t, i) => t.classList.toggle('active', i === currentIdx));
+    galleryThumbs.forEach(function (t, i) { t.classList.toggle('active', i === currentIdx); });
 }
+window.galleryNav  = function (dir) { showMain(currentIdx + dir); };
+window.switchPhoto = function (idx) { showMain(idx); };
 
-// Clic sur une miniature
-function switchPhoto(thumb, idx) {
-    currentIdx = idx;
-    const mp = document.getElementById('main-photo');
-    if (mp) mp.src = galleryUrls[idx];
-    galleryThumbs.forEach(t => t.classList.remove('active'));
-    thumb.classList.add('active');
-}
-
-// ── Lightbox ───────────────────────────────────────────────────────────────────
-function openLightbox(src) {
-    // src = URL string depuis this.src (photo principale cliquée)
-    currentIdx = galleryUrls.findIndex(u => u === src);
-    if (currentIdx < 0) currentIdx = 0;
-
-    const lbImg = document.getElementById('lightbox-img');
-    const lbErr = document.getElementById('lb-error');
-    lbImg.onerror = function() { this.onerror = null; this.style.display = 'none'; if (lbErr) lbErr.style.display = 'flex'; };
-    lbImg.style.display = '';
-    if (lbErr) lbErr.style.display = 'none';
-    lbImg.src = galleryUrls[currentIdx] || src;
-
-    document.getElementById('lightbox').classList.add('open');
-    document.body.style.overflow = 'hidden';
-    _updateCounter();
-}
-
-function _updateCounter() {
-    const counter = document.getElementById('lightbox-counter');
-    if (counter && galleryUrls.length > 1) {
-        counter.textContent = `${currentIdx + 1} / ${galleryUrls.length}`;
-    }
-}
-
-function lightboxNav(dir) {
-    currentIdx = (currentIdx + dir + galleryUrls.length) % galleryUrls.length;
-    const lbImg = document.getElementById('lightbox-img');
-    const lbErr = document.getElementById('lb-error');
-    lbImg.onerror = function() { this.onerror = null; this.style.display = 'none'; if (lbErr) lbErr.style.display = 'flex'; };
-    lbImg.style.display = '';
-    if (lbErr) lbErr.style.display = 'none';
+// ── Lightbox ──────────────────────────────────────────────────────────────────
+function showInLightbox() {
+    var lbImg = document.getElementById('lightbox-img');
+    var lbErr = document.getElementById('lb-error');
+    lbImg.onerror = function () { this.onerror = null; this.hidden = true; if (lbErr) lbErr.hidden = false; };
+    lbImg.hidden = false;
+    if (lbErr) lbErr.hidden = true;
     lbImg.src = galleryUrls[currentIdx];
-    _updateCounter();
-    // Sync la photo principale et les miniatures
-    const mp = document.getElementById('main-photo');
-    if (mp) mp.src = galleryUrls[currentIdx];
-    galleryThumbs.forEach((t, i) => t.classList.toggle('active', i === currentIdx));
+    var counter = document.getElementById('lightbox-counter');
+    if (counter && galleryUrls.length > 1) counter.textContent = (currentIdx + 1) + ' / ' + galleryUrls.length;
 }
-
-function closeLightbox() {
-    document.getElementById('lightbox').classList.remove('open');
-    document.body.style.overflow = '';
-}
-
-document.addEventListener('keydown', e => {
-    if (!document.getElementById('lightbox').classList.contains('open')) return;
-    if (e.key === 'Escape') closeLightbox();
-    if (e.key === 'ArrowLeft')  lightboxNav(-1);
-    if (e.key === 'ArrowRight') lightboxNav(1);
-});
-
-// Swipe tactile (mobile)
-let _tsX = null;
-document.getElementById('lightbox').addEventListener('touchstart', e => { _tsX = e.touches[0].clientX; }, {passive:true});
-document.getElementById('lightbox').addEventListener('touchend', e => {
-    if (_tsX === null) return;
-    const diff = _tsX - e.changedTouches[0].clientX;
-    if (Math.abs(diff) > 40) lightboxNav(diff > 0 ? 1 : -1);
-    _tsX = null;
-}, {passive:true});
-
-// ── Favori ─────────────────────────────────────────────────────────────────────
-var VZB_I18N_FAV = {
-    save:    "{% trans 'Sauvegarder'|escapejs %}",
-    saved:   "{% trans 'Sauvegardé'|escapejs %}",
-    saving:  "{% trans 'Chargement…'|escapejs %}",
+window.openLightbox = function () {
+    if (!lightbox || !galleryUrls.length) return;
+    showInLightbox();
+    lightbox.classList.add('open');
+    document.body.style.overflow = 'hidden';
+    var c = document.getElementById('lightbox-close'); if (c) c.focus();
 };
-function toggleFavori(pk) {
-    const btn   = document.getElementById('fav-btn');
-    const icon  = document.getElementById('fav-icon');
-    const label = document.getElementById('fav-label');
-    const count = document.getElementById('fav-count');
+window.lightboxNav = function (dir) {
+    showMain(currentIdx + dir);
+    showInLightbox();
+};
+window.closeLightbox = function () {
+    if (!lightbox) return;
+    lightbox.classList.remove('open');
+    document.body.style.overflow = '';
+};
+if (lightbox) {
+    document.addEventListener('keydown', function (e) {
+        if (!lightbox.classList.contains('open')) return;
+        if (e.key === 'Escape') window.closeLightbox();
+        if (galleryUrls.length > 1 && e.key === 'ArrowLeft')  window.lightboxNav(-1);
+        if (galleryUrls.length > 1 && e.key === 'ArrowRight') window.lightboxNav(1);
+    });
+    // Balayage tactile (mobile)
+    var tsX = null;
+    lightbox.addEventListener('touchstart', function (e) { tsX = e.touches[0].clientX; }, {passive: true});
+    lightbox.addEventListener('touchend', function (e) {
+        if (tsX === null || galleryUrls.length < 2) return;
+        var diff = tsX - e.changedTouches[0].clientX;
+        if (Math.abs(diff) > 40) window.lightboxNav(diff > 0 ? 1 : -1);
+        tsX = null;
+    }, {passive: true});
+    document.getElementById('lightbox-img').addEventListener('click', function (e) { e.stopPropagation(); });
+}
+
+// ── Favori ────────────────────────────────────────────────────────────────────
+window.toggleFavori = function () {
+    var btn   = document.getElementById('fav-btn');
+    var icon  = document.getElementById('fav-icon');
+    var label = document.getElementById('fav-label');
+    var count = document.getElementById('fav-count');
     if (!btn) return;
+    var before = label.textContent;
     btn.disabled = true;
-    label.textContent = VZB_I18N_FAV.saving;
-    fetch('/bazar/' + pk + '/favori/', {
+    label.textContent = I18N.loading;
+    fetch(FAV_URL, {
         method: 'POST',
-        headers: { 'X-CSRFToken': document.cookie.match(/csrftoken=([^;]+)/)?.[1] || '' },
-        credentials: 'same-origin',
+        headers: { 'X-CSRFToken': (document.cookie.match(/csrftoken=([^;]+)/) || [])[1] || '' },
+        credentials: 'same-origin'
     })
-    .then(r => r.json())
-    .then(data => {
+    .then(function (r) { if (!r.ok) throw new Error(r.status); return r.json(); })
+    .then(function (data) {
         btn.disabled = false;
-        if (data.saved) {
-            btn.classList.remove('bazar-btn-outline');
-            btn.classList.add('bazar-btn-fav-saved');
-            icon.setAttribute('fill', 'currentColor');
-            label.textContent = VZB_I18N_FAV.saved;
-        } else {
-            btn.classList.remove('bazar-btn-fav-saved');
-            btn.classList.add('bazar-btn-outline');
-            icon.setAttribute('fill', 'none');
-            label.textContent = VZB_I18N_FAV.save;
-        }
+        btn.classList.toggle('vz-btn--tonal', !!data.saved);
+        btn.classList.toggle('vz-btn--secondary', !data.saved);
+        btn.setAttribute('aria-pressed', data.saved ? 'true' : 'false');
+        icon.textContent  = data.saved ? 'favorite' : 'favorite_border';
+        label.textContent = data.saved ? I18N.saved : I18N.save;
         count.textContent = data.count > 0 ? '(' + data.count + ')' : '';
     })
-    .catch(() => { btn.disabled = false; label.textContent = VZB_I18N_FAV.save; });
-}
+    .catch(function () { btn.disabled = false; label.textContent = before; vzToast(I18N.error, {type: 'error'}); });
+};
 
-// ── Copier le lien ─────────────────────────────────────────────────────────────
-function copyLink(btn) {
-    const url = window.location.href;
+// ── Copier le lien ────────────────────────────────────────────────────────────
+window.copyLink = function (btn) {
+    var url = window.location.href;
+    function done() {
+        var label = btn.querySelector('.copy-label');
+        btn.classList.add('is-copied');
+        if (label) label.textContent = I18N.copied;
+        setTimeout(function () {
+            btn.classList.remove('is-copied');
+            if (label) label.textContent = I18N.copyLink;
+        }, 2500);
+    }
     if (navigator.clipboard && navigator.clipboard.writeText) {
-        navigator.clipboard.writeText(url).then(() => _showCopied(btn));
+        navigator.clipboard.writeText(url).then(done);
     } else {
-        // Fallback pour navigateurs anciens
-        const ta = document.createElement('textarea');
+        // Repli pour les navigateurs anciens
+        var ta = document.createElement('textarea');
         ta.value = url;
         ta.style.position = 'fixed';
         ta.style.opacity = '0';
@@ -488,19 +460,9 @@ function copyLink(btn) {
         ta.select();
         document.execCommand('copy');
         document.body.removeChild(ta);
-        _showCopied(btn);
+        done();
     }
-}
-function _showCopied(btn) {
-    const label = btn.querySelector('.copy-label');
-    btn.dataset.copied = '1';
-    btn.classList.add('is-copied');
-    if (label) label.textContent = VZB_I18N.copied;
-    setTimeout(() => {
-        delete btn.dataset.copied;
-        btn.classList.remove('is-copied');
-        if (label) label.textContent = VZB_I18N.copyLink;
-    }, 2500);
-}
+};
+})();
 </script>
 {% endblock %}

@@ -1,33 +1,40 @@
 {% extends 'base.html' %}
 {% load static %}
 {% load i18n %}
+{% block page_title %}{% trans "Edit my profile" %} — Vazimba{% endblock %}
 
 {% block content %}
 <link rel="stylesheet" href="{% static 'css/pages/account-edit_account.css' %}">
 
 <div class="edit-page">
-    <div class="edit-card">
-
-        <!-- Header -->
-        <div class="edit-card-header">
-            <span class="material-icons">manage_accounts</span>
-            <h2>{% trans "Edit my profile" %}</h2>
+    <div class="vz-page-head edit-head">
+        <a class="vz-back" href="{% url 'account:view' user_id=request.user.pk %}"><span class="material-icons" aria-hidden="true">arrow_back</span>{% trans "Profile" %}</a>
+        <div class="vz-page-head__main">
+            <h1 class="vz-page-title"><span class="material-icons" aria-hidden="true">manage_accounts</span>{% trans "Edit my profile" %}</h1>
         </div>
+    </div>
+    <div class="edit-card">
 
         <!-- Avatar -->
         <div class="avatar-section">
             <div>
-                <div id="id_image_crop_confirm">
-                    <span id="id_cancel" class="material-icons">cancel</span>
-                    <span id="id_confirm" class="material-icons">check_circle</span>
+                {# Recadrage : « Annuler » puis « Valider » (affichés par le JS) #}
+                <div id="id_image_crop_confirm" class="vz-btn-row">
+                    <button type="button" id="id_cancel" class="vz-btn vz-btn--secondary vz-btn--sm">
+                        <span class="material-icons" aria-hidden="true">close</span>{% trans "Annuler" %}
+                    </button>
+                    <button type="button" id="id_confirm" class="vz-btn vz-btn--primary vz-btn--sm">
+                        <span class="material-icons" aria-hidden="true">check</span>{% trans "Valider" %}
+                    </button>
                 </div>
-                <div class="image-container" id="id_image_container">
+                {# (photo du membre connecté : en GET le formulaire n'a pas d'instance, form.instance donnait l'avatar par défaut) #}
+                <div class="image-container" id="id_image_container" role="button" tabindex="0" aria-label="{% trans 'Changer la photo de profil' %}">
                     <img class="rounded-circle" id="id_profile_image_display"
-                         src="{{ form.instance.profile_image.url }}" alt="avatar">
+                         src="{{ request.user.profile_image.url }}" alt="">
                     <div id="id_middle_container">
                         <div id="id_text">
-                            <span class="material-icons">photo_camera</span>
-                            Modifier
+                            <span class="material-icons" aria-hidden="true">photo_camera</span>
+                            {% trans "Modifier" %}
                         </div>
                     </div>
                 </div>
@@ -48,7 +55,7 @@
                 <div class="edit-errors">{{ error }}</div>
                 {% endfor %}{% endfor %}
                 {% if form.non_field_errors %}
-                <div class="edit-errors">{{ form.non_field_errors }}</div>
+                <div class="edit-errors">{% for error in form.non_field_errors %}{{ error }}{% if not forloop.last %}<br>{% endif %}{% endfor %}</div>
                 {% endif %}
 
                 <div class="edit-section-title">{% trans "Account information" %}</div>
@@ -58,8 +65,8 @@
                     <div class="edit-input-wrap">
                         <span class="material-icons">mail_outline</span>
                         <input type="email" name="email" id="id_input_email"
-                               placeholder="votre@email.com" required
-                               value="{{ form.email.value }}">
+                               placeholder="{% trans 'vous@exemple.com' %}" required autocomplete="email"
+                               value="{{ form.email.value|default:'' }}">
                     </div>
                 </div>
 
@@ -68,8 +75,8 @@
                     <div class="edit-input-wrap">
                         <span class="material-icons">alternate_email</span>
                         <input type="text" name="username" id="id_input_username"
-                               placeholder="nom_utilisateur" required
-                               value="{{ form.username.value }}">
+                               maxlength="30" required autocomplete="username"
+                               value="{{ form.username.value|default:'' }}">
                     </div>
                 </div>
 
@@ -80,7 +87,7 @@
                     <div class="edit-textarea-wrap">
                         <span class="material-icons">edit_note</span>
                         <textarea name="bio" id="id_input_bio"
-                                  placeholder="Parlez un peu de vous…">{{ form.bio.value }}</textarea>
+                                  placeholder="{% trans 'Parlez un peu de vous…' %}">{{ form.bio.value|default:'' }}</textarea>
                     </div>
                 </div>
 
@@ -89,23 +96,23 @@
                     <div class="edit-input-wrap">
                         <span class="material-icons">location_on</span>
                         <input type="text" name="location" id="id_input_location"
-                               placeholder="Ville, Pays"
-                               value="{{ form.location.value }}">
+                               placeholder="{% trans 'Ville, pays' %}"
+                               value="{{ form.location.value|default:'' }}">
                     </div>
                 </div>
 
                 <div class="edit-field">
-                    <label for="id_input_region">{% trans "Région (Près de chez moi)" %}</label>
+                    <label for="id_input_region">{% trans "Pays ou région (Près de chez moi)" %}</label>
                     <div class="edit-input-wrap edit-input-wrap--select">
                         <span class="material-icons">map</span>
                         <select name="region" id="id_input_region">
                             {% for code, label in region_choices %}
-                            <option value="{{ code }}" {% if form.region.value == code %}selected{% endif %}>{{ label }}</option>
+                            <option value="{{ code }}" {% if form.region.value == code %}selected{% endif %}>{% if code %}{{ label }}{% else %}{% trans "Non précisé" %}{% endif %}</option>
                             {% endfor %}
                         </select>
                     </div>
                     <small class="edit-help">
-                        Permet de filtrer le fil, les groupes et le Bazar par région.
+                        {% trans "Permet de filtrer le fil, les groupes et le Bazar par pays ou par région." %}
                     </small>
                 </div>
 
@@ -119,10 +126,12 @@
                     </label>
                 </div>
 
-                <button class="edit-save-btn" type="submit">
-                    <span class="material-icons">save</span>
-                    {% trans "Save changes" %}
-                </button>
+                <div class="vz-actions">
+                    <a class="vz-btn vz-btn--secondary" href="{% url 'account:view' user_id=request.user.pk %}">{% trans "Annuler" %}</a>
+                    <button class="vz-btn vz-btn--primary" type="submit">
+                        <span class="material-icons" aria-hidden="true">save</span>{% trans "Enregistrer" %}
+                    </button>
+                </div>
             </form>
 
             <!-- ═══════════════════════════════════════════════════════════════
@@ -130,7 +139,7 @@
                  ══════════════════════════════════════════════════════════════ -->
             <div id="phone-section">
                 <div class="edit-section-title">
-                    <i class="material-icons" aria-hidden="true">smartphone</i> Numéro de téléphone
+                    <i class="material-icons" aria-hidden="true">smartphone</i> {% trans "Numéro de téléphone" %}
                 </div>
 
                 <!-- Statut actuel -->
@@ -138,31 +147,31 @@
                 <div id="phone-current" class="phone-verified-box">
                     <i class="material-icons phone-verified-icon" aria-hidden="true">verified</i>
                     <div>
-                        <div class="phone-verified-title">Téléphone vérifié</div>
+                        <div class="phone-verified-title">{% trans "Téléphone vérifié" %}</div>
                         <div class="phone-verified-num" id="phone-verified-display">{{ request.user.phone_number }}</div>
                     </div>
-                    <button onclick="document.getElementById('phone-change-area').style.display='block';this.style.display='none';"
-                            class="edit-link-btn phone-change-btn" type="button">
-                        Changer
+                    <button onclick="document.getElementById('phone-change-area').hidden=false;this.hidden=true;"
+                            class="vz-btn vz-btn--ghost vz-btn--sm phone-change-btn" type="button">
+                        {% trans "Changer" %}
                     </button>
                 </div>
-                <div id="phone-change-area" style="display:none;">
+                <div id="phone-change-area" hidden>
                 {% else %}
                 <div id="phone-change-area">
                 {% endif %}
                     <!-- Champ numéro -->
                     <div class="edit-field" id="phone-input-group">
-                        <label for="phone-country">Pays</label>
+                        <label for="phone-country">{% trans "Country" %}</label>
                         <div class="edit-input-wrap edit-input-wrap--select">
                             <span class="material-icons">public</span>
                             <select id="phone-country" autocomplete="tel-country-code">
-                                <option value="">Choisir (ou écrire le numéro avec +indicatif)</option>
+                                <option value="">{% trans "Choose (or write +country code below)" %}</option>
                                 {% for code, name in phone_countries %}
                                 <option value="{{ code }}"{% if code == phone_country %} selected{% endif %}>{{ name }}</option>
                                 {% endfor %}
                             </select>
                         </div>
-                        <label for="phone-input">Votre numéro de mobile</label>
+                        <label for="phone-input">{% trans "Votre numéro de mobile" %}</label>
                         <div class="edit-row">
                             <div class="edit-input-wrap edit-input-wrap--grow">
                                 <span class="material-icons">phone</span>
@@ -170,13 +179,13 @@
                             </div>
                             <button id="btn-send-otp"
                                     onclick="phoneSendOtp()"
-                                    class="vz-btn vz-btn--primary edit-row-btn" type="button">
-                                Envoyer le code
+                                    class="vz-btn vz-btn--tonal edit-row-btn" type="button">
+                                {% trans "Envoyer le code" %}
                             </button>
                         </div>
                         {% if phone_channels|length > 1 %}
                         <div class="phone-channels">
-                            Recevoir le code par :
+                            {% trans "Receive the code by" %} :
                             {% for c in phone_channels %}
                             <label><input type="radio" name="phone-channel" value="{{ c }}"{% if forloop.first %} checked{% endif %}>
                                 {% if c == 'whatsapp' %}WhatsApp{% else %}SMS{% endif %}</label>
@@ -184,14 +193,14 @@
                         </div>
                         {% endif %}
                         <small class="edit-help">
-                            Tous les pays sont acceptés. Un numéro de mobile, pour recevoir le code.
+                            {% trans "Tous les pays sont acceptés. Un numéro de mobile, pour recevoir le code." %}
                         </small>
                     </div>
 
                     <!-- Zone saisie du code (masquée jusqu'à envoi) -->
-                    <div id="otp-input-group">
+                    <div id="otp-input-group" hidden>
                         <div class="edit-field">
-                            <label for="otp-input">Code reçu <span id="otp-phone-hint" class="edit-label-hint"></span></label>
+                            <label for="otp-input">{% trans "Code reçu" %} <span id="otp-phone-hint" class="edit-label-hint"></span></label>
                             <div class="edit-row">
                                 <div class="edit-input-wrap edit-input-wrap--grow">
                                     <span class="material-icons">sms</span>
@@ -202,14 +211,14 @@
                                 </div>
                                 <button id="btn-verify-otp" type="button"
                                         onclick="phoneVerifyOtp()"
-                                        class="vz-btn vz-btn--success edit-row-btn">
-                                    Vérifier
+                                        class="vz-btn vz-btn--tonal edit-row-btn">
+                                    {% trans "Vérifier" %}
                                 </button>
                             </div>
                             <small class="edit-help">
-                                Code valable 10 minutes •
-                                <button onclick="phoneSendOtp(true)" class="edit-link-btn" type="button">
-                                    Renvoyer
+                                {% trans "Code valable 10 minutes." %}
+                                <button onclick="phoneSendOtp(true)" class="vz-btn vz-btn--ghost vz-btn--sm" type="button">
+                                    {% trans "Renvoyer le code" %}
                                 </button>
                             </small>
                         </div>
@@ -290,7 +299,7 @@
         var startIndex = image.indexOf("base64,") + 7;
         var base64str = image.substr(startIndex);
         var decoded = atob(base64str);
-        if (decoded.length >= "{{ DATA_UPLOAD_MAX_MEMORY_SIZE }}") return null;
+        if (decoded.length >= {{ DATA_UPLOAD_MAX_MEMORY_SIZE|default:10485760 }}) return null;
         return base64str;
     }
 
@@ -309,14 +318,19 @@
                 },
                 timeout: 10000,
                 success: function(data) {
-                    if (data.result == "success") { document.getElementById("id_cancel").click(); }
-                    else if (data.result == "error") { vzAlert(data.exception); document.getElementById("id_cancel").click(); }
+                    if (data.result == "success") { window.location.reload(); }
+                    else { vzAlert(data.exception || "{% trans 'Une erreur est survenue'|escapejs %}"); }
                 },
-                error: function(data) { console.error("ERROR...", data); },
+                /* Le serveur répond 400 en cas d'échec : c'est ici qu'on arrive, pas dans success. */
+                error: function(xhr) {
+                    var msg = "{% trans 'Le recadrage de la photo a échoué. Réessayez avec une autre image.'|escapejs %}";
+                    if (xhr && xhr.responseJSON && xhr.responseJSON.exception) msg = xhr.responseJSON.exception;
+                    vzAlert(msg);
+                },
                 complete: function(data) { displayLoadingSpinner(false); }
             });
         } else {
-            vzAlert("Choisissez une image de moins de 10 Mo.");
+            vzAlert("{% trans 'Choisissez une image de moins de 10 Mo.'|escapejs %}");
             document.getElementById("id_cancel").click();
         }
     }
@@ -327,6 +341,9 @@
         cropBtn.style.display = "none";
         container.addEventListener("click", function() {
             document.getElementById('id_profile_image').click();
+        });
+        container.addEventListener("keydown", function(e) {
+            if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); document.getElementById('id_profile_image').click(); }
         });
     }
 
@@ -352,6 +369,17 @@
     'use strict';
 
     var CSRF = (document.cookie.match('(^|;)\\s*csrftoken=([^;]+)') || [])[2] || '';
+    var T = {
+        enterPhone: "{% trans 'Entrez votre numéro de téléphone.'|escapejs %}",
+        error:      "{% trans 'Une erreur est survenue'|escapejs %}",
+        sentTo:     "{% trans 'envoyé à'|escapejs %}",
+        sentWa:     "{% trans 'Code envoyé ! Regardez WhatsApp.'|escapejs %}",
+        sentSms:    "{% trans 'Code envoyé ! Vérifiez vos SMS.'|escapejs %}",
+        network:    "{% trans 'Erreur réseau. Réessayez.'|escapejs %}",
+        enterCode:  "{% trans 'Entrez le code à 6 chiffres.'|escapejs %}",
+        verified:   "{% trans 'Numéro vérifié ! Merci.'|escapejs %}",
+        verifiedTitle: "{% trans 'Téléphone vérifié'|escapejs %}"
+    };
     var currentPhone = '';   // numéro normalisé (E.164) renvoyé par le serveur
 
     function phoneChannel() {
@@ -373,10 +401,10 @@
 
     window.phoneSendOtp = function (resend) {
         var phone = document.getElementById('phone-input').value.trim();
-        if (!phone) { showMsg('Entrez votre numéro de téléphone.', true); return; }
+        if (!phone) { showMsg(T.enterPhone, true); return; }
 
         var btn = document.getElementById('btn-send-otp');
-        btn.disabled = true; btn.style.opacity = '.5';
+        btn.classList.add('is-loading'); btn.disabled = true;
         hideMsg();
 
         fetch('{% url "account:phone-send-otp" %}', {
@@ -388,32 +416,32 @@
         })
         .then(function (r) { return r.json().then(function(d) { return {ok: r.ok, data: d}; }); })
         .then(function (res) {
-            btn.disabled = false; btn.style.opacity = '';
-            if (!res.ok) { showMsg(res.data.error || 'Erreur.', true); return; }
+            btn.classList.remove('is-loading'); btn.disabled = false;
+            if (!res.ok) { showMsg(res.data.error || T.error, true); return; }
 
             currentPhone = res.data.phone;
             // Afficher la zone de saisie du code
-            document.getElementById('otp-input-group').style.display = 'block';
+            document.getElementById('otp-input-group').hidden = false;
             document.getElementById('phone-input-group').style.display = resend ? '' : 'none';
             var hint = document.getElementById('otp-phone-hint');
-            if (hint) hint.textContent = '— envoyé à ' + res.data.phone_display;
+            if (hint) hint.textContent = '— ' + T.sentTo + ' ' + res.data.phone_display;
             document.getElementById('otp-input').value = '';
             document.getElementById('otp-input').focus();
-            showMsg(res.data.channel === 'whatsapp' ? 'Code envoyé ! Regardez WhatsApp.' : 'Code envoyé ! Vérifiez vos SMS.', false);
+            showMsg(res.data.channel === 'whatsapp' ? T.sentWa : T.sentSms, false);
         })
         .catch(function () {
-            btn.disabled = false; btn.style.opacity = '';
-            showMsg('Erreur réseau. Réessayez.', true);
+            btn.classList.remove('is-loading'); btn.disabled = false;
+            showMsg(T.network, true);
         });
     };
 
     window.phoneVerifyOtp = function () {
         var code  = (document.getElementById('otp-input').value || '').trim();
         var phone = currentPhone || document.getElementById('phone-input').value.trim();
-        if (!code || code.length !== 6) { showMsg('Entrez le code à 6 chiffres.', true); return; }
+        if (!code || code.length !== 6) { showMsg(T.enterCode, true); return; }
 
         var btn = document.getElementById('btn-verify-otp');
-        btn.disabled = true; btn.style.opacity = '.5';
+        btn.classList.add('is-loading'); btn.disabled = true;
         hideMsg();
 
         fetch('{% url "account:phone-verify-otp" %}', {
@@ -425,13 +453,13 @@
         .then(function (r) { return r.json().then(function(d) { return {ok: r.ok, data: d}; }); })
         .then(function (res) {
             if (!res.ok) {
-                btn.disabled = false; btn.style.opacity = '';
-                showMsg(res.data.error || 'Erreur.', true);
+                btn.classList.remove('is-loading'); btn.disabled = false;
+                showMsg(res.data.error || T.error, true);
                 return;
             }
             // Succes — mettre à jour l'interface sans rechargement
-            showMsg('Numéro vérifié ! Merci.', false);
-            btn.innerHTML = '<i class="material-icons" aria-hidden="true">check</i> Vérifié';
+            showMsg(T.verified, false);
+            btn.disabled = true;
 
             // Remplacer la zone de saisie par le badge vérifié
             setTimeout(function () {
@@ -439,14 +467,16 @@
                 area.innerHTML =
                     '<div class="phone-verified-box phone-verified-box--flush">' +
                     '<i class="material-icons phone-verified-icon" aria-hidden="true">verified</i>' +
-                    '<div><div class="phone-verified-title">Téléphone vérifié</div>' +
-                    '<div class="phone-verified-num">' + res.data.phone_display + '</div></div>' +
+                    '<div><div class="phone-verified-title"></div>' +
+                    '<div class="phone-verified-num"></div></div>' +
                     '</div>';
+                area.querySelector('.phone-verified-title').textContent = T.verifiedTitle;
+                area.querySelector('.phone-verified-num').textContent = res.data.phone_display;
             }, 1200);
         })
         .catch(function () {
-            btn.disabled = false; btn.style.opacity = '';
-            showMsg('Erreur réseau. Réessayez.', true);
+            btn.classList.remove('is-loading'); btn.disabled = false;
+            showMsg(T.network, true);
         });
     };
 
@@ -467,7 +497,7 @@
 <div class="edit-zone">
     <div class="edit-zone-card">
         <h2 class="edit-zone-title">
-            <span class="material-icons">block</span>{% trans "Comptes bloqués" %}
+            <span class="material-icons" aria-hidden="true">block</span>{% trans "Comptes bloqués" %}
         </h2>
         {% if blocked_users %}
         <div class="edit-zone-list">

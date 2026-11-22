@@ -1,45 +1,18 @@
-/* Généré depuis tourisme/templates/tourisme/lieu_submit.html — styles de page servis en statique (cache navigateur + service worker)
-   au lieu d'être renvoyés dans chaque réponse HTML. Modifier ICI, plus dans le gabarit. */
+/* Styles des pages « Proposer un lieu » et « Modifier le lieu » (tourisme/lieu_submit.html,
+   lieu_edit.html, _lieu_fields.html, _lieu_photos.html). En-tête : .vz-page-head ; carte :
+   .vz-card.vz-card--block ; champs : .vz-field ; boutons : .vz-actions + .vz-btn (zoot-base.css). */
 
-/* ============================================================
-   TOURISME — PROPOSER UN LIEU
-   ============================================================ */
 .lieu-submit-wrap {
     max-width: 680px;
     margin: 0 auto;
     padding: 1.5rem 1rem 4rem;
 }
+.ls-card { padding: 1.6rem 1.4rem; }
 
-.tour-breadcrumb {
-    display: flex; align-items: center; gap: .3rem;
-    font-size: .8rem; color: var(--text-muted);
-    margin-bottom: 1.2rem; flex-wrap: wrap;
-}
-.tour-breadcrumb a { color: var(--accent); text-decoration: none; font-weight: 600; }
-.tour-breadcrumb a:hover { text-decoration: underline; }
-.tour-breadcrumb .material-icons { font-size: .9rem; }
-
-.ls-card {
-    background: var(--bg-card);
-    border: 1px solid var(--border);
-    border-radius: 18px;
-    padding: 1.8rem 1.6rem;
-    box-shadow: var(--shadow);
-}
-.ls-title {
-    font-size: 1.5rem; font-weight: 800; letter-spacing: -.03em;
-    color: var(--text); margin: 0 0 .4rem;
-    display: flex; align-items: center; gap: .5rem;
-}
-.ls-title .material-icons { color: var(--accent); font-size: 1.7rem; }
-.ls-subtitle {
-    font-size: .88rem; color: var(--text-muted); margin-bottom: 1.6rem;
-    line-height: 1.5;
-}
 .ls-info-banner {
     background: var(--accent-glow);
     border-left: 4px solid var(--accent);
-    border-radius: 0 10px 10px 0;
+    border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
     padding: .7rem 1rem;
     font-size: .83rem; color: var(--accent);
     margin-bottom: 1.4rem;
@@ -53,54 +26,31 @@
     margin: 1.4rem 0 .8rem;
     display: flex; align-items: center; gap: .3rem;
 }
+.ls-section-label:first-of-type { margin-top: 0; }
 .ls-section-label .material-icons { font-size: .9rem; color: var(--accent); }
 
-.ls-field { margin-bottom: 1rem; }
-.ls-label {
-    display: block; font-size: .82rem; font-weight: 600;
-    color: var(--text); margin-bottom: .35rem;
-}
-.ls-label span.req { color: var(--accent); }
-.ls-input, .ls-select, .ls-textarea {
-    width: 100%;
-    border: 1.5px solid var(--border);
-    border-radius: 10px;
-    background: var(--bg);
-    color: var(--text);
-    padding: .65rem .85rem;
-    font-size: .9rem;
-    font-family: inherit;
-    transition: border-color .18s;
-}
-.ls-input:focus, .ls-select:focus, .ls-textarea:focus {
-    outline: none; border-color: var(--accent);
-    box-shadow: 0 0 0 3px var(--accent-glow);
-}
-.ls-textarea { resize: vertical; min-height: 100px; }
-.ls-textarea--tall  { min-height: 140px; }
-.ls-textarea--short { min-height: 80px; }
+.ls-textarea--tall { min-height: 140px; }
 
-.ls-row { display: grid; grid-template-columns: 1fr 1fr; gap: .9rem; }
+.ls-row { display: grid; grid-template-columns: 1fr 1fr; gap: 0 .9rem; }
 @media (max-width: 520px) { .ls-row { grid-template-columns: 1fr; } }
 
-/* Image upload zone */
+/* Zone d'ajout de photos */
 .ls-upload-zone {
     border: 2px dashed var(--border);
-    border-radius: 12px;
+    border-radius: var(--radius);
     padding: 1.5rem 1rem;
     text-align: center;
     cursor: pointer;
     transition: border-color .2s, background .2s;
     position: relative;
 }
-.ls-upload-zone:hover, .ls-upload-zone.drag-over {
+.ls-upload-zone:hover, .ls-upload-zone.drag-over, .ls-upload-zone:focus-within {
     border-color: var(--accent);
     background: var(--accent-glow);
 }
 .ls-upload-zone input[type=file] {
     position: absolute; inset: 0; opacity: 0; cursor: pointer; width: 100%; height: 100%;
 }
-.ls-upload-icon { font-size: 2.2rem; color: var(--text-subtle); margin-bottom: .4rem; }
 .ls-upload-icon .material-icons { font-size: 2.5rem; color: var(--accent); }
 .ls-upload-label { font-size: .85rem; color: var(--text-muted); }
 .ls-upload-hint { font-size: .75rem; color: var(--text-subtle); margin-top: .2rem; }
@@ -108,7 +58,7 @@
     display: flex; gap: .5rem; flex-wrap: wrap; margin-top: .9rem;
 }
 .ls-preview-thumb {
-    width: 72px; height: 72px; border-radius: 8px; overflow: hidden;
+    width: 72px; height: 72px; border-radius: var(--radius-sm); overflow: hidden;
     border: 2px solid var(--border); position: relative; flex-shrink: 0;
 }
 .ls-preview-thumb img { width: 100%; height: 100%; object-fit: cover; }
@@ -119,23 +69,10 @@
     padding: 1px 4px; line-height: 1.4;
 }
 
-/* Error */
+/* Erreur du formulaire */
 .ls-error {
     background: rgba(var(--danger-rgb), .10); color: var(--danger); border-radius: var(--radius-sm);
     padding: .65rem .9rem; font-size: .85rem; margin-bottom: 1rem;
     display: flex; align-items: center; gap: .4rem;
 }
 .ls-error .material-icons { font-size: 1rem; }
-
-/* Submit */
-.ls-submit-btn {
-    display: inline-flex; align-items: center; gap: .5rem;
-    background: var(--accent); color: var(--on-accent);
-    border: none; border-radius: var(--radius);
-    padding: .75rem 2rem; font-size: .95rem; font-weight: 700;
-    cursor: pointer; transition: opacity .18s; width: 100%;
-    justify-content: center; margin-top: .5rem;
-  min-height: 44px; display: inline-flex; align-items: center; justify-content: center; gap: .4rem;
-}
-.ls-submit-btn:hover { opacity: .88; }
-.ls-submit-btn .material-icons { font-size: 1.15rem; }

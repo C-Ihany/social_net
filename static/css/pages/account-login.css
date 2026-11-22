@@ -1,5 +1,6 @@
-/* Généré depuis account/templates/account/login.html — styles de page servis en statique (cache navigateur + service worker)
-   au lieu d'être renvoyés dans chaque réponse HTML. Modifier ICI, plus dans le gabarit. */
+/* Feuille unique des pages de compte hors session : connexion, connexion par numéro, inscription,
+   mot de passe (changement, oubli, réinitialisation). Les sept feuilles quasi identiques d'avant
+   (account-register.css, base-password_*.css) ont été fusionnées ici. Boutons : .vz-btn (zoot-base.css). */
 
 /* ── Auth shared ──────────────────────────────────────────── */
 .auth-page {
@@ -121,7 +122,7 @@
     font-family: var(--font-primary, 'Space Grotesk', sans-serif);
 }
 [data-theme="dark"] .auth-heading {
-    background: linear-gradient(135deg, #fff 40%, rgba(var(--accent-rgb),.7) 100%);
+    background: linear-gradient(135deg, var(--text) 40%, rgba(var(--accent-rgb),.7) 100%);
     -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
 }
 .auth-sub {
@@ -182,41 +183,10 @@
     color: var(--neon-pink);
 }
 
-/* Button */
-.auth-btn {
-    display: block; width: 100%; height: 52px;
-    background: linear-gradient(135deg, var(--accent) 0%, var(--accent2) 100%);
-    color: #fff; border: none; border-radius: var(--radius);
-    font-size: 1rem; font-weight: 700; cursor: pointer;
-    letter-spacing: .02em;
-    transition: opacity .2s, transform .15s, box-shadow .2s;
-    box-shadow: 0 4px 18px var(--accent-glow);
-    margin-top: 1.25rem;
-    font-family: var(--font-primary, 'Space Grotesk', sans-serif);
-    position: relative;
-    overflow: hidden;
-}
-[data-theme="dark"] .auth-btn {
-    color: #000;
-    box-shadow: 0 0 20px rgba(var(--accent-rgb),.3), 0 4px 18px rgba(0,0,0,.4);
-}
-.auth-btn::after {
-    content: '';
-    position: absolute;
-    inset: 0;
-    background: linear-gradient(90deg, transparent 0%, rgba(255,255,255,.12) 50%, transparent 100%);
-    transform: translateX(-100%);
-    transition: transform .4s;
-}
-.auth-btn:hover::after { transform: translateX(100%); }
-.auth-btn:hover {
-    opacity: .9; transform: translateY(-1px);
-    box-shadow: 0 8px 28px var(--accent-glow);
-}
-[data-theme="dark"] .auth-btn:hover {
-    box-shadow: 0 0 28px rgba(var(--accent-rgb),.45), 0 8px 28px rgba(0,0,0,.4);
-}
-.auth-btn:active { transform: translateY(0); }
+/* Bouton principal : .vz-btn--primary --lg --block (zoot-base.css) ; ici, seulement l'espacement. */
+.auth-card form > .vz-btn,
+.auth-card .auth-alt-btn { margin-top: 1.25rem; }
+.auth-card .auth-alt-btn { margin-top: 0; }
 
 /* Links */
 .auth-links {
@@ -254,10 +224,6 @@
 .auth-errors .material-icons { font-size: 1rem; flex-shrink: 0; }
 
 /* ── Connexion par numéro de téléphone ─────────────────────────────────── */
-.auth-btn-phone {
-    display: flex; align-items: center; justify-content: center; gap: .5rem;
-    text-decoration: none; margin-top: .75rem;
-}
 .auth-channels { display: flex; gap: .75rem; }
 .auth-channel {
     flex: 1; display: flex; align-items: center; justify-content: center; gap: .4rem;
@@ -266,3 +232,66 @@
 }
 .auth-channel:has(input:checked) { background: rgba(var(--accent-rgb), .12); border-color: var(--accent); }
 .auth-hint { display: block; margin-top: .4rem; opacity: .7; font-size: .8rem; }
+
+/* ── Inscription : lien de connexion, force du mot de passe, CGU ───────── */
+.auth-login-link { text-align: center; font-size: .9rem; color: var(--text-muted); }
+.auth-login-link a { color: var(--accent); font-weight: 700; text-decoration: none; transition: opacity .2s; }
+.auth-login-link a:hover { opacity: .75; }
+.auth-sub-icon { font-size: 1rem; vertical-align: -3px; color: var(--accent); }
+
+.pw-strength { margin-top: .35rem; display: none; gap: .3rem; align-items: center; }
+.pw-strength.is-on { display: flex; }
+.pw-bar { flex: 1; height: 3px; border-radius: 3px; background: var(--border); transition: background .3s; }
+.pw-label { font-size: .7rem; color: var(--text-muted); white-space: nowrap; min-width: 60px; text-align: right; }
+/* Niveau 1 à 4 posé par le JS sur .pw-strength : couleurs en jetons, plus de hex dans le script */
+.pw-strength[data-level="1"] { --pw-color: var(--danger); }
+.pw-strength[data-level="2"] { --pw-color: var(--warning); }
+.pw-strength[data-level="3"] { --pw-color: var(--accent); }
+.pw-strength[data-level="4"] { --pw-color: var(--success); }
+.pw-strength[data-level="1"] .pw-bar:nth-child(-n+1),
+.pw-strength[data-level="2"] .pw-bar:nth-child(-n+2),
+.pw-strength[data-level="3"] .pw-bar:nth-child(-n+3),
+.pw-strength[data-level="4"] .pw-bar:nth-child(-n+4) { background: var(--pw-color); }
+.pw-strength[data-level] .pw-label { color: var(--pw-color); }
+
+.auth-terms-wrap { margin: .85rem 0 .2rem; }
+.auth-terms-label {
+    display: flex; align-items: flex-start; gap: .55rem;
+    font-size: .83rem; color: var(--text-muted);
+    cursor: pointer; line-height: 1.5;
+}
+.auth-terms-label input[type="checkbox"] {
+    width: 18px; height: 18px; flex-shrink: 0; margin-top: 1px;
+    accent-color: var(--accent); cursor: pointer;
+}
+.auth-terms-label a { color: var(--accent); font-weight: 700; text-decoration: none; }
+.auth-terms-label a:hover { text-decoration: underline; }
+.auth-terms-error {
+    background: rgba(var(--danger-rgb),.08); border: 1px solid rgba(var(--danger-rgb),.25);
+    border-radius: 8px; padding: .4rem .7rem; margin-bottom: .45rem;
+    font-size: .8rem; color: var(--danger);
+}
+.auth-terms-error .material-icons { font-size: .9rem; vertical-align: middle; }
+
+/* ── Mot de passe : encadré d'information, pages de confirmation ───────── */
+.auth-info-box {
+    background: rgba(var(--accent-rgb),.05); border: 1px solid rgba(var(--accent-rgb),.12);
+    border-radius: 10px; padding: .7rem 1rem; font-size: .84rem; color: var(--text-muted);
+    margin-bottom: 1.2rem; display: flex; align-items: flex-start; gap: .5rem;
+}
+.auth-info-box .material-icons { font-size: 1rem; flex-shrink: 0; margin-top: .1rem; color: var(--accent); }
+.auth-errors .material-icons { margin-top: .1rem; }
+.auth-errors ul { margin: 0; padding: 0; list-style: none; }
+.auth-back { text-align: center; font-size: .87rem; color: var(--text-muted); margin-top: 1.25rem; }
+.auth-back a { color: var(--accent); font-weight: 600; text-decoration: none; }
+.auth-back .material-icons { font-size: 1rem; vertical-align: -3px; }
+
+.auth-card--center { text-align: center; }
+.auth-icon-big { line-height: 1; color: var(--accent); margin-bottom: .75rem; }
+.auth-icon-big .material-icons { font-size: 3.5rem; }
+.auth-icon-big--warning { color: var(--warning); }
+.auth-body { font-size: .9rem; color: var(--text-muted); line-height: 1.6; margin-bottom: 1.5rem; }
+.auth-tip {
+    font-size: .8rem; color: var(--text-muted); margin: 0 0 1.5rem; padding: .6rem .9rem;
+    background: rgba(var(--accent-rgb),.05); border-radius: 8px; border: 1px solid rgba(var(--accent-rgb),.1);
+}

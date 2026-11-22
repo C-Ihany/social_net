@@ -1,10 +1,10 @@
 {% load static i18n %}
 <!DOCTYPE html>
-<html lang="fr" data-theme="light">
+{% get_current_language as LANGUAGE_CODE %}<html lang="{{ LANGUAGE_CODE|default:'fr' }}" data-theme="light">
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Vazimba — Hors ligne</title>
+    <title>Vazimba — {% trans "Hors ligne" %}</title>
     <link rel="icon" type="image/png" href="{% static 'logo/vazimba_icon.png' %}">
     <link rel="manifest" href="/manifest.json">
     <meta name="theme-color" content="#ffffff">
@@ -26,6 +26,8 @@
             --text: #111827;
             --text-muted: #5b6675;
             --border: #e3e8ed;
+            --on-accent: #ffffff;
+            --btn-bg: #eef2f5;
         }
         [data-theme="dark"] {
             --accent: #2dd4bf;
@@ -36,6 +38,8 @@
             --text: #e6ebf0;
             --text-muted: #9aa7b4;
             --border: #263039;
+            --on-accent: #0f1419;
+            --btn-bg: #1e262e;
         }
         * { box-sizing: border-box; margin: 0; padding: 0; }
         body {
@@ -84,29 +88,22 @@
             line-height: 1.6; margin-bottom: 1.8rem;
         }
 
-        /* ── Boutons ── */
-        .btn-retry {
-            display: inline-flex; align-items: center; gap: .4rem;
-            padding: .65rem 1.5rem; border-radius: 14px;
-            background: linear-gradient(135deg, var(--accent), var(--accent2));
-            color: #fff; font-size: .95rem; font-weight: 700;
-            border: none; cursor: pointer; text-decoration: none;
-            transition: opacity .15s, transform .1s;
-            width: 100%; justify-content: center; margin-bottom: .8rem;
+        /* ── Boutons : mêmes mesures que .vz-btn (la page doit s'afficher sans la feuille
+              du site, d'où la copie des valeurs) ── */
+        .vz-btn {
+            display: flex; align-items: center; justify-content: center; gap: .45rem;
+            width: 100%; min-height: 44px; padding: 0 1.15rem;
+            border: 1px solid transparent; border-radius: 12px;
+            font: inherit; font-size: .95rem; font-weight: 700; line-height: 1.2;
+            cursor: pointer; text-decoration: none;
+            transition: background .15s, transform .1s;
         }
-        .btn-retry:hover { opacity: .88; transform: translateY(-1px); }
-        .btn-retry .icon { font-size: 1.1rem; }
-
-        .btn-home {
-            display: inline-flex; align-items: center; gap: .4rem;
-            padding: .6rem 1.5rem; border-radius: 14px;
-            background: var(--bg); color: var(--text-muted);
-            font-size: .9rem; font-weight: 600;
-            border: 1.5px solid var(--border); cursor: pointer;
-            text-decoration: none; width: 100%; justify-content: center;
-            transition: border-color .15s, color .15s;
-        }
-        .btn-home:hover { border-color: var(--accent); color: var(--accent); text-decoration: none; }
+        .vz-btn:active { transform: scale(.97); }
+        .vz-btn .ico { font-size: 1.2rem; }
+        .vz-btn--primary { background: var(--accent); color: var(--on-accent); margin-bottom: .6rem; }
+        .vz-btn--primary:hover { filter: brightness(.94); }
+        .vz-btn--secondary { background: var(--btn-bg); color: var(--text); border-color: var(--border); }
+        .vz-btn--secondary:hover { filter: brightness(.97); text-decoration: none; }
 
         /* ── Tips ── */
         .offline-tips {
@@ -130,7 +127,7 @@
         #back-online {
             display: none;
             position: fixed; bottom: 1.5rem; left: 50%; transform: translateX(-50%);
-            background: var(--success); color: #fff; font-weight: 700; font-size: .9rem;
+            background: var(--success); color: var(--on-accent); font-weight: 700; font-size: .9rem;
             padding: .6rem 1.4rem; border-radius: 24px;
             box-shadow: 0 4px 20px rgba(var(--success-rgb),.35);
             animation: slideUp .3s ease;
@@ -143,31 +140,35 @@
     <div class="offline-card">
         <img src="{% static 'logo/vazimba_v2_icon.png' %}" alt="Vazimba" class="offline-logo">
         <div class="offline-signal"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path fill="currentColor" d="M22.99 9C19.15 5.16 13.8 3.76 8.84 4.78l2.52 2.52c3.47-.17 6.99 1.05 9.63 3.7l2-2zm-4 4c-1.29-1.29-2.84-2.13-4.49-2.56l3.53 3.53.96-.97zM2 3.05 5.07 6.1C3.6 6.82 2.22 7.78 1 9l1.99 2c1.24-1.24 2.67-2.16 4.2-2.77l2.24 2.24C7.81 10.89 6.27 11.73 5 13v.01L6.99 15c1.36-1.36 3.14-2.04 4.92-2.06L18.98 20l1.27-1.26L3.29 1.79 2 3.05zM9 17l3 3 3-3c-1.65-1.66-4.34-1.66-6 0z"/></svg></div>
-        <h1>Vous êtes hors ligne</h1>
+        <h1>{% trans "Vous êtes hors ligne" %}</h1>
         <p class="subtitle">
-            Pas de connexion internet détectée.<br>
-            Les pages déjà visitées restent accessibles.
+            {% trans "Pas de connexion internet détectée." %}<br>
+            {% trans "Les pages déjà visitées restent accessibles." %}
         </p>
-        <button class="btn-retry" onclick="retryConnection()" type="button">
-            <span class="icon">↻</span> Réessayer la connexion
+        <button class="vz-btn vz-btn--primary" id="offline-retry" type="button">
+            <svg class="ico" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path fill="currentColor" d="M17.65 6.35A7.96 7.96 0 0 0 12 4a8 8 0 1 0 7.73 10h-2.08A6 6 0 1 1 12 6c1.66 0 3.14.69 4.22 1.78L13 11h7V4l-2.35 2.35z"/></svg>
+            {% trans "Réessayer" %}
         </button>
-        <a class="btn-home" href="/">← Retour à l'accueil</a>
+        <a class="vz-btn vz-btn--secondary" href="/">
+            <svg class="ico" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path fill="currentColor" d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/></svg>
+            {% trans "Retour à l'accueil" %}
+        </a>
     </div>
 
     <div class="offline-tips">
-        <h3>Disponible hors ligne</h3>
-        <div class="tip"><span class="tip-icon"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path fill="currentColor" d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-5 14H7v-2h7v2zm3-4H7v-2h10v2zm0-4H7V7h10v2z"/></svg></span><span>Le fil d'actualité déjà chargé</span></div>
-        <div class="tip"><span class="tip-icon"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path fill="currentColor" d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/></svg></span><span>Les profils déjà consultés</span></div>
-        <div class="tip"><span class="tip-icon"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path fill="currentColor" d="M16 11c1.66 0 2.99-1.34 2.99-3S17.66 5 16 5c-1.66 0-3 1.34-3 3s1.34 3 3 3zm-8 0c1.66 0 2.99-1.34 2.99-3S9.66 5 8 5C6.34 5 5 6.34 5 8s1.34 3 3 3zm0 2c-2.33 0-7 1.17-7 3.5V19h14v-2.5c0-2.33-4.67-3.5-7-3.5zm8 0c-.29 0-.62.02-.97.05 1.16.84 1.97 1.97 1.97 3.45V19h6v-2.5c0-2.33-4.67-3.5-7-3.5z"/></svg></span><span>Les groupes déjà visités</span></div>
-        <div class="tip"><span class="tip-icon"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path fill="currentColor" d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04c.39-.39.39-1.02 0-1.41l-2.34-2.34a.9959.9959 0 0 0-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z"/></svg></span><span>Vos posts en attente seront envoyés à la reconnexion</span></div>
+        <h3>{% trans "Disponible hors ligne" %}</h3>
+        <div class="tip"><span class="tip-icon"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path fill="currentColor" d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-5 14H7v-2h7v2zm3-4H7v-2h10v2zm0-4H7V7h10v2z"/></svg></span><span>{% trans "Le fil d'actualité déjà chargé" %}</span></div>
+        <div class="tip"><span class="tip-icon"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path fill="currentColor" d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/></svg></span><span>{% trans "Les profils déjà consultés" %}</span></div>
+        <div class="tip"><span class="tip-icon"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path fill="currentColor" d="M16 11c1.66 0 2.99-1.34 2.99-3S17.66 5 16 5c-1.66 0-3 1.34-3 3s1.34 3 3 3zm-8 0c1.66 0 2.99-1.34 2.99-3S9.66 5 8 5C6.34 5 5 6.34 5 8s1.34 3 3 3zm0 2c-2.33 0-7 1.17-7 3.5V19h14v-2.5c0-2.33-4.67-3.5-7-3.5zm8 0c-.29 0-.62.02-.97.05 1.16.84 1.97 1.97 1.97 3.45V19h6v-2.5c0-2.33-4.67-3.5-7-3.5z"/></svg></span><span>{% trans "Les groupes déjà visités" %}</span></div>
+        <div class="tip"><span class="tip-icon"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path fill="currentColor" d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04c.39-.39.39-1.02 0-1.41l-2.34-2.34a.9959.9959 0 0 0-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z"/></svg></span><span>{% trans "Vos posts en attente seront envoyés à la reconnexion" %}</span></div>
     </div>
 
-    <div id="back-online"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path fill="currentColor" d="M9 16.17 4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg> Connexion rétablie — rechargement…</div>
+    <div id="back-online"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path fill="currentColor" d="M9 16.17 4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg> {% trans "Connexion rétablie — rechargement…" %}</div>
 
     <script>
-        function retryConnection() {
+        document.getElementById('offline-retry').addEventListener('click', function() {
             window.location.reload();
-        }
+        });
 
         // Détecter le retour de connexion
         window.addEventListener('online', function() {

@@ -692,3 +692,12 @@
   width: 100%; padding: .55rem; background: none; color: var(--text-muted);
   border: none; font-size: .88rem; cursor: pointer; font-family: var(--font-primary, sans-serif);
 }
+
+/* ── Cibles tactiles (2026-11) : 44 px minimum dans la visionneuse et le créateur ── */
+.zsv-ibtn, .zsc-ibtn, .zsv-reply-send, .zsc-music-close, .zsc-sel-play { width: 44px; height: 44px; }
+.zsv-emobtn { min-width: 44px; min-height: 44px; display: inline-flex; align-items: center; justify-content: center; }
+.zsv-views-btn, .zsv-del-btn, .zsc-done, .zsc-mchip, .zs-sheet-cancel { min-height: 44px; }
+.zsc-url-btn { height: 44px; }
+.zsc-chip, .zsc-gswatch, .zsc-pill-rm { position: relative; }
+.zsc-chip::after, .zsc-gswatch::after, .zsc-pill-rm::after { content: ''; position: absolute; inset: -6px; border-radius: 50%; }
+.zsc-pill-rm::after { inset: -9px; }

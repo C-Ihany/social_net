@@ -10,7 +10,7 @@ from personal.models import Announcement
 register = template.Library()
 
 
-# Un mot encadré d'astérisques dans le titre du Hero : *malagasy*
+# Un mot encadré d'astérisques dans le titre du Hero : *l'Afrique*
 _ACCENT = re.compile(r'\*([^*]+)\*')
 
 
@@ -19,7 +19,7 @@ def hero_accent(value):
     """Met en valeur les portions encadrées d'astérisques du titre du Hero.
 
     Le titre reste modifiable depuis l'admin, tout en gardant l'accent
-    typographique de la maquette : `qui parle *malagasy*.` rend « malagasy »
+    typographique de la maquette : `qui rassemble *l'Afrique*.` rend « l'Afrique »
     dans le serif italique de la charte.
 
     Le texte est échappé AVANT toute insertion de balise : la valeur vient de

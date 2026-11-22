@@ -1,36 +1,38 @@
 {% extends 'base.html' %}
 {% load static i18n %}
 
+{% block page_title %}{% trans "Tourisme" %} — Vazimba{% endblock %}
+{% block meta_description %}{% trans "Lieux à visiter et guides locaux à travers l'Afrique, recommandés par la communauté." %}{% endblock %}
+
 {% block extra_head %}
 <link rel="stylesheet" href="{% static 'css/pages/tourisme-home.css' %}">
 {% endblock %}
 
 {% block content %}
-<main>
 
 <!-- ── Hero ── -->
 <section class="tour-hero">
     <div class="tour-hero-badge">
         <span class="material-icons" aria-hidden="true">place</span>
-        Madagascar
+        {% trans "Afrique" %}
     </div>
     <h1 class="tour-hero-title">
-        {% trans "Découvrez" %}<br><span>Madagascar</span>
+        {% trans "Découvrez" %}<br><span>{% trans "l'Afrique" %}</span>
     </h1>
     <p class="tour-hero-sub">
-        {% trans "L'île rouge vous attend — baobabs, plages de corail, lémuriens et paysages à couper le souffle." %}
+        {% trans "Un continent vous attend — savanes, déserts, plages de corail, forêts et paysages à couper le souffle." %}
     </p>
     <div class="tour-hero-actions">
-        <a href="{% url 'tourisme:lieux_list' %}" class="tour-btn-primary">
+        <a href="{% url 'tourisme:lieux_list' %}" class="vz-btn vz-btn--lg vz-btn--pill tour-hero-btn tour-hero-btn--main">
             <span class="material-icons" aria-hidden="true">explore</span>
             {% trans "Lieux touristiques" %}
         </a>
-        <a href="{% url 'tourisme:guides_list' %}" class="tour-btn-outline">
+        <a href="{% url 'tourisme:guides_list' %}" class="vz-btn vz-btn--lg vz-btn--pill tour-hero-btn tour-hero-btn--ghost">
             <span class="material-icons" aria-hidden="true">person</span>
             {% trans "Trouver un guide" %}
         </a>
         {% if user.is_authenticated %}
-        <a href="{% url 'tourisme:lieu_submit' %}" class="tour-btn-outline">
+        <a href="{% url 'tourisme:lieu_submit' %}" class="vz-btn vz-btn--lg vz-btn--pill tour-hero-btn tour-hero-btn--ghost">
             <span class="material-icons" aria-hidden="true">add_location_alt</span>
             {% trans "Proposer un lieu" %}
         </a>
@@ -38,16 +40,16 @@
     </div>
     <div class="tour-hero-stats">
         <div class="tour-stat">
-            <div class="tour-stat-num">22</div>
-            <div class="tour-stat-label">{% trans "Régions" %}</div>
+            <div class="tour-stat-num">54</div>
+            <div class="tour-stat-label">{% trans "Pays" %}</div>
         </div>
         <div class="tour-stat">
-            <div class="tour-stat-num">5000+</div>
-            <div class="tour-stat-label">{% trans "Espèces endémiques" %}</div>
+            <div class="tour-stat-num">30</div>
+            <div class="tour-stat-label">{% trans "Millions de km²" %}</div>
         </div>
         <div class="tour-stat">
-            <div class="tour-stat-num">{% trans "5000 km" %}</div>
-            <div class="tour-stat-label">{% trans "De côtes" %}</div>
+            <div class="tour-stat-num">2 000+</div>
+            <div class="tour-stat-label">{% trans "Langues" %}</div>
         </div>
     </div>
 </section>
@@ -57,21 +59,13 @@
     <!-- ── Catégories ── -->
     <section class="tour-section tour-section--flush">
         <h2 class="tour-section-title">
-            <span class="material-icons">category</span>
+            <span class="material-icons" aria-hidden="true">category</span>
             {% trans "Explorer par catégorie" %}
         </h2>
         <div class="cat-strip">
-            {% for cat_key, cat_label in categories %}
-            <a href="{% url 'tourisme:lieux_list' %}?cat={{ cat_key }}" class="cat-chip">
-                {% if cat_key == 'nature' %}<span class="material-icons cat-chip__icon cat-chip__icon--nature" aria-hidden="true">forest</span>
-                {% elif cat_key == 'plage' %}<span class="material-icons cat-chip__icon cat-chip__icon--plage" aria-hidden="true">waves</span>
-                {% elif cat_key == 'histoire' %}<span class="material-icons cat-chip__icon cat-chip__icon--histoire" aria-hidden="true">museum</span>
-                {% elif cat_key == 'faune' %}<span class="material-icons cat-chip__icon cat-chip__icon--faune" aria-hidden="true">pets</span>
-                {% elif cat_key == 'montagne' %}<span class="material-icons cat-chip__icon cat-chip__icon--montagne" aria-hidden="true">landscape</span>
-                {% elif cat_key == 'circuit' %}<span class="material-icons cat-chip__icon cat-chip__icon--circuit" aria-hidden="true">route</span>
-                {% elif cat_key == 'ville' %}<span class="material-icons cat-chip__icon cat-chip__icon--ville" aria-hidden="true">location_city</span>
-                {% else %}<span class="material-icons cat-chip__icon cat-chip__icon--autre" aria-hidden="true">sports</span>
-                {% endif %}
+            {% for cat_key, cat_label, cat_icon in categories %}
+            <a href="{% url 'tourisme:lieux_list' %}?cat={{ cat_key }}" class="vz-chip cat-chip">
+                <span class="material-icons cat-chip__icon cat-chip__icon--{{ cat_key }}" aria-hidden="true">{{ cat_icon }}</span>
                 {{ cat_label }}
             </a>
             {% endfor %}
@@ -82,7 +76,7 @@
     <section class="tour-section">
         <div class="tour-section-header">
             <h2 class="tour-section-title">
-                <span class="material-icons">star</span>
+                <span class="material-icons" aria-hidden="true">star</span>
                 {% trans "Lieux populaires" %}
             </h2>
             <a href="{% url 'tourisme:lieux_list' %}" class="tour-see-all">
@@ -100,7 +94,7 @@
                         <img src="{{ img.image.url }}" alt="{{ lieu.name }}" loading="lazy">
                     {% else %}
                         <div class="vz-card__media-ph vz-card__media-ph--accent">
-                            <i class="material-icons">landscape</i>
+                            <i class="material-icons" aria-hidden="true">landscape</i>
                         </div>
                     {% endif %}
                     {% endwith %}
@@ -111,7 +105,7 @@
                     {% if lieu.region %}
                     <div class="vz-card__meta">
                         <span class="vz-card__meta-item">
-                            <i class="material-icons">place</i>
+                            <i class="material-icons" aria-hidden="true">place</i>
                             <span>{{ lieu.get_region_display }}</span>
                         </span>
                     </div>
@@ -133,7 +127,7 @@
     <section class="tour-section">
         <div class="tour-section-header">
             <h2 class="tour-section-title">
-                <span class="material-icons">verified_user</span>
+                <span class="material-icons" aria-hidden="true">verified_user</span>
                 {% trans "Guides vérifiés" %}
             </h2>
             <a href="{% url 'tourisme:guides_list' %}?verified=1" class="tour-see-all">
@@ -154,7 +148,7 @@
                         <span class="vz-card__avatar vz-card__avatar--lg vz-card__avatar--initial" aria-hidden="true">{{ guide.display_name|first|upper }}</span>
                     {% endif %}
                     {% if guide.is_verified %}
-                    <span class="vz-card__avatar-dot" title="{% trans 'Vérifié' %}"><i class="material-icons">check</i></span>
+                    <span class="vz-card__avatar-dot" title="{% trans 'Vérifié' %}"><i class="material-icons" aria-hidden="true">check</i></span>
                     {% endif %}
                 </div>
                 <div class="vz-card__body">
@@ -162,13 +156,13 @@
                     <div class="vz-card__meta">
                         {% if guide.is_verified %}
                         <span class="vz-chip vz-chip--sm vz-chip--success">
-                            <i class="material-icons">verified</i>
+                            <i class="material-icons" aria-hidden="true">verified</i>
                             {% trans "Vérifié" %}
                         </span>
                         {% endif %}
                         {% if guide.languages %}
                         <span class="vz-card__meta-item">
-                            <i class="material-icons">translate</i>
+                            <i class="material-icons" aria-hidden="true">translate</i>
                             <span>{{ guide.languages|truncatechars:40 }}</span>
                         </span>
                         {% endif %}
@@ -190,8 +184,8 @@
         <!-- CTA Devenir guide -->
         <div class="tour-cta">
             <span class="material-icons tour-cta-icon" aria-hidden="true">explore</span>
-            <div class="tour-cta-title">{% trans "Vous connaissez Madagascar ?" %}</div>
-            <div class="tour-cta-text">{% trans "Rejoignez notre réseau de guides touristiques et aidez les voyageurs à découvrir l'île." %}</div>
+            <div class="tour-cta-title">{% trans "Vous connaissez un coin d'Afrique ?" %}</div>
+            <div class="tour-cta-text">{% trans "Rejoignez notre réseau de guides touristiques et aidez les voyageurs à découvrir le continent." %}</div>
             {% if user.is_authenticated %}
             <a href="{% url 'tourisme:guide_register' %}" class="vz-btn vz-btn--primary vz-btn--pill">
                 <span class="material-icons" aria-hidden="true">add</span>
@@ -200,12 +194,11 @@
             {% else %}
             <a href="{% url 'login' %}?next={% url 'tourisme:guide_register' %}" class="vz-btn vz-btn--primary vz-btn--pill">
                 <span class="material-icons" aria-hidden="true">login</span>
-                {% trans "Se connecter pour s'inscrire" %}
+                {% trans "Se connecter" %}
             </a>
             {% endif %}
         </div>
     </section>
 
 </div><!-- /container -->
-</main>
 {% endblock %}

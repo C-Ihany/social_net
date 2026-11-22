@@ -1,5 +1,5 @@
 from django.shortcuts import render, redirect
-from django.http import HttpResponse, JsonResponse
+from django.http import Http404, HttpResponse, JsonResponse
 from django.contrib.auth import login, authenticate, logout
 from django.conf import settings
 from django.core.paginator import Paginator
@@ -8,6 +8,8 @@ from django.template.loader import render_to_string
 from django.core.files.storage import default_storage
 from django.utils.http import url_has_allowed_host_and_scheme
 from django.views.decorators.http import require_POST as _require_POST
+from django.utils.translation import gettext as _, gettext_lazy
+from django.templatetags.static import static as static_url
 from django.core.files.storage import FileSystemStorage
 import os
 from PIL import Image
@@ -39,7 +41,7 @@ MAX_AVATAR_BYTES = 10 * 1024 * 1024
 def register_view(request, *args, **kwargs):
 	user = request.user
 	if user.is_authenticated:
-		return HttpResponse("You are already authenticated as " + str(user.email))
+		return redirect('post:post-view')
 
 	context = {}
 	if request.POST:
@@ -64,7 +66,7 @@ def register_view(request, *args, **kwargs):
 			else:
 				logger.warning("register_view : authentification impossible juste après l'inscription de %s", email)
 				return redirect('login')
-			destination = _safe_redirect_target(request, kwargs.get("next"))
+			destination = _safe_redirect_target(request, kwargs.get("next") or request.GET.get("next"))
 			if destination:
 				return redirect(destination)
 			return redirect('post:post-view')
@@ -103,8 +105,18 @@ def login_view(request, *args, **kwargs):
 
 
 def logout_view(request):
-	logout(request)
-	return redirect("post:index")
+	"""Déconnexion en POST uniquement.
+
+	En GET (anciens liens, application Android, <img src="/logout/"> sur un
+	site tiers), on affiche une petite page de confirmation au lieu de
+	déconnecter : une requête GET n'est pas protégée contre le CSRF.
+	"""
+	if request.method == 'POST':
+		logout(request)
+		return redirect('landing')
+	if not request.user.is_authenticated:
+		return redirect('landing')
+	return render(request, 'account/logout_confirm.html')
 
 
 def get_redirect_if_exists(request):
@@ -145,10 +157,10 @@ def account_view(request, *args, **kwargs):
 	try:
 		account = Account.objects.get(pk=user_id)
 	except Account.DoesNotExist:
-		return HttpResponse("Utilisateur introuvable.", status=404)
+		raise Http404("Utilisateur introuvable.")
 	if not account.visible_to(request.user):
 		# (compte « Pola seulement » : invisible sur le réseau social, même réponse qu'inconnu)
-		return HttpResponse("Utilisateur introuvable.", status=404)
+		raise Http404("Utilisateur introuvable.")
 
 	# Posts (first page) — seuls les posts réellement visibles par le visiteur.
 	all_posts_qs = _visible_posts_for(request.user, account)
@@ -209,6 +221,8 @@ def account_view(request, *args, **kwargs):
 		context['bio'] = account.bio
 		context['location'] = account.location
 		context['date_joined'] = account.date_joined
+		from regions import REGION_LABELS
+		context['region_label'] = REGION_LABELS.get(account.region or '', '')
 
 		# Cover image
 		cover_url = None
@@ -243,8 +257,11 @@ def account_view(request, *args, **kwargs):
 		from collections import namedtuple
 		PhotoItem = namedtuple('PhotoItem', ['url', 'title', 'post_id'])
 		photo_list = []
+		# Uniquement les photos des posts que le visiteur a le droit de voir :
+		# sans ce filtre, les images des brouillons, des posts programmés et
+		# des groupes privés étaient exposées à n'importe qui.
 		for m in PostMedia.objects.filter(
-			post__author=account, media_type='image'
+			post__in=all_posts_qs.order_by().values('id'), media_type='image'
 		).select_related('post').order_by('-post__post_date')[:50]:
 			media_url = m.url
 			if media_url:
@@ -256,10 +273,12 @@ def account_view(request, *args, **kwargs):
 		context['request_sent'] = FriendRequestStatus.NO_REQUEST_SENT.value
 
 		context['is_blocked'] = False
+		context['can_see_friends'] = False
 		if request.user.is_authenticated:
 			context['is_blocked'] = UserBlock.objects.filter(blocker=request.user, blocked=account).exists()
 			if request.user == account:
 				context['is_self'] = True
+				context['can_see_friends'] = True
 				# Incoming friend requests for self
 				try:
 					friend_requests = FriendRequest.objects.filter(receiver=account, is_active=True)
@@ -268,6 +287,9 @@ def account_view(request, *args, **kwargs):
 					context['friend_requests'] = []
 			else:
 				context['is_friend'] = friends.filter(pk=request.user.pk).exists()
+				# Même règle que friend.views.friends_list_view : la liste
+				# d'amis n'est montrée qu'au membre lui-même et à ses amis.
+				context['can_see_friends'] = context['is_friend']
 
 				# Cas 1 : l'autre (account) nous a envoyé une demande → THEM_SENT_TO_YOU = 0
 				fr_from_them = get_friend_request_or_false(account, request.user)
@@ -286,54 +308,26 @@ def account_view(request, *args, **kwargs):
 						context['request_sent'] = FriendRequestStatus.NO_REQUEST_SENT.value
 						context['pending_friend_request_id'] = None
 
+		if not context['can_see_friends']:
+			context['friends'] = friends.none()
+
 	return render(request, 'account/account.html', context)
 
 
 def account_search_view(request):
-	context = {}
+	"""Ancienne page /search/ : une seule page de résultats, /recherche/.
+
+	La recherche du menu mobile arrivait ici, celle de la barre de bureau sur
+	/recherche/ (posts, annonces, membres) : deux pages différentes pour la
+	même action. L'adresse est gardée en redirection pour les anciens liens.
+	"""
+	from django.urls import reverse
+	from urllib.parse import urlencode
 	query = request.GET.get('q', '').strip()
-	context['query'] = query
-	context['total'] = 0
-
+	url = reverse('recherche')
 	if query:
-		from django.db.models import Q, Count
-		from post.models import Hashtag
-
-		# Users
-		# Recherche par pseudo uniquement : chercher sur `email` permettait de
-		# confirmer l'existence d'un compte à partir d'une adresse e-mail
-		# (énumération de comptes), y compris pour les profils hide_email=True.
-		accounts_qs = Account.objects.filter(
-			Q(username__icontains=query)
-		).exclude(pk=request.user.pk if request.user.is_authenticated else 0).exclude(pola_mode=Account.POLA_ONLY)[:20]
-
-		accounts_with_friend = []
-		if request.user.is_authenticated:
-			try:
-				fl = FriendList.objects.get(user=request.user)
-				friend_ids = set(fl.friends.values_list('id', flat=True))
-			except FriendList.DoesNotExist:
-				friend_ids = set()
-			for acc in accounts_qs:
-				accounts_with_friend.append((acc, acc.id in friend_ids))
-		else:
-			accounts_with_friend = [(acc, False) for acc in accounts_qs]
-
-		# Posts — uniquement les posts publiés : la recherche renvoyait aussi
-		# les brouillons et posts programmés des autres utilisateurs.
-		posts_qs = Post.objects.filter(
-			Q(title__icontains=query) | Q(body__icontains=query)
-		).filter(status='published').select_related('author')[:20]
-
-		# Hashtags
-		hashtags_qs = Hashtag.objects.filter(tag__icontains=query)[:10]
-
-		context['accounts'] = accounts_with_friend
-		context['posts'] = posts_qs
-		context['hashtags'] = hashtags_qs
-		context['total'] = len(accounts_with_friend) + posts_qs.count() + hashtags_qs.count()
-
-	return render(request, 'account/search_results.html', context)
+		url += '?' + urlencode({'q': query})
+	return redirect(url)
 
 
 def edit_account_view(request, *args, **kwargs):
@@ -343,9 +337,9 @@ def edit_account_view(request, *args, **kwargs):
 	try:
 		account = Account.objects.get(pk=user_id)
 	except Account.DoesNotExist:
-		return HttpResponse("Utilisateur introuvable.", status=404)
+		raise Http404("Utilisateur introuvable.")
 	if request.user != account:
-		return HttpResponse("Vous ne pouvez pas modifier ce profil.", status=403)
+		return redirect('account:edit', user_id=request.user.pk)
 
 	context = {}
 	if request.POST:
@@ -403,11 +397,11 @@ def save_temp_profile_image_from_base64String(imageString, user):
 def crop_image(request, *args, **kwargs):
 	user = request.user
 	if not user.is_authenticated:
-		return JsonResponse({'result': 'error', 'exception': 'Connexion requise.'}, status=401)
+		return JsonResponse({'result': 'error', 'exception': _('Connexion requise.')}, status=401)
 
 	imageString = request.POST.get("image")
 	if not imageString:
-		return JsonResponse({'result': 'error', 'exception': 'Aucune image reçue.'}, status=400)
+		return JsonResponse({'result': 'error', 'exception': _('Aucune image reçue.')}, status=400)
 
 	url = None
 	try:
@@ -448,7 +442,7 @@ def crop_image(request, *args, **kwargs):
 		logger.exception("crop_image a échoué pour l'utilisateur %s : %s", user.pk, e)
 		return JsonResponse({
 			'result': 'error',
-			'exception': "Le recadrage de l'image a échoué.",
+			'exception': _("Le recadrage de l'image a échoué."),
 		}, status=400)
 	finally:
 		if url:
@@ -479,7 +473,7 @@ def global_search_api(request):
 		try:
 			avatar = u.profile_image.url
 		except Exception:
-			avatar = '/static/images/default_profile_image.png'
+			avatar = static_url('images/profile_pic.png')
 		users.append({'id': u.id, 'username': u.username, 'avatar': avatar})
 
 	# Hashtags
@@ -487,10 +481,13 @@ def global_search_api(request):
 	hashtags = [{'id': h.id, 'tag': h.tag, 'count': h.count} for h in hashtags_qs]
 
 	# Posts
-	posts_qs = Post.objects.filter(
-		Q(title__icontains=query) | Q(body__icontains=query)
-	).filter(status='published').select_related('author')[:5]
-	posts = [{'id': p.id, 'title': p.title or p.body[:60], 'author': p.author.username} for p in posts_qs]
+	# visible_posts() : ni brouillons, ni posts de groupes privés, ni auteurs bloqués.
+	from post.visibility import visible_posts
+	posts_qs = visible_posts(
+		Post.objects.filter(Q(title__icontains=query) | Q(body__icontains=query)).select_related('author'),
+		request.user,
+	)[:5]
+	posts = [{'id': p.id, 'title': p.title or (p.body or '')[:60], 'author': p.author.username} for p in posts_qs]
 
 	# Annonces bazar
 	annonces_qs = Annonce.objects.filter(
@@ -587,13 +584,13 @@ def profile_posts_more(request, *args, **kwargs):
 def update_cover_image(request):
 	"""AJAX endpoint pour changer la photo de couverture."""
 	if not request.user.is_authenticated:
-		return JsonResponse({'error': 'Non authentifié.'}, status=401)
+		return JsonResponse({'error': _('Non authentifié.')}, status=401)
 	if request.method != 'POST':
-		return JsonResponse({'error': 'Méthode non autorisée.'}, status=405)
+		return JsonResponse({'error': _('Méthode non autorisée.')}, status=405)
 
 	cover_file = request.FILES.get('cover')
 	if not cover_file:
-		return JsonResponse({'error': 'Aucun fichier reçu.'}, status=400)
+		return JsonResponse({'error': _('Aucun fichier reçu.')}, status=400)
 
 	allowed_mime = {
 		'image/jpeg', 'image/jpg', 'image/png', 'image/webp',
@@ -601,10 +598,10 @@ def update_cover_image(request):
 	}
 	mime = (cover_file.content_type or '').split(';')[0].strip().lower()
 	if mime not in allowed_mime:
-		return JsonResponse({'error': 'Format non supporté (jpeg, png, webp, gif, heic…).'}, status=400)
+		return JsonResponse({'error': _('Format non supporté (jpeg, png, webp, gif, heic…).')}, status=400)
 
 	if cover_file.size > 10 * 1024 * 1024:
-		return JsonResponse({'error': 'Fichier trop volumineux (max 10 Mo).'}, status=400)
+		return JsonResponse({'error': _('Fichier trop volumineux (max 10 Mo).')}, status=400)
 
 	# L'extension était reprise du nom de fichier envoyé par le client : un
 	# fichier « image/png » nommé payload.html était stocké tel quel sur le
@@ -636,7 +633,7 @@ def update_cover_image(request):
 		return JsonResponse({'ok': True, 'url': url})
 	except Exception as e:
 		logger.exception("update_cover_image FAILED: %s", e)
-		return JsonResponse({'error': "L'envoi de l'image a échoué."}, status=500)
+		return JsonResponse({'error': _("L'envoi de l'image a échoué.")}, status=500)
 
 
 # ─────────────────────────────────────────────────────────────────────────────
@@ -674,7 +671,7 @@ def phone_send_otp(request):
 	sans lui, le premier moyen proposé.)
 	"""
 	if not request.user.is_authenticated:
-		return JsonResponse({'error': 'Connexion requise.'}, status=401)
+		return JsonResponse({'error': _('Connexion requise.')}, status=401)
 
 	data = request.POST or _json_body(request)
 	channel = otp_codes.pick_channel(data.get('channel', ''))
@@ -684,13 +681,13 @@ def phone_send_otp(request):
 	# Un numéro déjà confirmé par un autre compte ne peut pas l'être une 2e fois : sinon, la
 	# connexion par numéro ne saurait plus quel compte ouvrir.
 	if Account.objects.filter(phone_number=phone_e164, phone_verified=True).exclude(pk=request.user.pk).exists():
-		return JsonResponse({'error': 'Ce numéro est déjà lié à un autre compte.'}, status=400)
+		return JsonResponse({'error': _('Ce numéro est déjà lié à un autre compte.')}, status=400)
 	refused = otp_codes.channel_refused(phone_e164, channel)
 	if refused:
 		return JsonResponse({'error': refused}, status=400)
 	if otp_codes.too_many_sends(phone_e164):
 		return JsonResponse({
-			'error': 'Trop de tentatives. Attendez 1 heure avant de demander un nouveau code.'
+			'error': _('Trop de tentatives. Attendez 1 heure avant de demander un nouveau code.')
 		}, status=429)
 	error = otp_codes.issue_code(request.user, phone_e164, 'verify', channel)
 	if error:
@@ -712,12 +709,12 @@ def phone_verify_otp(request):
 	Body (JSON ou form) : { "phone": "+491512345678", "country": "DE", "code": "123456" }
 	"""
 	if not request.user.is_authenticated:
-		return JsonResponse({'error': 'Connexion requise.'}, status=401)
+		return JsonResponse({'error': _('Connexion requise.')}, status=401)
 
 	data  = request.POST or _json_body(request)
 	phone_e164 = otp_codes.read_phone(data.get('phone', ''), data.get('country', ''))
 	if not phone_e164:
-		return JsonResponse({'error': 'Numéro invalide.'}, status=400)
+		return JsonResponse({'error': _('Numéro invalide.')}, status=400)
 	otp, error = otp_codes.check_code(phone_e164, 'verify', data.get('code'), user=request.user)
 	if error:
 		return JsonResponse({'error': error}, status=400)
@@ -733,18 +730,18 @@ def phone_verify_otp(request):
 	return otp_codes.remember_country(JsonResponse({
 		'ok': True,
 		'phone_display': format_phone_display(phone_e164),
-		'message': 'Numéro vérifié avec succès !',
+		'message': _('Numéro vérifié avec succès !'),
 	}), phone_e164)
 
 
-_INVALID_PHONE = ("Numéro invalide. Choisissez votre pays, ou écrivez le numéro avec l'indicatif "
+_INVALID_PHONE = gettext_lazy("Numéro invalide. Choisissez votre pays, ou écrivez le numéro avec l'indicatif "
                   "(+…). Il faut un numéro de mobile.")
 
 
 # Ce qu'on répond quand un code est demandé, QUE LE NUMÉRO AIT UN COMPTE OU NON : sinon la
 # page dirait à n'importe qui quels numéros sont inscrits sur Vazimba.
-_CODE_SENT = "Si ce numéro est lié à un compte Vazimba, un code vient d'y être envoyé."
-_CODE_SENT_EMAIL = ("Si ce numéro est lié à un compte Vazimba, un code vient d'être envoyé à l'adresse "
+_CODE_SENT = gettext_lazy("Si ce numéro est lié à un compte Vazimba, un code vient d'y être envoyé.")
+_CODE_SENT_EMAIL = gettext_lazy("Si ce numéro est lié à un compte Vazimba, un code vient d'être envoyé à l'adresse "
                     "e-mail de ce compte (regardez aussi dans les indésirables).")
 
 
@@ -772,7 +769,7 @@ def phone_login_view(request):
 		elif refused:
 			context['error'] = refused
 		elif otp_codes.too_many_sends(phone):
-			context['error'] = 'Trop de codes demandés pour ce numéro. Réessayez dans une heure.'
+			context['error'] = _('Trop de codes demandés pour ce numéro. Réessayez dans une heure.')
 		else:
 			account = otp_codes.account_for_phone(phone)
 			error = otp_codes.issue_code(account, phone, 'login', channel) if account else None
@@ -785,7 +782,7 @@ def phone_login_view(request):
 	elif request.method == 'POST' and request.POST.get('step') == 'code':
 		phone = request.session.get('phone_login')
 		if not phone:
-			context['error'] = 'Recommencez : indiquez votre numéro.'
+			context['error'] = _('Recommencez : indiquez votre numéro.')
 		else:
 			otp, error = otp_codes.check_code(phone, 'login', request.POST.get('code'))
 			if error:
@@ -794,7 +791,7 @@ def phone_login_view(request):
 				request.session.pop('phone_login', None)
 				user = otp.user
 				if not user.is_active:
-					context['error'] = 'Ce compte est désactivé.'
+					context['error'] = _('Ce compte est désactivé.')
 				else:
 					login(request, user, backend='account.backends.CaseInsensitiveModelBackend')
 					destination = get_redirect_if_exists(request)
@@ -821,8 +818,8 @@ def toggle_block(request, user_id):
 	UserBlock.objects.create(blocker=request.user, blocked=other)
 	# Un bloqué n'est plus un ami ni un demandeur
 	try:
-		mine, _ = FriendList.objects.get_or_create(user=request.user)
-		theirs, _ = FriendList.objects.get_or_create(user=other)
+		mine, _c = FriendList.objects.get_or_create(user=request.user)
+		theirs, _c = FriendList.objects.get_or_create(user=other)
 		mine.friends.remove(other); theirs.friends.remove(request.user)
 		FriendRequest.objects.filter(
 			models_Q(sender=request.user, receiver=other) | models_Q(sender=other, receiver=request.user),
@@ -834,6 +831,9 @@ def toggle_block(request, user_id):
 
 
 # ── Suppression du compte ───────────────────────────────────────────────────
+DELETE_WORD = 'SUPPRIMER'   # mot à recopier, identique dans les trois langues
+
+
 def delete_account_view(request):
 	"""GET : page de confirmation. POST (mot de passe) : suppression définitive.
 
@@ -844,11 +844,19 @@ def delete_account_view(request):
 	if not request.user.is_authenticated:
 		return redirect(f"{settings.LOGIN_URL}?next={request.path}")
 	error = None
+	# Compte sans mot de passe (créé depuis Pola, connexion par numéro) : il ne
+	# pouvait jamais confirmer. Il recopie le mot SUPPRIMER à la place.
+	has_password = request.user.has_usable_password()
 	if request.method == 'POST':
-		password = request.POST.get('password', '')
-		if not request.user.check_password(password):
-			error = 'wrong_password'
+		if has_password:
+			confirmed = request.user.check_password(request.POST.get('password', ''))
+			if not confirmed:
+				error = 'wrong_password'
 		else:
+			confirmed = request.POST.get('confirm_word', '').strip().upper() == DELETE_WORD
+			if not confirmed:
+				error = 'wrong_word'
+		if confirmed:
 			user = request.user
 			logout(request)
 			try:
@@ -871,4 +879,6 @@ def delete_account_view(request):
 					pass
 				user.save()
 			return render(request, 'account/delete_account_done.html')
-	return render(request, 'account/delete_account.html', {'error': error})
+	return render(request, 'account/delete_account.html', {
+		'error': error, 'has_password': has_password, 'delete_word': DELETE_WORD,
+	})

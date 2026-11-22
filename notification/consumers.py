@@ -207,8 +207,13 @@ class NotificationConsumer(AsyncJsonWebsocketConsumer):
 			elif command == "call_reject_global":
 				# Le callee (sur n'importe quelle page) rejette l'appel entrant.
 				# On forward le signal CALL_REJECT vers le groupe personnel du caller.
-				caller_id = content.get("caller_id")
-				if caller_id:
+				# Seul un correspondant réel peut refuser : il faut une conversation privée
+				# entre les deux comptes, sinon n'importe qui pourrait couper un appel.
+				try:
+					caller_id = int(content.get("caller_id"))
+				except (TypeError, ValueError):
+					caller_id = None
+				if caller_id and await _shares_private_room(self.scope["user"].id, caller_id):
 					from chat.constants import MSG_TYPE_CALL_REJECT
 					try:
 						await self.channel_layer.group_send(
@@ -498,9 +503,13 @@ def accept_friend_request(user, notification_id):
             notification = Notification.objects.get(pk=notification_id)
             friend_request = notification.content_object
             # confirm this is the correct user
-            if friend_request.receiver == user:
+            # (une demande annulée, refusée ou désactivée par un blocage ne s'accepte plus)
+            if (getattr(friend_request, 'receiver', None) == user
+                    and getattr(friend_request, 'is_active', False)):
                 # accept the request and get the updated notification
                 updated_notification = friend_request.accept()
+                if updated_notification is None:
+                    updated_notification = notification
 
                 # return the notification associated with this FriendRequest
                 s = LazyNotificationEncoder()
@@ -522,9 +531,10 @@ def decline_friend_request(user, notification_id):
 			notification = Notification.objects.get(pk=notification_id)
 			friend_request = notification.content_object
 			# confirm this is the correct user
-			if friend_request.receiver == user:
+			if (getattr(friend_request, 'receiver', None) == user
+					and getattr(friend_request, 'is_active', False)):
 				# accept the request and get the updated notification
-				updated_notification = friend_request.decline()
+				updated_notification = friend_request.decline() or notification
 
 				# return the notification associated with this FriendRequest
 				s = LazyNotificationEncoder()
@@ -713,3 +723,10 @@ def get_unread_chat_notification_count(user):
         raise ClientError("AUTH_ERROR", "User must be authenticated to get notifications.")
     return None
 
+
+@database_sync_to_async
+def _shares_private_room(user_id, other_id):
+	from django.db.models import Q
+	from chat.models import PrivateChatRoom
+	return PrivateChatRoom.objects.filter(
+		Q(user1_id=user_id, user2_id=other_id) | Q(user1_id=other_id, user2_id=user_id)).exists()

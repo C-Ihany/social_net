@@ -6,24 +6,34 @@
 <div class="del-page">
     <div class="del-card">
         <div class="vz-dialog-head">
-            <span class="material-icons">delete_forever</span>
+            <span class="material-icons" aria-hidden="true">delete_forever</span>
             <h1 class="vz-dialog-title">{% trans "Supprimer mon compte" %}</h1>
         </div>
         <p class="vz-dialog-text">{% trans "Cette action est définitive : votre profil, vos publications, vos stories, vos messages et vos annonces seront supprimés. Les commandes et transactions déjà réalisées sont conservées de façon anonyme, comme l’exige la loi." %}</p>
         <p class="vz-dialog-text">{% trans "Vous pouvez aussi simplement vous déconnecter si vous souhaitez faire une pause." %}</p>
         {% if error == 'wrong_password' %}
         <div class="vz-field-error" role="alert">{% trans "Mot de passe incorrect." %}</div>
+        {% elif error == 'wrong_word' %}
+        <div class="vz-field-error" role="alert">{% blocktrans %}Écrivez exactement le mot {{ delete_word }} pour confirmer.{% endblocktrans %}</div>
         {% endif %}
         <form method="post" data-vz-confirm="{% trans 'Supprimer définitivement votre compte Vazimba ?' %}" data-vz-danger data-vz-confirm-label="{% trans 'Oui, supprimer' %}">
             {% csrf_token %}
+            {% if has_password %}
             <div class="vz-field{% if error %} has-error{% endif %}">
                 <label for="del-password">{% trans "Confirmez avec votre mot de passe" %} <span class="vz-req">*</span></label>
                 <input type="password" id="del-password" name="password" required autocomplete="current-password">
             </div>
-            <div class="vz-dialog-actions">
+            {% else %}
+            {# Compte sans mot de passe (connexion par numéro, compte créé depuis Pola) #}
+            <div class="vz-field{% if error %} has-error{% endif %}">
+                <label for="del-word">{% blocktrans %}Pour confirmer, écrivez le mot {{ delete_word }}{% endblocktrans %} <span class="vz-req">*</span></label>
+                <input type="text" id="del-word" name="confirm_word" required autocomplete="off" autocapitalize="characters" spellcheck="false">
+            </div>
+            {% endif %}
+            <div class="vz-actions">
                 <a class="vz-btn vz-btn--secondary" href="{% url 'account:edit' user_id=request.user.pk %}">{% trans "Annuler" %}</a>
                 <button type="submit" class="vz-btn vz-btn--danger">
-                    <span class="material-icons">delete_forever</span>{% trans "Supprimer mon compte" %}
+                    <span class="material-icons" aria-hidden="true">delete_forever</span>{% trans "Supprimer mon compte" %}
                 </button>
             </div>
         </form>

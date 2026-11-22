@@ -8,10 +8,13 @@ from django.core.paginator import Paginator
 from django.core.files.uploadedfile import InMemoryUploadedFile
 from django.http import Http404, JsonResponse
 from django.utils import timezone
+from django.core.exceptions import ValidationError
+from django.utils.translation import gettext as _
 from django.views.decorators.http import require_POST
 
 from .models import Annonce, AnnonceImage, SellerVerification, BazarFavori
 from .forms import AnnonceForm
+from .uploads import clean_image, clean_images
 
 # ── Constantes ─────────────────────────────────────────────────────────────────
 PAGE_SIZE            = 12
@@ -153,7 +156,15 @@ def bazar_index(request):
     paginator = Paginator(qs, PAGE_SIZE)
     page_obj  = paginator.get_page(request.GET.get('page'))
 
-    from regions import REGION_CHOICES, REGION_LABELS
+    # Chaînes de requête prêtes à l'emploi : pagination (tout sauf `page`) et
+    # onglets Tout / À vendre / À louer (tout sauf `page` et `type`).
+    params = request.GET.copy()
+    params.pop('page', None)
+    qs_page = params.urlencode()
+    params.pop('type', None)
+    qs_tabs = params.urlencode()
+
+    from regions import REGION_CHOICES, REGION_LABELS, REGION_SHORT
     # Région courante de l'utilisateur (pour pré-sélectionner "Ma région")
     user_region = ''
     if request.user.is_authenticated:
@@ -176,7 +187,12 @@ def bazar_index(request):
         'total':           paginator.count,
         'region_choices':  REGION_CHOICES,
         'user_region':     user_region,
-        'user_region_label': REGION_LABELS.get(user_region, ''),
+        'user_region_label': REGION_SHORT.get(user_region, ''),
+        'sel_cat_label':   dict(Annonce.CATEGORY_CHOICES).get(category, ''),
+        'qs_page':         qs_page,
+        'qs_tabs':         qs_tabs,
+        'has_filters':     bool(q or category or condition or region or listing_type or only_verified
+                                or price_min or price_max or sort != 'recent'),
     }
     return render(request, 'bazar/index.html', context)
 
@@ -195,8 +211,14 @@ def annonce_detail(request, pk):
         pk=pk,
     )
 
+    is_owner = request.user.is_authenticated and request.user == annonce.seller
+    # Une annonce en pause ou expirée n'est plus publique : seuls son vendeur et
+    # l'équipe la voient encore (« En pause » masque l'annonce, dit le formulaire).
+    if annonce.status in ('pause', 'expiree') and not is_owner and not request.user.is_staff:
+        raise Http404
+
     # Incrémenter le compteur de vues (pas pour le vendeur lui-même)
-    if request.user != annonce.seller:
+    if not is_owner:
         annonce.increment_views()
 
     # Annonces similaires (même catégorie, même type, actives, pas la même)
@@ -223,8 +245,9 @@ def annonce_detail(request, pk):
     context = {
         'annonce':    annonce,
         'images':     annonce.images.all(),
+        'gallery_urls': [img.image.url for img in annonce.images.all()],
         'similaires': similaires,
-        'is_owner':   request.user.is_authenticated and request.user == annonce.seller,
+        'is_owner':   is_owner,
         'is_saved':   is_saved,
         'fav_count':  fav_count,
     }
@@ -251,9 +274,11 @@ def annonce_create(request):
 
             # Gérer les images uploadées (multiple files)
             # _heic_to_jpeg convertit silencieusement les photos iPhone si besoin
-            images = request.FILES.getlist('images')
             limit  = _get_max_images(request.user)
-            for i, img_file in enumerate(images[:limit]):
+            images, refused = clean_images(request.FILES.getlist('images'), limit)
+            for msg in refused:
+                messages.warning(request, msg)
+            for i, img_file in enumerate(images):
                 AnnonceImage.objects.create(
                     annonce=annonce,
                     image=_prepare_image(img_file),
@@ -261,10 +286,10 @@ def annonce_create(request):
                     order=i,
                 )
 
-            messages.success(request, 'Votre annonce a été publiée avec succès !')
+            messages.success(request, _('Votre annonce est publiée.'))
             return redirect('bazar:detail', pk=annonce.pk)
         else:
-            messages.error(request, 'Veuillez corriger les erreurs ci-dessous.')
+            messages.error(request, _('Vérifiez les champs signalés.'))
     else:
         form = AnnonceForm()
 
@@ -285,7 +310,7 @@ def annonce_edit(request, pk):
     annonce = get_object_or_404(Annonce, pk=pk)
 
     if annonce.seller != request.user:
-        messages.error(request, 'Vous n\'êtes pas autorisé à modifier cette annonce.')
+        messages.error(request, _('Vous ne pouvez pas modifier cette annonce.'))
         return redirect('bazar:detail', pk=annonce.pk)
 
     if request.method == 'POST':
@@ -294,23 +319,23 @@ def annonce_edit(request, pk):
             annonce = form.save()
 
             # Ajouter de nouvelles images
-            new_images    = request.FILES.getlist('images')
             current_count = annonce.images.count()
             limit         = _get_max_images(request.user)
+            new_images, refused = clean_images(request.FILES.getlist('images'), limit - current_count)
+            for msg in refused:
+                messages.warning(request, msg)
             for i, img_file in enumerate(new_images):
-                if current_count + i >= limit:
-                    break
                 AnnonceImage.objects.create(
                     annonce=annonce,
                     image=_prepare_image(img_file),
-                    is_primary=False,
+                    is_primary=(current_count == 0 and i == 0),
                     order=current_count + i,
                 )
 
-            messages.success(request, 'Annonce mise à jour.')
+            messages.success(request, _('Annonce mise à jour.'))
             return redirect('bazar:detail', pk=annonce.pk)
         else:
-            messages.error(request, 'Veuillez corriger les erreurs.')
+            messages.error(request, _('Vérifiez les champs signalés.'))
     else:
         form = AnnonceForm(instance=annonce)
 
@@ -333,7 +358,7 @@ def delete_image(request, img_pk):
     """
     img = get_object_or_404(AnnonceImage, pk=img_pk)
     if img.annonce.seller != request.user:
-        return JsonResponse({'error': 'Non autorisé'}, status=403)
+        return JsonResponse({'error': _('Action non autorisée.')}, status=403)
 
     annonce_pk = img.annonce.pk
     img.delete()
@@ -359,12 +384,14 @@ def mark_sold(request, pk):
     """
     annonce = get_object_or_404(Annonce, pk=pk)
     if annonce.seller != request.user:
-        messages.error(request, 'Non autorisé.')
+        messages.error(request, _('Action non autorisée.'))
         return redirect('bazar:detail', pk=pk)
 
-    annonce.status = 'vendue'
+    # Une location se clôt en « louée », une vente en « vendue »
+    annonce.status = 'louee' if annonce.is_location else 'vendue'
     annonce.save(update_fields=['status'])
-    messages.success(request, 'Annonce marquée comme vendue.')
+    messages.success(request, _('Annonce marquée comme louée.') if annonce.is_location
+                     else _('Annonce marquée comme vendue.'))
     return redirect('bazar:mes_annonces')
 
 
@@ -380,15 +407,15 @@ def annonce_delete(request, pk):
     try:
         annonce = Annonce.objects.get(pk=pk)
     except Annonce.DoesNotExist:
-        messages.error(request, "Cette annonce n'existe pas ou a déjà été supprimée.")
+        messages.error(request, _("Cette annonce n'existe pas ou a déjà été supprimée."))
         return redirect('bazar:mes_annonces')
 
     if annonce.seller != request.user:
-        messages.error(request, 'Non autorisé.')
+        messages.error(request, _('Action non autorisée.'))
         return redirect('bazar:index')
 
     annonce.delete()
-    messages.success(request, 'Annonce supprimée.')
+    messages.success(request, _('Annonce supprimée.'))
     return redirect('bazar:mes_annonces')
 
 
@@ -405,10 +432,10 @@ def bump_annonce(request, pk):
     annonce = get_object_or_404(Annonce, pk=pk)
 
     if annonce.seller != request.user:
-        return JsonResponse({'error': 'Non autorisé'}, status=403)
+        return JsonResponse({'error': _('Action non autorisée.')}, status=403)
 
     if annonce.status != 'active':
-        return JsonResponse({'error': 'Seules les annonces actives peuvent être rafraîchies.'}, status=400)
+        return JsonResponse({'error': _('Seules les annonces actives peuvent être remontées.')}, status=400)
 
     now = timezone.now()
     # Vérifier le cooldown
@@ -417,7 +444,7 @@ def bump_annonce(request, pk):
         if elapsed_h < BUMP_COOLDOWN_H:
             remaining = int(BUMP_COOLDOWN_H - elapsed_h)
             return JsonResponse({
-                'error': f'Vous pouvez rafraîchir à nouveau dans {remaining}h.',
+                'error': _('Vous pourrez remonter cette annonce dans %(h)d h.') % {'h': max(1, remaining)},
                 'cooldown': True,
                 'remaining_h': remaining,
             }, status=429)
@@ -439,17 +466,19 @@ def toggle_status(request, pk):
     annonce = get_object_or_404(Annonce, pk=pk)
 
     if annonce.seller != request.user:
-        return JsonResponse({'error': 'Non autorisé'}, status=403)
+        return JsonResponse({'error': _('Action non autorisée.')}, status=403)
 
-    if annonce.status == 'vendue':
-        return JsonResponse({'error': 'Une annonce vendue ne peut pas être réactivée ici.'}, status=400)
+    # Seule la bascule active ↔ pause passe par ici : une annonce vendue, louée ou
+    # expirée se republie depuis « Modifier », en connaissance de cause.
+    if annonce.status not in ('active', 'pause'):
+        return JsonResponse({'error': _('Cette annonce est clôturée : modifiez-la pour la republier.')}, status=400)
 
     new_status = 'pause' if annonce.status == 'active' else 'active'
     Annonce.objects.filter(pk=pk).update(status=new_status)
     return JsonResponse({
         'success': True,
         'new_status': new_status,
-        'label': 'Active' if new_status == 'active' else 'En pause',
+        'label': _('Active') if new_status == 'active' else _('En pause'),
     })
 
 
@@ -491,7 +520,7 @@ def mes_annonces(request):
     context = {
         'annonces':     qs,
         'count_active': qs.filter(status='active').count(),
-        'count_sold':   qs.filter(status='vendue').count(),
+        'count_sold':   qs.filter(status__in=('vendue', 'louee')).count(),
         'verification': verification,
     }
     return render(request, 'bazar/mes_annonces.html', context)
@@ -516,15 +545,15 @@ def request_verification(request):
         new_type = request.POST.get('seller_type', 'verified').strip()
         # Bloquer si en attente — pas de double soumission
         if verification and verification.status == SellerVerification.STATUS_PENDING:
-            messages.info(request, 'Vous avez déjà une demande en cours.')
+            messages.info(request, _('Vous avez déjà une demande en cours.'))
             return redirect('bazar:mes_annonces')
         # Bloquer si déjà approuvé au même niveau (ou déjà Pro)
         if verification and verification.status == SellerVerification.STATUS_APPROVED:
             if verification.seller_type == SellerVerification.SELLER_TYPE_PRO:
-                messages.info(request, 'Votre boutique Pro est déjà active.')
+                messages.info(request, _('Votre boutique Pro est déjà active.'))
                 return redirect('bazar:mes_annonces')
             if new_type != SellerVerification.SELLER_TYPE_PRO:
-                messages.info(request, 'Votre compte est déjà vérifié.')
+                messages.info(request, _('Votre compte est déjà vérifié.'))
                 return redirect('bazar:mes_annonces')
             # Sinon : upgrade verified → pro — on continue
 
@@ -547,16 +576,31 @@ def request_verification(request):
             boutique_name        = request.POST.get('boutique_name', '').strip()[:120]
             boutique_description = request.POST.get('boutique_description', '').strip()[:2000]
             boutique_category    = request.POST.get('boutique_category', '').strip()
+            if boutique_category not in dict(SellerVerification.BOUTIQUE_CAT_CHOICES):
+                boutique_category = ''
             boutique_phone       = request.POST.get('boutique_phone', '').strip()[:30]
             boutique_address     = request.POST.get('boutique_address', '').strip()[:250]
             boutique_hours       = request.POST.get('boutique_hours', '').strip()[:250]
             boutique_banner_raw  = request.FILES.get('boutique_banner')
-            boutique_banner_file = _heic_to_jpeg(boutique_banner_raw) if boutique_banner_raw else None
-
+            error = ''
+            if boutique_banner_raw:
+                try:
+                    boutique_banner_file = clean_image(boutique_banner_raw)
+                except ValidationError as e:
+                    error = e.messages[0]
             if not boutique_name:
-                messages.error(request, 'Le nom de la boutique est obligatoire pour une demande Pro.')
-                context = {'verification': verification}
-                return render(request, 'bazar/verification.html', context)
+                error = _('Le nom de la boutique est obligatoire pour une demande Pro.')
+            if error:
+                messages.error(request, error)
+                # On rend la saisie telle quelle (sans rien enregistrer) pour ne pas la perdre
+                draft = verification or SellerVerification(seller=request.user)
+                draft.seller_type, draft.message = seller_type, message_text
+                draft.boutique_name, draft.boutique_description = boutique_name, boutique_description
+                draft.boutique_category, draft.boutique_phone = boutique_category, boutique_phone
+                draft.boutique_address, draft.boutique_hours = boutique_address, boutique_hours
+                return render(request, 'bazar/verification.html', {
+                    'verification': verification, 'draft': draft, 'form_open': True,
+                })
 
         if verification:
             # Résoumission après refus — mettre à jour les champs
@@ -575,7 +619,7 @@ def request_verification(request):
             if boutique_banner_file:
                 verification.boutique_banner = boutique_banner_file
             verification.save()
-            messages.success(request, 'Votre nouvelle demande a été envoyée. L\'admin l\'examinera prochainement.')
+            messages.success(request, _('Demande envoyée. L\'équipe de modération l\'examinera prochainement.'))
         else:
             kw = dict(
                 seller=request.user,
@@ -592,12 +636,13 @@ def request_verification(request):
             if boutique_banner_file:
                 sv.boutique_banner = boutique_banner_file
             sv.save()
-            messages.success(request, 'Demande de vérification envoyée ! L\'admin l\'examinera prochainement.')
+            messages.success(request, _('Demande envoyée. L\'équipe de modération l\'examinera prochainement.'))
 
         return redirect('bazar:mes_annonces')
 
     context = {
         'verification': verification,
+        'draft': verification,
     }
     return render(request, 'bazar/verification.html', context)
 
@@ -634,6 +679,8 @@ def boutique_page(request, username):
     if cat_filter:
         annonces_qs = annonces_qs.filter(category=cat_filter)
 
+    if cat_filter not in dict(Annonce.CATEGORY_CHOICES):
+        cat_filter = ''
     paginator = Paginator(annonces_qs, PAGE_SIZE)
     page      = paginator.get_page(request.GET.get('page'))
 
@@ -687,8 +734,8 @@ def mes_favoris(request):
             .select_related('annonce__seller')
             .prefetch_related('annonce__images')
         )
-        # Exclure les annonces supprimées ou expirées
-        favoris_qs = [f for f in favoris_qs if f.annonce.status != 'expiree']
+        # Exclure les annonces qui ne sont plus publiques (expirées, en pause)
+        favoris_qs = [f for f in favoris_qs if f.annonce.status not in ('expiree', 'pause')]
     except Exception:
         favoris_qs = []
 

@@ -1,3 +1,79 @@
 {% load static %}
 {% load i18n %}
 <link rel="stylesheet" href="{% static 'css/pages/resto-style.css' %}">
+<script>
+/* Outils communs aux pages Resto : montants, dialogues, rafraîchissement partiel. */
+(function(){
+  if (window.rsMoney) return;
+  // Même rendu que le filtre vz_ariary côté serveur : « 12 500 Ar »
+  // (espace fine insécable entre les milliers, espace insécable avant l'unité).
+  window.rsMoney = function(n){
+    var v = Math.round(Number(n) || 0);
+    return String(v).replace(/\B(?=(\d{3})+(?!\d))/g, ' ') + ' Ar';
+  };
+
+  // Dialogues .vz-overlay/.vz-dialog présents dans la page (attribut hidden quand fermés).
+  var closers = {}, previous = {};
+  window.rsDialog = {
+    open: function(id){
+      var o = document.getElementById(id);
+      if (!o || o.classList.contains('open')) return;
+      previous[id] = document.activeElement;
+      o.hidden = false;
+      requestAnimationFrame(function(){ o.classList.add('open'); });
+      if (window.vzLock) window.vzLock();
+      closers[id] = function(){ window.rsDialog.close(id, true); };
+      if (window.vzLayers) window.vzLayers.push(closers[id]);   // Échap ferme le dialogue du dessus
+      var f = o.querySelector('[data-autofocus], .vz-dialog button, .vz-dialog input');
+      if (f) setTimeout(function(){ try { f.focus({preventScroll: true}); } catch (e) {} }, 60);
+    },
+    close: function(id, fromLayer){
+      var o = document.getElementById(id);
+      if (!o || !o.classList.contains('open')) return;
+      if (!fromLayer && window.vzLayers && closers[id]) window.vzLayers.remove(closers[id]);
+      o.classList.remove('open');
+      if (window.vzUnlock) window.vzUnlock();
+      setTimeout(function(){ if (!o.classList.contains('open')) o.hidden = true; }, 200);
+      try { previous[id] && previous[id].focus && previous[id].focus(); } catch (e) {}
+    }
+  };
+  document.addEventListener('click', function(e){
+    var o = e.target;
+    if (o && o.classList && o.classList.contains('vz-overlay') && o.hasAttribute('data-rs-dialog')) window.rsDialog.close(o.id);
+  });
+
+  // Vrai tant que la personne saisit quelque chose : on ne remplace alors rien sous ses doigts.
+  window.rsBusy = function(){
+    if (document.querySelector('.vz-overlay.open')) return true;
+    var a = document.activeElement;
+    if (a && /^(INPUT|TEXTAREA|SELECT)$/.test(a.tagName) && !/^(radio|checkbox|submit|button)$/.test(a.type || '')) return true;
+    var dirty = false;
+    document.querySelectorAll('[data-rs-live] input[type="text"], [data-rs-live] input:not([type]), [data-rs-live] textarea').forEach(function(el){
+      if (el.value !== el.defaultValue) dirty = true;
+    });
+    return dirty;
+  };
+
+  // Rafraîchissement partiel : recharge la page en arrière-plan et ne remplace que les zones
+  // marquées data-rs-live (par id). Renvoie false si rien n'a été remplacé.
+  window.rsRefresh = async function(){
+    if (window.rsBusy()) return false;
+    try {
+      var r = await fetch(window.location.href, {credentials: 'same-origin', cache: 'no-store'});
+      if (!r.ok) return false;
+      var doc = new DOMParser().parseFromString(await r.text(), 'text/html');
+      if (window.rsBusy()) return false;
+      document.querySelectorAll('[data-rs-live][id]').forEach(function(zone){
+        var fresh = doc.getElementById(zone.id);
+        if (fresh) zone.innerHTML = fresh.innerHTML;
+      });
+      // Messages Django rendus dans la page rechargée : on les montre quand même
+      var flash = doc.getElementById('vz-flash');
+      if (flash && window.vzToast) {
+        try { JSON.parse(flash.textContent).forEach(function(m){ window.vzToast(m.m, {type: m.t}); }); } catch (e) {}
+      }
+      return true;
+    } catch (e) { return false; }
+  };
+})();
+</script>

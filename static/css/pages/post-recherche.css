@@ -8,12 +8,6 @@ body { background: var(--bg); }
     margin: 80px auto 3rem;
     padding: 0 1rem;
 }
-.rech-hero { margin-bottom: 1.5rem; }
-.rech-hero h1 {
-    font-size: 1.5rem; font-weight: 900;
-    color: var(--text); margin: 0 0 .25rem;
-}
-.rech-hero p { font-size: .88rem; color: var(--text-muted); margin: 0; }
 .query-hl { color: var(--accent); font-weight: 700; }
 
 /* Search bar */
@@ -34,13 +28,6 @@ body { background: var(--bg); }
     color: var(--text); font-size: 1rem; font-family: inherit;
 }
 .rech-bar input::placeholder { color: var(--text-muted); }
-.rech-bar button {
-    background: var(--accent); color: var(--on-accent);
-    border: none; border-radius: var(--radius-sm);
-    padding: .45rem 1.1rem; font-size: .88rem; font-weight: 700;
-    cursor: pointer; transition: background .2s;
-}
-.rech-bar button:hover { background: var(--accent-dark); }
 
 /* Section titles */
 .rech-section-title {
@@ -52,12 +39,6 @@ body { background: var(--bg); }
 .rech-section-title .material-icons { font-size: .95rem; color: var(--accent); }
 
 /* Empty */
-.rech-empty {
-    text-align: center; padding: 3rem 1rem;
-    color: var(--text-muted);
-}
-.rech-empty .material-icons { font-size: 3rem; display: block; margin-bottom: .75rem; }
-.rech-empty h3 { font-size: 1.1rem; margin: 0 0 .35rem; color: var(--text); }
 
 /* Chevron de fin de ligne (publications) */
 .rech-chevron { flex-shrink: 0; color: var(--text-subtle); font-size: 1.1rem; transition: color .2s; }
@@ -73,3 +54,5 @@ a.vz-card:hover .rech-chevron { color: var(--accent); }
 }
 .rech-ht-pill:hover { background: var(--accent); color: var(--on-accent); text-decoration: none; }
 .rech-ht-count { font-size: .73rem; opacity: .75; }
+.rech-section-title { margin-top: 0; }
+.rech-bar .vz-btn { flex-shrink: 0; }

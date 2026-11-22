@@ -1,7 +1,8 @@
 {% extends 'base.html' %}
 {% load static i18n %}
 
-{% block title %}{{ verif.boutique_display_name }} — Boutique Pro{% endblock %}
+{% block page_title %}{{ verif.boutique_display_name }} — {% trans "Boutique Pro" %} · Vazimba{% endblock %}
+{% block meta_description %}{{ verif.boutique_description|default:verif.boutique_display_name|truncatechars:150 }}{% endblock %}
 
 {% block content %}
 <link rel="stylesheet" href="{% static 'css/pages/bazar-boutique.css' %}">
@@ -10,7 +11,7 @@
 <div class="boutique-banner-wrap">
     {% if verif.boutique_banner %}
     <img class="boutique-banner-img" src="{{ verif.boutique_banner.url }}" alt=""
-         onerror="this.style.display='none'">
+         onerror="this.hidden=true">
     {% endif %}
     <div class="boutique-banner-overlay"></div>
 </div>
@@ -20,15 +21,15 @@
     <div class="boutique-identity">
         <div class="boutique-avatar-wrap">
             <img src="{{ boutique_seller.profile_image.url }}" alt="{{ boutique_seller.username }}"
-                 onerror="this.onerror=null;this.style.display='none'">
+                 onerror="this.onerror=null;this.hidden=true">
         </div>
         <div class="boutique-meta">
             <h1 class="boutique-name">
                 {{ verif.boutique_display_name }}
-                <span class="boutique-pro-badge"><i class="material-icons" aria-hidden="true">star</i>{% trans "Boutique Pro" %}</span>
+                <span class="vz-chip vz-chip--sm vz-chip--static vz-chip--warning"><i class="material-icons" aria-hidden="true">star</i>{% trans "Boutique Pro" %}</span>
             </h1>
             {% if verif.boutique_category %}
-            <span class="boutique-cat-badge">{{ verif.get_boutique_category_display }}</span>
+            <span class="vz-chip vz-chip--sm vz-chip--static">{{ verif.get_boutique_category_display }}</span>
             {% endif %}
         </div>
     </div>
@@ -38,7 +39,7 @@
 <div class="boutique-stats-bar">
     <div class="boutique-stats-inner">
         <span class="boutique-stat">
-            <i class="material-icons" aria-hidden="true">sell</i><strong>{{ total }}</strong> {% trans "annonce" %}{{ total|pluralize }}
+            <i class="material-icons" aria-hidden="true">sell</i>{% blocktrans count n=total %}<strong>{{ n }}</strong> annonce{% plural %}<strong>{{ n }}</strong> annonces{% endblocktrans %}
         </span>
         {% if verif.boutique_address %}
         <span class="boutique-stat">
@@ -50,44 +51,52 @@
             <i class="material-icons" aria-hidden="true">schedule</i>{{ verif.boutique_hours }}
         </span>
         {% endif %}
-        {% if verif.boutique_phone %}
-        <a href="https://wa.me/{{ verif.boutique_phone|cut:'+' }}"
-           target="_blank" rel="noopener"
-           class="boutique-wa-btn">
-            <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413Z"/></svg>
-            {% trans "Contacter" %}
-        </a>
-        {% endif %}
+        <span class="vz-btn-row boutique-contact">
+            {% if verif.whatsapp_number %}
+            <a href="https://wa.me/{{ verif.whatsapp_number }}" target="_blank" rel="noopener" class="vz-btn vz-btn--whatsapp vz-btn--pill">
+                <i class="material-icons" aria-hidden="true">chat</i>{% trans "WhatsApp" %}
+            </a>
+            {% elif verif.boutique_phone %}
+            <a href="tel:{{ verif.boutique_phone|cut:' ' }}" class="vz-btn vz-btn--primary vz-btn--pill">
+                <i class="material-icons" aria-hidden="true">call</i>{% trans "Appeler" %}
+            </a>
+            {% endif %}
+            {% if request.user.is_authenticated and request.user != boutique_seller %}
+            <a href="{% url 'chat:private-chat-room' %}?user_id={{ boutique_seller.pk }}" class="vz-btn vz-btn--secondary vz-btn--pill">
+                <i class="material-icons" aria-hidden="true">forum</i>{% trans "Envoyer un message" %}
+            </a>
+            {% endif %}
+        </span>
     </div>
 </div>
 
 <!-- ── Description ──────────────────────────────────────────────────────── -->
 {% if verif.boutique_description %}
 <div class="boutique-desc-wrap">
-    <div class="boutique-desc">{{ verif.boutique_description }}</div>
+    <div class="vz-card boutique-desc">{{ verif.boutique_description }}</div>
 </div>
 {% endif %}
 
 <!-- ── Filtres catégories ────────────────────────────────────────────────── -->
 {% if categories_with_labels|length > 1 %}
-<div class="boutique-cats">
+<nav class="boutique-cats" aria-label="{% trans 'Catégorie' %}">
     <a href="{% url 'bazar:boutique' username=boutique_seller.username %}"
-       class="boutique-cat-btn {% if not cat_filter %}active{% endif %}">
+       class="vz-chip {% if not cat_filter %}active{% endif %}"{% if not cat_filter %} aria-current="page"{% endif %}>
         {% trans "Tout" %}
     </a>
     {% for cat_key, cat_label in categories_with_labels %}
     <a href="{% url 'bazar:boutique' username=boutique_seller.username %}?cat={{ cat_key }}"
-       class="boutique-cat-btn {% if cat_filter == cat_key %}active{% endif %}">
+       class="vz-chip {% if cat_filter == cat_key %}active{% endif %}"{% if cat_filter == cat_key %} aria-current="page"{% endif %}>
         {{ cat_label }}
     </a>
     {% endfor %}
-</div>
+</nav>
 {% endif %}
 
 <!-- ── Titre section annonces ────────────────────────────────────────────── -->
-<p class="boutique-listings-title">
+<h2 class="boutique-listings-title">
     {% trans "Annonces disponibles" %} ({{ total }})
-</p>
+</h2>
 
 <!-- ── Grille annonces ───────────────────────────────────────────────────── -->
 {% if page_obj %}
@@ -98,13 +107,13 @@
             {% with img=annonce.get_primary_image %}
             {% if img %}
             <img src="{{ img.image.url }}" alt="{{ annonce.title }}" loading="lazy"
-                 onerror="this.onerror=null;this.style.display='none'">
+                 onerror="this.onerror=null;this.hidden=true">
             {% else %}
             <div class="vz-card__media-ph"><i class="material-icons" aria-hidden="true">sell</i></div>
             {% endif %}
             {% endwith %}
-            {% if annonce.status == 'vendue' %}
-            <div class="vz-card__overlay">{% trans "VENDUE" %}</div>
+            {% if annonce.is_location %}
+            <span class="vz-card__badge vz-card__badge--bottom vz-card__badge--accent"><i class="material-icons" aria-hidden="true">vpn_key</i>{% trans "Location" %}</span>
             {% endif %}
         </div>
         <div class="vz-card__body">
@@ -113,7 +122,7 @@
             <div class="vz-card__meta">
                 <span class="vz-card__meta-item"><i class="material-icons" aria-hidden="true">place</i><span>{{ annonce.location }}</span></span>
             </div>
-            <span class="vz-card__price">{{ annonce.formatted_price }}</span>
+            <span class="vz-card__price">{{ annonce.display_price }}</span>
         </div>
     </a>
     {% endfor %}
@@ -121,21 +130,21 @@
 
 <!-- ── Pagination ────────────────────────────────────────────────────────── -->
 {% if page_obj.has_other_pages %}
-<div class="bazar-pagination">
+<nav class="vz-pager" aria-label="{% trans 'Pagination' %}">
     {% if page_obj.has_previous %}
-    <a href="?{% if cat_filter %}cat={{ cat_filter }}&{% endif %}page={{ page_obj.previous_page_number }}" class="bazar-page-btn">←</a>
+    <a href="?{% if cat_filter %}cat={{ cat_filter }}&amp;{% endif %}page={{ page_obj.previous_page_number }}" aria-label="{% trans 'Page précédente' %}"><i class="material-icons" aria-hidden="true">chevron_left</i></a>
     {% endif %}
     {% for num in page_obj.paginator.page_range %}
     {% if page_obj.number == num %}
-    <span class="bazar-page-btn active">{{ num }}</span>
+    <span class="is-current" aria-current="page">{{ num }}</span>
     {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %}
-    <a href="?{% if cat_filter %}cat={{ cat_filter }}&{% endif %}page={{ num }}" class="bazar-page-btn">{{ num }}</a>
+    <a href="?{% if cat_filter %}cat={{ cat_filter }}&amp;{% endif %}page={{ num }}">{{ num }}</a>
     {% endif %}
     {% endfor %}
     {% if page_obj.has_next %}
-    <a href="?{% if cat_filter %}cat={{ cat_filter }}&{% endif %}page={{ page_obj.next_page_number }}" class="bazar-page-btn">→</a>
+    <a href="?{% if cat_filter %}cat={{ cat_filter }}&amp;{% endif %}page={{ page_obj.next_page_number }}" aria-label="{% trans 'Page suivante' %}"><i class="material-icons" aria-hidden="true">chevron_right</i></a>
     {% endif %}
-</div>
+</nav>
 {% endif %}
 
 {% else %}

@@ -90,7 +90,7 @@ class Post(models.Model):
     region = models.CharField(
         max_length=30, blank=True, default='',
         verbose_name='Région',
-        help_text='Région de Madagascar du post (auto-remplie depuis le profil de l\'auteur)',
+        help_text='Pays ou région du post (auto-remplie depuis le profil de l\'auteur)',
         db_index=True,
     )
     lieu = models.ForeignKey(

@@ -5,20 +5,20 @@
 {% block content %}
 {% include 'resto/_style.html' %}
 <div class="rs-wrap rs-wrap--md">
-    <div class="rs-page-head">
-        <h1 class="rs-h1"><i class="material-icons" aria-hidden="true">delivery_dining</i> {% trans "Livreurs" %} · {{ restaurant.name }}</h1>
-        <a class="vz-btn vz-btn--sm vz-btn--secondary" href="{% url 'resto:vendor_dashboard' %}"><i class="material-icons" aria-hidden="true">arrow_back</i> {% trans "Mes restaurants" %}</a>
+    <div class="vz-page-head">
+        <a class="vz-back" href="{% url 'resto:vendor_dashboard' %}" aria-label="{% trans 'Mes restaurants' %}"><i class="material-icons" aria-hidden="true">arrow_back</i></a>
+        <div class="vz-page-head__main"><h1 class="vz-page-title"><i class="material-icons" aria-hidden="true">delivery_dining</i> {% trans "Livreurs" %}</h1><p class="vz-page-sub">{{ restaurant.name }}</p></div>
     </div>
 
-    <div class="rs-card rs-form rs-card--pad rs-card--mb">
-        <p class="rs-mb-s">{% trans "Ajoutez vos livreurs par leur nom d'utilisateur Vazimba. Ils recevront vos commandes prêtes et partageront leur position avec le client." %}</p>
+    <div class="vz-card rs-box rs-form rs-card--pad rs-card--mb">
+        <p class="rs-mb-s">{% trans "Ajoutez vos livreurs par leur nom d'utilisateur Vazimba. La personne doit d'abord avoir créé son profil livreur (Espace livreur). Elle recevra vos commandes prêtes et partagera sa position avec le client." %}</p>
         <form method="post" class="rs-inline-form rs-inline-form--wrap">{% csrf_token %}
-            <input class="form-control rs-grow" name="username" placeholder="{% trans "Nom d'utilisateur" %}" required>
+            <input class="form-control rs-grow" name="username" placeholder="{% trans "Nom d'utilisateur" %}" aria-label="{% trans "Nom d'utilisateur" %}" autocapitalize="none" autocomplete="off" required>
             <button class="vz-btn vz-btn--primary" type="submit"><i class="material-icons" aria-hidden="true">add</i> {% trans "Ajouter" %}</button>
         </form>
     </div>
 
-    <div class="rs-card">
+    <div class="vz-card rs-box">
         {% for c in couriers %}
         <div class="rs-list-row">
             <div>
@@ -27,10 +27,10 @@
                 <span class="vz-chip vz-chip--sm vz-chip--static {% if c.is_available %}vz-chip--success{% else %}vz-chip--danger{% endif %}">{% if c.is_available %}{% trans "Disponible" %}{% else %}{% trans "Indisponible" %}{% endif %}</span>
                 <div class="rs-muted">{{ c.get_vehicle_display }} · <i class="material-icons rs-ico" aria-hidden="true">call</i> {{ c.phone|default:"—" }}{% if c.position_updated_at %} · <i class="material-icons rs-ico" aria-hidden="true">place</i> {{ c.position_updated_at|date:"d/m H:i" }}{% endif %}</div>
             </div>
-            <form method="post" data-vz-confirm="{% trans 'Retirer ce livreur ?' %}" data-vz-danger>{% csrf_token %}<input type="hidden" name="remove" value="{{ c.pk }}"><button class="vz-btn vz-btn--sm vz-btn--muted vz-btn--icon" type="submit" aria-label="{% trans 'Retirer ce livreur ?' %}" title="{% trans 'Retirer' %}"><i class="material-icons" aria-hidden="true">close</i></button></form>
+            <form method="post" data-vz-confirm="{% trans 'Retirer ce livreur ?' %}" data-vz-confirm-label="{% trans 'Retirer' %}" data-vz-danger>{% csrf_token %}<input type="hidden" name="remove" value="{{ c.pk }}"><button class="vz-icon-btn vz-icon-btn--lg vz-icon-btn--danger" type="submit" aria-label="{% trans 'Retirer ce livreur' %}" title="{% trans 'Retirer ce livreur' %}"><i class="material-icons" aria-hidden="true">person_remove</i></button></form>
         </div>
         {% empty %}
-        <p class="rs-muted rs-pad-l rs-m0">{% trans "Aucun livreur rattaché. Sans livreur, vos commandes « prêtes » sont proposées aux livreurs indépendants de votre région." %}</p>
+        <div class="vz-empty"><i class="material-icons" aria-hidden="true">delivery_dining</i><p class="vz-empty-text">{% trans "Aucun livreur rattaché. Sans livreur, vos commandes « prêtes » sont proposées aux livreurs indépendants de votre région." %}</p></div>
         {% endfor %}
     </div>
 </div>

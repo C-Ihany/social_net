@@ -14,6 +14,7 @@ from chat.utils import calculate_timestamp, LazyRoomChatMessageEncoder
 from chat.exceptions import ClientError
 from chat.e2ee_check import is_ciphertext, ms
 from chat.constants import *   # inclut MSG_TYPE_REACTION
+from chat.constants import file_preview
 from account.models import Account
 
 import logging
@@ -45,6 +46,9 @@ class ChatConsumer(AsyncJsonWebsocketConsumer):
 		# destinataires (plus le peer courant) peuvent être ciblés via
 		# `peer_id` dans les signaux d'appel — voir receive_json.
 		self.known_call_peers = set()
+		# Vrai entre l'envoi de notre offre d'appel et la réponse : si l'on se déconnecte pendant
+		# que ça sonne chez l'autre, on le prévient (sinon son écran sonnait sans fin).
+		self.call_ringing_out = False
 
 		# Groupe personnel — reçoit les appels entrants même sans room active
 		if self.scope["user"].is_authenticated:
@@ -75,7 +79,7 @@ class ChatConsumer(AsyncJsonWebsocketConsumer):
 				await self.leave_room(content["room"])
 			elif command == "send":
 				if len(content["message"].lstrip()) == 0:
-					raise ClientError(422,"You can't send an empty message.")
+					raise ClientError(422, "Le message est vide.")
 				await self.send_room(content["room"], content["message"], content.get("reply_to_id"),
 				                     encrypted=bool(content.get("encrypted")))
 			elif command == "get_room_chat_messages":
@@ -86,7 +90,7 @@ class ChatConsumer(AsyncJsonWebsocketConsumer):
 					payload = json.loads(payload)
 					await self.send_messages_payload(payload['messages'], payload['new_page_number'])
 				else:
-					raise ClientError(204,"Something went wrong retrieving the chatroom messages.")
+					raise ClientError(204, "Les messages n'ont pas pu être chargés.")
 				await self.display_progress_bar(False)
 			elif command == "get_user_info":
 				await self.display_progress_bar(True)
@@ -96,7 +100,7 @@ class ChatConsumer(AsyncJsonWebsocketConsumer):
 					payload = json.loads(payload)
 					await self.send_user_info_payload(payload['user_info'])
 				else:
-					raise ClientError(204, "Something went wrong retrieving the other users account details.")
+					raise ClientError(204, "Le profil de votre contact n'a pas pu être chargé.")
 				await self.display_progress_bar(False)
 			elif command == "typing":
 				# Broadcast "typing" indicator to everyone else in the room
@@ -121,8 +125,11 @@ class ChatConsumer(AsyncJsonWebsocketConsumer):
 					try:
 						room      = await get_room_or_error(self.room_id, self.scope["user"])
 						other     = await get_other_user(room, self.scope["user"])
+						if await is_blocked(room):
+							raise ClientError("BLOCKED", BLOCKED_MESSAGE)
 						call_mode = content.get("call_mode", "video")
 						self.call_peer_id = other.id
+						self.call_ringing_out = True
 						logger.debug(f"[CALL] envoi vers groupe user_{other.id}")
 						await self.channel_layer.group_send(
 							f"user_{other.id}",
@@ -131,7 +138,7 @@ class ChatConsumer(AsyncJsonWebsocketConsumer):
 								"msg_type":      MSG_TYPE_CALL_OFFER,
 								"user_id":       self.scope["user"].id,
 								"username":      self.scope["user"].username,
-								"profile_image": self.scope["user"].profile_image.url,
+								"profile_image": self.scope["user"].profile_image.url if self.scope["user"].profile_image else "",
 								"sdp":           content.get("sdp", {}),
 								"call_mode":     call_mode,
 								"room_id":       str(self.room_id),
@@ -146,9 +153,10 @@ class ChatConsumer(AsyncJsonWebsocketConsumer):
 						caller_img  = caller.profile_image.url if caller.profile_image else None
 						await send_call_push(other, caller.username, caller_img, self.room_id, call_mode)
 
-					except Exception as e:
-						logger.debug(f"call_offer error: {e}")
-						import traceback; traceback.print_exc()
+					except ClientError:
+						raise
+					except Exception:
+						logger.exception("call_offer")
 				else:
 					logger.debug(f"[CALL] IGNORÉ: self.room_id est None — le caller n'a pas joint de room")
 
@@ -200,6 +208,7 @@ class ChatConsumer(AsyncJsonWebsocketConsumer):
 					#  casser le routage de l'appel en cours).
 					if command in ("call_reject", "call_end") and peer_id == self.call_peer_id:
 						self.call_peer_id = None
+						self.call_ringing_out = False
 			elif command == "send_file":
 				# The file was already saved to DB by the HTTP upload view.
 				# We just need to broadcast it to the room group.
@@ -214,9 +223,8 @@ class ChatConsumer(AsyncJsonWebsocketConsumer):
 				await self.react_message(content.get("msg_id"), content.get("emoji"))
 		except ClientError as e:
 			await self.handle_client_error(e)
-		except Exception as e:
-			logger.debug("ChatConsumer: receive_json: unhandled exception — " + str(e))
-			import traceback; traceback.print_exc()
+		except Exception:
+			logger.exception("ChatConsumer: receive_json (%s)", command)
 			await self.send_json({"error": 500, "message": "Une erreur interne s'est produite."})
 
 
@@ -232,6 +240,14 @@ class ChatConsumer(AsyncJsonWebsocketConsumer):
 		except Exception as e:
 			logger.debug("EXCEPTION: " + str(e))
 			pass
+		# Appel lancé, pas encore décroché : l'autre arrête de sonner.
+		if getattr(self, 'call_ringing_out', False) and getattr(self, 'call_peer_id', None):
+			try:
+				await self.channel_layer.group_send(f"user_{self.call_peer_id}", {
+					"type": "chat.call", "msg_type": MSG_TYPE_CALL_END, "user_id": self.scope["user"].id,
+				})
+			except Exception:
+				pass
 		# Quitter le groupe personnel
 		if self.scope["user"].is_authenticated:
 			try:
@@ -272,6 +288,8 @@ class ChatConsumer(AsyncJsonWebsocketConsumer):
 		await self.send_json({
 			"join": str(room.id),
 			"encrypted": room.encrypted,
+			# (qui a activé ou coupé la conversation secrète en dernier : montré à l'autre à l'ouverture)
+			**(await secret_change_of(room)),
 		})
 
 		if self.scope["user"].is_authenticated:
@@ -334,13 +352,15 @@ class ChatConsumer(AsyncJsonWebsocketConsumer):
 		if self.room_id != None:
 			if str(room_id) != str(self.room_id):
 				logger.debug("CLIENT ERRROR 1")
-				raise ClientError("ROOM_ACCESS_DENIED", "Room access denied")
+				raise ClientError("ROOM_ACCESS_DENIED", "Accès refusé à cette conversation.")
 		else:
 			logger.debug("CLIENT ERRROR 2")
-			raise ClientError("ROOM_ACCESS_DENIED", "Room access denied")
+			raise ClientError("ROOM_ACCESS_DENIED", "Accès refusé à cette conversation.")
 
 		# Get the room and send to the group about it
 		room = await get_room_or_error(room_id, self.scope["user"])
+		if await is_blocked(room):
+			raise ClientError("BLOCKED", BLOCKED_MESSAGE)
 
 		# Conversation secrète : seuls les messages chiffrés y entrent (et seulement là). Un message
 		# en clair y serait lisible par le serveur sans que les deux personnes le sachent.
@@ -397,6 +417,10 @@ class ChatConsumer(AsyncJsonWebsocketConsumer):
 					"msg_type":     MSG_TYPE_UNREAD_NOTIF,
 					"from_user_id": self.scope["user"].id,
 					"count":        unread_count,
+					# (de quoi créer la ligne de la conversation chez quelqu'un qui ne l'avait pas encore)
+					"from_username": self.scope["user"].username,
+					"from_image":    self.scope["user"].profile_image.url if self.scope["user"].profile_image else "",
+					"preview":       preview[:60],
 				}
 			)
 
@@ -407,9 +431,11 @@ class ChatConsumer(AsyncJsonWebsocketConsumer):
 		The RoomChatMessage was already created by the HTTP upload view.
 		"""
 		if self.room_id is None or str(room_id) != str(self.room_id):
-			raise ClientError("ROOM_ACCESS_DENIED", "Room access denied")
+			raise ClientError("ROOM_ACCESS_DENIED", "Accès refusé à cette conversation.")
 
 		room = await get_room_or_error(room_id, self.scope["user"])
+		if await is_blocked(room):
+			raise ClientError("BLOCKED", BLOCKED_MESSAGE)
 		# L'adresse du fichier ne vient JAMAIS du navigateur : on la recalcule d'après le message,
 		# s'il est bien à cette personne et dans cette conversation. Avant, n'importe quel lien
 		# envoyé ici s'affichait chez l'autre comme une pièce jointe.
@@ -422,7 +448,7 @@ class ChatConsumer(AsyncJsonWebsocketConsumer):
 		connected_users = await get_connected_users(room)
 
 		# Increment unread count for the other (disconnected) user
-		preview = SECRET_FILE_PREVIEW if file_msg.encrypted else f'[📎 {file_name}]'
+		preview = SECRET_FILE_PREVIEW if file_msg.encrypted else file_preview(file_msg.file_type, file_name)
 		await asyncio.gather(
 			append_unread_msg_if_not_connected(room, room.user1, connected_users, preview),
 			append_unread_msg_if_not_connected(room, room.user2, connected_users, preview),
@@ -456,6 +482,10 @@ class ChatConsumer(AsyncJsonWebsocketConsumer):
 					"msg_type":     MSG_TYPE_UNREAD_NOTIF,
 					"from_user_id": self.scope["user"].id,
 					"count":        unread_count,
+					# (de quoi créer la ligne de la conversation chez quelqu'un qui ne l'avait pas encore)
+					"from_username": self.scope["user"].username,
+					"from_image":    self.scope["user"].profile_image.url if self.scope["user"].profile_image else "",
+					"preview":       preview[:60],
 				}
 			)
 
@@ -465,6 +495,8 @@ class ChatConsumer(AsyncJsonWebsocketConsumer):
 			return
 		try:
 			room = await get_room_or_error(self.room_id, self.scope["user"])
+			if await is_blocked(room):
+				return
 			if not await toggle_reaction(msg_id, room, self.scope["user"], emoji):
 				return
 			reactions = await get_message_reactions(msg_id)
@@ -590,6 +622,9 @@ class ChatConsumer(AsyncJsonWebsocketConsumer):
 			# Ne réinitialiser que si le signal vient du peer courant
 			if self.call_peer_id is None or self.call_peer_id == event.get("user_id"):
 				self.call_peer_id = None
+				self.call_ringing_out = False
+		elif mt == MSG_TYPE_CALL_ANSWER:
+			self.call_ringing_out = False
 		await self.send_json(event)
 		logger.debug(f"[CALL] chat_call: send_json OK")
 
@@ -615,6 +650,9 @@ class ChatConsumer(AsyncJsonWebsocketConsumer):
 			"msg_type":     MSG_TYPE_UNREAD_NOTIF,
 			"from_user_id": event["from_user_id"],
 			"count":        event["count"],
+			"from_username": event.get("from_username", ""),
+			"from_image":    event.get("from_image", ""),
+			"preview":       event.get("preview"),
 		})
 
 	async def chat_reaction(self, event):
@@ -688,6 +726,26 @@ class ChatConsumer(AsyncJsonWebsocketConsumer):
 		return
 
 
+BLOCKED_MESSAGE = "Cette conversation n'est pas disponible."
+
+
+@database_sync_to_async
+def is_blocked(room):
+	"""Vrai si l'une des deux personnes a bloqué l'autre : plus de message, de fichier ni d'appel
+	(la conversation reste lisible)."""
+	from account.models import UserBlock
+	return UserBlock.is_blocked_between(room.user1, room.user2)
+
+
+@database_sync_to_async
+def secret_change_of(room):
+	"""{'secret_by': nom, 'secret_by_id': n, 'secret_at': ms} du dernier changement, ou {}."""
+	if not room.secret_changed_at or not room.secret_changed_by_id:
+		return {}
+	who = Account.objects.filter(pk=room.secret_changed_by_id).values_list('username', flat=True).first()
+	return {'secret_by': who or '', 'secret_by_id': room.secret_changed_by_id, 'secret_at': ms(room.secret_changed_at)}
+
+
 @database_sync_to_async
 def file_link_or_none(msg_id, room, user):
 	"""Le lien vérifié d'un fichier envoyé par `user` dans `room`, sinon None."""
@@ -707,14 +765,14 @@ def get_room_or_error(room_id, user):
 		# select_related pré-charge user1 et user2 en un seul JOIN
 		# → évite SynchronousOnlyOperation quand on y accède dans le contexte async (send_room)
 		room = PrivateChatRoom.objects.select_related('user1', 'user2').get(pk=room_id)
-	except PrivateChatRoom.DoesNotExist:
-		raise ClientError("ROOM_INVALID", "Invalid room.")
+	except (PrivateChatRoom.DoesNotExist, ValueError, TypeError):
+		raise ClientError("ROOM_INVALID", "Conversation introuvable.")
 
 	# Is this user allowed in the room? (must be user1 or user2)
 	# NOTE: on accède explicitement aux deux pour s'assurer qu'ils sont bien mis en cache
 	user1, user2 = room.user1, room.user2
 	if user != user1 and user != user2:
-		raise ClientError("ROOM_ACCESS_DENIED", "You do not have permission to join this room.")
+		raise ClientError("ROOM_ACCESS_DENIED", "Accès refusé à cette conversation.")
 
 	# La messagerie est ouverte à tous les utilisateurs connectés (pas besoin d'être amis)
 	return room
@@ -738,7 +796,7 @@ def get_user_info(room, user):
 		payload['user_info'] = s.serialize([other_user])[0] 
 		return json.dumps(payload)
 	except ClientError as e:
-		raise ClientError("DATA_ERROR", "Unable to get that users information.")
+		raise ClientError("DATA_ERROR", "Le profil de votre contact n'a pas pu être chargé.")
 	return None
 
 
@@ -893,8 +951,7 @@ def append_unread_msg_if_not_connected(room, user, connected_users, message):
 			unread_msgs.count += 1
 			unread_msgs.save()
 		except UnreadChatRoomMessages.DoesNotExist:
-			UnreadChatRoomMessages(room=room, user=user, count=1).save()
-			pass
+			UnreadChatRoomMessages(room=room, user=user, count=1, most_recent_message=message).save()
 	return
 
 # When a user connects, reset their unread message count.
@@ -904,18 +961,3 @@ def on_user_connected(room, user):
 	from chat.models import reset_unread
 	reset_unread(room, user)
 	return
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

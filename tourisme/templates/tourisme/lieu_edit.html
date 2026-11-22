@@ -1,34 +1,35 @@
 {% extends 'base.html' %}
 {% load static i18n %}
 
+{% block page_title %}{% trans "Modifier le lieu" %} — {{ lieu.name }}{% endblock %}
+
 {% block extra_head %}
+<link rel="stylesheet" href="{% static 'css/pages/tourisme-lieu_submit.css' %}">
 <link rel="stylesheet" href="{% static 'css/pages/tourisme-lieu_edit.css' %}">
 {% endblock %}
 
 {% block content %}
-<main>
 <div class="lieu-submit-wrap">
 
-    <nav class="tour-breadcrumb">
-        <a href="{% url 'tourisme:home' %}">{% trans "Tourisme" %}</a>
-        <span class="material-icons">chevron_right</span>
-        <a href="{% url 'tourisme:lieux_list' %}">{% trans "Lieux" %}</a>
-        <span class="material-icons">chevron_right</span>
-        <a href="{% url 'tourisme:lieu_detail' lieu.slug %}">{{ lieu.name }}</a>
-        <span class="material-icons">chevron_right</span>
-        <span>{% trans "Modifier" %}</span>
-    </nav>
+    <div class="vz-page-head">
+        <a class="vz-back" href="{% url 'tourisme:lieu_detail' lieu.slug %}"><span class="material-icons" aria-hidden="true">arrow_back</span>{% trans "Retour" %}</a>
+        <div class="vz-page-head__main">
+            <h1 class="vz-page-title"><span class="material-icons" aria-hidden="true">edit_location_alt</span>{% trans "Modifier le lieu" %}</h1>
+            <p class="vz-page-sub">{{ lieu.name }}</p>
+        </div>
+    </div>
 
-    <div class="ls-card">
-        <h1 class="ls-title">
-            <span class="material-icons">edit_location_alt</span>
-            {% trans "Modifier le lieu" %}
-        </h1>
-        <p class="ls-subtitle">{{ lieu.name }}</p>
+    <div class="vz-card vz-card--block ls-card">
+        {% if lieu.is_approved and not request.user.is_staff %}
+        <div class="ls-info-banner">
+            <span class="material-icons" aria-hidden="true">info</span>
+            {% trans "Ce lieu est publié. Après modification, il sera de nouveau vérifié par un administrateur avant de réapparaître." %}
+        </div>
+        {% endif %}
 
         {% if error %}
-        <div class="ls-error">
-            <span class="material-icons">error_outline</span>
+        <div class="ls-error" role="alert">
+            <span class="material-icons" aria-hidden="true">error_outline</span>
             {{ error }}
         </div>
         {% endif %}
@@ -36,90 +37,26 @@
         <form method="post" enctype="multipart/form-data">
             {% csrf_token %}
 
-            <div class="ls-section-label">
-                <span class="material-icons">info</span>
-                {% trans "Informations principales" %}
-            </div>
+            {% include 'tourisme/_lieu_fields.html' %}
 
-            <div class="ls-field">
-                <label class="ls-label" for="id_name">{% trans "Nom du lieu" %} <span class="req">*</span></label>
-                <input class="ls-input" type="text" id="id_name" name="name"
-                       value="{{ lieu.name }}" required maxlength="200">
-            </div>
-
-            <div class="ls-row">
-                <div class="ls-field">
-                    <label class="ls-label" for="id_category">{% trans "Catégorie" %}</label>
-                    <select class="ls-select" id="id_category" name="category">
-                        {% for val, label in categories %}
-                        <option value="{{ val }}" {% if lieu.category == val %}selected{% endif %}>{{ label }}</option>
-                        {% endfor %}
-                    </select>
-                </div>
-                <div class="ls-field">
-                    <label class="ls-label" for="id_region">{% trans "Région" %}</label>
-                    <select class="ls-select" id="id_region" name="region">
-                        <option value="">{% trans "— Choisir —" %}</option>
-                        {% for val, label in regions %}
-                        <option value="{{ val }}" {% if lieu.region == val %}selected{% endif %}>{{ label }}</option>
-                        {% endfor %}
-                    </select>
-                </div>
-            </div>
-
-            <div class="ls-field">
-                <label class="ls-label" for="id_description">{% trans "Description" %} <span class="req">*</span></label>
-                <textarea class="ls-textarea ls-textarea--tall" id="id_description" name="description"
-                          required>{{ lieu.description }}</textarea>
-            </div>
-
-            <div class="ls-section-label">
-                <span class="material-icons">directions</span>
-                {% trans "Informations pratiques" %}
-            </div>
-
-            <div class="ls-field">
-                <label class="ls-label" for="id_address">{% trans "Adresse / Coordonnées GPS" %}</label>
-                <input class="ls-input" type="text" id="id_address" name="address"
-                       value="{{ lieu.address }}">
-            </div>
-
-            <div class="ls-row">
-                <div class="ls-field">
-                    <label class="ls-label" for="id_best_period">{% trans "Meilleure période" %}</label>
-                    <input class="ls-input" type="text" id="id_best_period" name="best_period"
-                           value="{{ lieu.best_period }}">
-                </div>
-                <div class="ls-field">
-                    <label class="ls-label" for="id_entry_fee">{% trans "Tarif d'entrée" %}</label>
-                    <input class="ls-input" type="text" id="id_entry_fee" name="entry_fee"
-                           value="{{ lieu.entry_fee }}">
-                </div>
-            </div>
-
-            <div class="ls-field">
-                <label class="ls-label" for="id_tips">{% trans "Conseils pratiques" %}</label>
-                <textarea class="ls-textarea ls-textarea--short" id="id_tips" name="tips">{{ lieu.tips }}</textarea>
-            </div>
-
-            <!-- Photos existantes -->
-            <div class="ls-section-label">
-                <span class="material-icons">photo_library</span>
+            <h2 class="ls-section-label">
+                <span class="material-icons" aria-hidden="true">photo_library</span>
                 {% trans "Photos existantes" %}
-            </div>
+            </h2>
 
             {% if images %}
-            <p class="delete-hint">{% trans "Cliquez sur une photo pour la marquer à supprimer (fond rouge = sera supprimée)." %}</p>
+            <p class="delete-hint">{% trans "Touchez une photo pour la marquer à supprimer (fond rouge = sera supprimée)." %}</p>
             <div class="existing-images-grid">
                 {% for img in images %}
                 <div class="existing-img-item">
-                    <input type="checkbox" name="delete_images" value="{{ img.pk }}" id="delimg{{ img.pk }}">
+                    <input type="checkbox" name="delete_images" value="{{ img.pk }}" id="delimg{{ img.pk }}"
+                           aria-label="{% blocktrans with n=forloop.counter %}Supprimer la photo {{ n }}{% endblocktrans %}">
                     <label for="delimg{{ img.pk }}">
-                        <span class="material-icons del-icon">delete</span>
+                        <span class="material-icons del-icon" aria-hidden="true">delete</span>
                     </label>
                     <img src="{{ img.image.url }}" alt="">
                     {% if img.is_primary %}
-                    <span class="existing-img-primary">{% trans "Principal" %}</span>
+                    <span class="existing-img-primary">{% trans "Principale" %}</span>
                     {% endif %}
                 </div>
                 {% endfor %}
@@ -128,44 +65,21 @@
             <p class="delete-hint">{% trans "Aucune photo pour le moment." %}</p>
             {% endif %}
 
-            <!-- Ajouter des photos -->
-            <div class="ls-section-label">
-                <span class="material-icons">add_photo_alternate</span>
+            <h2 class="ls-section-label">
+                <span class="material-icons" aria-hidden="true">add_photo_alternate</span>
                 {% trans "Ajouter des photos" %}
-            </div>
+            </h2>
+            {% include 'tourisme/_lieu_photos.html' with room=8 %}
 
-            <div class="ls-upload-zone">
-                <input type="file" name="images" accept="image/*" multiple
-                       onchange="previewNewImages(this)">
-                <div class="ls-upload-label">{% trans "Cliquez ou glissez vos nouvelles photos ici" %}</div>
-                <div class="ls-upload-hint">{% trans "JPG, PNG, WEBP — maximum 8 photos au total" %}</div>
+            <div class="vz-actions">
+                <a href="{% url 'tourisme:lieu_detail' lieu.slug %}" class="vz-btn vz-btn--muted">{% trans "Annuler" %}</a>
+                <button type="submit" class="vz-btn vz-btn--primary">
+                    <span class="material-icons" aria-hidden="true">save</span>
+                    {% trans "Enregistrer" %}
+                </button>
             </div>
-            <div class="ls-preview-grid" id="newPreviewGrid"></div>
-
-            <button type="submit" class="ls-submit-btn ls-submit-btn--spaced">
-                <span class="material-icons" aria-hidden="true">save</span>
-                {% trans "Enregistrer les modifications" %}
-            </button>
         </form>
     </div>
 
 </div>
-</main>
-
-<script>
-function previewNewImages(input) {
-    var grid = document.getElementById('newPreviewGrid');
-    grid.innerHTML = '';
-    Array.from(input.files).slice(0, 8).forEach(function(file) {
-        var reader = new FileReader();
-        reader.onload = function(e) {
-            var div = document.createElement('div');
-            div.className = 'ls-preview-thumb';
-            div.innerHTML = '<img src="' + e.target.result + '" alt="">';
-            grid.appendChild(div);
-        };
-        reader.readAsDataURL(file);
-    });
-}
-</script>
 {% endblock %}

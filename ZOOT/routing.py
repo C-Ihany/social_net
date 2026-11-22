@@ -29,7 +29,8 @@ from django.urls import path, re_path
 from django.core.asgi import get_asgi_application
 
 from chat.consumers import ChatConsumer
-from public_chat.consumers import PublicChatConsumer
+# (le chat public n'est plus branché : aucune page ne l'utilise, et son consumer laissait
+#  n'importe qui, même sans compte, en lire l'historique — l'app public_chat reste en place)
 from notification.consumers import NotificationConsumer
 from video.consumers import LiveConsumer
 
@@ -40,7 +41,6 @@ application = ProtocolTypeRouter({
 		AuthMiddlewareStack(
 			URLRouter([
 					path('', NotificationConsumer.as_asgi()),
-					path('public_chat/<room_id>/', PublicChatConsumer.as_asgi()),
 					path('chat/<room_id>/', ChatConsumer.as_asgi()),
 					path('live/<room_id>/', LiveConsumer.as_asgi()),
 			])

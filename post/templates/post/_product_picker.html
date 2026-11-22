@@ -12,11 +12,11 @@
         <img id="pp-sel-img" src="" alt="" hidden>
         <span id="pp-sel-ico" class="material-icons">storefront</span>
         <span class="pp-sel-txt"><b id="pp-sel-title"></b><small id="pp-sel-price"></small></span>
-        <button type="button" class="pp-sel-remove" onclick="ppClear()" aria-label="{% trans 'Retirer' %}"><span class="material-icons">close</span></button>
+        <button type="button" class="vz-icon-btn pp-sel-remove" onclick="ppClear()" aria-label="{% trans 'Retirer' %}"><span class="material-icons" aria-hidden="true">close</span></button>
     </div>
     {% if my_products %}
-    <button type="button" class="pp-open-btn" id="pp-open-btn" onclick="ppOpen()">
-        <span class="material-icons">add_shopping_cart</span>
+    <button type="button" class="vz-btn vz-btn--secondary pp-open-btn" id="pp-open-btn" onclick="ppOpen()">
+        <span class="material-icons" aria-hidden="true">add_shopping_cart</span>
         {% trans "Lier une annonce ou un plat" %}
     </button>
     {% else %}
@@ -52,7 +52,7 @@
         var html = '';
         products.forEach(function (p) {
             if (q && (p.title + ' ' + p.seller).toLowerCase().indexOf(q) === -1) return;
-            html += '<button type="button" class="pp-item" onclick="ppPick(' + JSON.stringify(p.ref) + ')">' +
+            html += '<button type="button" class="pp-item" data-ref="' + esc(p.ref) + '">' +
                 (p.image ? '<img src="' + esc(p.image) + '" alt="">' :
                     '<span class="pp-item-ico material-icons">' + (p.kind === 'resto' ? 'restaurant' : 'storefront') + '</span>') +
                 '<span class="pp-item-txt"><small>' + esc(p.badge) + ' · ' + esc(p.seller) + '</small><b>' + esc(p.title) +
@@ -60,6 +60,12 @@
         });
         {% trans "Aucun produit trouvé." as ppNone %}list.innerHTML = html || '<p class="pp-empty">{{ ppNone|escapejs }}</p>';
     };
+    /* Choix d'un produit : écouteur délégué (un onclick construit avec
+       JSON.stringify cassait l'attribut HTML, le clic ne faisait rien). */
+    document.getElementById('pp-list').addEventListener('click', function (e) {
+        var item = e.target.closest('.pp-item');
+        if (item) window.ppPick(item.getAttribute('data-ref'));
+    });
     window.ppOpen = function () {
         ppRender('');
         document.getElementById('pp-sheet').classList.add('open');

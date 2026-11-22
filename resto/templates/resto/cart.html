@@ -5,10 +5,13 @@
 {% block content %}
 {% include 'resto/_style.html' %}
 <div class="rs-wrap rs-wrap--narrow">
-    <h1 class="rs-h1 rs-h1--top"><i class="material-icons" aria-hidden="true">shopping_basket</i> {% trans "Mon panier" %}</h1>
+    <div class="vz-page-head">
+        <a class="vz-back" href="{% if cart %}{% url 'resto:restaurant' cart.restaurant.slug %}{% else %}{% url 'resto:index' %}{% endif %}" aria-label="{% trans 'Retour' %}"><i class="material-icons" aria-hidden="true">arrow_back</i></a>
+        <div class="vz-page-head__main"><h1 class="vz-page-title"><i class="material-icons" aria-hidden="true">shopping_basket</i> {% trans "Mon panier" %}</h1></div>
+    </div>
 
     {% if cart and cart_summary.count %}
-    <div class="rs-card rs-card--pad">
+    <div class="vz-card rs-box rs-card--pad">
         <p class="rs-mb">
             <strong>{{ cart.restaurant.name }}</strong>
             <a href="{% url 'resto:restaurant' cart.restaurant.slug %}" class="rs-link rs-text-sm rs-ml">{% trans "Ajouter d'autres plats" %} <i class="material-icons rs-ico" aria-hidden="true">arrow_forward</i></a>
@@ -27,7 +30,7 @@
                 <div class="vz-card__actions vz-card__actions--end rs-line-end">
                     <span class="vz-card__price lt">{{ l.line_total|vz_ariary }}</span>
                     <div class="rs-qty">
-                        <button type="button" onclick="rsLine({{ l.id }}, -1)" aria-label="{% trans 'Retirer un' %}">−</button><span class="q">{{ l.quantity }}</span><button type="button" onclick="rsLine({{ l.id }}, 1)" aria-label="{% trans 'Ajouter un' %}">+</button>
+                        <button type="button" class="vz-icon-btn" onclick="rsLine({{ l.id }}, -1)" aria-label="{% trans 'Retirer un' %}"><i class="material-icons" aria-hidden="true">remove</i></button><span class="q">{{ l.quantity }}</span><button type="button" class="vz-icon-btn" onclick="rsLine({{ l.id }}, 1)" aria-label="{% trans 'Ajouter un' %}"><i class="material-icons" aria-hidden="true">add</i></button>
                     </div>
                 </div>
             </div>
@@ -39,13 +42,13 @@
             <div class="rs-total-row rs-total-row--grand"><span>{% trans "Total" %}</span><span id="rs-total">{{ cart_summary.total|vz_ariary }}</span></div>
         </div>
         {% if cart.restaurant.min_order and cart_summary.subtotal < cart.restaurant.min_order %}
-        <p class="rs-form err rs-mt">{% blocktrans with m=cart.restaurant.min_order|floatformat:0 %}Commande minimum : {{ m|vz_ariary }}{% endblocktrans %}</p>
+        <p class="rs-form err rs-mt" role="alert">{% blocktrans with m=cart.restaurant.min_order|vz_ariary %}Commande minimum : {{ m }}{% endblocktrans %}</p>
         {% endif %}
-        <div class="rs-actions rs-mt-l">
-            <a class="vz-btn vz-btn--primary rs-grow" href="{% url 'resto:checkout' %}">{% trans "Commander" %} <i class="material-icons" aria-hidden="true">arrow_forward</i></a>
-            <form method="post" action="{% url 'resto:cart_clear' %}" data-vz-confirm="{% trans 'Vider le panier ?' %}" data-vz-danger>{% csrf_token %}
-                <button class="vz-btn vz-btn--muted" type="submit">{% trans "Vider" %}</button>
+        <div class="vz-actions vz-actions--between">
+            <form method="post" action="{% url 'resto:cart_clear' %}" data-vz-confirm="{% trans 'Vider le panier ?' %}" data-vz-confirm-label="{% trans 'Vider' %}" data-vz-danger>{% csrf_token %}
+                <button class="vz-btn vz-btn--danger-soft vz-btn--block" type="submit"><i class="material-icons" aria-hidden="true">delete_outline</i> {% trans "Vider le panier" %}</button>
             </form>
+            <a class="vz-btn vz-btn--primary" href="{% url 'resto:checkout' %}">{% trans "Commander" %} <i class="material-icons" aria-hidden="true">arrow_forward</i></a>
         </div>
     </div>
     {% else %}
@@ -55,22 +58,27 @@
 </div>
 
 <script>
+(function(){
 const CSRF = document.cookie.match(/csrftoken=([^;]+)/)?.[1] || '';
-async function rsLine(id, d){
+window.rsLine = async function(id, d){
   const row = document.querySelector(`[data-line="${id}"]`);
   const q = parseInt(row.querySelector('.q').textContent) + d;
-  const r = await fetch(`/resto/panier/ligne/${id}/`, {method:'POST', credentials:'same-origin',
-    headers:{'Content-Type':'application/json','X-CSRFToken':CSRF}, body: JSON.stringify({quantity:q})});
-  if(!r.ok) return;
+  let r;
+  try {
+    r = await fetch(`/resto/panier/ligne/${id}/`, {method:'POST', credentials:'same-origin',
+      headers:{'Content-Type':'application/json','X-CSRFToken':CSRF}, body: JSON.stringify({quantity:q})});
+  } catch(e) { r = null; }
+  if(!r || !r.ok){ vzToast("{% trans 'Une erreur est survenue. Réessayez.'|escapejs %}", 'error'); return; }
   const data = await r.json();
   if(!data.cart.count){ window.location.reload(); return; }
   const line = data.cart.lines.find(l => l.id === id);
   if(!line){ row.remove(); } else {
     row.querySelectorAll('.q').forEach(e => e.textContent = line.quantity);
-    row.querySelector('.lt').textContent = line.line_total + ' Ar';
+    row.querySelector('.lt').textContent = rsMoney(line.line_total);
   }
-  document.getElementById('rs-sub').textContent = data.cart.subtotal + ' Ar';
-  document.getElementById('rs-total').textContent = data.cart.total + ' Ar';
-}
+  document.getElementById('rs-sub').textContent = rsMoney(data.cart.subtotal);
+  document.getElementById('rs-total').textContent = rsMoney(data.cart.total);
+};
+})();
 </script>
 {% endblock %}

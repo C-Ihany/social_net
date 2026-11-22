@@ -13,24 +13,6 @@
 .gp-private-icon {
     font-size: 3.5rem; color: var(--text-muted); display: block; margin-bottom: .8rem;
 }
-.gp-private-card h2 { font-size: 1.3rem; font-weight: 800; color: var(--text); margin-bottom: .5rem; }
+.gp-private-card .gp-private-title { font-size: 1.3rem; font-weight: 800; color: var(--text); margin-bottom: .5rem; }
 .gp-private-card p { color: var(--text-muted); font-size: .95rem; margin-bottom: 1.4rem; }
-.gp-private-btn {
-    display: inline-flex; align-items: center; gap: .4rem;
-    padding: .6rem 1.3rem; border-radius: 14px;
-    background: linear-gradient(135deg, var(--accent), var(--accent2));
-    color: #fff; font-weight: 700; font-size: .95rem;
-    text-decoration: none; border: none; cursor: pointer;
-    transition: opacity .15s;
-}
-.gp-private-btn:hover { opacity: .88; color: #fff; text-decoration: none; }
-.gp-back {
-    display: inline-flex; align-items: center; gap: .3rem;
-    color: var(--text-muted); font-size: .85rem; font-weight: 600;
-    text-decoration: none; margin-top: 1.2rem;
-    padding: .3rem .6rem; border-radius: 8px; transition: background .15s, color .15s;
-}
-.gp-back:hover { background: var(--btn-bg); color: var(--accent); text-decoration: none; }
-.gp-back .material-icons { font-size: 1rem; }
-
-.gp-private-btn--static { cursor: default; opacity: .75; }
+.gp-private-wrapper .gp-back { margin-top: 1rem; }

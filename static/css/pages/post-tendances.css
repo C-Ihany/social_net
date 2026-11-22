@@ -40,13 +40,8 @@
     position: relative;
 }
 
-/* ── Filtres (.vz-chip + .active) ── */
-.td-filters {
-    display: flex;
-    gap: .5rem;
-    margin-bottom: 1.25rem;
-    flex-wrap: wrap;
-}
+/* ── Filtres : contrôle segmenté partagé ── */
+.td-filters { margin-bottom: 1.25rem; }
 
 /* ── Carte de tendance : seul le spécifique, le conteneur est .vz-card ── */
 .td-rank {
@@ -112,15 +107,7 @@
 a.vz-card:hover .td-arrow { color: var(--accent); }
 
 /* Empty state */
-.td-empty {
-    text-align: center;
-    padding: 3rem 1rem;
-    color: var(--text-muted);
-}
-.td-empty-icon { font-size: 3rem; margin-bottom: .75rem; opacity: .4; display: block; }
-.td-empty h3 { font-size: 1.1rem; font-weight: 700; color: var(--text); margin-bottom: .4rem; }
-.td-empty p  { font-size: .88rem; }
-.td-empty a, .td-refresh-hint a { color: var(--accent); font-weight: 600; }
+.td-refresh-hint a { color: var(--accent); font-weight: 600; }
 
 /* Refresh hint */
 .td-refresh-hint {

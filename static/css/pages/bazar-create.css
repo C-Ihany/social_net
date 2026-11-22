@@ -7,38 +7,30 @@
    ============================================================ */
 .bazar-form-wrap {
     max-width: 740px;
-    margin: 2rem auto 4rem;
+    margin: 1.25rem auto 4rem;
     padding: 0 1rem;
 }
-.bazar-form-header {
-    margin-bottom: 1.8rem;
-}
-.bazar-form-header h1 {
-    font-size: 1.6rem;
-    font-weight: 800;
-    margin-bottom: .25rem;
-    display: flex; align-items: center; gap: .5rem;
-}
-.bazar-form-header h1 .material-icons { font-size: 1.7rem; color: var(--accent); }
-.bazar-form-header p {
+/* En-tête : composant partagé .vz-page-head (+ .vz-back) */
+
+/* Récapitulatif des erreurs de validation */
+.bazar-form-errors {
+    background: rgba(var(--danger-rgb), .08);
+    border: 1.5px solid rgba(var(--danger-rgb), .35);
+    border-radius: var(--radius);
+    padding: .85rem 1.1rem;
+    margin-bottom: 1.2rem;
     font-size: .88rem;
-    color: var(--text-muted);
+    color: var(--text);
 }
+.bazar-form-errors strong { display: flex; align-items: center; gap: .4rem; color: var(--danger); }
+.bazar-form-errors strong .material-icons { font-size: 1.15rem; }
+.bazar-form-errors ul { margin: .4rem 0 0; padding-left: 1.2rem; }
+.bazar-form-errors ul:empty { display: none; }
 
-/* ── Fil d'Ariane ── */
-.bazar-crumb {
-    display: flex; align-items: center; gap: .3rem; flex-wrap: wrap;
-    font-size: .8rem; color: var(--text-muted); margin-bottom: .6rem;
-}
-.bazar-crumb a { color: var(--accent); text-decoration: none; font-weight: 600; }
-.bazar-crumb a:hover { text-decoration: underline; }
-.bazar-alert { border-radius: var(--radius); }
-
-/* Section card */
+/* Sections : surface partagée .vz-card (fond, bordure, rayon, ombre) */
 .bazar-section {
-    background: var(--bg-card);
-    border: 1px solid var(--border);
-    border-radius: var(--radius-lg);
+    display: block;
+    overflow: visible;
     padding: 1.5rem;
     margin-bottom: 1.2rem;
 }
@@ -48,7 +40,7 @@
     text-transform: uppercase;
     letter-spacing: .1em;
     color: var(--accent);
-    margin-bottom: 1.1rem;
+    margin: 0 0 1.1rem;
     display: flex;
     align-items: center;
     gap: .5rem;
@@ -65,14 +57,6 @@
 }
 .bazar-section .vz-field > label .material-icons { font-size: 1rem; vertical-align: -3px; margin-right: .25rem; }
 .bazar-section .vz-field > label small { font-weight: 500; }
-.bazar-section .errorlist {
-    list-style: none;
-    padding: 0;
-    margin: .25rem 0 0;
-    font-size: .8rem;
-    color: var(--danger);
-}
-
 /* Grilles de champs */
 .bazar-form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 0 .85rem; }
 .bazar-form-grid--3 { grid-template-columns: repeat(3, 1fr); }
@@ -106,7 +90,11 @@
 .bazar-upload-zone:hover .bazar-upload-icon { color: var(--accent); }
 .bazar-upload-text { font-size: .9rem; font-weight: 600; margin-bottom: .2rem; color: var(--text); }
 .bazar-upload-hint { font-size: .78rem; color: var(--text-muted); }
-.bazar-file-input { display: none !important; }
+.bazar-upload-zone[hidden] { display: none; }
+.bazar-upload-text, .bazar-upload-hint { display: block; }
+/* Champ fichier masqué à la vue mais atteignable au clavier (le libellé le déclenche) */
+.bazar-file-input { position: absolute; width: 1px; height: 1px; opacity: 0; overflow: hidden; }
+.bazar-file-input:focus-visible + .bazar-preview-grid { outline: 2px solid var(--accent); outline-offset: 4px; }
 
 /* Aperçu photos */
 .bazar-preview-grid {
@@ -137,21 +125,10 @@
     border-radius: var(--radius-pill);
     letter-spacing: .04em;
 }
-.bazar-preview-remove {
-    position: absolute;
-    top: 4px; right: 4px;
-    background: rgba(0,0,0,.65);
-    border: none;
-    color: #fff;
-    width: 20px; height: 20px;
-    border-radius: 50%;
-    padding: 0;
-    line-height: 1;
-    cursor: pointer;
-    display: flex; align-items: center; justify-content: center;
-}
-.bazar-preview-remove .material-icons { font-size: .85rem; }
-.bazar-preview-remove:hover { background: var(--danger); }
+/* Croix de retrait d'une photo : .vz-icon-btn--over réduit à 32 px, zone de toucher étendue par .vz-tap */
+.bazar-photo-x { position: absolute; top: 3px; right: 3px; width: 32px; height: 32px; }
+.bazar-photo-x .material-icons { font-size: 1.05rem; }
+.bazar-photo-x:hover { background: var(--danger); }
 
 /* Rangée prix + case « négociable » alignée sur la saisie */
 .bazar-price-row {
@@ -162,22 +139,13 @@
 }
 .bazar-price-check { margin-top: 1.6rem; min-height: 48px; }
 
-/* Submit : boutons partagés .vz-btn */
-.bazar-submit {
-    display: flex;
-    justify-content: flex-end;
-    gap: .75rem;
-    margin-top: 1.5rem;
-}
+/* Boutons : rangée partagée .vz-actions (Annuler à gauche, action principale à droite) */
 
 @media (max-width: 575px) {
     .bazar-form-wrap { margin: 1rem auto 5rem; }
-    .bazar-form-header h1 { font-size: 1.25rem; }
     .bazar-form-grid, .bazar-form-grid--3 { grid-template-columns: 1fr; }
     .bazar-price-row { grid-template-columns: 1fr; }
     .bazar-price-check { margin-top: 0; min-height: 0; margin-bottom: 1rem; }
-    .bazar-submit { flex-direction: column-reverse; }
-    .bazar-submit .vz-btn { width: 100%; }
 }
 
 /* ── Sélecteur type d'annonce ── */
@@ -190,14 +158,16 @@
     color: var(--text);
     transition: border-color .18s, background .18s;
 }
-.type-radio-btn input[type=radio] { display: none; }
+.type-radio-btn input[type=radio] { position: absolute; opacity: 0; width: 1px; height: 1px; }
+.type-radio-btn:focus-within { outline: 2px solid var(--accent); outline-offset: 2px; }
 .type-radio-btn .material-icons { grid-row: 1 / span 2; font-size: 1.6rem; color: var(--text-subtle); }
 .type-radio-btn strong { font-size: .95rem; }
 .type-radio-btn small { font-size: .78rem; color: var(--text-muted); }
 .type-radio-btn.selected { border-color: var(--accent); background: rgba(var(--accent-rgb), .07); }
 .type-radio-btn.selected .material-icons { color: var(--accent); }
 .type-radio-btn:hover { border-color: var(--accent); }
-.location-fields { background: var(--bg-secondary); border-radius: var(--radius); padding: 1.2rem; margin-bottom: 1.5rem; }
+.location-fields { background: var(--bg-secondary); border-radius: var(--radius); padding: 1.2rem; margin-top: 1.1rem; }
+.location-fields[hidden] { display: none; }
 .loc-fields-header {
     display: flex; align-items: center; gap: .4rem;
     font-weight: 700; font-size: .95rem; margin-bottom: 1rem; color: var(--accent);

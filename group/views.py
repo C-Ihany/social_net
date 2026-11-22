@@ -8,8 +8,10 @@ from django.db.models import Count, Q
 from django.http import HttpResponseForbidden, JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.utils import timezone
+from django.utils.translation import gettext as _
 
 from post.models import Post, Comment, Reaction, PostMedia, Repost
+from post.visibility import visible_posts
 from .forms import GroupForm
 from .models import Group, GroupMembership, GroupEvent, GroupJoinRequest
 
@@ -78,6 +80,11 @@ def _enrich_posts(posts, post_ids, user):
     except Exception:
         count_map = {}
         user_reposts = set()
+    bookmarked = set()
+    if user.is_authenticated:
+        from post.models import PostBookmark
+        bookmarked = set(PostBookmark.objects.filter(user=user, post_id__in=post_ids)
+                         .values_list('post_id', flat=True))
 
     for post in posts:
         top = top_by_post.get(post.id, [])
@@ -91,8 +98,15 @@ def _enrich_posts(posts, post_ids, user):
         post.total_reactions = sum(post.reaction_counts.values())
         post.repost_count    = count_map.get(post.id, 0)
         post.user_reposted   = post.id in user_reposts
+        post.is_bookmarked   = post.id in bookmarked
 
     _attach_media(posts, post_ids)
+    try:
+        from post.products import attach_products
+        attach_products(posts)
+    except Exception:
+        for post in posts:
+            post.product = None
 
 
 # ── Helpers ───────────────────────────────────────────────────────────────────
@@ -123,7 +137,7 @@ def _strip_html(text):
 
 def _get_trending_hashtags(group, limit=10):
     """Extrait les hashtags les plus utilisés dans les posts du groupe."""
-    posts_bodies = Post.objects.filter(group=group).values_list('body', flat=True)
+    posts_bodies = Post.objects.filter(group=group).order_by('-id').values_list('body', flat=True)[:500]
     counter = {}
     for body in posts_bodies:
         for tag in _HASHTAG_RE.findall(_strip_html(body)):
@@ -181,6 +195,9 @@ def _get_recommended_groups(user, exclude_ids, limit=6):
     return qs[:limit]
 
 
+MEDIA_TAB_LIMIT = 60   # vignettes de l'onglet Médias
+
+
 # ── Vues ──────────────────────────────────────────────────────────────────────
 
 def group_list(request):
@@ -221,7 +238,7 @@ def group_list(request):
     user_region = ''
     user_region_label = ''
     if request.user.is_authenticated:
-        from regions import REGION_LABELS
+        from regions import REGION_SHORT as REGION_LABELS
         user_region = getattr(request.user, 'region', '') or ''
         user_region_label = REGION_LABELS.get(user_region, '')
 
@@ -280,7 +297,7 @@ def group_create(request):
                 group=group,
                 role=GroupMembership.ADMIN,
             )
-            messages.success(request, "Groupe créé avec succès.")
+            messages.success(request, _("Groupe créé avec succès."))
             return redirect('group:detail', slug=group.slug)
     else:
         form = GroupForm()
@@ -314,7 +331,11 @@ def group_detail(request, slug):
     hashtag_filter = request.GET.get('hashtag', '').strip().lstrip('#').lower()
 
     # ── Annonces épinglées ────────────────────────────────────────
-    pinned_qs = Post.objects.filter(group=group, is_pinned=True).select_related('author', 'group').order_by('-id')
+    # visible_posts() : mêmes règles que le fil (comptes bloqués, posts masqués)
+    pinned_qs = visible_posts(
+        Post.objects.filter(group=group, is_pinned=True).select_related('author', 'group').order_by('-id'),
+        request.user,
+    )
     if hashtag_filter:
         pinned_qs = pinned_qs.filter(body__icontains=f'#{hashtag_filter}')
     pinned_posts = list(pinned_qs)
@@ -323,10 +344,11 @@ def group_detail(request, slug):
         _enrich_posts(pinned_posts, pinned_ids, request.user)
 
     # ── Posts du groupe (hors épinglés, paginés, 10/page) ────────
-    posts_qs = (
+    posts_qs = visible_posts(
         Post.objects.filter(group=group, is_pinned=False)
         .select_related('author', 'group')
-        .order_by('-id')
+        .order_by('-id'),
+        request.user,
     )
     if hashtag_filter:
         posts_qs = posts_qs.filter(body__icontains=f'#{hashtag_filter}')
@@ -341,13 +363,14 @@ def group_detail(request, slug):
     trending_hashtags = _get_trending_hashtags(group, limit=12)
 
     # ── Galerie médias ────────────────────────────────────────────
-    media_qs = (
+    # Bornée : la galerie chargeait tous les médias du groupe à chaque affichage.
+    media_base = (
         PostMedia.objects.filter(post__group=group)
-        .select_related('post', 'post__author')
-        .order_by('-post__id')
+        .select_related('post')
+        .order_by('-post__id', 'order')
     )
-    media_images = [m for m in media_qs if m.media_type == 'image']
-    media_videos = [m for m in media_qs if m.media_type == 'video']
+    media_images = list(media_base.filter(media_type='image')[:MEDIA_TAB_LIMIT])
+    media_videos = list(media_base.filter(media_type='video')[:MEDIA_TAB_LIMIT // 5])
 
     # ── Événements à venir ────────────────────────────────────────
     upcoming_events = group.events.filter(
@@ -375,7 +398,7 @@ def group_detail(request, slug):
         'member_count':       member_count,
         'trending_hashtags':  trending_hashtags,
         'hashtag_filter':     hashtag_filter,
-        'comment_url_template': '/post/{post_id}/add-comment/',
+        'in_group':           True,
     })
 
 
@@ -384,7 +407,9 @@ def group_hashtag(request, slug, tag):
     Redirige vers group_detail avec le filtre hashtag actif.
     Peut aussi servir comme vue dédiée si besoin.
     """
-    return redirect(f"/groups/{slug}/?hashtag={tag.lower()}")
+    from django.urls import reverse
+    from urllib.parse import quote
+    return redirect(reverse('group:detail', args=[slug]) + '?hashtag=' + quote(tag.lower()))
 
 
 @login_required
@@ -394,8 +419,8 @@ def group_add_post(request, slug):
     # Vérifier que l'utilisateur est membre
     if not GroupMembership.objects.filter(group=group, user=request.user).exists():
         if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
-            return JsonResponse({'ok': False, 'error': 'Non membre'}, status=403)
-        return HttpResponseForbidden("Vous devez être membre du groupe pour publier.")
+            return JsonResponse({'ok': False, 'error': _('Vous devez être membre du groupe pour publier.')}, status=403)
+        return HttpResponseForbidden(_("Vous devez être membre du groupe pour publier."))
 
     if request.method == 'POST':
         title = request.POST.get('title', '').strip()
@@ -405,8 +430,8 @@ def group_add_post(request, slug):
         # Un post est valide s'il a du texte OU des fichiers
         if not title and not body and not files:
             if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
-                return JsonResponse({'ok': False, 'error': 'Contenu vide'})
-            messages.error(request, "Le post ne peut pas être vide.")
+                return JsonResponse({'ok': False, 'error': _('Le post ne peut pas être vide.')})
+            messages.error(request, _("Le post ne peut pas être vide."))
             return redirect('group:detail', slug=group.slug)
 
         post = Post.objects.create(
@@ -416,13 +441,12 @@ def group_add_post(request, slug):
             group=group,
         )
 
-        # ── Enregistrer les médias ────────────────────────────────────
-        _VIDEO_EXTS = {'mp4', 'webm', 'ogg', 'mov', 'mkv', 'avi', 'm4v', '3gp'}
+        # ── Enregistrer les médias : même chaîne que le fil (compression
+        #    WebP, poster et recompression des vidéos) ─────────────────────
+        from post.media_utils import store_post_media
         for i, f in enumerate(files):
-            ext = f.name.rsplit('.', 1)[-1].lower() if '.' in f.name else ''
-            mtype = 'video' if ext in _VIDEO_EXTS else 'image'
             try:
-                PostMedia.objects.create(post=post, file=f, media_type=mtype, order=i)
+                store_post_media(post, f, order=i)
             except Exception as e:
                 import logging
                 logging.getLogger(__name__).exception("GroupPost: PostMedia FAILED (%s): %s", f.name, e)
@@ -430,14 +454,16 @@ def group_add_post(request, slug):
         if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
             from django.template.loader import render_to_string
             _enrich_posts([post], [post.id], request.user)
+            membership = GroupMembership.objects.filter(group=group, user=request.user).first()
             html = render_to_string(
                 'post/post_cards_fragment.html',
-                {'posts_of_the_page': [post], 'request': request},
+                {'posts_of_the_page': [post], 'request': request, 'in_group': True,
+                 'is_mod': bool(membership and membership.is_moderator)},
                 request=request,
             )
             return JsonResponse({'ok': True, 'html': html})
 
-        messages.success(request, "Post publié dans le groupe.")
+        messages.success(request, _("Post publié dans le groupe."))
         return redirect('group:detail', slug=group.slug)
 
     return redirect('group:detail', slug=group.slug)
@@ -452,14 +478,14 @@ def group_join(request, slug):
             return redirect('group:detail', slug=group.slug)
         if group.privacy == Group.PRIVATE:
             # Groupe privé : on n'entre que sur validation d'un modérateur.
-            _, created = GroupJoinRequest.objects.get_or_create(user=request.user, group=group)
+            _jr, created = GroupJoinRequest.objects.get_or_create(user=request.user, group=group)
             if created:
-                messages.success(request, "Votre demande a été envoyée aux modérateurs du groupe.")
+                messages.success(request, _("Votre demande a été envoyée aux modérateurs du groupe."))
             else:
-                messages.info(request, "Votre demande est déjà en attente.")
+                messages.info(request, _("Votre demande est déjà en attente."))
             return redirect('group:detail', slug=group.slug)
         GroupMembership.objects.create(user=request.user, group=group, role=GroupMembership.MEMBER)
-        messages.success(request, "Vous avez rejoint le groupe.")
+        messages.success(request, _("Vous avez rejoint le groupe."))
     return redirect('group:detail', slug=group.slug)
 
 
@@ -478,9 +504,9 @@ def group_join_request_decide(request, slug, request_id):
             user=join_request.user, group=group,
             defaults={'role': GroupMembership.MEMBER},
         )
-        messages.success(request, f"{join_request.user.username} a rejoint le groupe.")
+        messages.success(request, _("%(name)s a rejoint le groupe.") % {'name': join_request.user.username})
     else:
-        messages.info(request, f"Demande de {join_request.user.username} refusée.")
+        messages.info(request, _("Demande de %(name)s refusée.") % {'name': join_request.user.username})
     join_request.delete()
     return redirect('group:detail', slug=group.slug)
 
@@ -491,10 +517,10 @@ def group_leave(request, slug):
     group = get_object_or_404(Group, slug=slug)
     if request.method == 'POST':
         if request.user == group.creator:
-            messages.error(request, "Le créateur ne peut pas quitter son propre groupe.")
+            messages.error(request, _("Le créateur ne peut pas quitter son propre groupe."))
         else:
             GroupMembership.objects.filter(user=request.user, group=group).delete()
-            messages.success(request, "Vous avez quitté le groupe.")
+            messages.success(request, _("Vous avez quitté le groupe."))
     return redirect('group:detail', slug=group.slug)
 
 
@@ -526,7 +552,7 @@ def group_promote_member(request, slug, user_id):
     if m.role == GroupMembership.MEMBER:
         m.role = GroupMembership.MODERATOR
         m.save(update_fields=['role'])
-        messages.success(request, f"{target.username} est maintenant modérateur.")
+        messages.success(request, _("%(name)s est maintenant modérateur.") % {'name': target.username})
     return redirect('group:detail', slug=slug)
 
 
@@ -543,7 +569,7 @@ def group_demote_member(request, slug, user_id):
     if m.role == GroupMembership.MODERATOR:
         m.role = GroupMembership.MEMBER
         m.save(update_fields=['role'])
-        messages.success(request, f"{target.username} est maintenant membre.")
+        messages.success(request, _("%(name)s est maintenant membre.") % {'name': target.username})
     return redirect('group:detail', slug=slug)
 
 
@@ -560,20 +586,20 @@ def group_kick_member(request, slug, user_id):
     from account.models import Account
     target = get_object_or_404(Account, pk=user_id)
     if target == request.user:
-        return JsonResponse({'ok': False, 'error': 'Vous ne pouvez pas vous retirer vous-même.'}, status=400)
+        return JsonResponse({'ok': False, 'error': _('Vous ne pouvez pas vous retirer vous-même.')}, status=400)
     if target == group.creator:
-        return JsonResponse({'ok': False, 'error': 'Impossible de retirer le créateur du groupe.'}, status=403)
+        return JsonResponse({'ok': False, 'error': _('Impossible de retirer le créateur du groupe.')}, status=403)
     # Un modérateur ne peut pas expulser un autre modérateur ni un admin
     target_membership = GroupMembership.objects.filter(group=group, user=target).first()
     if target_membership and target_membership.role in (GroupMembership.ADMIN, GroupMembership.MODERATOR):
         if membership.role != GroupMembership.ADMIN:
-            return JsonResponse({'ok': False, 'error': 'Seul un admin peut retirer un modérateur.'}, status=403)
+            return JsonResponse({'ok': False, 'error': _('Seul un admin peut retirer un modérateur.')}, status=403)
     if target_membership:
         target_membership.delete()
     is_ajax = request.headers.get('X-Requested-With') == 'XMLHttpRequest'
     if is_ajax:
         return JsonResponse({'ok': True, 'username': target.username})
-    messages.success(request, f"{target.username} a été retiré du groupe.")
+    messages.success(request, _("%(name)s a été retiré du groupe.") % {'name': target.username})
     return redirect('group:detail', slug=slug)
 
 
@@ -585,7 +611,7 @@ def group_event_create(request, slug):
 
     if not GroupMembership.objects.filter(group=group, user=request.user).exists():
         if is_ajax:
-            return JsonResponse({'ok': False, 'error': 'Vous devez être membre du groupe.'}, status=403)
+            return JsonResponse({'ok': False, 'error': _('Vous devez être membre du groupe.')}, status=403)
         return HttpResponseForbidden()
 
     if request.method != 'POST':
@@ -600,14 +626,14 @@ def group_event_create(request, slug):
 
     if not title:
         if is_ajax:
-            return JsonResponse({'ok': False, 'error': 'Le titre est obligatoire.'})
-        messages.error(request, "Le titre est obligatoire.")
+            return JsonResponse({'ok': False, 'error': _('Le titre est obligatoire.')})
+        messages.error(request, _("Le titre est obligatoire."))
         return redirect('group:detail', slug=slug)
 
     if not event_date:
         if is_ajax:
-            return JsonResponse({'ok': False, 'error': 'La date est obligatoire.'})
-        messages.error(request, "La date est obligatoire.")
+            return JsonResponse({'ok': False, 'error': _('La date est obligatoire.')})
+        messages.error(request, _("La date est obligatoire."))
         return redirect('group:detail', slug=slug)
 
     # parse_datetime accepte "2026-06-11T14:30" (format datetime-local HTML)
@@ -623,8 +649,8 @@ def group_event_create(request, slug):
 
     if dt is None:
         if is_ajax:
-            return JsonResponse({'ok': False, 'error': f'Format de date invalide : {event_date!r}'})
-        messages.error(request, "Format de date invalide.")
+            return JsonResponse({'ok': False, 'error': _('Format de date invalide.')})
+        messages.error(request, _("Format de date invalide."))
         return redirect('group:detail', slug=slug)
 
     try:
@@ -637,13 +663,13 @@ def group_event_create(request, slug):
         import logging
         logging.getLogger(__name__).exception("GroupEvent create failed: %s", e)
         if is_ajax:
-            return JsonResponse({'ok': False, 'error': 'Erreur serveur. Les migrations ont-elles été appliquées ?'})
-        messages.error(request, "Erreur lors de la création de l'événement.")
+            return JsonResponse({'ok': False, 'error': _('Une erreur est survenue')})
+        messages.error(request, _("Erreur lors de la création de l'événement."))
         return redirect('group:detail', slug=slug)
 
     if is_ajax:
-        return JsonResponse({'ok': True, 'message': 'Événement créé avec succès !'})
-    messages.success(request, "Événement créé.")
+        return JsonResponse({'ok': True, 'message': _('Événement créé.')})
+    messages.success(request, _("Événement créé."))
     return redirect('group:detail', slug=slug)
 
 
@@ -664,9 +690,10 @@ def group_invite_search(request, slug):
     # Exclure les membres déjà dans le groupe
     already_ids = set(GroupMembership.objects.filter(group=group).values_list('user_id', flat=True))
     users = (
-        Account.objects.filter(
-            Q(username__icontains=query) | Q(email__icontains=query)
-        ).exclude(pk__in=already_ids).exclude(pola_mode='pola')[:10]
+        # Par nom d'utilisateur uniquement : chercher aussi dans l'e-mail
+        # permettait de deviner l'adresse d'un membre par fragments.
+        Account.objects.filter(username__icontains=query, is_active=True)
+        .exclude(pk__in=already_ids).exclude(pola_mode=Account.POLA_ONLY)[:10]
     )
     data = []
     for u in users:
@@ -698,7 +725,7 @@ def group_invite_member(request, slug):
         if not target.visible_to(request.user):
             return JsonResponse({'ok': False, 'error': 'Utilisateur introuvable'})
 
-        _, created = GroupMembership.objects.get_or_create(
+        _m, created = GroupMembership.objects.get_or_create(
             user=target, group=group,
             defaults={'role': GroupMembership.MEMBER},
         )
@@ -707,7 +734,7 @@ def group_invite_member(request, slug):
             'ok': True,
             'created': created,
             'username': target.username,
-            'message': f"{target.username} a été ajouté au groupe." if created else f"{target.username} est déjà membre.",
+            'message': (_("%(name)s a été ajouté au groupe.") if created else _("%(name)s est déjà membre.")) % {'name': target.username},
         })
     return JsonResponse({'ok': False, 'error': 'Méthode non autorisée'}, status=405)
 
@@ -725,16 +752,19 @@ def group_dina_save(request, slug):
         return JsonResponse({'ok': False, 'error': 'Méthode non autorisée'}, status=405)
     dina = request.POST.get('dina', '').strip()
     if len(dina) > 3000:
-        return JsonResponse({'ok': False, 'error': 'Le Dina est trop long (max 3000 caractères).'})
+        return JsonResponse({'ok': False, 'error': _('Le Dina est trop long (3000 caractères au maximum).')})
     group.dina = dina
     group.save(update_fields=['dina'])
-    return JsonResponse({'ok': True, 'message': 'Dina sauvegardé.'})
+    return JsonResponse({'ok': True, 'message': _('Dina enregistré.')})
 
 
 @login_required
+@require_POST
 def group_event_attend(request, slug, event_id):
-    """Participer / annuler participation à un événement."""
+    """Participer / annuler participation à un événement (membres, POST)."""
     group = get_object_or_404(Group, slug=slug)
+    if not GroupMembership.objects.filter(group=group, user=request.user).exists():
+        return JsonResponse({'ok': False, 'error': _('Vous devez être membre du groupe.')}, status=403)
     event = get_object_or_404(GroupEvent, pk=event_id, group=group)
     if request.user in event.attendees.all():
         event.attendees.remove(request.user)
@@ -758,7 +788,7 @@ def group_edit(request, slug):
         form = GroupForm(request.POST, request.FILES, instance=group)
         if form.is_valid():
             form.save()
-            messages.success(request, "Groupe mis à jour.")
+            messages.success(request, _("Groupe mis à jour."))
             return redirect('group:detail', slug=group.slug)
     else:
         form = GroupForm(instance=group)
@@ -777,6 +807,6 @@ def group_delete(request, slug):
         return HttpResponseForbidden("Seul le créateur peut supprimer le groupe.")
     if request.method == 'POST':
         group.delete()
-        messages.success(request, "Groupe supprimé.")
+        messages.success(request, _("Groupe supprimé."))
         return redirect('group:list')
     return render(request, 'group/group_confirm_delete.html', {'group': group})

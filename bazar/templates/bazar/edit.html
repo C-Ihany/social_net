@@ -1,350 +1,72 @@
 {% extends 'base.html' %}
 {% load static i18n %}
+{% block page_title %}{% trans "Modifier l'annonce" %} — {% trans "Bazar" %} Vazimba{% endblock %}
 
 {% block content %}
+<link rel="stylesheet" href="{% static 'css/pages/bazar-create.css' %}">
 <link rel="stylesheet" href="{% static 'css/pages/bazar-edit.css' %}">
 
 <div class="bazar-form-wrap">
-    <div class="bazar-form-header">
-        <nav class="bazar-crumb">
-            <a href="{% url 'bazar:index' %}">{% trans "Bazar" %}</a>
-            <span> › </span>
-            <a href="{% url 'bazar:detail' annonce.pk %}">{{ annonce.title|truncatechars:30 }}</a>
-            <span> › </span>{% trans "Modifier" %}
-        </nav>
-        <h1><i class="material-icons" aria-hidden="true">edit</i> {% trans "Modifier" %} {% trans "l'annonce" %}</h1>
-        <p>{% trans "Les modifications seront visibles immédiatement." %}</p>
+    <a class="vz-back" href="{% url 'bazar:detail' annonce.pk %}"><i class="material-icons" aria-hidden="true">arrow_back</i>{{ annonce.title|truncatechars:40 }}</a>
+    <div class="vz-page-head">
+        <div class="vz-page-head__main">
+            <h1 class="vz-page-title"><i class="material-icons" aria-hidden="true">edit</i> {% trans "Modifier l'annonce" %}</h1>
+            <p class="vz-page-sub">{% trans "Les modifications seront visibles immédiatement." %}</p>
+        </div>
     </div>
 
-    {% if messages %}
-    {% for msg in messages %}
-    <div class="alert alert-{{ msg.tags }} mb-3 bazar-alert">{{ msg }}</div>
-    {% endfor %}
-    {% endif %}
-
-    <form method="post" enctype="multipart/form-data">
+    <form method="post" enctype="multipart/form-data" id="bazar-annonce-form">
         {% csrf_token %}
 
-        <!-- Type d'annonce -->
-        <div class="bazar-section">
-          <div class="bazar-section-title"><i class="material-icons" aria-hidden="true">category</i>{% trans "Type d'annonce" %}</div>
-          <div class="type-radio-group">
-            <label class="type-radio-btn {% if annonce.listing_type != 'location' %}selected{% endif %}" id="lbl-vente">
-              <input type="radio" name="listing_type" value="vente"
-                     {% if annonce.listing_type != 'location' %}checked{% endif %}>
-              <i class="material-icons" aria-hidden="true">sell</i>
-              <strong>À vendre</strong>
-              <small>Vente d'un objet ou service</small>
-            </label>
-            <label class="type-radio-btn {% if annonce.listing_type == 'location' %}selected{% endif %}" id="lbl-location">
-              <input type="radio" name="listing_type" value="location"
-                     {% if annonce.listing_type == 'location' %}checked{% endif %}>
-              <i class="material-icons" aria-hidden="true">vpn_key</i>
-              <strong>À louer</strong>
-              <small>Location de voiture ou appartement</small>
-            </label>
-          </div>
-        </div>
+        {% include 'bazar/_annonce_fields.html' %}
 
-        <!-- Section location (cachée si vente ; display basculé par le JS « Toggle champs location ») -->
-        <div class="location-fields" id="location-fields" style="{% if annonce.listing_type != 'location' %}display:none{% endif %}">
-          <div class="loc-fields-header"><i class="material-icons" aria-hidden="true">assignment</i>Conditions de location</div>
-          <div class="bazar-form-grid bazar-form-grid--3">
-            <div class="vz-field">
-              <label for="{{ form.prix_location.id_for_label }}">Prix de location (Ar)</label>
-              {{ form.prix_location }}
-            </div>
-            <div class="vz-field">
-              <label for="{{ form.periode_location.id_for_label }}">Période</label>
-              {{ form.periode_location }}
-            </div>
-            <div class="vz-field">
-              <label for="{{ form.caution.id_for_label }}">Caution (Ar) <small class="text-muted">facultatif</small></label>
-              {{ form.caution }}
-            </div>
-            <div class="vz-field">
-              <label for="{{ form.duree_min.id_for_label }}">Durée minimale (jours)</label>
-              {{ form.duree_min }}
-            </div>
-            <div class="vz-field">
-              <label for="{{ form.nb_pieces.id_for_label }}">Nb de pièces <small class="text-muted">appartement</small></label>
-              {{ form.nb_pieces }}
-            </div>
-            <div class="vz-field">
-              <label for="{{ form.surface_m2.id_for_label }}">Surface (m²)</label>
-              {{ form.surface_m2 }}
-            </div>
-          </div>
-          <div class="bazar-check-row">
-            <div class="form-check bazar-check">
-              {{ form.meuble }} <label class="form-check-label bazar-check-label" for="{{ form.meuble.id_for_label }}">Meublé</label>
-            </div>
-            <div class="form-check bazar-check">
-              {{ form.charges_incluses }} <label class="form-check-label bazar-check-label" for="{{ form.charges_incluses.id_for_label }}">Charges incluses</label>
-            </div>
-            <div class="form-check bazar-check">
-              {{ form.avec_chauffeur }} <label class="form-check-label bazar-check-label" for="{{ form.avec_chauffeur.id_for_label }}">Avec chauffeur</label>
-            </div>
-          </div>
-        </div>
-
-        <!-- Photos existantes -->
-        <div class="bazar-section">
-            <div class="bazar-section-title">
+        <!-- Photos -->
+        <div class="vz-card bazar-section">
+            <h2 class="bazar-section-title">
                 <i class="material-icons" aria-hidden="true">photo_library</i>
-                {% trans "Photos actuelles" %}
-            </div>
-            {% if images %}
+                {% blocktrans with n=max_images %}Photos ({{ n }} max){% endblocktrans %}
+            </h2>
             <div class="existing-photos">
                 {% for img in images %}
-                <div class="existing-photo-item" id="photo-{{ img.pk }}">
+                <div class="existing-photo-item">
                     <img src="{{ img.image.url }}" alt="">
-                    {% if img.is_primary %}<span class="existing-photo-primary">PRINCIPALE</span>{% endif %}
-                    <button type="button" class="existing-photo-del" onclick="deletePhoto({{ img.pk }}, this)" title="Supprimer"><i class="material-icons" aria-hidden="true">close</i></button>
+                    {% if img.is_primary %}<span class="existing-photo-primary">{% trans "PRINCIPALE" %}</span>{% endif %}
+                    <button type="button" class="vz-icon-btn vz-icon-btn--over vz-tap bazar-photo-x"
+                            data-delete-photo="{% url 'bazar:delete_image' img.pk %}"
+                            title="{% trans 'Supprimer cette photo' %}" aria-label="{% trans 'Supprimer cette photo' %}"><i class="material-icons" aria-hidden="true">close</i></button>
                 </div>
                 {% endfor %}
             </div>
-            {% else %}
-            <p class="bazar-no-photos">{% trans "Aucune photo pour le moment." %}</p>
-            {% endif %}
+            <p class="bazar-no-photos" id="bazar-no-photos"{% if images %} hidden{% endif %}>{% trans "Aucune photo pour le moment." %}</p>
 
-            <!-- Ajouter nouvelles photos -->
-            {% if images|length < max_images %}
-            <label class="bazar-upload-zone bazar-upload-zone--compact" for="id_images">
+            <!-- Ajouter de nouvelles photos (masqué par le script quand le quota est atteint) -->
+            <label class="bazar-upload-zone bazar-upload-zone--compact" id="upload-zone" for="id_images">
                 <i class="material-icons bazar-upload-icon" aria-hidden="true">add_photo_alternate</i>
-                <div class="bazar-upload-text">{% trans "Ajouter des photos" %}</div>
-                <div class="bazar-upload-hint">{{ max_images }} photos max au total ({{ images|length }} déjà ajoutée{{ images|length|pluralize }})</div>
+                <span class="bazar-upload-text">{% trans "Ajouter des photos" %}</span>
+                <span class="bazar-upload-hint">{% blocktrans with n=max_images %}JPG, PNG, WebP, HEIC · {{ n }} photos max au total{% endblocktrans %}</span>
             </label>
             <input type="file" name="images" id="id_images" class="bazar-file-input" multiple accept="image/*,.heic,.heif">
             <div class="bazar-preview-grid" id="preview-grid"></div>
-            {% endif %}
         </div>
 
-        <!-- Titre + Catégorie + État -->
-        <div class="bazar-section">
-            <div class="bazar-section-title"><i class="material-icons" aria-hidden="true">local_offer</i>{% trans "Article" %}</div>
-            <div class="vz-field">
-                <label for="{{ form.title.id_for_label }}">{{ form.title.label }} <span class="vz-req">*</span></label>
-                {{ form.title }}
-                {% if form.title.errors %}<ul class="errorlist">{% for e in form.title.errors %}<li>{{ e }}</li>{% endfor %}</ul>{% endif %}
-            </div>
-            <div class="bazar-form-grid">
-                <div class="vz-field">
-                    <label for="{{ form.category.id_for_label }}">{{ form.category.label }} <span class="vz-req">*</span></label>
-                    {{ form.category }}
-                </div>
-                <div class="vz-field">
-                    <label for="{{ form.condition.id_for_label }}">{{ form.condition.label }} <span class="vz-req">*</span></label>
-                    {{ form.condition }}
-                </div>
-            </div>
-        </div>
-
-        <!-- Prix -->
-        <div class="bazar-section">
-            <div class="bazar-section-title"><i class="material-icons" aria-hidden="true">payments</i>{% trans "Prix" %}</div>
-            <div class="bazar-price-row">
-                <div class="vz-field">
-                    <label for="{{ form.price.id_for_label }}">{{ form.price.label }}</label>
-                    {{ form.price }}
-                    <small class="vz-field-help">{% trans "Laisser vide = « Prix à discuter »" %}</small>
-                </div>
-                <div class="form-check bazar-check bazar-price-check">
-                    {{ form.price_negotiable }}
-                    <label class="form-check-label bazar-check-label" for="{{ form.price_negotiable.id_for_label }}">{{ form.price_negotiable.label }}</label>
-                </div>
-            </div>
-        </div>
-
-        <!-- Description -->
-        <div class="bazar-section">
-            <div class="bazar-section-title"><i class="material-icons" aria-hidden="true">notes</i>{% trans "Description" %}</div>
-            <div class="vz-field">
-                <label for="{{ form.description.id_for_label }}">{{ form.description.label }} <span class="vz-req">*</span></label>
-                {{ form.description }}
-            </div>
-        </div>
-
-        <!-- Localisation + Contact -->
-        <div class="bazar-section">
-            <div class="bazar-section-title"><i class="material-icons" aria-hidden="true">place</i>{% trans "Localisation & Contact" %}</div>
-            <div class="bazar-form-grid">
-                <div class="vz-field">
-                    <label for="{{ form.location.id_for_label }}">{{ form.location.label }} <span class="vz-req">*</span></label>
-                    {{ form.location }}
-                </div>
-                <div class="vz-field">
-                    <label for="{{ form.region.id_for_label }}">{{ form.region.label }}</label>
-                    {{ form.region }}
-                    <small class="vz-field-help">{% trans "Facilite le filtre « Près de chez moi »" %}</small>
-                </div>
-            </div>
-            <div class="vz-field">
-                <label for="{{ form.contact_phone.id_for_label }}">
-                    <i class="material-icons" aria-hidden="true">call</i>{{ form.contact_phone.label }}
-                </label>
-                {{ form.contact_phone }}
-                <small class="vz-field-help">{% trans "Visible pour les acheteurs (appel ou WhatsApp)." %}</small>
-            </div>
-            <div class="form-check bazar-check">
-                {{ form.show_phone }}
-                <label class="form-check-label bazar-check-label" for="{{ form.show_phone.id_for_label }}">{{ form.show_phone.label }}</label>
-            </div>
-        </div>
+        {% include 'bazar/_annonce_fields2.html' %}
 
         <!-- Statut -->
-        <div class="bazar-section">
-            <div class="bazar-section-title"><i class="material-icons" aria-hidden="true">schedule</i>{% trans "Statut de l'annonce" %}</div>
-            <div class="vz-field">
-                <label for="{{ form.status.id_for_label }}">{{ form.status.label }}</label>
-                {{ form.status }}
-                <small class="vz-field-help">{% trans "« En pause » masque votre annonce sans la supprimer." %}</small>
-            </div>
+        <div class="vz-card bazar-section">
+            <h2 class="bazar-section-title"><i class="material-icons" aria-hidden="true">schedule</i>{% trans "Statut de l'annonce" %}</h2>
+            {% trans "« En pause » masque votre annonce sans la supprimer." as status_help %}
+            {% include 'bazar/_field.html' with field=form.status help=status_help %}
         </div>
 
-        <div class="bazar-submit">
-            <a href="{% url 'bazar:detail' annonce.pk %}" class="vz-btn vz-btn--secondary vz-btn--lg">{% trans "Annuler" %}</a>
-            <button type="submit" class="vz-btn vz-btn--primary vz-btn--lg">
+        <div class="vz-actions">
+            <a href="{% url 'bazar:detail' annonce.pk %}" class="vz-btn vz-btn--secondary">{% trans "Annuler" %}</a>
+            <button type="submit" class="vz-btn vz-btn--primary">
                 <i class="material-icons" aria-hidden="true">save</i>{% trans "Enregistrer" %}
             </button>
         </div>
     </form>
 </div>
 
-<script>
-var VZB_I18N = {
-    saving: "{% trans 'Enregistrement…'|escapejs %}",
-    networkError: "{% trans 'Erreur réseau. Réessayez.'|escapejs %}"
-};
-</script>
-<script>
-// Supprimer photo existante via AJAX
-function deletePhoto(imgPk, btn) {
-    vzConfirm({ text: '{% trans "Supprimer cette photo ?"|escapejs %}', danger: true, confirmText: '{% trans "Supprimer"|escapejs %}' })
-    .then(function(ok){ if (ok) _deletePhotoNow(imgPk, btn); });
-}
-function _deletePhotoNow(imgPk, btn) {
-    const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]').value;
-    fetch(`/bazar/image/${imgPk}/supprimer/`, {
-        method: 'POST',
-        headers: { 'X-CSRFToken': csrfToken, 'Content-Type': 'application/json' },
-    })
-    .then(r => r.json())
-    .then(data => {
-        if (data.success) {
-            document.getElementById(`photo-${imgPk}`).remove();
-        }
-    })
-    .catch(() => vzAlert('{% trans "Erreur lors de la suppression."|escapejs %}'));
-}
-
-// Aperçu nouvelles photos
-let selectedFiles = [];
-const fileInput  = document.getElementById('id_images');
-const previewGrid = document.getElementById('preview-grid');
-
-/* Détection support DataTransfer (absent sur iOS Safari < 17) */
-const _supportsFileSync = (function() {
-    try {
-        const dt = new DataTransfer();
-        dt.items.add(new File([''], '_chk_', { type: 'text/plain' }));
-        const tmp = document.createElement('input');
-        tmp.type = 'file';
-        tmp.files = dt.files;
-        return tmp.files.length === 1;
-    } catch(e) { return false; }
-})();
-
-if (fileInput) {
-    fileInput.addEventListener('change', function() {
-        const captured = Array.from(this.files);
-        try { this.value = ''; } catch(e) {}
-        if (window.ZootMediaConverter) {
-            ZootMediaConverter.processFiles(captured).then(converted => {
-                selectedFiles = converted.slice(0, 8);
-                renderPreviews(); syncEditInput();
-            }).catch(() => {
-                selectedFiles = captured.slice(0, 8);
-                renderPreviews(); syncEditInput();
-            });
-        } else {
-            selectedFiles = captured.slice(0, 8);
-            renderPreviews(); syncEditInput();
-        }
-    });
-}
-
-function syncEditInput() {
-    if (!fileInput || !_supportsFileSync) return;
-    const dt = new DataTransfer();
-    selectedFiles.forEach(f => dt.items.add(f));
-    fileInput.files = dt.files;
-}
-
-function removeFile(idx) {
-    selectedFiles.splice(idx, 1);
-    renderPreviews();
-    syncEditInput();
-}
-
-function renderPreviews() {
-    if (!previewGrid) return;
-    previewGrid.innerHTML = '';
-    selectedFiles.forEach((file, i) => {
-        const reader = new FileReader();
-        reader.onload = ev => {
-            const div = document.createElement('div');
-            div.className = 'bazar-preview-item';
-            div.innerHTML = `<img src="${ev.target.result}" alt=""><button type="button" class="bazar-preview-remove" onclick="removeFile(${i})"><i class="material-icons" aria-hidden="true">close</i></button>`;
-            previewGrid.appendChild(div);
-        };
-        reader.readAsDataURL(file);
-    });
-}
-
-/* Soumission iOS-safe via FormData + fetch */
-const _editForm = document.querySelector('form[enctype="multipart/form-data"]');
-if (_editForm) {
-    _editForm.addEventListener('submit', function(e) {
-        if (selectedFiles.length === 0) return; /* aucun nouveau fichier : soumission native */
-        e.preventDefault();
-        const btn  = this.querySelector('button[type="submit"]');
-        const orig = btn ? btn.innerHTML : '';
-        if (btn) { btn.disabled = true; btn.innerHTML = VZB_I18N.saving; }
-
-        const fd = new FormData(this);
-        fd.delete('images');
-        selectedFiles.forEach(f => fd.append('images', f));
-
-        fetch(this.action || window.location.pathname, {
-            method: 'POST', body: fd, credentials: 'same-origin'
-        }).then(function(r) {
-            if (r.redirected) { window.location.href = r.url; }
-            else { return r.text().then(function(html) {
-                document.open(); document.write(html); document.close();
-            }); }
-        }).catch(function() {
-            if (btn) { btn.disabled = false; btn.innerHTML = orig; }
-            vzAlert(VZB_I18N.networkError);
-        });
-    });
-}
-
-// ── Toggle champs location ────────────────────────────────────────────────────
-(function() {
-  var radios = document.querySelectorAll('input[name="listing_type"]');
-  var panel  = document.getElementById('location-fields');
-  function update() {
-    var checked = document.querySelector('input[name="listing_type"]:checked');
-    var isLoc = checked && checked.value === 'location';
-    if (panel) panel.style.display = isLoc ? 'block' : 'none';
-    document.querySelectorAll('.type-radio-btn').forEach(function(lbl) {
-      var radio = lbl.querySelector('input[type=radio]');
-      lbl.classList.toggle('selected', radio && radio.checked);
-    });
-  }
-  radios.forEach(function(r) { r.addEventListener('change', update); });
-  update();
-})();
-</script>
+{% trans "Enregistrement…" as sending_label %}
+{% include 'bazar/_annonce_script.html' %}
 {% endblock %}

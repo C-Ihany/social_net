@@ -11,7 +11,7 @@
         <div class="post-form-header">
             <span class="material-icons">edit</span>
             <div>
-                <h4>{% trans "Edit post" %}</h4>
+                <h1 class="post-form-title">{% trans "Edit post" %}</h1>
                 <span>{{ object.title }}</span>
             </div>
         </div>
@@ -52,7 +52,7 @@
                             {% else %}
                             <img src="{{ item.url }}" alt="">
                             {% endif %}
-                            <input type="checkbox" name="delete_media" value="{{ item.id }}" title="Supprimer ce média">
+                            <input type="checkbox" name="delete_media" value="{{ item.id }}" title="{% trans 'Supprimer ce média' %}" aria-label="{% trans 'Supprimer ce média' %}">
                         </div>
                         {% endfor %}
                     </div>
@@ -107,13 +107,21 @@
 
             </div>
 
-            <div class="post-form-actions">
-                <a class="btn-cancel" href="{% url 'post:post-view' %}">
-                    <span class="material-icons">arrow_back</span> {% trans "Cancel" %}
-                </a>
-                <button class="btn-submit" type="submit">
-                    <span class="material-icons">save</span> {% trans "Save" %}
+            <div class="vz-actions post-form-actions">
+                <a class="vz-btn vz-btn--muted" href="{% if object.status == 'published' %}{% url 'post:post-detail' object.pk %}{% else %}{% url 'post:mes-brouillons' %}{% endif %}">{% trans "Annuler" %}</a>
+                {% if object.status == 'draft' %}
+                {# Brouillon : on peut l'enregistrer tel quel, ou le publier (seul primaire) #}
+                <button class="vz-btn vz-btn--secondary" type="submit">
+                    <span class="material-icons" aria-hidden="true">save</span> {% trans "Enregistrer" %}
                 </button>
+                <button class="vz-btn vz-btn--primary btn-submit" type="submit" name="action" value="publish">
+                    <span class="material-icons" aria-hidden="true">send</span> {% trans "Publier" %}
+                </button>
+                {% else %}
+                <button class="vz-btn vz-btn--primary btn-submit" type="submit">
+                    <span class="material-icons" aria-hidden="true">save</span> {% trans "Enregistrer" %}
+                </button>
+                {% endif %}
             </div>
         </form>
 
@@ -178,7 +186,7 @@ function _renderPreview() {
             vid.onloadedmetadata = function() { URL.revokeObjectURL(url); };
             item.appendChild(vid);
             var badge = document.createElement('span');
-            badge.className = 'mp-type-badge'; badge.textContent = 'vidéo';
+            badge.className = 'mp-type-badge'; badge.textContent = '{% trans "video"|escapejs %}';
             item.appendChild(badge);
         } else {
             var img = document.createElement('img');
@@ -188,7 +196,7 @@ function _renderPreview() {
         }
         var btn = document.createElement('button');
         btn.type = 'button'; btn.className = 'mp-remove';
-        btn.innerHTML = '&#x2715;'; btn.title = 'Retirer';
+        btn.innerHTML = '<span class="material-icons" aria-hidden="true">close</span>'; btn.setAttribute('aria-label', '{% trans "Retirer"|escapejs %}');
         (function(i){ btn.onclick = function(e){ e.stopPropagation(); removeFromSelection(i); }; })(idx);
         item.appendChild(btn);
         grid.appendChild(item);
@@ -221,12 +229,15 @@ function _renderPreview() {
         if (_pending.length === 0) return;
 
         e.preventDefault();
+        /* FormData(form, submitter) n'est pas disponible partout : on reporte
+           à la main le bouton cliqué (« Publier » porte action=publish). */
         var fd = new FormData(form);
+        if (e.submitter && e.submitter.name) fd.set(e.submitter.name, e.submitter.value);
         fd.delete('media_files');
         _pending.forEach(function(f) { fd.append('media_files', f); });
 
-        var btn = form.querySelector('.btn-submit');
-        if (btn) { btn.disabled = true; btn.style.opacity = '.6'; }
+        var btn = e.submitter || form.querySelector('.btn-submit');
+        if (btn) { btn.disabled = true; btn.classList.add('is-loading'); }
 
         fetch(form.action || window.location.pathname, {
             method: 'POST',
@@ -235,7 +246,7 @@ function _renderPreview() {
         }).then(function(r) {
             window.location.href = r.url;
         }).catch(function() {
-            if (btn) { btn.disabled = false; btn.style.opacity = ''; }
+            if (btn) { btn.disabled = false; btn.classList.remove('is-loading'); }
             form.submit();
         });
     });

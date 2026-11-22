@@ -1,0 +1,25 @@
+{% load i18n %}{% comment %}
+Pagination partagée du tourisme (composant .vz-pager de zoot-base.css).
+  {% include 'tourisme/_pager.html' with page_obj=page_obj filters_qs=filters_qs %}
+filters_qs : filtres courants déjà encodés par la vue (sans « page »), éventuellement vide.
+{% endcomment %}{% if page_obj.has_other_pages %}
+<nav class="vz-pager" aria-label="{% trans 'Pagination' %}">
+    {% if page_obj.has_previous %}
+    <a href="?{% if filters_qs %}{{ filters_qs }}&amp;{% endif %}page={{ page_obj.previous_page_number }}" aria-label="{% trans 'Page précédente' %}"><span class="material-icons" aria-hidden="true">chevron_left</span></a>
+    {% else %}
+    <span class="is-disabled" aria-hidden="true"><span class="material-icons">chevron_left</span></span>
+    {% endif %}
+    {% for num in page_obj.paginator.page_range %}
+    {% if page_obj.number == num %}
+    <span class="is-current" aria-current="page">{{ num }}</span>
+    {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %}
+    <a href="?{% if filters_qs %}{{ filters_qs }}&amp;{% endif %}page={{ num }}">{{ num }}</a>
+    {% endif %}
+    {% endfor %}
+    {% if page_obj.has_next %}
+    <a href="?{% if filters_qs %}{{ filters_qs }}&amp;{% endif %}page={{ page_obj.next_page_number }}" aria-label="{% trans 'Page suivante' %}"><span class="material-icons" aria-hidden="true">chevron_right</span></a>
+    {% else %}
+    <span class="is-disabled" aria-hidden="true"><span class="material-icons">chevron_right</span></span>
+    {% endif %}
+</nav>
+{% endif %}

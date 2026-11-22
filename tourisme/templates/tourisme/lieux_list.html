@@ -1,21 +1,21 @@
 {% extends 'base.html' %}
 {% load static i18n %}
 
+{% block page_title %}{% trans "Lieux touristiques" %} — Vazimba{% endblock %}
+
 {% block extra_head %}
 <link rel="stylesheet" href="{% static 'css/pages/tourisme-lieux_list.css' %}">
 {% endblock %}
 
 {% block content %}
-<main>
-
 <!-- ── Hero ── -->
 <div class="lieux-hero">
     <div>
         <h1>{% trans "Lieux touristiques" %}</h1>
-        <p>{{ total }} destination{{ total|pluralize }} à découvrir à Madagascar</p>
+        <p>{% blocktrans count n=total %}{{ n }} destination à découvrir en Afrique{% plural %}{{ n }} destinations à découvrir en Afrique{% endblocktrans %}</p>
     </div>
     {% if user.is_authenticated %}
-    <a href="{% url 'tourisme:lieu_submit' %}" class="lieux-hero-cta">
+    <a href="{% url 'tourisme:lieu_submit' %}" class="vz-btn vz-btn--pill tour-hero-btn--main">
         <span class="material-icons" aria-hidden="true">add_location_alt</span>
         {% trans "Proposer un lieu" %}
     </a>
@@ -24,31 +24,30 @@
 
 <!-- ── Barre de recherche + filtres ── -->
 <div class="lieux-search-bar">
-    <form method="get" action="{% url 'tourisme:lieux_list' %}">
+    <form method="get" action="{% url 'tourisme:lieux_list' %}" role="search">
         <div class="lieux-search-inner">
             <div class="lieux-search-field">
-                <span class="material-icons">search</span>
-                <input type="text" name="q" value="{{ q }}" placeholder="{% trans 'Rechercher un lieu…' %}">
+                <span class="material-icons" aria-hidden="true">search</span>
+                <input type="search" name="q" value="{{ q }}" placeholder="{% trans 'Rechercher un lieu…' %}" aria-label="{% trans 'Rechercher un lieu…' %}" autocomplete="off">
             </div>
-            <select name="region" class="lieux-select">
-                <option value="">{% trans "Toutes les régions" %}</option>
+            <select name="region" class="lieux-select" aria-label="{% trans 'Pays ou région' %}">
+                <option value="">{% trans "Tous les pays" %}</option>
                 {% for r_key, r_label in regions %}
                 <option value="{{ r_key }}" {% if sel_region == r_key %}selected{% endif %}>{{ r_label }}</option>
                 {% endfor %}
             </select>
-            <button type="submit" class="lieux-search-submit" aria-label="{% trans 'Rechercher' %}">
+            <button type="submit" class="vz-btn vz-btn--primary vz-btn--pill">
                 <span class="material-icons" aria-hidden="true">search</span>
+                {% trans "Rechercher" %}
             </button>
         </div>
-        <!-- Chips catégorie -->
-        <div class="cat-chips">
-            <a href="{% url 'tourisme:lieux_list' %}{% if q %}?q={{ q }}{% endif %}{% if sel_region %}&region={{ sel_region }}{% endif %}"
-               class="cat-chip-btn {% if not sel_cat %}active{% endif %}">
+        <!-- Puces catégorie -->
+        <div class="vz-chip-row cat-chips">
+            <a href="{{ all_cats_url }}" class="vz-chip {% if not sel_cat %}active{% endif %}" {% if not sel_cat %}aria-current="true"{% endif %}>
                 {% trans "Tous" %}
             </a>
-            {% for cat_key, cat_label in categories %}
-            <a href="?cat={{ cat_key }}{% if q %}&q={{ q }}{% endif %}{% if sel_region %}&region={{ sel_region }}{% endif %}"
-               class="cat-chip-btn {% if sel_cat == cat_key %}active{% endif %}">
+            {% for cat_key, cat_label, cat_url, cat_active in cat_links %}
+            <a href="{{ cat_url }}" class="vz-chip {% if cat_active %}active{% endif %}" {% if cat_active %}aria-current="true"{% endif %}>
                 {{ cat_label }}
             </a>
             {% endfor %}
@@ -61,10 +60,10 @@
 
     {% if q or sel_cat or sel_region %}
     <div class="lieux-results-info">
-        {{ total }} résultat{{ total|pluralize }}
-        {% if q %} pour &laquo; {{ q }} &raquo;{% endif %}
-        {% if sel_cat %} &middot; {{ sel_cat }}{% endif %}
-        {% if sel_region %} &middot; {{ sel_region }}{% endif %}
+        {% blocktrans count n=total %}{{ n }} résultat{% plural %}{{ n }} résultats{% endblocktrans %}
+        {% if q %} {% blocktrans %}pour « {{ q }} »{% endblocktrans %}{% endif %}
+        {% if sel_cat %} &middot; {{ sel_cat_label }}{% endif %}
+        {% if sel_region %} &middot; {{ sel_region_label }}{% endif %}
         &mdash; <a href="{% url 'tourisme:lieux_list' %}" class="lieux-link">{% trans "Effacer les filtres" %}</a>
     </div>
     {% endif %}
@@ -79,7 +78,7 @@
                     <img src="{{ img.image.url }}" alt="{{ lieu.name }}" loading="lazy">
                 {% else %}
                     <div class="vz-card__media-ph vz-card__media-ph--accent">
-                        <i class="material-icons">landscape</i>
+                        <i class="material-icons" aria-hidden="true">landscape</i>
                     </div>
                 {% endif %}
                 {% endwith %}
@@ -90,7 +89,7 @@
                 {% if lieu.region %}
                 <div class="vz-card__meta">
                     <span class="vz-card__meta-item">
-                        <i class="material-icons">place</i>
+                        <i class="material-icons" aria-hidden="true">place</i>
                         <span>{{ lieu.get_region_display }}</span>
                     </span>
                 </div>
@@ -101,131 +100,88 @@
         {% endfor %}
     </div>
 
-    <!-- Pagination -->
-    {% if page_obj.has_other_pages %}
-    <nav class="tour-pagination" aria-label="{% trans 'Pagination' %}">
-        {% if page_obj.has_previous %}
-        <a href="?page={{ page_obj.previous_page_number }}{% if q %}&q={{ q }}{% endif %}{% if sel_cat %}&cat={{ sel_cat }}{% endif %}{% if sel_region %}&region={{ sel_region }}{% endif %}"
-           class="tour-page-btn">
-            <span class="material-icons" aria-hidden="true">chevron_left</span>
-        </a>
-        {% endif %}
-
-        {% for num in page_obj.paginator.page_range %}
-        {% if page_obj.number == num %}
-        <span class="tour-page-btn active">{{ num }}</span>
-        {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %}
-        <a href="?page={{ num }}{% if q %}&q={{ q }}{% endif %}{% if sel_cat %}&cat={{ sel_cat }}{% endif %}{% if sel_region %}&region={{ sel_region }}{% endif %}"
-           class="tour-page-btn">{{ num }}</a>
-        {% endif %}
-        {% endfor %}
-
-        {% if page_obj.has_next %}
-        <a href="?page={{ page_obj.next_page_number }}{% if q %}&q={{ q }}{% endif %}{% if sel_cat %}&cat={{ sel_cat }}{% endif %}{% if sel_region %}&region={{ sel_region }}{% endif %}"
-           class="tour-page-btn">
-            <span class="material-icons" aria-hidden="true">chevron_right</span>
-        </a>
-        {% endif %}
-    </nav>
-    {% endif %}
+    {% include 'tourisme/_pager.html' with page_obj=page_obj filters_qs=filters_qs %}
 
     {% else %}
-    <div class="lieux-empty">
-        <span class="material-icons">travel_explore</span>
-        <div class="lieux-empty-title">{% trans "Aucun lieu trouvé" %}</div>
-        <div class="lieux-empty-text">{% trans "Essayez d'autres termes ou" %}
-            <a href="{% url 'tourisme:lieux_list' %}" class="lieux-link">{% trans "réinitialisez les filtres" %}</a>.
-        </div>
+    <div class="vz-empty">
+        <i class="material-icons" aria-hidden="true">travel_explore</i>
+        <p class="vz-empty-title">{% trans "Aucun lieu trouvé" %}</p>
+        <p class="vz-empty-text">{% trans "Essayez d'autres termes ou effacez les filtres." %}</p>
+        <a href="{% url 'tourisme:lieux_list' %}" class="vz-btn vz-btn--secondary">{% trans "Effacer les filtres" %}</a>
     </div>
     {% endif %}
 
 </div>
-</main>
 
 <script>
 (function() {
     var input     = document.querySelector('.lieux-search-field input');
     var regionSel = document.querySelector('select[name="region"]');
-    var catSel    = document.querySelector('select[name="cat"]');
+    var catInput  = document.querySelector('input[type="hidden"][name="cat"]');
     if (!input) return;
 
     var drop = document.createElement('div');
     drop.className = 'lieux-ac';
-    drop.style.display = 'none';
+    drop.hidden = true;
     document.body.appendChild(drop);
 
     function pos() {
         var r = input.getBoundingClientRect();
-        drop.style.left  = r.left + 'px';
+        var w = Math.min(Math.max(r.width, 280), window.innerWidth - 16);
+        drop.style.left  = Math.max(8, Math.min(r.left, window.innerWidth - w - 8)) + 'px';
         drop.style.top   = (r.bottom + 6) + 'px';
-        drop.style.width = Math.max(r.width, 280) + 'px';
+        drop.style.width = w + 'px';
     }
     function esc(s) {
-        return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+        return String(s == null ? '' : s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');
     }
-
-    /* Icône par catégorie */
-    var CAT_ICON = {
-        'nature':'landscape','plage':'beach_access','ville':'location_city',
-        'culture':'museum','aventure':'hiking','gastronomie':'restaurant',
-        'ecolodge':'cabin','reserve':'park',
-    };
+    function hide() { drop.hidden = true; }
 
     var timer = null;
     function search(q) {
         var region = regionSel ? regionSel.value : '';
-        var cat    = catSel    ? catSel.value    : '';
-        /* Lire aussi le chip actif (cat dans l'URL) */
-        var activeChip = document.querySelector('.cat-chip-btn.active');
-        if (!cat && activeChip && activeChip.href) {
-            var m = activeChip.href.match(/cat=([^&]+)/);
-            if (m) cat = decodeURIComponent(m[1]);
-        }
-        var url = '/tourisme/lieux/autocomplete/?q=' + encodeURIComponent(q);
+        var cat    = catInput ? catInput.value : '';
+        var url = "{% url 'tourisme:lieu_autocomplete' %}?q=" + encodeURIComponent(q);
         if (region) url += '&region=' + encodeURIComponent(region);
         if (cat)    url += '&cat='    + encodeURIComponent(cat);
         fetch(url)
             .then(function(r) { return r.json(); })
             .then(function(d) {
-                if (!d.results || d.results.length === 0) { drop.style.display = 'none'; return; }
+                if (!d.results || d.results.length === 0) { hide(); return; }
                 var html = '';
                 d.results.forEach(function(it) {
-                    var icon = CAT_ICON[it.category] || 'place';
-                    html += '<a href="/tourisme/lieux/' + esc(it.slug) + '/" class="lieux-ac-item">';
-                    html += '<span class="material-icons lieux-ac-icon" aria-hidden="true">' + icon + '</span>';
+                    html += '<a href="/tourisme/lieux/' + encodeURIComponent(it.slug) + '/" class="lieux-ac-item">';
+                    html += '<span class="material-icons lieux-ac-icon" aria-hidden="true">' + esc(it.icon || 'place') + '</span>';
                     html += '<div class="lieux-ac-body">';
                     html += '<div class="lieux-ac-name">' + esc(it.name) + '</div>';
-                    if (it.region) {
-                        html += '<div class="lieux-ac-region">'
-                              + '<span class="material-icons" aria-hidden="true">place</span> '
-                              + esc(it.region) + '</div>';
-                    }
+                    var sub = [it.category_label, it.region_label].filter(Boolean).join(' · ');
+                    if (sub) html += '<div class="lieux-ac-region">' + esc(sub) + '</div>';
                     html += '</div></a>';
                 });
                 drop.innerHTML = html;
                 pos();
-                drop.style.display = 'block';
+                drop.hidden = false;
             })
-            .catch(function() { drop.style.display = 'none'; });
+            .catch(hide);
     }
 
     input.addEventListener('input', function() {
         clearTimeout(timer);
         var q = input.value.trim();
-        if (q.length < 2) { drop.style.display = 'none'; return; }
+        if (q.length < 2) { hide(); return; }
         timer = setTimeout(function() { search(q); }, 280);
     });
     input.addEventListener('focus', function() {
         if (input.value.trim().length >= 2) search(input.value.trim());
     });
     document.addEventListener('click', function(e) {
-        if (!drop.contains(e.target) && e.target !== input) drop.style.display = 'none';
+        if (!drop.contains(e.target) && e.target !== input) hide();
     });
     document.addEventListener('keydown', function(e) {
-        if (e.key === 'Escape') drop.style.display = 'none';
+        if (e.key === 'Escape') hide();
     });
-    window.addEventListener('scroll', function() { if (drop.style.display !== 'none') pos(); }, true);
-    window.addEventListener('resize', function() { if (drop.style.display !== 'none') pos(); });
+    window.addEventListener('scroll', function() { if (!drop.hidden) pos(); }, true);
+    window.addEventListener('resize', function() { if (!drop.hidden) pos(); });
 })();
 </script>
 {% endblock %}

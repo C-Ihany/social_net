@@ -1,7 +1,6 @@
 from django.urls import path
 from django.views.generic import RedirectView
 
-from .views import home_screen_view
 
 # ─────────────────────────────────────────────────────────────────────────────
 # Ces routes déclaraient name='landing' et name='privacy-policy', noms déjà
@@ -17,7 +16,8 @@ from .views import home_screen_view
 # ─────────────────────────────────────────────────────────────────────────────
 
 urlpatterns = [
-	path('home/', home_screen_view, name='home'),
+	# Ancienne page de test (vide) : redirigée, le nom d'URL 'home' n'existe plus.
+	path('home/', RedirectView.as_view(pattern_name='landing', permanent=True)),
 	path('landing/', RedirectView.as_view(pattern_name='landing', permanent=True)),
 	path('privacy/', RedirectView.as_view(pattern_name='privacy-policy', permanent=True)),
 ]

@@ -42,6 +42,11 @@
     --success:      #16a34a;
     --success-rgb:  22,163,74;
     --warning:      #d97706;
+    --warning-rgb:  217,119,6;
+    --on-media:     #ffffff;
+    --on-danger:    #ffffff;
+    --scrim:        rgba(0,0,0,.6);   /* voile sombre (écran d'appel, visionneuse) */   /* texte posé sur une photo ou un bandeau sombre */
+    --whatsapp:     #1fa855;
     --info:         #0891b2;
     /* Échelle unique de rayons et d'ombres */
     --radius-sm:    8px;
@@ -109,6 +114,7 @@
     --success:      #22c55e;
     --success-rgb:  34,197,94;
     --warning:      #fbbf24;
+    --warning-rgb:  251,191,36;
     --info:         #22d3ee;
     --shadow-sm:    0 1px 2px rgba(0,0,0,.4);
     --shadow:       0 2px 8px rgba(0,0,0,.45), 0 8px 32px rgba(0,0,0,.25);
@@ -372,16 +378,20 @@ code, pre {
 
 [data-theme="dark"] hr { border-color: var(--border); }
 
-[data-theme="dark"] a { color: var(--accent); }
-[data-theme="dark"] a:hover { color: var(--accent-dark); }
+/* Les composants (.vz-btn…) portent leur propre couleur : sans cette exclusion,
+   un lien-bouton primaire s'affichait accent sur accent, donc illisible. */
+[data-theme="dark"] a:where(:not(.vz-btn):not(.vz-chip):not(.vz-card):not(.vz-seg):not(.vz-menu-item):not(.vz-icon-btn):not(.vz-back)) { color: var(--accent); }
+[data-theme="dark"] a:where(:not(.vz-btn):not(.vz-chip):not(.vz-card):not(.vz-seg):not(.vz-menu-item):not(.vz-icon-btn):not(.vz-back)):hover { color: var(--accent-dark); }
 
 [data-theme="dark"] .spinner-border { color: var(--accent) !important; }
 
 /* ============================================================
    INPUTS GLOBAUX
    ============================================================ */
-input:not([type="submit"]):not([type="button"]):not([type="checkbox"]):not([type="radio"]),
-textarea, select {
+/* Spécificité nulle (:where) : ce sont des valeurs par défaut. Une page qui
+   place son champ dans un habillage (icône + champ sans bordure) garde la main
+   — avant, cette règle l'emportait et dessinait un second cadre dans le cadre. */
+:where(input:not([type="submit"]):not([type="button"]):not([type="checkbox"]):not([type="radio"]), textarea, select) {
     font-family: var(--font-primary);
     border-radius: 10px;
     border: 1.5px solid var(--border);
@@ -389,25 +399,10 @@ textarea, select {
     color: var(--text);
     transition: border-color .2s, box-shadow .2s;
 }
-input:not([type="submit"]):not([type="button"]):not([type="checkbox"]):not([type="radio"]):focus,
-textarea:focus, select:focus {
+:where(input:not([type="submit"]):not([type="button"]):not([type="checkbox"]):not([type="radio"]), textarea, select):focus {
     border-color: var(--accent);
     box-shadow: 0 0 0 3px var(--accent-glow);
     outline: none;
-}
-
-[data-theme="dark"] input:not([type="submit"]):not([type="button"]):not([type="checkbox"]):not([type="radio"]),
-[data-theme="dark"] textarea,
-[data-theme="dark"] select {
-    background-color: var(--input-bg) !important;
-    color: var(--text) !important;
-    border-color: var(--border) !important;
-}
-[data-theme="dark"] input:not([type="submit"]):not([type="button"]):not([type="checkbox"]):not([type="radio"]):focus,
-[data-theme="dark"] textarea:focus,
-[data-theme="dark"] select:focus {
-    border-color: var(--accent) !important;
-    box-shadow: 0 0 0 3px var(--accent-glow) !important;
 }
 
 /* ============================================================
@@ -1369,13 +1364,15 @@ button, [role="button"], .vz-btn, a.btn, input[type="submit"], input[type="butto
     background: var(--btn-bg);
     color: var(--text);
     font-family: var(--font-primary);
-    font-size: .95rem;
-    font-weight: 700;
+    font-size: .94rem;
+    font-weight: 650;
     line-height: 1.2;
-    letter-spacing: 0;
+    letter-spacing: -.005em;
     text-decoration: none;
     white-space: nowrap;
+    max-width: 100%;
     cursor: pointer;
+    -webkit-tap-highlight-color: transparent;
     user-select: none;
     -webkit-user-select: none;
     vertical-align: middle;
@@ -1385,15 +1382,16 @@ button, [role="button"], .vz-btn, a.btn, input[type="submit"], input[type="butto
 .vz-btn:hover { text-decoration: none; }
 .vz-btn:active { transform: scale(.97); }
 .vz-btn:disabled, .vz-btn[aria-disabled="true"] { opacity: .55; pointer-events: none; }
-.vz-btn .material-icons { font-size: 1.2rem; line-height: 1; }
+.vz-btn .material-icons { font-size: 1.2rem; line-height: 1; flex-shrink: 0; }
+.vz-btn:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
 
 .vz-btn--primary {
     --vz-spin: var(--on-accent);
     background: var(--accent);
     color: var(--on-accent);
-    box-shadow: 0 2px 10px var(--accent-glow);
+    box-shadow: 0 1px 2px rgba(0,0,0,.08), 0 3px 10px var(--accent-glow);
 }
-.vz-btn--primary:hover { background: var(--accent-dark); color: var(--on-accent); }
+.vz-btn--primary:hover { background: var(--accent-dark); color: var(--on-accent); box-shadow: 0 1px 2px rgba(0,0,0,.1), 0 5px 14px var(--accent-glow); }
 
 .vz-btn--secondary { background: var(--btn-bg); color: var(--text); border-color: var(--border); }
 .vz-btn--secondary:hover { background: var(--btn-hover); color: var(--text); }
@@ -1411,6 +1409,13 @@ button, [role="button"], .vz-btn, a.btn, input[type="submit"], input[type="butto
 
 .vz-btn--success { --vz-spin: #fff; background: var(--success); color: #fff; }
 .vz-btn--success:hover { filter: brightness(.92); color: #fff; }
+
+/* Tonal : action secondaire mise en avant (à côté d'un primaire, sans rivaliser) */
+.vz-btn--tonal { background: rgba(var(--accent-rgb), .11); color: var(--accent); }
+.vz-btn--tonal:hover { background: rgba(var(--accent-rgb), .18); color: var(--accent); }
+/* WhatsApp : seule couleur de marque tierce admise, portée par ce jeton */
+.vz-btn--whatsapp { --vz-spin: #fff; background: var(--whatsapp, #1fa855); color: #fff; }
+.vz-btn--whatsapp:hover { filter: brightness(.93); color: #fff; }
 
 .vz-btn--sm   { min-height: 36px; padding: 0 .85rem; font-size: .85rem; border-radius: var(--radius-sm); gap: .35rem; }
 .vz-btn--sm .material-icons { font-size: 1.05rem; }
@@ -1966,7 +1971,7 @@ a.vz-card:hover .vz-card__chevron, .vz-card--link:hover .vz-card__chevron { colo
 .vz-chip--wrap { white-space: normal; text-align: center; line-height: 1.2; padding-top: .2rem; padding-bottom: .2rem; }
 .vz-chip--soft { background: var(--btn-bg); border-color: transparent; color: var(--text-muted); }
 .vz-chip--success { background: rgba(var(--success-rgb), .12); border-color: transparent; color: var(--success); }
-.vz-chip--warning { background: rgba(217,119,6,.14); border-color: transparent; color: var(--warning); }
+.vz-chip--warning { background: rgba(var(--warning-rgb), .14); border-color: transparent; color: var(--warning); }
 .vz-chip--danger  { background: rgba(var(--danger-rgb), .12); border-color: transparent; color: var(--danger); }
 
 /* Grille de cartes : 2 colonnes sur mobile, auto-fill au-delà */
@@ -1985,3 +1990,123 @@ a.vz-card:hover .vz-card__chevron, .vz-card--link:hover .vz-card__chevron { colo
     .vz-card__meta { font-size: .72rem; }
     .vz-card--row { padding: .7rem .85rem; gap: .7rem; }
 }
+
+
+/* ════════════════════════════════════════════════════════════════════
+   Composants de page partagés (lot 2026-11-22)
+   ════════════════════════════════════════════════════════════════════ */
+
+/* ── En-tête de page : [retour] titre (+ sous-titre) ……… [actions] ── */
+.vz-page-head {
+    display: flex; align-items: center; gap: .75rem; flex-wrap: wrap;
+    margin: 0 0 1.1rem;
+}
+.vz-page-head__main { flex: 1 1 12rem; min-width: 0; }
+.vz-page-title {
+    margin: 0; font-size: clamp(1.25rem, 2.6vw, 1.6rem); font-weight: 800;
+    line-height: 1.2; letter-spacing: -.02em; color: var(--text);
+    display: flex; align-items: center; gap: .5rem;
+}
+.vz-page-title .material-icons { font-size: 1.15em; color: var(--accent); }
+.vz-page-sub { margin: .2rem 0 0; font-size: .9rem; color: var(--text-muted); }
+.vz-page-head__actions { display: flex; align-items: center; gap: .5rem; flex-wrap: wrap; }
+.vz-back {
+    display: inline-flex; align-items: center; gap: .3rem; min-height: 36px;
+    color: var(--text-muted); font-size: .88rem; font-weight: 600; text-decoration: none;
+}
+.vz-back:hover { color: var(--accent); text-decoration: none; }
+.vz-page-head > .vz-back { flex: 0 0 100%; margin-bottom: -.45rem; }
+.vz-back .material-icons { font-size: 1.15rem; }
+
+/* ── Rangée d'actions d'un formulaire : « Annuler » à gauche, l'action
+      principale à droite ; sur mobile les boutons s'empilent, le principal
+      en premier (ordre visuel inversé, ordre du DOM conservé). ── */
+.vz-actions {
+    display: flex; align-items: center; justify-content: flex-end;
+    gap: .6rem; flex-wrap: wrap; margin-top: 1.25rem;
+}
+.vz-actions--between { justify-content: space-between; }
+.vz-actions--start { justify-content: flex-start; }
+@media (max-width: 480px) {
+    .vz-actions:not(.vz-actions--inline) { flex-direction: column-reverse; align-items: stretch; }
+    .vz-actions:not(.vz-actions--inline) > .vz-btn { width: 100%; }
+}
+/* Groupe de boutons qui passent à la ligne proprement */
+.vz-btn-row { display: flex; align-items: center; gap: .5rem; flex-wrap: wrap; }
+.vz-btn-row--end { justify-content: flex-end; }
+.vz-btn-row--fill > .vz-btn { flex: 1 1 0; min-width: 0; }
+
+/* ── Pagination ── */
+.vz-pager {
+    display: flex; align-items: center; justify-content: center;
+    gap: .35rem; flex-wrap: wrap; margin: 1.5rem 0 .5rem;
+}
+.vz-pager a, .vz-pager span {
+    display: inline-flex; align-items: center; justify-content: center;
+    min-width: 40px; height: 40px; padding: 0 .7rem; border-radius: var(--radius-sm);
+    border: 1.5px solid var(--border); background: var(--bg-secondary);
+    color: var(--text); font-size: .88rem; font-weight: 650; text-decoration: none;
+    transition: background .15s, border-color .15s, color .15s;
+}
+.vz-pager a:hover { border-color: var(--accent); color: var(--accent); text-decoration: none; }
+.vz-pager .is-current { background: var(--accent); border-color: var(--accent); color: var(--on-accent); }
+.vz-pager .is-disabled { opacity: .45; pointer-events: none; }
+.vz-pager .is-gap { border-color: transparent; background: transparent; min-width: 24px; padding: 0; }
+
+/* ── Bouton d'icône : variantes ── */
+.vz-icon-btn { -webkit-tap-highlight-color: transparent; text-decoration: none; flex-shrink: 0; }
+.vz-icon-btn:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.vz-icon-btn--lg { width: 44px; height: 44px; }
+.vz-icon-btn--solid { background: var(--btn-bg); color: var(--text); }
+.vz-icon-btn--solid:hover { background: var(--btn-hover); }
+.vz-icon-btn--danger:hover { background: rgba(var(--danger-rgb), .12); color: var(--danger); }
+/* Sur un média (photo, vidéo) : pastille sombre translucide */
+.vz-icon-btn--over { background: rgba(0,0,0,.55); color: #fff; }
+.vz-icon-btn--over:hover { background: rgba(0,0,0,.75); color: #fff; }
+
+/* État vide : l'action sous le texte respire */
+.vz-empty .vz-btn { margin-top: .6rem; }
+
+/* Dialogue déjà présent dans la page : masqué tant qu'il porte [hidden] */
+.vz-overlay[hidden], .vz-dialog[hidden] { display: none !important; }
+/* Un <form> dans une rangée d'actions se comporte comme son bouton */
+.vz-actions > form, .vz-btn-row > form { display: contents; }
+@media (max-width: 480px) {
+    .vz-actions:not(.vz-actions--inline) > form > .vz-btn { width: 100%; }
+}
+/* Carte conteneur : un bloc de contenu (formulaire, section) et non une vignette */
+.vz-card--panel { display: block; padding: 1.1rem 1.15rem; cursor: default; }
+.vz-card--panel:hover { transform: none; }
+@media (max-width: 480px) { .vz-card--panel { padding: .95rem .9rem; } }
+
+/* Petite croix (retirer une pièce jointe, fermer une citation) : 32 px visibles */
+.vz-icon-btn--sm { width: 32px; height: 32px; }
+.vz-icon-btn--sm .material-icons { font-size: 1.1rem; }
+
+/* [hidden] l'emporte sur le display des composants */
+.vz-empty[hidden], .vz-stack[hidden], .vz-btn[hidden], .vz-card[hidden], .vz-chip[hidden], .vz-btn-row[hidden], .vz-actions[hidden] { display: none !important; }
+
+/* Tout élément [hidden] reste masqué, quelle que soit sa classe */
+[hidden] { display: none !important; }
+
+/* Champ posé dans un habillage qui porte déjà le cadre et l'état de focus
+   (:focus-within) : le champ lui-même ne redessine ni contour ni halo. */
+:is(.auth-input-wrap, .edit-input-wrap, .edit-textarea-wrap, .chat-input-inner, .gd-invite-search-wrap,
+    .guide-search-field, .lieux-search-field, .rech-bar, .sb-search, .zoot-mobile-search, .zoot-search-form,
+    .bazar-search-wrap, .rs-search)
+  :is(input, textarea, select):is(:focus, :focus-visible) {
+    outline: none !important; box-shadow: none; border-color: transparent;
+}
+
+/* Thème sombre : les grands aplats d'accent (bandeau Explore, couverture de
+   groupe sans image, vignette sans photo) deviennent une teinte sourde —
+   l'accent clair en pleine surface éblouit et rend le texte blanc illisible. */
+[data-theme="dark"] .vz-card__media-ph--accent,
+[data-theme="dark"] .gp-cover,
+[data-theme="dark"] .gd-cover {
+    background: linear-gradient(135deg, rgba(var(--accent-rgb), .30), rgba(var(--accent-rgb), .10)), var(--bg-card);
+    background-size: cover; background-position: center;
+}
+
+/* Bouton « S'inscrire » de l'en-tête visiteur : lisible en thème sombre */
+[data-theme="dark"] a.zoot-anon-signup, [data-theme="dark"] a.zoot-anon-signup:hover { color: var(--on-accent); }

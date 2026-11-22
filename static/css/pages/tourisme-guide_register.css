@@ -1,46 +1,21 @@
-/* Généré depuis tourisme/templates/tourisme/guide_register.html — styles de page servis en statique (cache navigateur + service worker)
-   au lieu d'être renvoyés dans chaque réponse HTML. Modifier ICI, plus dans le gabarit. */
+/* « Devenir guide » / « Modifier mon profil de guide » (tourisme/guide_register.html).
+   En-tête : .vz-page-head ; sections : .vz-card.vz-card--block ; champs : .vz-field ;
+   boutons : .vz-actions + .vz-btn (zoot-base.css). Ne reste ici que le spécifique. */
 
-/* ============================================================
-   TOURISME — INSCRIPTION / MODIFICATION GUIDE
-   ============================================================ */
 .guide-reg-wrap {
     max-width: 720px; margin: 0 auto; padding: 1.5rem 1rem 4rem;
 }
 
-/* ── Hero ── */
-.guide-reg-hero {
-    background: linear-gradient(135deg, var(--accent-dark) 0%, var(--accent2) 100%);
-    border-radius: var(--radius-lg); color: #fff;
-    padding: 2rem 1.5rem 1.8rem; margin-bottom: 1.8rem;
-    text-align: center;
+/* ── Erreur du formulaire ── */
+.guide-reg-error {
+    background: rgba(var(--danger-rgb), .10); color: var(--danger); border-radius: var(--radius-sm);
+    padding: .65rem .9rem; font-size: .88rem; margin-bottom: 1rem;
+    display: flex; align-items: center; gap: .4rem;
 }
-[data-theme="dark"] .guide-reg-hero {
-    background:
-        linear-gradient(135deg, rgba(var(--accent-rgb), .28) 0%, transparent 100%),
-        var(--bg-card);
-}
-.guide-reg-hero > .material-icons { font-size: 2.5rem; margin-bottom: .5rem; display: block; }
-.guide-reg-hero h1 {
-    font-size: 1.6rem; font-weight: 800;
-    letter-spacing: -.03em; margin: 0 0 .35rem;
-}
-.guide-reg-hero p { font-size: .9rem; opacity: .8; margin: 0; }
-
-/* ── Messages ── */
-.alert-success {
-    background: rgba(var(--success-rgb), .12); border-left: 4px solid var(--success);
-    border-radius: 0 var(--radius-sm) var(--radius-sm) 0; padding: .9rem 1.1rem;
-    font-size: .9rem; color: var(--success); margin-bottom: 1.2rem;
-    display: flex; align-items: center; gap: .5rem;
-}
+.guide-reg-error .material-icons { font-size: 1.05rem; }
 
 /* ── Sections de formulaire ── */
-.form-section {
-    background: var(--bg-card); border-radius: 14px;
-    border: 1px solid var(--border); padding: 1.4rem 1.5rem;
-    margin-bottom: 1.2rem; box-shadow: var(--shadow);
-}
+.form-section { padding: 1.4rem 1.5rem; margin-bottom: 1.2rem; }
 .form-section-title {
     font-size: .95rem; font-weight: 800; color: var(--text);
     margin: 0 0 1.1rem; display: flex; align-items: center; gap: .4rem;
@@ -48,35 +23,13 @@
     border-bottom: 1px solid var(--border);
 }
 .form-section-title .material-icons { color: var(--accent); font-size: 1.1rem; }
-
-/* ── Champs ── */
-.form-group { margin-bottom: 1rem; }
-.form-group:last-child { margin-bottom: 0; }
-.form-label {
-    display: block; font-size: .8rem; font-weight: 700;
-    color: var(--text-muted); margin-bottom: .35rem;
-    text-transform: uppercase; letter-spacing: .05em;
-}
-.form-label .req { color: var(--accent); }
-.form-label .hint {
-    font-size: .72rem; font-weight: 400; color: var(--text-subtle);
-    text-transform: none; letter-spacing: 0; display: block; margin-top: .1rem;
-}
-.form-control {
-    width: 100%; background: var(--input-bg); border: 1.5px solid var(--border);
-    border-radius: 10px; padding: .6rem .9rem; font-size: .92rem;
-    color: var(--text); outline: none; transition: border-color .15s;
-    font-family: var(--font-primary, 'Space Grotesk', sans-serif);
-}
-.form-control:focus { border-color: var(--accent); }
-.form-control::placeholder { color: var(--text-subtle); }
-textarea.form-control { resize: vertical; min-height: 100px; line-height: 1.6; }
+.form-section .vz-field:last-child { margin-bottom: 0; }
 
 .form-row {
-    display: grid; grid-template-columns: 1fr 1fr; gap: .9rem;
+    display: grid; grid-template-columns: 1fr 1fr; gap: 0 .9rem;
 }
 
-/* ── Photo upload ── */
+/* ── Photo ── */
 .photo-upload-wrap {
     display: flex; align-items: center; gap: 1rem; flex-wrap: wrap;
 }
@@ -87,16 +40,8 @@ textarea.form-control { resize: vertical; min-height: 100px; line-height: 1.6; }
     overflow: hidden; border: 2px solid var(--border);
 }
 .photo-preview img { width: 100%; height: 100%; object-fit: cover; }
-.photo-preview .material-icons { font-size: 2rem; color: rgba(255,255,255,.5); }
-.photo-input-btn {
-    display: inline-flex; align-items: center; gap: .4rem;
-    background: var(--btn-bg); border: 1.5px solid var(--border);
-    border-radius: 50px; padding: .5rem 1.2rem;
-    font-size: .85rem; font-weight: 600; color: var(--text);
-    cursor: pointer; transition: all .15s;
-}
-.photo-input-btn:hover { border-color: var(--accent); color: var(--accent); }
-.photo-input-btn .material-icons { font-size: 1rem; }
+.photo-preview .material-icons { font-size: 2rem; color: var(--on-accent); opacity: .6; }
+.photo-input-btn { cursor: pointer; margin: 0; }
 .photo-help { font-size: .75rem; color: var(--text-subtle); margin-top: .3rem; }
 /* Caché visuellement mais accessible via <label> sur mobile/Capacitor WebView.
    display:none empêche le déclenchement par label sur certains Android WebView. */
@@ -107,24 +52,11 @@ textarea.form-control { resize: vertical; min-height: 100px; line-height: 1.6; }
     overflow: hidden;
     pointer-events: none;
 }
+#id_photo:focus-visible + .photo-help { outline: 2px solid var(--accent); outline-offset: 2px; }
 
-/* ── Submit ── */
-.guide-reg-submit {
-    display: flex; align-items: center; justify-content: center; gap: .6rem;
-    width: 100%; padding: .9rem 2rem; font-size: 1rem; font-weight: 800;
-    border: none; border-radius: 50px; cursor: pointer;
-    background: linear-gradient(135deg, var(--accent), var(--accent2));
-    color: #fff; letter-spacing: -.01em;
-    transition: opacity .18s, transform .18s; margin-top: .4rem;
-    box-shadow: 0 4px 20px rgba(0,0,0,.2);
-}
-.guide-reg-submit:hover { opacity: .9; transform: translateY(-2px); }
-.guide-reg-submit .material-icons { font-size: 1.2rem; }
 .guide-reg-note { text-align: center; font-size: .8rem; color: var(--text-subtle); margin-top: .9rem; }
 .guide-reg-note .material-icons { font-size: .9rem; vertical-align: middle; }
 
 @media (max-width: 575px) {
     .form-row { grid-template-columns: 1fr; }
-    .guide-reg-hero { border-radius: 12px; padding: 1.5rem 1rem; }
-    .guide-reg-hero h1 { font-size: 1.3rem; }
 }

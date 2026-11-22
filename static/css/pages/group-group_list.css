@@ -11,21 +11,6 @@
 }
 
 /* ── En-tête ─────────────────────────────────────────── */
-.gp-head {
-    display: flex; align-items: center; justify-content: space-between;
-    margin-bottom: 1.2rem; gap: 1rem; flex-wrap: wrap;
-}
-.gp-head h1 { font-size: 1.5rem; font-weight: 800; color: var(--text); margin: 0; }
-.gp-btn {
-    display: inline-flex; align-items: center; gap: .4rem;
-    padding: .55rem 1.1rem; border-radius: 12px;
-    background: linear-gradient(135deg, var(--accent), var(--accent2));
-    color: #fff; font-weight: 700; font-size: .9rem;
-    text-decoration: none; border: none; cursor: pointer;
-    transition: opacity .15s, transform .1s;
-}
-.gp-btn:hover { opacity: .9; color: #fff; text-decoration: none; transform: translateY(-1px); }
-.gp-btn .material-icons { font-size: 1.1rem; }
 
 /* ── Barre de recherche ──────────────────────────────── */
 .gp-search-bar {
@@ -40,31 +25,8 @@
     transition: border-color .15s;
 }
 .gp-search-bar input:focus { border-color: var(--accent); }
-.gp-search-bar button {
-    padding: .6rem 1.1rem; border-radius: 12px;
-    background: var(--accent); color: #fff;
-    border: none; font-weight: 700; cursor: pointer;
-    display: inline-flex; align-items: center; gap: .3rem;
-    font-size: .9rem;
-}
-.gp-search-bar button:hover { opacity: .88; }
 
 /* ── Onglets (Tous / Mes groupes / Recommandés) ──────── */
-.gp-tabs {
-    display: flex; gap: .4rem; margin-bottom: 1rem; flex-wrap: wrap;
-}
-.gp-tab {
-    padding: .45rem .95rem; border-radius: 22px;
-    font-size: .85rem; font-weight: 600; cursor: pointer;
-    border: 1.5px solid var(--border); color: var(--text-muted);
-    background: var(--bg-card); text-decoration: none;
-    transition: all .15s;
-}
-.gp-tab:hover { border-color: var(--accent); color: var(--accent); text-decoration: none; }
-.gp-tab.active {
-    background: linear-gradient(135deg, var(--accent), var(--accent2));
-    color: #fff; border-color: transparent;
-}
 
 /* ── Dropdown catégorie ──────────────────────────────── */
 .gp-cat-row {
@@ -97,13 +59,13 @@
     display: inline-flex; align-items: center; gap: .3rem;
     padding: .4rem .9rem; border-radius: 20px;
     background: linear-gradient(135deg, var(--accent), var(--accent2));
-    color: #fff; font-size: .82rem; font-weight: 700;
+    color: var(--on-accent); font-size: .82rem; font-weight: 700;
 }
 .gp-cat-active-badge a {
     color: rgba(255,255,255,.8); text-decoration: none; font-size: .85rem;
     margin-left: .2rem; font-weight: 900;
 }
-.gp-cat-active-badge a:hover { color: #fff; }
+.gp-cat-active-badge a:hover { color: var(--on-accent); }
 
 /* ── Grille de cartes ────────────────────────────────── */
 .gp-grid {
@@ -129,18 +91,11 @@
 .gp-card .vz-card__text { flex: 1; }
 
 /* ── Vide ────────────────────────────────────────────── */
-.gp-empty {
-    text-align: center; padding: 4rem 1.5rem; color: var(--text-muted);
-    background: var(--bg-card); border: 1px solid var(--border); border-radius: 18px;
-}
-.gp-empty .material-icons { font-size: 3rem; color: var(--border); display: block; margin-bottom: .8rem; }
 
 
 /* ── Styles sortis des attributs style="" de group_list.html (2026-11) ── */
-.gp-search-bar button .material-icons { font-size: 1.1rem; }
-.gp-search-clear { align-self: center; margin: 0; display: inline-flex; align-items: center; }
-.gp-search-clear .material-icons { font-size: 1rem; }
 .gp-tab-icon { font-size: 1rem; vertical-align: -3px; }
 .gp-cat-active-badge a .material-icons { font-size: .9rem; vertical-align: -2px; }
-.gp-btn--spaced { margin-top: 1rem; }
 .gp-cat-active-badge .material-icons { font-size: .95rem; vertical-align: -3px; }
+.gp-tabs { margin-bottom: 1rem; }
+.gp-search-bar { gap: .35rem; }

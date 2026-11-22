@@ -7,48 +7,52 @@
 
 <div class="gp-wrapper">
     <!-- En-tête -->
-    <div class="gp-head">
-        <h1>{% trans "Groups" %}</h1>
+    <div class="vz-page-head">
+        <div class="vz-page-head__main">
+            <h1 class="vz-page-title"><span class="material-icons" aria-hidden="true">groups</span>{% trans "Groups" %}</h1>
+        </div>
         {% if user.is_authenticated %}
-        <a class="gp-btn" href="{% url 'group:create' %}">
-            <span class="material-icons">add</span> {% trans "Create a group" %}
-        </a>
+        <div class="vz-page-head__actions">
+            <a class="vz-btn vz-btn--primary vz-btn--sm" href="{% url 'group:create' %}">
+                <span class="material-icons" aria-hidden="true">add</span> {% trans "Create a group" %}
+            </a>
+        </div>
         {% endif %}
     </div>
 
     <!-- Barre de recherche -->
-    <form class="gp-search-bar" method="get" action="">
+    <form class="gp-search-bar" method="get" action="" role="search">
         {% if tab != 'all' %}<input type="hidden" name="tab" value="{{ tab }}">{% endif %}
         {% if category %}<input type="hidden" name="cat" value="{{ category }}">{% endif %}
-        <input type="text" name="q" value="{{ query }}" placeholder="{% trans 'Search a group…' %}">
-        <button type="submit" aria-label="{% trans 'Rechercher' %}"><span class="material-icons">search</span></button>
+        <input type="search" name="q" value="{{ query }}" placeholder="{% trans 'Search a group…' %}" aria-label="{% trans 'Search a group…' %}">
+        <button type="submit" class="vz-icon-btn vz-icon-btn--lg vz-icon-btn--solid" aria-label="{% trans 'Rechercher' %}"><span class="material-icons" aria-hidden="true">search</span></button>
         {% if query %}
-        <a href="?tab={{ tab }}&cat={{ category }}" class="gp-tab gp-search-clear" aria-label="{% trans 'Effacer' %}"><i class="material-icons" aria-hidden="true">close</i></a>
+        <a href="?tab={{ tab }}&amp;cat={{ category }}" class="vz-icon-btn vz-icon-btn--lg" aria-label="{% trans 'Effacer' %}"><i class="material-icons" aria-hidden="true">close</i></a>
         {% endif %}
     </form>
 
     <!-- Onglets -->
     {% if user.is_authenticated %}
-    <div class="gp-tabs">
+    <nav class="vz-segmented gp-tabs" aria-label="{% trans 'Filtrer les groupes' %}">
         <a href="?tab=all{% if query %}&q={{ query }}{% endif %}{% if category %}&cat={{ category }}{% endif %}"
-           class="gp-tab {% if tab == 'all' %}active{% endif %}">
+           class="vz-seg {% if tab == 'all' %}active{% endif %}">
             {% trans "All" %}
         </a>
         <a href="?tab=mine{% if query %}&q={{ query }}{% endif %}{% if category %}&cat={{ category }}{% endif %}"
-           class="gp-tab {% if tab == 'mine' %}active{% endif %}">
+           class="vz-seg {% if tab == 'mine' %}active{% endif %}">
             {% trans "My groups" %}
         </a>
         {% if user_region %}
         <a href="?tab=local{% if query %}&q={{ query }}{% endif %}{% if category %}&cat={{ category }}{% endif %}"
-           class="gp-tab {% if tab == 'local' %}active{% endif %}">
-            <i class="material-icons gp-tab-icon" aria-hidden="true">place</i> {{ user_region_label|default:"Ma région" }}
+           class="vz-seg {% if tab == 'local' %}active{% endif %}">
+            <i class="material-icons gp-tab-icon" aria-hidden="true">place</i> {{ user_region_label|default:_("Ma région") }}
         </a>
         {% endif %}
         <a href="?tab=recommended{% if query %}&q={{ query }}{% endif %}{% if category %}&cat={{ category }}{% endif %}"
-           class="gp-tab {% if tab == 'recommended' %}active{% endif %}">
+           class="vz-seg {% if tab == 'recommended' %}active{% endif %}">
              {% trans "Recommended" %}
         </a>
-    </div>
+    </nav>
     {% endif %}
 
     <!-- Filtre catégorie — dropdown -->
@@ -114,7 +118,7 @@
                     <form method="post" action="{% url 'group:join' group.slug %}">
                         {% csrf_token %}
                         <button type="submit" class="vz-btn vz-btn--primary vz-btn--sm">
-                            <i class="material-icons" aria-hidden="true">add</i> {% trans "Join" %}
+                            <i class="material-icons" aria-hidden="true">add</i> {% if group.privacy == 'private' %}{% trans "Request to join" %}{% else %}{% trans "Join" %}{% endif %}
                         </button>
                     </form>
                     {% else %}
@@ -126,21 +130,21 @@
         {% endfor %}
     </div>
     {% else %}
-    <div class="gp-empty">
-        <span class="material-icons">groups</span>
+    <div class="vz-empty gp-empty">
+        <span class="material-icons" aria-hidden="true">groups</span>
         {% if query or category %}
-        <p>{% trans "No group matches your search." %}</p>
-        <a class="gp-btn gp-btn--spaced" href="?tab={{ tab }}">{% trans "Clear filters" %}</a>
+        <p class="vz-empty-title">{% trans "No group matches your search." %}</p>
+        <a class="vz-btn vz-btn--secondary" href="?tab={{ tab }}">{% trans "Clear filters" %}</a>
         {% elif tab == 'mine' %}
-        <p>{% trans "You haven't joined any group yet." %}</p>
-        <a class="gp-btn gp-btn--spaced" href="{% url 'group:create' %}">
-            <span class="material-icons">add</span> {% trans "Create a group" %}
+        <p class="vz-empty-title">{% trans "You haven't joined any group yet." %}</p>
+        <a class="vz-btn vz-btn--primary" href="{% url 'group:create' %}">
+            <span class="material-icons" aria-hidden="true">add</span> {% trans "Create a group" %}
         </a>
         {% else %}
-        <p>{% trans "No groups yet. Be the first to create one!" %}</p>
+        <p class="vz-empty-title">{% trans "No groups yet. Be the first to create one!" %}</p>
         {% if user.is_authenticated %}
-        <a class="gp-btn gp-btn--spaced" href="{% url 'group:create' %}">
-            <span class="material-icons">add</span> {% trans "Create a group" %}
+        <a class="vz-btn vz-btn--primary" href="{% url 'group:create' %}">
+            <span class="material-icons" aria-hidden="true">add</span> {% trans "Create a group" %}
         </a>
         {% endif %}
         {% endif %}

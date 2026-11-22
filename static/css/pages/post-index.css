@@ -36,13 +36,6 @@
         min-width: 0;
         font-size: .88rem;
     }
-    .hero-search-btn {
-        flex-shrink: 0;
-        padding: .45rem .85rem;
-        font-size: .82rem;
-        white-space: nowrap;
-    }
-    .hero-search-btn .material-icons { display: none; }
     /* Stats bar compacte */
     .hero-stats {
         gap: 1.5rem;
@@ -97,16 +90,6 @@
 }
 .hero-search-wrap input::placeholder { color: rgba(255,255,255,.72); opacity: 1; }
 .hero-search-wrap input::-moz-placeholder { color: rgba(255,255,255,.72); opacity: 1; }
-.hero-search-btn {
-    background: #fff; color: var(--accent);
-    border: none; border-radius: 40px;
-    padding: .5rem 1.2rem; font-weight: 700; font-size: .9rem;
-    cursor: pointer; transition: transform .15s, box-shadow .15s;
-    display: flex; align-items: center; gap: .3rem;
-    text-decoration: none;
-}
-.hero-search-btn:hover { transform: scale(1.04); box-shadow: 0 4px 14px rgba(0,0,0,.2); text-decoration: none; }
-.hero-search-btn .material-icons { font-size: 1rem; }
 
 /* ── Hero stats bar ── */
 .hero-stats {
@@ -208,18 +191,6 @@
     text-align: center;
 }
 .sidebar-cta p { font-size: .88rem; color: var(--text-muted); margin-bottom: .85rem; line-height: 1.5; }
-.sidebar-cta-btn {
-    display: block; padding: .55rem;
-    border-radius: var(--radius); font-weight: 700; font-size: .9rem;
-    text-decoration: none; text-align: center;
-    margin-bottom: .5rem; transition: background .15s, transform .12s;
-  min-height: 40px; display: inline-flex; align-items: center; justify-content: center; gap: .4rem;
-}
-.sidebar-cta-btn:hover { transform: translateY(-1px); text-decoration: none; }
-.cta-primary { background: var(--accent); color: #fff; }
-.cta-primary:hover { background: var(--accent-dark); color: #fff; }
-.cta-secondary { background: var(--btn-bg); color: var(--text); border: 1px solid var(--border); }
-.cta-secondary:hover { background: var(--btn-hover); color: var(--text); }
 
 /* ── MAIN CONTENT ── */
 
@@ -376,19 +347,6 @@
 .explore-cta-bar {
     text-align: center; margin-top: 1.8rem;
 }
-.explore-cta-btn {
-    display: inline-flex; align-items: center; gap: .45rem;
-    padding: .65rem 1.8rem;
-    border-radius: var(--radius); font-weight: 700; font-size: .95rem;
-    text-decoration: none; transition: background .15s, transform .12s;
-  min-height: 44px; display: inline-flex; align-items: center; justify-content: center; gap: .4rem;
-}
-.explore-cta-btn:hover { transform: translateY(-2px); text-decoration: none; }
-.explore-cta-primary { background: var(--accent); color: #fff; }
-.explore-cta-primary:hover { background: var(--accent-dark); color: #fff; }
-.explore-cta-secondary { background: var(--btn-bg); color: var(--text); border: 1px solid var(--border); margin-left: .5rem; }
-.explore-cta-secondary:hover { background: var(--btn-hover); color: var(--text); }
-.explore-cta-btn .material-icons { font-size: 1rem; }
 
 /* ── Dark mode — boutons accentués ── */
 [data-theme="dark"] .filter-tab.active {
@@ -400,24 +358,6 @@
     background: rgba(var(--accent-rgb),0.22);
     color: var(--accent);
 }
-[data-theme="dark"] .cta-primary {
-    background: rgba(var(--accent-rgb),0.10);
-    color: var(--accent) !important;
-    border: 1px solid rgba(var(--accent-rgb),0.26);
-}
-[data-theme="dark"] .cta-primary:hover {
-    background: rgba(var(--accent-rgb),0.18);
-    color: var(--accent) !important;
-}
-[data-theme="dark"] .explore-cta-primary {
-    background: rgba(var(--accent-rgb),0.10);
-    color: var(--accent) !important;
-    border: 1px solid rgba(var(--accent-rgb),0.26);
-}
-[data-theme="dark"] .explore-cta-primary:hover {
-    background: rgba(var(--accent-rgb),0.18);
-    color: var(--accent) !important;
-}
 [data-theme="dark"] .country-tag:hover {
     background: rgba(var(--accent-rgb),0.10);
     color: var(--accent);
@@ -427,10 +367,11 @@
 /* ── Héros : logo ── */
 .explore-hero-logo { width: 64px; height: 64px; object-fit: contain; margin-bottom: .9rem; display: block; filter: invert(1); }
 .country-tag--more { opacity: .6; }
-.sidebar-cta-btn .material-icons { font-size: .9rem; vertical-align: middle; }
 .epc-cat {
     margin-left: auto; font-size: .72rem; background: var(--btn-bg);
     border-radius: 10px; padding: .1rem .5rem; color: var(--text-muted);
     white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 80px;
 }
-.explore-empty .explore-cta-btn { display: inline-flex; margin-top: 1rem; }
+.sidebar-cta-btn + .sidebar-cta-btn { margin-top: .5rem; }
+.epc-thumb-placeholder[hidden], .epc-thumb[hidden] { display: none; }
+.hero-search-btn { flex-shrink: 0; }

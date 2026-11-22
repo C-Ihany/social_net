@@ -70,6 +70,7 @@
 .vz-footer-col a .material-icons { font-size: 1.05rem; color: var(--text-muted); }
 .vz-footer-langs { display: flex; flex-wrap: wrap; align-items: center; gap: .15rem .55rem; }
 .vz-footer-langs form { margin: 0; }
+.vz-footer-langs .vz-footer-lang { min-height: 40px; }
 .vz-footer-langs .vz-footer-lang.active { color: var(--accent); font-weight: 700; }
 .vz-footer-langs .vz-footer-sep { color: var(--text-subtle); }
 

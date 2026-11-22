@@ -1,43 +1,29 @@
 {% load i18n %}
 <script type="text/javascript">
-	
+	/* Retire le membre `id` de ses amis.
+	   Le rappel d'interface n'est appelé qu'en cas de SUCCÈS : avant, il partait
+	   dans `complete`, et la page se mettait à jour même quand le serveur refusait. */
 	function removeFriend(id, uiUpdateFunction){
-		payload = {
-			"csrfmiddlewaretoken": "{{ csrf_token }}",
-			"receiver_user_id": id,
-		}
 		$.ajax({
 			type: 'POST',
 			dataType: "json",
 			url: "{% url 'friend:remove-friend' %}",
-			timeout: 5000,
-			data: payload,
+			data: { csrfmiddlewaretoken: "{{ csrf_token }}", receiver_user_id: id },
+			timeout: 8000,
 			success: function(data) {
-				console.log("SUCCESS", data)
 				if(data['response'] == "Successfully removed that friend."){
 					vzToast('{% trans "Ami retiré"|escapejs %}', 'success')
-					// UI gets updated
+					if (typeof uiUpdateFunction === 'function') uiUpdateFunction()
 				}
 				else if(data['response'] != null){
 					vzAlert(data['response'])
 				}
 			},
-			error: function(data) {
-				console.error("ERROR...", data)
-				vzAlert("{% trans 'Une erreur est survenue'|escapejs %}")
-			},
-			complete: function(data){
-				uiUpdateFunction()
+			error: function(xhr) {
+				var msg = "{% trans 'Une erreur est survenue'|escapejs %}"
+				if (xhr && xhr.responseJSON && xhr.responseJSON.response) msg = xhr.responseJSON.response
+				vzAlert(msg)
 			}
 		});
 	}
-	
-
 </script>
-
-
-
-
-
-
-

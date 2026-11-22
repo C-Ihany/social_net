@@ -34,7 +34,7 @@
     background: linear-gradient(135deg, var(--accent) 0%, var(--accent2) 100%);
     border-radius: 18px;
     padding: 2.5rem 2rem;
-    color: #fff;
+    color: var(--on-accent);
     margin-bottom: 2.5rem;
     position: relative;
     overflow: hidden;
@@ -119,3 +119,9 @@
     .legal-section { padding: 1.25rem 1rem .85rem; }
     .legal-hero { padding: 1.75rem 1.25rem; }
 }
+
+/* Styles sortis des attributs style="" (lot 2026-11-22) */
+.legal-id-table { margin: .5rem 0 1rem; }
+.legal-id-key { font-weight: 700; width: 40%; }
+.legal-link { color: var(--accent); }
+.legal-foot { text-align: center; font-size: .78rem; color: var(--text-muted); margin-top: 2rem; }

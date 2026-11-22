@@ -3,7 +3,11 @@ from django.conf import settings
 from django.utils.translation import gettext_lazy as _
 
 
-REGION_CHOICES = [
+from regions import AFRICA_COUNTRIES
+
+# Les 54 pays d'Afrique, puis les régions de Madagascar sous leur code d'origine
+# (des lieux déjà publiés les portent).
+_MADAGASCAR_REGIONS = [
     ('analamanga',      'Analamanga'),
     ('vakinankaratra',  'Vakinankaratra'),
     ('itasy',           'Itasy'),
@@ -27,6 +31,35 @@ REGION_CHOICES = [
     ('diana',           'Diana'),
     ('sava',            'SAVA'),
 ]
+REGION_CHOICES = AFRICA_COUNTRIES + [(code, 'Madagascar — ' + label) for code, label in _MADAGASCAR_REGIONS]
+REGION_LABELS = dict(REGION_CHOICES)
+REGION_CODES = set(REGION_LABELS)
+
+
+def region_search_terms(code):
+    """
+    Ce qu'il faut chercher dans un texte libre (« régions couvertes » d'un guide)
+    pour une région choisie dans la liste : sa clé, son libellé, et le libellé sans
+    le préfixe « Madagascar — » ni les tirets/underscores (« Haute Matsiatra »).
+    """
+    terms = [code, code.replace('_', ' '), code.replace('_', '-')]
+    label = REGION_LABELS.get(code)
+    if label:
+        terms.append(label)
+        short = label.split(' — ', 1)[-1]
+        terms += [short, short.replace('-', ' ')]
+    seen, out = set(), []
+    for t in terms:
+        t = (t or '').strip()
+        if len(t) >= 2 and t.lower() not in seen:
+            seen.add(t.lower())
+            out.append(t)
+    return out
+
+LIEU_CATEGORY_ICONS = {
+    'nature': 'forest', 'plage': 'waves', 'histoire': 'museum', 'faune': 'pets',
+    'montagne': 'landscape', 'circuit': 'route', 'ville': 'location_city', 'aventure': 'sports',
+}
 
 LIEU_CATEGORY_CHOICES = [
     ('nature',     _('Nature & Paysages')),
@@ -46,7 +79,7 @@ TRANSPORT_CHOICES = [
     ('bateau',     _('Bateau / Pirogue')),
     ('velo',       _('Vélo')),
     ('pieds',      _('À pied')),
-    ('taxi_brousse',_('Taxi-brousse')),
+    ('taxi_brousse',_('Taxi collectif')),
     ('avion',      _('Avion')),
 ]
 
@@ -81,13 +114,26 @@ class LieuTouristique(models.Model):
     def __str__(self):
         return self.name
 
+    @property
+    def get_cname(self):
+        # Type lu par notification.utils.LazyNotificationEncoder : « Restaurant » est son
+        # rendu générique (verbe + lien), utilisé ici pour « votre lieu est approuvé ».
+        return 'Restaurant'
+
     def get_primary_image(self):
-        return self.images.filter(is_primary=True).first() or self.images.first()
+        """Photo principale ou None. Lit self.images.all() pour profiter du cache de
+        prefetch_related('images') (l'ordre du modèle met déjà la principale en tête)."""
+        images = list(self.images.all())
+        if not images:
+            return None
+        return next((img for img in images if img.is_primary), images[0])
 
     def save(self, *args, **kwargs):
         if not self.slug:
             from django.utils.text import slugify
-            base = slugify(self.name)
+            # Le convertisseur d'URL <slug:> n'accepte que l'ASCII : un nom sans lettre
+            # latine (arabe, amharique, « !!! ») donnerait un slug vide → repli « lieu ».
+            base = slugify(self.name)[:200] or 'lieu'
             slug = base
             n = 1
             while LieuTouristique.objects.filter(slug=slug).exclude(pk=self.pk).exists():
@@ -115,7 +161,7 @@ class GuideTouristique(models.Model):
     bio         = models.TextField(verbose_name=_('Présentation / Bio'))
     languages   = models.CharField(max_length=250, blank=True, default='',
                                    verbose_name=_('Langues parlées'),
-                                   help_text=_('Ex: Malagasy, Français, Anglais'))
+                                   help_text=_('Ex : Français, Anglais, Swahili'))
     regions_covered = models.TextField(blank=True, default='',
                                        verbose_name=_('Régions couvertes'))
     transport_modes = models.CharField(max_length=250, blank=True, default='',
@@ -159,6 +205,20 @@ class GuideTouristique(models.Model):
     def display_name(self):
         # Account n'a pas first_name/last_name — on utilise uniquement username
         return self.user.username
+
+    @property
+    def whatsapp_number(self):
+        """Numéro au format attendu par wa.me (chiffres, indicatif pays compris), ou ''
+        si le numéro saisi est local (« 034… ») : le lien serait faux."""
+        raw = (self.phone or '').strip()
+        digits = ''.join(c for c in raw if c.isdigit())
+        if raw.startswith('+'):
+            pass
+        elif digits.startswith('00'):
+            digits = digits[2:]
+        elif digits.startswith('0'):
+            return ''
+        return digits if 8 <= len(digits) <= 15 else ''
 
     @property
     def transport_list(self):

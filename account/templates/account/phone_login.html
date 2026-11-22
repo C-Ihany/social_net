@@ -1,6 +1,6 @@
 {% extends 'base.html' %}
-{% load static %}
-{% load i18n %}
+{% load static i18n %}
+{% block page_title %}{% trans "Se connecter" %} — Vazimba{% endblock %}
 
 {% block content %}
 <link rel="stylesheet" href="{% static 'css/pages/account-login.css' %}">
@@ -9,18 +9,21 @@
     <span class="auth-particle"></span>
     <span class="auth-particle"></span>
     <span class="auth-particle"></span>
+    <span class="auth-particle"></span>
+    <span class="auth-particle"></span>
 
     <div class="auth-card">
-        <a href="{% url 'landing' %}" class="auth-brand">
-            <img src="{% static 'logo/Vazi_logo003.jpeg' %}" alt="VAZIMBA" class="auth-brand-logo"
-                 onerror="this.style.display='none'">
+
+        <a href="{% url 'landing' %}" class="auth-brand" aria-label="Vazimba">
+            <img src="{% static 'logo/Vazi_logo003.jpeg' %}" alt="Vazimba" class="auth-brand-logo"
+                 onerror="this.remove()">
         </a>
 
         <h1 class="auth-heading">{% trans "Sign in with my phone number" %}</h1>
 
         {% if error %}
-        <div class="auth-errors">
-            <span class="material-icons">error_outline</span>
+        <div class="auth-errors" role="alert">
+            <span class="material-icons" aria-hidden="true">error_outline</span>
             <span>{{ error }}</span>
         </div>
         {% endif %}
@@ -34,15 +37,15 @@
             <div class="auth-field">
                 <label for="inputCode">{% trans "6-digit code" %}</label>
                 <div class="auth-input-wrap">
-                    <span class="material-icons">pin</span>
+                    <span class="material-icons" aria-hidden="true">pin</span>
                     <input type="text" name="code" id="inputCode" inputmode="numeric" pattern="[0-9]{6}"
                            maxlength="6" placeholder="123456" required autofocus autocomplete="one-time-code">
                 </div>
             </div>
-            <button class="auth-btn" type="submit">{% trans "Login" %}</button>
+            <button class="vz-btn vz-btn--primary vz-btn--lg vz-btn--block" type="submit">{% trans "Se connecter" %}</button>
         </form>
         <div class="auth-links">
-            <a href="{% url 'phone-login' %}">{% trans "Resend a code" %}</a>
+            <a href="{% url 'phone-login' %}{% if request.GET.next %}?next={{ request.GET.next|urlencode }}{% endif %}">{% trans "Resend a code" %}</a>
         </div>
 
         {% else %}
@@ -53,7 +56,7 @@
             <div class="auth-field">
                 <label for="inputCountry">{% trans "Country" %}</label>
                 <div class="auth-input-wrap">
-                    <span class="material-icons">public</span>
+                    <span class="material-icons" aria-hidden="true">public</span>
                     <select name="country" id="inputCountry" autocomplete="tel-country-code">
                         <option value="">{% trans "Choose (or write +country code below)" %}</option>
                         {% for code, name in countries %}
@@ -65,7 +68,7 @@
             <div class="auth-field">
                 <label for="inputPhone">{% trans "Phone number" %}</label>
                 <div class="auth-input-wrap">
-                    <span class="material-icons">smartphone</span>
+                    <span class="material-icons" aria-hidden="true">smartphone</span>
                     <input type="tel" name="phone" id="inputPhone" value="{{ phone_raw|default:'' }}"
                            required autofocus autocomplete="tel">
                 </div>
@@ -86,13 +89,13 @@
             {% elif channels %}
             <input type="hidden" name="channel" value="{{ channels.0 }}">
             {% endif %}
-            <button class="auth-btn" type="submit">{% trans "Receive a code" %}</button>
+            <button class="vz-btn vz-btn--primary vz-btn--lg vz-btn--block" type="submit">{% trans "Receive a code" %}</button>
         </form>
         {% endif %}
 
-        <div class="auth-divider">ou</div>
+        <div class="auth-divider">{% trans "ou" %}</div>
         <div class="auth-register-link">
-            <a href="{% url 'login' %}">{% trans "Sign in with my email address" %}</a>
+            <a href="{% url 'login' %}{% if request.GET.next %}?next={{ request.GET.next|urlencode }}{% endif %}">{% trans "Sign in with my email address" %}</a>
         </div>
     </div>
 </div>

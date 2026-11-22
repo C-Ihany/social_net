@@ -5,9 +5,27 @@ from django.contrib.auth import authenticate
 
 from .models import Account
 
+import re
+
+# Pseudo : lettres (accents compris), chiffres, espace et . _ -
+# Appliqué aux NOUVEAUX pseudos seulement (inscription, changement de pseudo) :
+# les comptes existants et ceux créés depuis Pola ne sont pas touchés.
+# Sans cette règle, un pseudo comme <img src=x onerror=…> était accepté et
+# s'exécutait partout où le pseudo est inséré dans une page.
+_USERNAME_RE = re.compile(r'^[\w .\-]+$', re.UNICODE)
+
+
+def validate_new_username(username):
+    username = (username or '').strip()
+    if len(username) < 2 or not _USERNAME_RE.match(username) or not re.search(r'[^\W_]', username):
+        raise forms.ValidationError(_(
+            'Le nom d’utilisateur ne peut contenir que des lettres, des chiffres, des espaces '
+            'et les signes . _ - (2 caractères au moins).'))
+    return username
+
 
 class RegistrationForm(UserCreationForm):
-    email = forms.EmailField(max_length=254, help_text='Required. Add a valid email address.')
+    email = forms.EmailField(max_length=254, help_text=_('Obligatoire. Indiquez une adresse e-mail valide.'))
 
     class Meta:
         model = Account
@@ -22,7 +40,7 @@ class RegistrationForm(UserCreationForm):
         raise forms.ValidationError(_('Cette adresse e-mail est déjà utilisée.'))
 
     def clean_username(self):
-        username = self.cleaned_data['username']
+        username = validate_new_username(self.cleaned_data['username'])
         try:
             account = Account.objects.exclude(pk=self.instance.pk).get(username=username)
         except Account.DoesNotExist:
@@ -58,18 +76,18 @@ class AccountUpdateForm(forms.ModelForm):
 
     bio = forms.CharField(
         required=False,
-        widget=forms.Textarea(attrs={'rows': 3, 'placeholder': 'Parlez un peu de vous...'}),
-        label='Bio',
+        widget=forms.Textarea(attrs={'rows': 3, 'placeholder': _('Parlez un peu de vous…')}),
+        label=_('Bio'),
     )
     location = forms.CharField(
         required=False,
         max_length=100,
-        widget=forms.TextInput(attrs={'placeholder': 'Ville, Pays'}),
-        label='Localisation',
+        widget=forms.TextInput(attrs={'placeholder': _('Ville, pays')}),
+        label=_('Localisation'),
     )
     region = forms.ChoiceField(
         required=False,
-        label='Région',
+        label=_('Région'),
         choices=[],  # rempli dynamiquement dans __init__
         widget=forms.Select(),
     )
@@ -98,6 +116,8 @@ class AccountUpdateForm(forms.ModelForm):
 
     def clean_username(self):
         username = self.cleaned_data['username']
+        if username != self.instance.username:      # pseudo inchangé : jamais refusé
+            username = validate_new_username(username)
         try:
             account = Account.objects.exclude(pk=self.instance.pk).get(username=username)
         except Account.DoesNotExist:

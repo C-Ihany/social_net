@@ -69,7 +69,7 @@ class CourierAdmin(admin.ModelAdmin):
     )
     actions = ['approve', 'verify_identity', 'unverify_identity']
 
-    @admin.display(description='CIN')
+    @admin.display(description="Pièce d'identité")
     def cin_preview(self, obj):
         from django.utils.html import format_html
         parts = []
@@ -82,7 +82,7 @@ class CourierAdmin(admin.ModelAdmin):
     def approve(self, request, queryset):
         queryset.update(is_approved=True)
 
-    @admin.action(description='Marquer l\'identité (CIN) comme vérifiée')
+    @admin.action(description='Marquer l\'identité comme vérifiée')
     def verify_identity(self, request, queryset):
         from django.utils import timezone
         queryset.update(cin_verified=True, is_approved=True, verified_at=timezone.now(), verified_by=request.user)

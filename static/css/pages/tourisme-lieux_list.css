@@ -8,7 +8,7 @@
     background:
         linear-gradient(120deg, rgba(var(--accent-rgb), .55) 0%, rgba(0,0,0,.18) 100%),
         var(--accent-dark);
-    color: #fff;
+    color: var(--on-accent);
     padding: 2.5rem 1.5rem 2rem;
     text-align: center;
     display: flex;
@@ -17,24 +17,19 @@
     flex-wrap: wrap;
     gap: .8rem;
 }
-.lieux-hero-cta {
-    display: inline-flex; align-items: center; gap: .4rem;
-    min-height: 44px; padding: .6rem 1.3rem;
-    background: #fff; color: var(--accent-dark);
-    border-radius: var(--radius-pill);
-    font-weight: 700; font-size: .86rem;
-    text-decoration: none; white-space: nowrap; flex-shrink: 0;
-    box-shadow: 0 4px 16px rgba(0,0,0,.25);
-    transition: transform .2s, box-shadow .2s;
+/* Bouton du bandeau : .vz-btn, couleurs adaptées au fond foncé */
+.tour-hero-btn--main,
+.tour-hero-btn--main:hover {
+    background: var(--bg-card); color: var(--accent-dark);
+    box-shadow: 0 4px 16px rgba(0,0,0,.25); flex-shrink: 0;
 }
-.lieux-hero-cta:hover { transform: translateY(-2px); color: var(--accent-dark); text-decoration: none; }
-.lieux-hero-cta .material-icons { font-size: 1.05rem; }
-[data-theme="dark"] .lieux-hero-cta,
-[data-theme="dark"] .lieux-hero-cta:hover { background: var(--accent); color: var(--on-accent); }
+[data-theme="dark"] .tour-hero-btn--main,
+[data-theme="dark"] .tour-hero-btn--main:hover { background: var(--accent); color: var(--on-accent); }
 [data-theme="dark"] .lieux-hero {
     background:
         linear-gradient(120deg, rgba(var(--accent-rgb), .28) 0%, transparent 100%),
         var(--bg-card);
+    color: var(--text);
 }
 .lieux-hero h1 {
     font-size: 1.8rem;
@@ -74,7 +69,8 @@
     background: var(--input-bg);
     border: 1.5px solid var(--border);
     border-radius: 50px;
-    padding: .45rem 1rem .45rem .8rem;
+    padding: 0 1rem 0 .8rem;
+    min-height: 44px;
     gap: .4rem;
     transition: border-color .15s;
 }
@@ -96,7 +92,9 @@
 }
 .lieux-search-field input::placeholder { color: var(--text-subtle); }
 
+/* 44 px de haut : cible tactile */
 .lieux-select {
+    min-height: 44px;
     background: var(--input-bg);
     border: 1.5px solid var(--border);
     border-radius: 50px;
@@ -115,56 +113,9 @@
 }
 .lieux-select:focus { border-color: var(--accent); }
 
-.lieux-search-submit {
-    background: var(--accent);
-    color: var(--on-accent);
-    border: none;
-    border-radius: 50px;
-    padding: .5rem 1.4rem;
-    font-size: .88rem;
-    font-weight: 700;
-    cursor: pointer;
-    transition: opacity .18s;
-    flex-shrink: 0;
-}
-.lieux-search-submit:hover { opacity: .88; }
-.lieux-search-submit .material-icons { font-size: 1rem; vertical-align: middle; }
-
-/* ── Chips catégories ── */
-.cat-chips {
-    display: flex;
-    gap: .5rem;
-    overflow-x: auto;
-    padding: .2rem 0 .4rem;
-    scrollbar-width: none;
-    max-width: 900px;
-    margin: .5rem auto 0;
-}
-.cat-chips::-webkit-scrollbar { display: none; }
-.cat-chip-btn {
-    display: inline-flex;
-    align-items: center;
-    gap: .3rem;
-    border: 1.5px solid var(--border);
-    background: var(--bg-card);
-    color: var(--text-muted);
-    border-radius: 50px;
-    padding: .3rem .9rem;
-    font-size: .78rem;
-    font-weight: 600;
-    white-space: nowrap;
-    cursor: pointer;
-    text-decoration: none;
-    transition: all .15s;
-    flex-shrink: 0;
-}
-.cat-chip-btn:hover,
-.cat-chip-btn.active {
-    border-color: var(--accent);
-    color: var(--accent);
-    background: var(--accent-glow);
-    text-decoration: none;
-}
+/* ── Puces catégories : composant partagé .vz-chip / .vz-chip-row ── */
+.cat-chips { max-width: 900px; margin: .5rem auto 0; }
+.cat-chips .vz-chip { min-height: 36px; flex-shrink: 0; }
 
 /* ── Résultats info ── */
 .lieux-results-info {
@@ -175,34 +126,8 @@
 
 /* ── Grille ── : cartes via le composant partagé .vz-card / .vz-grid (zoot-base.css) */
 
-/* ── Pagination ── */
-.tour-pagination {
-    display: flex; justify-content: center; gap: .5rem; flex-wrap: wrap; margin-top: 2rem;
-}
-.tour-page-btn {
-    display: inline-flex; align-items: center; justify-content: center;
-    min-width: 36px; height: 36px; padding: 0 .7rem;
-    border: 1.5px solid var(--border);
-    border-radius: var(--radius); font-size: .88rem; font-weight: 700;
-    color: var(--text-muted); text-decoration: none; background: var(--bg-card);
-    transition: all .15s;
-}
-.tour-page-btn:hover, .tour-page-btn.active {
-    border-color: var(--accent); color: var(--accent);
-    background: var(--accent-glow); text-decoration: none;
-}
-.tour-page-btn.active { font-weight: 800; }
-
-/* ── Empty ── */
-.lieux-empty {
-    text-align: center; padding: 4rem 1rem; color: var(--text-muted);
-}
-.lieux-empty > .material-icons { font-size: 4rem; opacity: .25; display: block; margin-bottom: .8rem; }
-.lieux-empty-title { font-size: 1.05rem; font-weight: 700; margin-bottom: .4rem; }
-.lieux-empty-text  { font-size: .88rem; }
 .lieux-link { color: var(--accent); }
 .lieux-container { max-width: 1100px; padding: 1.5rem 1rem 3rem; }
-.tour-page-btn .material-icons { font-size: 1rem; }
 
 /* ── Autocomplétion (liste injectée par le script de la page) ── */
 .lieux-ac {
@@ -225,7 +150,6 @@
 .lieux-ac-body { flex: 1; min-width: 0; }
 .lieux-ac-name { font-weight: 700; font-size: .9rem; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; }
 .lieux-ac-region { font-size: .75rem; color: var(--text-muted); }
-.lieux-ac-region .material-icons { font-size: .8rem; vertical-align: middle; }
 
 @media (max-width: 575px) {
     .lieux-hero { padding: 2rem 1rem 1.5rem; }

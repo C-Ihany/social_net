@@ -4,12 +4,13 @@
 {% load i18n %}
 
 {% block extra_head %}
-<!-- Rendu markdown + coloration du code dans les messages (validateText) -->
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.2.0/styles/default.min.css" crossorigin="anonymous" />
-<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.2.0/highlight.min.js" crossorigin="anonymous"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.2.0/languages/kotlin.min.js" crossorigin="anonymous"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.2.0/languages/python.min.js" crossorigin="anonymous"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/markdown-it/11.0.1/markdown-it.min.js" crossorigin="anonymous"></script>
+<!-- Rendu markdown + coloration du code dans les messages (validateText). Empreintes vérifiées
+     (integrity) : un fichier modifié sur le CDN ne s'exécute pas. -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.2.0/styles/default.min.css" integrity="sha512-kZqGbhf9JTB4bVJ0G8HCkqmaPcRgo88F0dneK30yku5Y/dep7CZfCnNml2Je/sY4lBoqoksXz4PtVXS4GHSUzQ==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.2.0/highlight.min.js" integrity="sha512-TDKKr+IvoqZnPzc3l35hdjpHD0m+b2EC2SrLEgKDRWpxf2rFCxemkgvJ5kfU48ip+Y+m2XVKyOCD85ybtlZDmw==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.2.0/languages/kotlin.min.js" integrity="sha512-8aYTnyDstX39PHxorDD+6ROknf98Vqr5KTOjwRCl/442uAVKOpCJ5wY9I3VQ6y46rdDJKYBIglIfE2+GQk8U5Q==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.2.0/languages/python.min.js" integrity="sha512-jufbyMC+y5pH6dbL/adxAoUWkeGLwx6meC+9yoqY9CFLd4zpC9s5hU9c+stY2uHoYy2lIUih+HbYJIqTZxhCQQ==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/markdown-it/11.0.1/markdown-it.min.js" integrity="sha512-hW0KbtvDnXCHbh2UCNP/6R+oXxCKiOfm9ciuUekdGBCQF1+57bGqZAk3sAFir7PMQstyRW0UecsSc2HQotH2vg==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
 {% endblock %}
 
 {% block content %}
@@ -19,25 +20,25 @@
 <!-- ── Page layout ───────────────────────────────────────────── -->
 <div class="chat-page">
 
-    <!-- Friends sidebar -->
+    <!-- Liste des conversations -->
     <aside class="chat-sidebar" id="chat-sidebar">
         <div class="chat-sidebar-header">
             <h2>{% trans "Messages" %}</h2>
-            <div class="sb-search">
-                <span class="material-icons">search</span>
-                <input type="text" placeholder="{% trans 'Rechercher…' %}" id="sb-search-input">
-            </div>
+            <label class="sb-search">
+                <span class="material-icons" aria-hidden="true">search</span>
+                <input type="search" placeholder="{% trans 'Rechercher…' %}" aria-label="{% trans 'Rechercher une conversation' %}" id="sb-search-input">
+            </label>
         </div>
         <div class="friends-list-container" id="friends-list-container">
             {% for x in m_and_f %}
-            <div class="friend-container"
-                 onclick="onSelectFriend('{{ x.friend.id }}')"
+            <div class="friend-container" role="button" tabindex="0"
+                 data-friend-id="{{ x.friend.id }}"
                  id="id_friend_container_{{ x.friend.id }}">
                 <div class="friend-avatar-wrap">
                     <img id="id_friend_img_{{ x.friend.id }}"
                          src="{{ x.friend.profile_image.url }}"
-                         alt="{{ x.friend.username }}"
-                         onerror="this.src='{% static 'images/profile_pic.png' %}'">
+                         alt=""
+                         onerror="this.onerror=null;this.src='{% static 'images/profile_pic.png' %}'">
                     <span class="friend-online-dot"></span>
                 </div>
                 <div class="friend-info">
@@ -49,72 +50,73 @@
                 </div>
                 <span class="friend-unread{% if x.unread %} has-unread{% endif %}">{% if x.unread %}{{ x.unread }}{% endif %}</span>
             </div>
-            {% empty %}
-            <div class="chat-side-empty">
-                <span class="material-icons" aria-hidden="true">people_outline</span>
-                {% trans "Aucun ami pour l'instant" %}
-            </div>
             {% endfor %}
+            <div class="vz-empty chat-side-empty" id="chat-side-empty"{% if m_and_f %} hidden{% endif %}>
+                <span class="material-icons" aria-hidden="true">forum</span>
+                <div class="vz-empty-title">{% trans "Aucune conversation" %}</div>
+                <div class="vz-empty-text">{% trans "Écrivez à quelqu'un depuis son profil ou depuis une annonce : la conversation apparaîtra ici." %}</div>
+                <a class="vz-btn vz-btn--primary vz-btn--sm" href="{% url 'recherche' %}">
+                    <span class="material-icons" aria-hidden="true">person_search</span>{% trans "Trouver quelqu'un" %}
+                </a>
+            </div>
         </div>
     </aside>
 
     <!-- Main chat -->
-    <div class="chat-main">
+    <div class="chat-main no-convo" id="chat-main">
 
         <!-- Header -->
         <div id="id_room_title">
             <!-- Bouton retour vers la liste (mobile uniquement) -->
-            <button class="chat-header-btn chat-back-btn" id="chat-back-btn" title="{% trans 'Conversations' %}" type="button">
-                <span class="material-icons">arrow_back</span>
+            <button class="vz-icon-btn chat-header-btn chat-back-btn" id="chat-back-btn" title="{% trans 'Conversations' %}" aria-label="{% trans 'Conversations' %}" type="button">
+                <span class="material-icons" aria-hidden="true">arrow_back</span>
             </button>
-            <a class="d-flex align-items-center" id="id_user_info_container" target="_blank">
+            <a id="id_user_info_container" target="_blank" rel="noopener">
                 <div id="chat-header-avatar-wrap">
                 <img class="d-none" id="id_other_user_profile_image"
                      src="{% static 'images/profile_pic.png' %}"
-                     alt="avatar">
+                     alt="">
                 <span id="chat-header-presence-dot"></span>
                 </div>
-                <div>
+                <div class="chat-header-id">
                     <h3 id="id_other_username"></h3>
-                    <div class="chat-header-status" id="chat-header-sub" style="display:none;">
+                    <div class="chat-header-status" id="chat-header-sub" hidden>
                         <span class="status-dot"></span>{% trans "En ligne" %}
                     </div>
                 </div>
             </a>
+            <!-- Conversation secrète activée (static/js/e2ee/chat-secret.js) -->
+            <span class="material-icons chat-header-lock" id="chat-header-lock" title="{% trans 'Conversation secrète' %}" role="img" aria-label="{% trans 'Conversation secrète' %}" hidden>lock</span>
+            <!-- État de la connexion : visible seulement quand elle est perdue ou en cours -->
+            <span class="ws-dot" id="ws-status-dot" role="status" hidden></span>
 
-            <!-- Actions + WS dot -->
             <div class="chat-header-actions">
-                <!-- Conversation secrète (chiffrement de bout en bout) : static/js/e2ee/chat-secret.js -->
-                <button class="chat-header-btn" id="btn-secret" title="{% trans 'Conversation secrète' %}" onclick="if(window.VZSecret){VZSecret.toggle();}" style="display:none;" type="button">
-                    <span class="material-icons">lock_open</span>
+                <button class="vz-icon-btn chat-header-btn" id="btn-call-audio" title="{% trans 'Appel audio' %}" aria-label="{% trans 'Appel audio' %}" hidden type="button">
+                    <span class="material-icons" aria-hidden="true">call</span>
                 </button>
-                <!-- Appel audio -->
-                <button class="chat-header-btn" id="btn-call-audio" title="{% trans 'Appel audio' %}" onclick="startCall('audio')" style="display:none;" type="button">
-                    <span class="material-icons">call</span>
+                <button class="vz-icon-btn chat-header-btn" id="btn-call-video" title="{% trans 'Appel vidéo' %}" aria-label="{% trans 'Appel vidéo' %}" hidden type="button">
+                    <span class="material-icons" aria-hidden="true">videocam</span>
                 </button>
-                <!-- Appel vidéo -->
-                <button class="chat-header-btn" id="btn-call-video" title="{% trans 'Appel vidéo' %}" onclick="startCall('video')" style="display:none;" type="button">
-                    <span class="material-icons">videocam</span>
+                <!-- ⋯ : profil, conversation secrète -->
+                <button class="vz-icon-btn chat-header-btn" id="chat-more-btn" title="{% trans 'Plus d’actions' %}" aria-label="{% trans 'Plus d’actions' %}" aria-haspopup="menu" hidden type="button">
+                    <span class="material-icons" aria-hidden="true">more_vert</span>
                 </button>
-                <button class="chat-header-btn" title="{% trans 'Infos' %}" id="chat-header-info-btn" style="display:none;" onclick="if(typeof selectUser==='function'){selectUser(currentFriendId);}" type="button">
-                    <span class="material-icons">info_outline</span>
-                </button>
-            </div>
-
-            <!-- No conversation selected placeholder -->
-            <div id="chat-no-selection">
-                <span class="material-icons" aria-hidden="true">touch_app</span>
-                {% trans "Sélectionnez une conversation" %}
             </div>
         </div>
 
+        <!-- Aucune conversation ouverte -->
+        <div class="vz-empty chat-main-empty" id="chat-no-selection">
+            <span class="material-icons" aria-hidden="true">chat_bubble_outline</span>
+            <div class="vz-empty-title">{% trans "Sélectionnez une conversation" %}</div>
+            <div class="vz-empty-text">{% trans "Vos messages s'affichent ici." %}</div>
+        </div>
+
         <!-- Messages + input wrapper -->
-        <div class="d-flex flex-column" id="id_chat_log_container">
+        <div id="id_chat_log_container">
 
             <!-- Loading spinner -->
             <div class="d-flex justify-content-center" id="id_chatroom_loading_spinner_container">
-                <div class="spinner-border" id="id_chatroom_loading_spinner"
-                     role="status" style="display:none;">
+                <div class="spinner-border" id="id_chatroom_loading_spinner" role="status" hidden>
                     <span class="sr-only">{% trans "Chargement…" %}</span>
                 </div>
             </div>
@@ -123,15 +125,14 @@
             <div id="id_chat_log"></div>
 
             <!-- Page number (hidden) -->
-            <span class="{% if not debug %}d-none{% endif %} page-number"
-                  id="id_page_number" hidden>1</span>
+            <span class="page-number" id="id_page_number" hidden>1</span>
 
             <!-- File preview bar (shown when a file is selected) -->
             <div id="file-preview-container">
                 <div class="file-preview-item" id="file-preview-item">
-                    <span class="material-icons">attach_file</span>
+                    <span class="material-icons" aria-hidden="true">attach_file</span>
                     <span class="file-preview-name" id="file-preview-name"></span>
-                    <button class="file-preview-remove" onclick="clearFileSelection()" title="Supprimer" type="button">
+                    <button class="vz-tap file-preview-remove" onclick="clearFileSelection()" title="{% trans 'Retirer le fichier' %}" aria-label="{% trans 'Retirer le fichier' %}" type="button">
                         <span class="material-icons" aria-hidden="true">close</span>
                     </button>
                 </div>
@@ -140,7 +141,7 @@
             <!-- Upload progress bar -->
             <div id="chat-upload-progress">
                 <span class="material-icons" aria-hidden="true">upload</span>
-                <span id="upload-progress-label">Envoi…</span>
+                <span id="upload-progress-label">{% trans "Envoi…" %}</span>
                 <div class="progress"><div id="chat-upload-bar"></div></div>
                 <span id="upload-progress-pct">0%</span>
             </div>
@@ -150,20 +151,20 @@
             <div id="bazar-annonce-ref">
                 {% with img=bazar_annonce.get_primary_image %}
                 {% if img %}
-                <img class="bazar-ref-thumb" src="{{ img.image.url }}" alt="{{ bazar_annonce.title }}">
+                <img class="bazar-ref-thumb" src="{{ img.image.url }}" alt="">
                 {% else %}
                 <div class="bazar-ref-no-img"><span class="material-icons" aria-hidden="true">sell</span></div>
                 {% endif %}
                 {% endwith %}
                 <div class="bazar-ref-info">
-                    <a class="bazar-ref-title" href="{% url 'bazar:detail' bazar_annonce.pk %}" target="_blank">
+                    <a class="bazar-ref-title" href="{% url 'bazar:detail' bazar_annonce.pk %}" target="_blank" rel="noopener">
                         {{ bazar_annonce.title }}
                     </a>
                     {% if bazar_annonce.price %}
                     <div class="bazar-ref-price">{{ bazar_annonce.formatted_price }}</div>
                     {% endif %}
                 </div>
-                <button class="bazar-ref-close" onclick="closeBazarRef()" title="Fermer" type="button">
+                <button class="vz-tap bazar-ref-close" onclick="closeBazarRef()" title="{% trans 'Fermer' %}" aria-label="{% trans 'Fermer' %}" type="button">
                     <span class="material-icons" aria-hidden="true">close</span>
                 </button>
             </div>
@@ -176,7 +177,7 @@
                     <div class="typing-dots">
                         <span></span><span></span><span></span>
                     </div>
-                    <span id="chat-typing-text">est en train d'écrire…</span>
+                    <span id="chat-typing-text">{% trans "est en train d'écrire…" %}</span>
                 </div>
                 <!-- ── Barre reply (citation) ──────────────────────────── -->
                 <div id="reply-preview">
@@ -184,7 +185,7 @@
                         <span id="reply-preview-author"></span>
                         <div id="reply-preview-body"></div>
                     </div>
-                    <button id="reply-cancel-btn" onclick="cancelReply()" title="Annuler" aria-label="Annuler" type="button"><span class="material-icons" aria-hidden="true">close</span></button>
+                    <button class="vz-tap" id="reply-cancel-btn" onclick="cancelReply()" title="{% trans 'Annuler' %}" aria-label="{% trans 'Annuler' %}" type="button"><span class="material-icons" aria-hidden="true">close</span></button>
                 </div>
                 <div class="chat-input-inner">
                     <!-- Indicateur enregistrement vocal -->
@@ -193,30 +194,30 @@
                     <input type="file" id="chat-file-input" hidden
                            accept="image/*,video/*,.pdf,.doc,.docx,.ppt,.pptx,.xls,.xlsx,.zip,.rar,.7z,.txt,.csv">
                     <!-- Attach button -->
-                    <button type="button" class="chat-attach-btn" onclick="document.getElementById('chat-file-input').click()" title="{% trans 'Joindre un fichier' %}">
-                        <span class="material-icons">attach_file</span>
+                    <button type="button" class="vz-icon-btn chat-attach-btn" id="chat-attach-btn" title="{% trans 'Joindre un fichier' %}" aria-label="{% trans 'Joindre un fichier' %}">
+                        <span class="material-icons" aria-hidden="true">attach_file</span>
                     </button>
                     <textarea id="id_chat_message_input"
                               placeholder="{% trans 'Écrire un message…' %}"
+                              aria-label="{% trans 'Écrire un message…' %}"
                               rows="1"
                               inputmode="text"
                               enterkeyhint="send"></textarea>
                     <!-- Bouton annuler enregistrement (caché par défaut) -->
-                    <button type="button" id="rec-cancel-btn" class="chat-mic-btn chat-mic-btn--danger" title="{% trans 'Annuler' %}" style="display:none;">
-                        <span class="material-icons">delete</span>
+                    <button type="button" id="rec-cancel-btn" class="vz-icon-btn vz-icon-btn--lg vz-icon-btn--danger chat-mic-btn chat-mic-btn--danger" title="{% trans 'Annuler' %}" aria-label="{% trans 'Annuler' %}" hidden>
+                        <span class="material-icons" aria-hidden="true">delete</span>
                     </button>
                     <!-- Bouton micro (visible quand input vide ET pas en train d'enregistrer) -->
-                    <button type="button" id="chat-mic-btn" class="chat-mic-btn" title="{% trans 'Message vocal' %}">
-                        <span class="material-icons">mic</span>
+                    <button type="button" id="chat-mic-btn" class="vz-icon-btn vz-icon-btn--lg chat-mic-btn" title="{% trans 'Message vocal' %}" aria-label="{% trans 'Message vocal' %}">
+                        <span class="material-icons" aria-hidden="true">mic</span>
                     </button>
                     <!-- Bouton ENVOYER le message vocal (visible UNIQUEMENT pendant l'enregistrement) -->
-                    <button type="button" id="voice-send-btn" class="chat-send-btn" title="{% trans 'Envoyer le message vocal' %}" style="display:none;">
-                        <span class="material-icons">send</span>
+                    <button type="button" id="voice-send-btn" class="vz-btn vz-btn--primary vz-btn--icon chat-send-btn" title="{% trans 'Envoyer le message vocal' %}" aria-label="{% trans 'Envoyer le message vocal' %}" hidden>
+                        <span class="material-icons" aria-hidden="true">send</span>
                     </button>
                     <!-- Bouton envoyer texte (visible quand textarea non vide) -->
-                    <button type="button" id="id_chat_message_submit" class="chat-send-btn" title="{% trans 'Envoyer (Entrée)' %}" style="display:none;">
-                        <span class="material-icons">send</span>
-                        <span class="send-btn-label">{% trans "Envoyer" %}</span>
+                    <button type="button" id="id_chat_message_submit" class="vz-btn vz-btn--primary vz-btn--icon chat-send-btn" title="{% trans 'Envoyer (Entrée)' %}" aria-label="{% trans 'Envoyer' %}" hidden>
+                        <span class="material-icons" aria-hidden="true">send</span>
                     </button>
                 </div>
                 <div class="input-hint">{% trans "Entrée pour envoyer · Maj+Entrée pour aller à la ligne" %}</div>
@@ -234,9 +235,9 @@
             <div class="call-status" id="call-out-status">{% trans "Appel en cours…" %}</div>
             <!-- Prévisualisation caméra locale (masquée en mode audio) -->
             <video id="call-out-local-vid" autoplay muted playsinline
-                   class="call-local-preview" style="display:none;"></video>
-            <button class="call-btn call-btn-red" onclick="hangUp()" title="{% trans 'Annuler' %}" type="button">
-                <span class="material-icons">call_end</span>
+                   class="call-local-preview" hidden></video>
+            <button class="call-btn call-btn-red" onclick="hangUp()" title="{% trans 'Annuler' %}" aria-label="{% trans 'Annuler' %}" type="button">
+                <span class="material-icons" aria-hidden="true">call_end</span>
             </button>
         </div>
 
@@ -251,14 +252,14 @@
             <div class="call-status" id="call-inc-type">{% trans "Appel vidéo entrant" %}</div>
             <div class="call-inc-row">
                 <div>
-                    <button class="call-btn call-btn-red" onclick="rejectCall()" title="{% trans 'Refuser' %}" type="button">
-                        <span class="material-icons">call_end</span>
+                    <button class="call-btn call-btn-red" onclick="rejectCall()" title="{% trans 'Refuser' %}" aria-label="{% trans 'Refuser' %}" type="button">
+                        <span class="material-icons" aria-hidden="true">call_end</span>
                     </button>
                     <div class="call-inc-label">{% trans "Refuser" %}</div>
                 </div>
                 <div>
-                    <button class="call-btn call-btn-green" onclick="acceptCall()" title="{% trans 'Accepter' %}" type="button">
-                        <span class="material-icons" id="call-inc-accept-icon">videocam</span>
+                    <button class="call-btn call-btn-green" onclick="acceptCall()" title="{% trans 'Accepter' %}" aria-label="{% trans 'Accepter' %}" type="button">
+                        <span class="material-icons" id="call-inc-accept-icon" aria-hidden="true">videocam</span>
                     </button>
                     <div class="call-inc-label">{% trans "Accepter" %}</div>
                 </div>
@@ -272,8 +273,8 @@
                  est toujours autorisé, même sans geste, sur Chrome/WebView/Safari). Le JS unmute
                  après via rv.muted=false. Cela évite le blocage de play() en contexte async.   -->
             <video id="call-remote-video" playsinline autoplay muted class="call-remote-video"></video>
-            <!-- Audio dédié pour les appels audio (video display:none bloque l'audio sur iOS) -->
-            <audio id="call-remote-audio" playsinline style="display:none;"></audio>
+            <!-- Audio dédié pour les appels audio (un <audio> sans « controls » n'est jamais affiché) -->
+            <audio id="call-remote-audio" playsinline></audio>
             <!-- Fond audio : avatar centré (affiché à la place de la vidéo) -->
             <div class="call-audio-bg" id="call-audio-bg">
                 <div class="call-avatar-ring">
@@ -284,7 +285,7 @@
                 <div class="call-name" id="call-active-name">…</div>
             </div>
             <!-- Vidéo locale (coin sup. droit) — masquée en mode audio -->
-            <video id="call-local-video" autoplay muted playsinline class="call-local-video" style="display:none;"></video>
+            <video id="call-local-video" autoplay muted playsinline class="call-local-video" hidden></video>
             <!-- Contrôles -->
             <div class="call-controls-wrap">
                 <div id="call-timer" class="call-timer">00:00</div>
@@ -294,35 +295,35 @@
                 <div id="call-ice-debug"></div>
                 <div class="call-ctrl-row">
                     <div class="call-ctrl-wrap">
-                        <button class="call-ctrl-btn" id="call-btn-mic" onclick="toggleMic()" title="{% trans 'Micro' %}" type="button">
-                            <span class="material-icons" id="call-mic-icon">mic</span>
+                        <button class="call-ctrl-btn" id="call-btn-mic" onclick="toggleMic()" title="{% trans 'Micro' %}" aria-label="{% trans 'Micro' %}" type="button">
+                            <span class="material-icons" id="call-mic-icon" aria-hidden="true">mic</span>
                         </button>
                         <span class="call-ctrl-lbl">{% trans "Micro" %}</span>
                     </div>
                     <!-- Bouton haut-parleur (toggle écouteur ↔ haut-parleur) -->
                     <div class="call-ctrl-wrap">
-                        <button class="call-ctrl-btn" id="call-btn-speaker" onclick="toggleSpeaker()" title="Haut-parleur" type="button">
-                            <span class="material-icons" id="call-speaker-icon">volume_up</span>
+                        <button class="call-ctrl-btn" id="call-btn-speaker" onclick="toggleSpeaker()" title="{% trans 'Haut-parleur' %}" aria-label="{% trans 'Haut-parleur' %}" type="button">
+                            <span class="material-icons" id="call-speaker-icon" aria-hidden="true">volume_up</span>
                         </button>
-                        <span class="call-ctrl-lbl">HP</span>
+                        <span class="call-ctrl-lbl">{% trans "Son" %}</span>
                     </div>
                     <div class="call-ctrl-wrap">
-                        <button class="call-ctrl-btn call-ctrl-hangup" onclick="hangUp()" title="{% trans 'Raccrocher' %}" type="button">
-                            <span class="material-icons">call_end</span>
+                        <button class="call-ctrl-btn call-ctrl-hangup" onclick="hangUp()" title="{% trans 'Raccrocher' %}" aria-label="{% trans 'Raccrocher' %}" type="button">
+                            <span class="material-icons" aria-hidden="true">call_end</span>
                         </button>
                         <span class="call-ctrl-lbl">{% trans "Fin" %}</span>
                     </div>
                     <div id="call-cam-wrap" class="call-ctrl-wrap">
-                        <button class="call-ctrl-btn" id="call-btn-cam" onclick="toggleCam()" title="{% trans 'Caméra' %}" type="button">
-                            <span class="material-icons" id="call-cam-icon">videocam</span>
+                        <button class="call-ctrl-btn" id="call-btn-cam" onclick="toggleCam()" title="{% trans 'Caméra' %}" aria-label="{% trans 'Caméra' %}" type="button">
+                            <span class="material-icons" id="call-cam-icon" aria-hidden="true">videocam</span>
                         </button>
                         <span class="call-ctrl-lbl">{% trans "Caméra" %}</span>
                     </div>
-                    <div id="call-flip-wrap" class="call-ctrl-wrap" style="display:none;">
-                        <button class="call-ctrl-btn" id="call-btn-flip" onclick="flipCallCamera()" title="Retourner la caméra" type="button">
-                            <span class="material-icons">camera_front</span>
+                    <div id="call-flip-wrap" class="call-ctrl-wrap" hidden>
+                        <button class="call-ctrl-btn" id="call-btn-flip" onclick="flipCallCamera()" title="{% trans 'Retourner la caméra' %}" aria-label="{% trans 'Retourner la caméra' %}" type="button">
+                            <span class="material-icons" aria-hidden="true">camera_front</span>
                         </button>
-                        <span class="call-ctrl-lbl">Retourner</span>
+                        <span class="call-ctrl-lbl">{% trans "Retourner" %}</span>
                     </div>
                 </div>
             </div>
@@ -332,44 +333,18 @@
 </div><!-- /chat-page -->
 
 <!-- ── Emoji picker (partagé, hors flux) ──────────────────── -->
-<div id="emoji-picker" role="dialog" aria-label="Choisir une réaction">
-    <span class="ep-emoji" data-emoji="👍">👍</span>
-    <span class="ep-emoji" data-emoji="❤️">❤️</span>
-    <span class="ep-emoji" data-emoji="😂">😂</span>
-    <span class="ep-emoji" data-emoji="😮">😮</span>
-    <span class="ep-emoji" data-emoji="😢">😢</span>
-    <span class="ep-emoji" data-emoji="😡">😡</span>
-    <span class="ep-emoji" data-emoji="🙏">🙏</span>
-</div>
-
-<!-- Mobile sidebar toggle -->
-<button class="chat-sidebar-toggle" id="sidebar-toggle-btn" title="{% trans 'Conversations' %}" type="button">
-    <span class="material-icons">chat</span>
-</button>
-
-<!-- Client Error Modal -->
-<button type="button" id="id_trigger_client_error_modal"
-        class="d-none" data-toggle="modal" data-target="#id_client_error_modal"></button>
-<div class="modal fade" id="id_client_error_modal" tabindex="-1" role="dialog">
-    <div class="modal-dialog" role="document">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title">Erreur</h5>
-                <button type="button" class="close" data-dismiss="modal"><span>&times;</span></button>
-            </div>
-            <div class="modal-body">
-                <p id="id_client_error_modal_body">Une erreur est survenue.</p>
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-dismiss="modal"
-                        id="id_client_error_modal_close_btn">{% trans "Fermer" %}</button>
-            </div>
-        </div>
-    </div>
+<div id="emoji-picker" role="dialog" aria-label="{% trans 'Choisir une réaction' %}">
+    <button type="button" class="ep-emoji" data-emoji="👍" aria-label="👍">👍</button>
+    <button type="button" class="ep-emoji" data-emoji="❤️" aria-label="❤️">❤️</button>
+    <button type="button" class="ep-emoji" data-emoji="😂" aria-label="😂">😂</button>
+    <button type="button" class="ep-emoji" data-emoji="😮" aria-label="😮">😮</button>
+    <button type="button" class="ep-emoji" data-emoji="😢" aria-label="😢">😢</button>
+    <button type="button" class="ep-emoji" data-emoji="😡" aria-label="😡">😡</button>
+    <button type="button" class="ep-emoji" data-emoji="🙏" aria-label="🙏">🙏</button>
 </div>
 
 <!-- ── Lightbox pour images agrandies ────────────────────────── -->
-<div id="chat-lightbox" style="display:none;" onclick="this.style.display='none'">
+<div id="chat-lightbox" role="dialog" aria-modal="true" aria-label="{% trans 'Image agrandie' %}" hidden>
     <img id="chat-lightbox-img" src="" alt="">
 </div>
 
@@ -385,14 +360,12 @@
     }
     // ── Pré-remplissage depuis une fiche Bazar ────────────────────
     {% if bazar_annonce %}
+    {% trans "Bonjour, je suis intéressé(e) par votre annonce : " as bz_prefix %}
     if(ta && ta.value.trim() === ''){
-        ta.value = "{% trans 'Bonjour, je suis intéressé(e) par votre annonce : '|escapejs %}{{ bazar_annonce.title }}";
+        ta.value = "{{ bz_prefix|escapejs }}{{ bazar_annonce.title|escapejs }}";
         ta.style.height = 'auto';
         ta.style.height = Math.min(ta.scrollHeight, 100) + 'px';
-        /* Afficher le bouton Envoyer */
-        var sbtn = document.getElementById('id_chat_message_submit');
-        if(sbtn) sbtn.style.display = 'flex';
-        /* Focus + curseur à la fin */
+        /* Focus + curseur à la fin (le bouton Envoyer suit : voir _syncMicSend) */
         setTimeout(function(){
             ta.focus();
             ta.selectionStart = ta.selectionEnd = ta.value.length;
@@ -400,21 +373,16 @@
     }
     {% endif %}
 
-    // Mobile sidebar toggle
-    var toggleBtn = document.getElementById('sidebar-toggle-btn');
-    var sidebar   = document.getElementById('chat-sidebar');
-    if(toggleBtn && sidebar){
-        toggleBtn.addEventListener('click', function(){
-            sidebar.classList.toggle('open');
-        });
-        document.addEventListener('click', function(e){
-            if(window.innerWidth <= 768 && sidebar.classList.contains('open')){
-                if(!sidebar.contains(e.target) && e.target !== toggleBtn){
-                    sidebar.classList.remove('open');
-                }
-            }
-        });
-    }
+    document.getElementById('chat-attach-btn').addEventListener('click', function(){
+        document.getElementById('chat-file-input').click();
+    });
+
+    // Image agrandie : un clic ou Échap la referme
+    var lightbox = document.getElementById('chat-lightbox');
+    lightbox.addEventListener('click', function(){ lightbox.hidden = true; });
+    document.addEventListener('keydown', function(e){
+        if(e.key === 'Escape' && !lightbox.hidden) lightbox.hidden = true;
+    });
 })();
 </script>
 
@@ -475,7 +443,7 @@ function fileIconName(fname, ftype){
 /* ── Upload + broadcast ────────────────────────────────────── */
 function uploadAndSendFile(f){
     if(!roomId){
-        vzAlert("Ouvrez d'abord une conversation.");
+        vzAlert(_ct('call_no_room', "Ouvrez d'abord une conversation."));
         return;
     }
     var formData = new FormData();
@@ -519,18 +487,18 @@ function uploadAndSendFile(f){
                 }
                 clearFileSelection();
             } else {
-                vzAlert(data.error || 'Échec de l\'envoi.');
+                vzAlert(data.error || _ct('send_failed', "L'envoi a échoué."));
             }
         } else {
             try {
                 var err = JSON.parse(xhr.responseText);
-                vzAlert(err.error || 'Erreur serveur.');
-            } catch(e){ vzAlert('Erreur serveur.'); }
+                vzAlert(err.error || _ct('server_error', 'Erreur du serveur. Réessayez.'));
+            } catch(e){ vzAlert(_ct('server_error', 'Erreur du serveur. Réessayez.')); }
         }
     };
     xhr.onerror = function(){
         uploadProg.style.display = 'none';
-        vzAlert('Erreur réseau.');
+        vzAlert(_ct('network_error', 'Erreur réseau. Vérifiez votre connexion.'));
     };
     xhr.send(formData);
 }
@@ -556,6 +524,88 @@ function uploadAndSendFile(f){
 {% trans "Quelqu'un" as ct_typing_who %}
 {% trans "Télécharger" as ct_dl %}
 {% trans "Connexion perdue. Rechargement…" as ct_conn_lost %}
+{% trans "L'envoi a échoué." as ct_send_failed %}
+{% trans "Erreur du serveur. Réessayez." as ct_server_error %}
+{% trans "Erreur réseau. Vérifiez votre connexion." as ct_network_error %}
+{% trans "Connexion…" as ct_ws_connecting %}
+{% trans "Hors connexion — reconnexion en cours…" as ct_ws_off %}
+{% trans "Impossible d'accéder au micro. Vérifiez les autorisations." as ct_mic_denied %}
+{% trans "Le message vocal n'est pas parti. Réessayez." as ct_voice_failed %}
+{% trans "Accès refusé à cette conversation." as ct_access_denied %}
+{% trans "Conversation introuvable." as ct_room_invalid %}
+{% trans "Cette conversation n'est pas disponible." as ct_unavailable %}
+{% trans "Erreur de connexion" as ct_conn_error %}
+{% trans "Une erreur est survenue" as ct_error %}
+{% trans "Réagir" as ct_react %}
+{% trans "Répondre" as ct_reply %}
+{% trans "fichier" as ct_file %}
+{% trans "Message vocal" as ct_voice %}
+{% trans "Contact" as ct_contact %}
+{% trans "Connexion en cours…" as ct_ice_checking %}
+{% trans "Connecté" as ct_ice_connected %}
+{% trans "Reconnexion…" as ct_ice_reconnect %}
+{% trans "Échec réseau" as ct_ice_failed %}
+{% trans "Échec de connexion réseau. Vérifiez votre connexion et réessayez." as ct_ice_failed_msg %}
+{% trans "Aucun son ni image reçu : le réseau, un VPN ou un pare-feu bloque l'appel." as ct_no_media %}
+{% trans "Son coupé — appuyez pour l'activer" as ct_unmute %}
+{% trans "Les appels nécessitent une connexion sécurisée (https)." as ct_need_https %}
+{% trans "Ce navigateur ne prend pas en charge les appels. Mettez-le à jour, ou utilisez Chrome, Firefox ou Safari." as ct_unsupported %}
+{% trans "Accès au micro ou à la caméra refusé. Autorisez-le dans les réglages du navigateur, puis réessayez." as ct_gum_denied %}
+{% trans "Aucun micro détecté sur cet appareil." as ct_gum_none %}
+{% trans "Le micro ou la caméra est déjà utilisé par une autre application. Fermez-la, puis réessayez." as ct_gum_busy %}
+{% trans "Caméra indisponible — appel converti en audio." as ct_cam_to_audio %}
+{% trans "Caméra indisponible — votre vidéo ne sera pas envoyée." as ct_cam_not_sent %}
+{% trans "Pas de réponse." as ct_no_answer %}
+{% trans "Voir le profil" as ct_menu_profile %}
+{% trans "Activer la conversation secrète" as ct_menu_secret_on %}
+{% trans "Couper la conversation secrète" as ct_menu_secret_off %}
+{% trans "Message chiffré" as ct_enc_msg %}
+{% trans "Fichier chiffré" as ct_enc_file %}
+{% trans "Annuler" as ct_cancel %}
+{% trans "Enregistrer" as ct_save %}
+{% trans "Plus tard" as ct_later %}
+{% trans "Un instant…" as ct_wait %}
+{% trans "Réessayer" as ct_retry %}
+{% trans "Conversation secrète" as ct_s_title %}
+{% trans "Conversation secrète (activée)" as ct_s_title_on %}
+{% trans "Conversation secrète : les messages sont chiffrés de bout en bout, sur vos appareils." as ct_s_banner %}
+{% trans "Ce navigateur ne permet pas les conversations secrètes." as ct_s_unsupported %}
+{% trans "Vous avez activé la conversation secrète : les nouveaux messages sont chiffrés de bout en bout." as ct_s_you_on %}
+{% trans "Vous avez coupé la conversation secrète : les messages suivants ne sont plus chiffrés." as ct_s_you_off %}
+{% trans "{name} a activé la conversation secrète : les nouveaux messages sont chiffrés de bout en bout." as ct_s_other_on %}
+{% trans "{name} a coupé la conversation secrète : les messages suivants ne sont plus chiffrés." as ct_s_other_off %}
+{% trans "Activer la conversation secrète ?" as ct_s_ask_on_title %}
+{% trans "Les nouveaux messages et fichiers seront chiffrés sur vos appareils avant de partir. Les anciens messages restent tels quels." as ct_s_ask_on_text %}
+{% trans "Couper la conversation secrète ?" as ct_s_ask_off_title %}
+{% trans "Les messages suivants ne seront plus chiffrés de bout en bout. Votre contact en sera prévenu." as ct_s_ask_off_text %}
+{% trans "Activer" as ct_s_activate %}
+{% trans "Couper" as ct_s_cut %}
+{% trans "Le changement n'a pas pu être enregistré." as ct_s_save_failed %}
+{% trans "Créer mon code secret" as ct_s_create_code %}
+{% trans "Saisir mon code secret" as ct_s_enter_code %}
+{% trans "Votre code secret" as ct_s_code_title %}
+{% trans "Il protège la sauvegarde de vos clés. Avec lui, vous retrouverez vos messages secrets sur un nouveau téléphone ou un autre navigateur. Vazimba ne le connaît pas et ne peut pas le retrouver : notez-le en lieu sûr. (8 caractères au moins.)" as ct_s_code_text %}
+{% trans "Code secret" as ct_s_code %}
+{% trans "Le même, encore une fois" as ct_s_code_again %}
+{% trans "Au moins 8 caractères." as ct_s_min8 %}
+{% trans "Les deux codes ne sont pas les mêmes." as ct_s_mismatch %}
+{% trans "Code secret enregistré : vos clés sont sauvegardées." as ct_s_code_saved %}
+{% trans "Le code secret n'a pas pu être enregistré. Réessayez." as ct_s_code_failed %}
+{% trans "Un code secret existe déjà pour ce compte : saisissez-le." as ct_s_code_exists %}
+{% trans "Pour lire sur cet appareil les messages secrets envoyés avant." as ct_s_unlock_text %}
+{% trans "Déverrouiller" as ct_s_unlock %}
+{% trans "Code secret incorrect." as ct_s_bad_code %}
+{% trans "Impossible de retrouver la sauvegarde. Réessayez plus tard." as ct_s_backup_unavailable %}
+{% trans "La sauvegarde de vos clés n'a pas pu être vérifiée (connexion ?)." as ct_s_check_failed %}
+{% trans "Le message n'a pas pu être chiffré : il n'est pas parti." as ct_s_enc_failed %}
+{% trans "Fichier trop volumineux (25 Mo au plus)." as ct_s_file_too_big %}
+{% trans "L'envoi du fichier a échoué." as ct_s_file_failed %}
+{% trans "Le fichier n'a pas pu être chiffré : il n'est pas parti." as ct_s_file_enc_failed %}
+{% trans "Chiffré de bout en bout" as ct_s_e2e %}
+{% trans "Message illisible sur cet appareil" as ct_s_unreadable %}
+{% trans "Fichier illisible sur cet appareil" as ct_s_file_unreadable %}
+{% trans "Déchiffrement…" as ct_s_decrypting %}
+{% trans "Toucher pour télécharger et déchiffrer" as ct_s_tap_decrypt %}
 window._CT = {
   calling_audio:  "{{ ct_calling_audio|escapejs }}",
   calling_video:  "{{ ct_calling_video|escapejs }}",
@@ -575,11 +625,95 @@ window._CT = {
   typing_who:     "{{ ct_typing_who|escapejs }}",
   dl:             "{{ ct_dl|escapejs }}",
   conn_lost:      "{{ ct_conn_lost|escapejs }}",
+  send_failed:    "{{ ct_send_failed|escapejs }}",
+  server_error:   "{{ ct_server_error|escapejs }}",
+  network_error:  "{{ ct_network_error|escapejs }}",
+  ws_connecting:  "{{ ct_ws_connecting|escapejs }}",
+  ws_off:         "{{ ct_ws_off|escapejs }}",
+  mic_denied:     "{{ ct_mic_denied|escapejs }}",
+  voice_failed:   "{{ ct_voice_failed|escapejs }}",
+  access_denied:  "{{ ct_access_denied|escapejs }}",
+  room_invalid:   "{{ ct_room_invalid|escapejs }}",
+  unavailable:    "{{ ct_unavailable|escapejs }}",
+  conn_error:     "{{ ct_conn_error|escapejs }}",
+  error:          "{{ ct_error|escapejs }}",
+  react:          "{{ ct_react|escapejs }}",
+  reply:          "{{ ct_reply|escapejs }}",
+  file:           "{{ ct_file|escapejs }}",
+  voice:          "{{ ct_voice|escapejs }}",
+  contact:        "{{ ct_contact|escapejs }}",
+  ice_checking:   "{{ ct_ice_checking|escapejs }}",
+  ice_connected:  "{{ ct_ice_connected|escapejs }}",
+  ice_reconnect:  "{{ ct_ice_reconnect|escapejs }}",
+  ice_failed:     "{{ ct_ice_failed|escapejs }}",
+  ice_failed_msg: "{{ ct_ice_failed_msg|escapejs }}",
+  no_media:       "{{ ct_no_media|escapejs }}",
+  unmute:         "{{ ct_unmute|escapejs }}",
+  need_https:     "{{ ct_need_https|escapejs }}",
+  unsupported:    "{{ ct_unsupported|escapejs }}",
+  gum_denied:     "{{ ct_gum_denied|escapejs }}",
+  gum_none:       "{{ ct_gum_none|escapejs }}",
+  gum_busy:       "{{ ct_gum_busy|escapejs }}",
+  cam_to_audio:   "{{ ct_cam_to_audio|escapejs }}",
+  cam_not_sent:   "{{ ct_cam_not_sent|escapejs }}",
+  no_answer:      "{{ ct_no_answer|escapejs }}",
+  menu_profile:   "{{ ct_menu_profile|escapejs }}",
+  menu_secret_on: "{{ ct_menu_secret_on|escapejs }}",
+  menu_secret_off:"{{ ct_menu_secret_off|escapejs }}",
+  enc_msg:        "{{ ct_enc_msg|escapejs }}",
+  enc_file:       "{{ ct_enc_file|escapejs }}",
+  cancel:         "{{ ct_cancel|escapejs }}",
+  save:           "{{ ct_save|escapejs }}",
+  later:          "{{ ct_later|escapejs }}",
+  wait:           "{{ ct_wait|escapejs }}",
+  retry:          "{{ ct_retry|escapejs }}",
+  s_title:        "{{ ct_s_title|escapejs }}",
+  s_title_on:     "{{ ct_s_title_on|escapejs }}",
+  s_banner:       "{{ ct_s_banner|escapejs }}",
+  s_unsupported:  "{{ ct_s_unsupported|escapejs }}",
+  s_you_on:       "{{ ct_s_you_on|escapejs }}",
+  s_you_off:      "{{ ct_s_you_off|escapejs }}",
+  s_other_on:     "{{ ct_s_other_on|escapejs }}",
+  s_other_off:    "{{ ct_s_other_off|escapejs }}",
+  s_ask_on_title: "{{ ct_s_ask_on_title|escapejs }}",
+  s_ask_on_text:  "{{ ct_s_ask_on_text|escapejs }}",
+  s_ask_off_title:"{{ ct_s_ask_off_title|escapejs }}",
+  s_ask_off_text: "{{ ct_s_ask_off_text|escapejs }}",
+  s_activate:     "{{ ct_s_activate|escapejs }}",
+  s_cut:          "{{ ct_s_cut|escapejs }}",
+  s_save_failed:  "{{ ct_s_save_failed|escapejs }}",
+  s_create_code:  "{{ ct_s_create_code|escapejs }}",
+  s_enter_code:   "{{ ct_s_enter_code|escapejs }}",
+  s_code_title:   "{{ ct_s_code_title|escapejs }}",
+  s_code_text:    "{{ ct_s_code_text|escapejs }}",
+  s_code:         "{{ ct_s_code|escapejs }}",
+  s_code_again:   "{{ ct_s_code_again|escapejs }}",
+  s_min8:         "{{ ct_s_min8|escapejs }}",
+  s_mismatch:     "{{ ct_s_mismatch|escapejs }}",
+  s_code_saved:   "{{ ct_s_code_saved|escapejs }}",
+  s_code_failed:  "{{ ct_s_code_failed|escapejs }}",
+  s_code_exists:  "{{ ct_s_code_exists|escapejs }}",
+  s_unlock_text:  "{{ ct_s_unlock_text|escapejs }}",
+  s_unlock:       "{{ ct_s_unlock|escapejs }}",
+  s_bad_code:     "{{ ct_s_bad_code|escapejs }}",
+  s_backup_unavailable: "{{ ct_s_backup_unavailable|escapejs }}",
+  s_check_failed: "{{ ct_s_check_failed|escapejs }}",
+  s_enc_failed:   "{{ ct_s_enc_failed|escapejs }}",
+  s_file_too_big: "{{ ct_s_file_too_big|escapejs }}",
+  s_file_failed:  "{{ ct_s_file_failed|escapejs }}",
+  s_file_enc_failed: "{{ ct_s_file_enc_failed|escapejs }}",
+  s_e2e:          "{{ ct_s_e2e|escapejs }}",
+  s_unreadable:   "{{ ct_s_unreadable|escapejs }}",
+  s_file_unreadable: "{{ ct_s_file_unreadable|escapejs }}",
+  s_decrypting:   "{{ ct_s_decrypting|escapejs }}",
+  s_tap_decrypt:  "{{ ct_s_tap_decrypt|escapejs }}",
 };
+/* Texte traduit de la page (repli : le français écrit dans le script) */
+function _ct(key, fallback){ return (window._CT && window._CT[key]) || fallback || ''; }
 </script>
 
 <!-- ── webrtc-adapter : normalise l'API WebRTC (Safari, Opera, anciens navigateurs) ── -->
-<script src="https://cdnjs.cloudflare.com/ajax/libs/webrtc-adapter/8.2.3/adapter.min.js" crossorigin="anonymous"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/webrtc-adapter/8.2.3/adapter.min.js" integrity="sha512-q4ypwk3dUkbGb3UhK1sOcMQlEQDCcR+10FBpWouA63JGo4Bh7SQBceQJLTtPItgoxaILCtjJYfOlB2can9DCyw==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
 <!-- Conversation secrète : le moteur (8 Mo) n'est chargé que lorsqu'une conversation secrète est ouverte -->
 <script>window.VZ_E2EE_MODULE = "{% static 'js/e2ee/vz-e2ee.mjs' %}"; window.VZ_SECRET_URL = "{% url 'chat:secret' %}"; window.VZ_UPLOAD_URL = "{% url 'chat:upload-chat-file' %}"; window.VZ_CSRF = "{{ csrf_token }}";</script>
 <script src="{% static 'js/e2ee/chat-secret.js' %}" defer></script>
@@ -625,22 +759,27 @@ window._CT = {
         createOrReturnPrivateChat(userId)
         clearHighlightedFriend()
         highlightFriend(userId)
-        document.getElementById('chat-no-selection').style.display = 'none';
+        /* (l'état vide laisse la place à la conversation : voir .chat-main.no-convo) */
+        document.getElementById('chat-main').classList.remove('no-convo');
         document.getElementById('id_other_user_profile_image').classList.remove('d-none');
+        /* Nom et photo tout de suite, d'après la liste (le serveur les confirme ensuite) */
+        var rowEl = document.getElementById('id_friend_container_' + userId);
+        if(rowEl){
+            var rowName = rowEl.querySelector('.friend-name');
+            var rowImg  = rowEl.querySelector('.friend-avatar-wrap img');
+            if(rowName) document.getElementById('id_other_username').textContent = rowName.textContent;
+            if(rowImg && rowImg.getAttribute('src')) document.getElementById('id_other_user_profile_image').src = rowImg.src;
+        }
         /* Réinitialiser la présence : on ne sait pas encore si l'ami est en ligne */
         var sub = document.getElementById('chat-header-sub');
-        if(sub) sub.style.display = 'none';
+        if(sub) sub.hidden = true;
         var pdot = document.getElementById('chat-header-presence-dot');
         if(pdot){ pdot.className = 'offline'; pdot.style.display = 'block'; }
         // Afficher les boutons d'appel immédiatement sans attendre handleUserInfoPayload
-        var btnA = document.getElementById('btn-call-audio');
-        var btnV = document.getElementById('btn-call-video');
-        var infoBtn = document.getElementById('chat-header-info-btn');
-        if(btnA) btnA.style.display = '';
-        if(btnV) btnV.style.display = '';
-        if(infoBtn) infoBtn.style.display = '';
-        var secretBtn = document.getElementById('btn-secret');
-        if(secretBtn) secretBtn.style.display = '';
+        ['btn-call-audio', 'btn-call-video', 'chat-more-btn'].forEach(function(id){
+            var b = document.getElementById(id);
+            if(b) b.hidden = false;
+        });
         // Mobile : glisser vers le panneau chat (style Messenger)
         if(window.innerWidth <= 768){
             document.querySelector('.chat-page').classList.add('chat-in-convo');
@@ -655,7 +794,82 @@ window._CT = {
                 document.querySelector('.chat-page').classList.remove('chat-in-convo');
             });
         }
+        /* Liste des conversations : clic, ou Entrée / Espace au clavier */
+        var list = document.getElementById('friends-list-container');
+        function rowOfEvent(e){ return e.target.closest ? e.target.closest('.friend-container[data-friend-id]') : null; }
+        list.addEventListener('click', function(e){
+            var row = rowOfEvent(e);
+            if(row) onSelectFriend(row.getAttribute('data-friend-id'));
+        });
+        list.addEventListener('keydown', function(e){
+            if(e.key !== 'Enter' && e.key !== ' ') return;
+            var row = rowOfEvent(e);
+            if(row){ e.preventDefault(); onSelectFriend(row.getAttribute('data-friend-id')); }
+        });
+        /* Boutons de l'en-tête */
+        document.getElementById('btn-call-audio').addEventListener('click', function(){ startCall('audio'); });
+        document.getElementById('btn-call-video').addEventListener('click', function(){ startCall('video'); });
+        /* ⋯ : profil du contact, conversation secrète */
+        var moreBtn = document.getElementById('chat-more-btn');
+        moreBtn.addEventListener('click', function(){
+            var secretOn = !!(window.VZSecret && VZSecret.on);
+            vzMenu(moreBtn, [
+                { icon: 'person', label: _ct('menu_profile', 'Voir le profil'),
+                  onClick: function(){ if(currentFriendId) selectUser(currentFriendId); } },
+                window.VZSecret ? {
+                    icon: secretOn ? 'lock_open' : 'lock', danger: secretOn,
+                    label: secretOn ? _ct('menu_secret_off', 'Couper la conversation secrète')
+                                    : _ct('menu_secret_on', 'Activer la conversation secrète'),
+                    onClick: function(){ VZSecret.toggle(); } } : null,
+            ], { title: document.getElementById('id_other_username').textContent });
+        });
     })();
+
+    /* ── Liste des conversations, tenue à jour sans recharger la page ───── */
+    /* Crée la ligne d'un contact qui n'y est pas encore (premier message reçu) */
+    function ensureFriendRow(userId, username, image){
+        var id = 'id_friend_container_' + userId;
+        var row = document.getElementById(id);
+        if(row || !username) return row;
+        row = document.createElement('div');
+        row.className = 'friend-container';
+        row.id = id;
+        row.setAttribute('role', 'button');
+        row.tabIndex = 0;
+        row.setAttribute('data-friend-id', String(userId));
+        var wrap = document.createElement('div'); wrap.className = 'friend-avatar-wrap';
+        var img = document.createElement('img');
+        img.id = 'id_friend_img_' + userId; img.alt = '';
+        img.onerror = function(){ img.onerror = null; img.src = "{% static 'images/profile_pic.png' %}"; };
+        img.src = image || "{% static 'images/profile_pic.png' %}";
+        var dot = document.createElement('span'); dot.className = 'friend-online-dot';
+        wrap.appendChild(img); wrap.appendChild(dot);
+        var info = document.createElement('div'); info.className = 'friend-info';
+        var top = document.createElement('div'); top.className = 'friend-top';
+        var name = document.createElement('span'); name.className = 'friend-name'; name.textContent = username;
+        var time = document.createElement('span'); time.className = 'friend-time';
+        top.appendChild(name); top.appendChild(time);
+        var prev = document.createElement('div'); prev.className = 'friend-preview';
+        info.appendChild(top); info.appendChild(prev);
+        var unread = document.createElement('span'); unread.className = 'friend-unread';
+        row.appendChild(wrap); row.appendChild(info); row.appendChild(unread);
+        var list = document.getElementById('friends-list-container');
+        list.insertBefore(row, list.firstChild);
+        var empty = document.getElementById('chat-side-empty');
+        if(empty) empty.hidden = true;
+        return row;
+    }
+    /* Dernier message en aperçu, et la conversation remonte en tête de liste */
+    function touchFriendRow(userId, previewText){
+        var row = document.getElementById('id_friend_container_' + userId);
+        if(!row) return;
+        if(previewText != null){
+            var prev = row.querySelector('.friend-preview');
+            if(prev) prev.textContent = String(previewText).replace(/\s+/g, ' ').substring(0, 30);
+        }
+        var list = row.parentNode;
+        if(list && list.firstElementChild !== row) list.insertBefore(row, list.firstElementChild);
+    }
 
     /* Override bouton retour Android : sur mobile, si une conv est ouverte,
        fermer le panneau au lieu de quitter la page chat. */
@@ -671,9 +885,15 @@ window._CT = {
     function setWsIndicator(state){ // 'connected' | 'connecting' | 'disconnected'
         var dot = document.getElementById('ws-status-dot');
         if(!dot) return;
-        if(state === true  || state === 'connected')    { dot.style.background='#4caf7d'; dot.title='Chat connecté'; }
-        else if(state === 'connecting')                  { dot.style.background='#ff9800'; dot.title='Connexion…'; }
-        else                                             { dot.style.background='#e53935'; dot.title='Chat déconnecté'; }
+        var connected = (state === true || state === 'connected');
+        /* (rien quand tout va bien ; orange pendant la connexion, rouge quand elle est perdue) */
+        dot.hidden = connected;
+        dot.classList.toggle('is-connecting', state === 'connecting');
+        dot.classList.toggle('is-off', !connected && state !== 'connecting');
+        var label = connected ? '' : (state === 'connecting' ? _ct('ws_connecting', 'Connexion…')
+                                                              : _ct('ws_off', 'Hors connexion — reconnexion en cours…'));
+        dot.title = label;
+        dot.setAttribute('aria-label', label);
     }
 
     function closeWebSocket(){
@@ -788,8 +1008,8 @@ window._CT = {
         /* ── Toggle mic ↔ send selon présence de texte ─────────────── */
         function _syncMicSend(){
             var hasText = inputEl && inputEl.value.trim().length > 0;
-            if(submitBtn) submitBtn.style.display = hasText ? '' : 'none';
-            if(micBtn)    micBtn.style.display    = hasText ? 'none' : '';
+            if(submitBtn) submitBtn.hidden = !hasText;
+            if(micBtn)    micBtn.hidden    = !!hasText;
         }
         _syncMicSend(); // état initial
 
@@ -918,21 +1138,6 @@ window._CT = {
             }
         })();
         {% endif %}
-        // Pré-remplir le message si on vient d'une fiche bazar
-        {% if bazar_annonce %}
-        (function(){
-            var ta = document.getElementById('id_chat_message_input');
-            if(ta && !ta.value.trim()){
-                ta.value = "Bonjour, je suis intéressé(e) par votre annonce « {{ bazar_annonce.title|escapejs }} » (réf. #{{ bazar_annonce.pk }}). Est-elle toujours disponible ?";
-                // Auto-resize + déclenche l'event input (sync mic/send)
-                ta.style.height = 'auto';
-                ta.style.height = ta.scrollHeight + 'px';
-                ta.dispatchEvent(new Event('input'));
-                ta.focus();
-                ta.setSelectionRange(ta.value.length, ta.value.length);
-            }
-        })();
-        {% endif %}
     });
 
     /* ════════════════════════════════════════════════════════════════
@@ -954,7 +1159,8 @@ window._CT = {
         var playBtn = document.createElement('button');
         playBtn.className = 'vp-play-btn';
         playBtn.type = 'button';
-        playBtn.innerHTML = '<span class="material-icons">play_arrow</span>';
+        playBtn.setAttribute('aria-label', _ct('voice', 'Message vocal'));
+        playBtn.innerHTML = '<span class="material-icons" aria-hidden="true">play_arrow</span>';
 
         /* Barre de progression */
         var prog = document.createElement('div');
@@ -1074,8 +1280,8 @@ window._CT = {
             micBtn.classList.add('recording');
             micBtn.querySelector('.material-icons').textContent = 'stop';
             /* Bouton d'envoi VOCAL dédié — aucun conflit avec le bouton texte */
-            if(voiceSndBtn) voiceSndBtn.style.display = '';
-            if(cancelBtn)   cancelBtn.style.display   = '';
+            if(voiceSndBtn) voiceSndBtn.hidden = false;
+            if(cancelBtn)   cancelBtn.hidden   = false;
             if(recInd)      recInd.classList.add('visible');
             if(recDurEl)    recDurEl.textContent = '0:00';
         }
@@ -1084,8 +1290,8 @@ window._CT = {
         function _exitRecUI(){
             micBtn.classList.remove('recording');
             micBtn.querySelector('.material-icons').textContent = 'mic';
-            if(voiceSndBtn) voiceSndBtn.style.display = 'none';
-            if(cancelBtn)   cancelBtn.style.display   = 'none';
+            if(voiceSndBtn) voiceSndBtn.hidden = true;
+            if(cancelBtn)   cancelBtn.hidden   = true;
             if(recInd)      recInd.classList.remove('visible');
             clearInterval(_timerID);
         }
@@ -1122,7 +1328,7 @@ window._CT = {
             })
             .catch(function(err){
                 console.warn('Micro inaccessible :', err);
-                vzAlert('Impossible d\'accéder au microphone. Vérifiez les permissions.');
+                vzAlert(_ct('mic_denied', "Impossible d'accéder au micro. Vérifiez les autorisations."));
             });
         }
 
@@ -1154,11 +1360,13 @@ window._CT = {
 
             var xhr = new XMLHttpRequest();
             xhr.open('POST', '{% url "chat:upload-chat-file" %}', true);
+            /* (un vocal refusé — trop gros, trop d'envois, conversation indisponible — le dit) */
+            function voiceFailed(message){ _showChatError(message || _ct('voice_failed', "Le message vocal n'est pas parti. Réessayez.")); }
+            xhr.onerror = function(){ voiceFailed(); };
             xhr.onload = function(){
-                if(xhr.status !== 200) return;
                 try {
                     var data = JSON.parse(xhr.responseText);
-                    if(!data.ok) return;
+                    if(xhr.status !== 200 || !data.ok){ voiceFailed(data.error); return; }
                     /* Le serveur a broadcasté via channel layer dès l'upload terminé.
                        Fallback WS uniquement si broadcast a échoué (data.broadcast = false). */
                     if(!data.broadcast && chatSocket && chatSocket.readyState === WebSocket.OPEN){
@@ -1171,7 +1379,7 @@ window._CT = {
                             'file_type': 'voice',
                         }));
                     }
-                } catch(e){ console.error('Voice send error', e); }
+                } catch(e){ console.error('Voice send error', e); voiceFailed(); }
             };
             xhr.send(fd);
         }
@@ -1310,6 +1518,7 @@ window._CT = {
     function setupWebSocket(room_id){
         roomId = room_id
         closeWebSocket()
+        showChatSkeleton()
 
         setWsIndicator('connecting');
         var ws_scheme = window.location.protocol == "https:" ? "wss" : "ws";
@@ -1322,15 +1531,20 @@ window._CT = {
             if (data.error) {
                 console.error("WS error:", data.error, data.message);
                 // Afficher l'erreur serveur visiblement pour l'utilisateur
-                var errMsg = data.message || data.error || 'Erreur de connexion';
+                var errMsg = data.message || data.error || _ct('conn_error', 'Erreur de connexion');
                 if(data.error === 'ROOM_ACCESS_DENIED'){
-                    errMsg = 'Accès refusé à cette conversation.';
+                    errMsg = _ct('access_denied', 'Accès refusé à cette conversation.');
                 } else if(data.error === 'ROOM_INVALID'){
-                    errMsg = 'Conversation introuvable.';
+                    errMsg = _ct('room_invalid', 'Conversation introuvable.');
+                } else if(data.error === 'BLOCKED'){
+                    errMsg = _ct('unavailable', "Cette conversation n'est pas disponible.");
+                } else if(data.error === 500){
+                    errMsg = _ct('error', 'Une erreur est survenue');
                 } else if(data.error === 'SECRET_ROOM' || data.error === 'NOT_SECRET_ROOM'){
                     errMsg = data.message;
                     if(window.VZSecret) VZSecret.resync(data.error);
                 }
+                hideChatSkeleton();
                 _showChatError(errMsg);
                 return;
             }
@@ -1340,7 +1554,7 @@ window._CT = {
             if (data.msg_type == 0) {
                 appendChatMessage(data, false, true);
                 // Mettre à jour le sidebar : preview du dernier message
-                updateSidebarPreview(data.user_id, data.encrypted ? '🔒 Message chiffré' : data.message);
+                updateSidebarPreview(data.user_id, data.encrypted ? _ct('enc_msg', 'Message chiffré') : data.message);
             }
             if (data.msg_type == 1 || data.msg_type == 2) {
                 // MSG_TYPE_ENTER : si on est caller en attente et que le peer vient de rejoindre
@@ -1369,24 +1583,33 @@ window._CT = {
                     if(data.msg_type == 1){
                         // Ami vient de rejoindre la room → marquer en ligne
                         if(fc) fc.classList.add('online');
-                        if(sub && String(currentFriendId) === evtUserId) sub.style.display = '';
+                        if(sub && String(currentFriendId) === evtUserId) sub.hidden = false;
                         if(pdot && String(currentFriendId) === evtUserId){ pdot.className = 'online'; }
                     } else {
                         // Ami a quitté la room → marquer hors ligne
                         if(fc) fc.classList.remove('online');
-                        if(sub && String(currentFriendId) === evtUserId) sub.style.display = 'none';
+                        if(sub && String(currentFriendId) === evtUserId) sub.hidden = true;
                         if(pdot && String(currentFriendId) === evtUserId){ pdot.className = 'offline'; }
                     }
                 }
             }
-            if (data.msg_type == 3) { appendFileMessage(data, false, true) }  // file
+            if (data.msg_type == 3) {   // file
+                appendFileMessage(data, false, true);
+                updateSidebarPreview(data.user_id, data.encrypted ? _ct('enc_file', 'Fichier chiffré')
+                    : (data.file_type === 'voice' ? _ct('voice', 'Message vocal') : (data.file_name || _ct('file', 'fichier'))));
+            }
             if (data.msg_type == 4) { showTypingIndicator(data.username) }   // typing
             if (data.msg_type == 5) { console.log('[CALL] offer reçu', data); handleCallOffer(data); }
             if (data.msg_type == 6) { console.log('[CALL] answer reçu', data); handleCallAnswer(data); }
             if (data.msg_type == 7) { handleCallIce(data); }
-            if (data.msg_type == 8) { console.log('[CALL] rejeté'); handleCallReject(); }
-            if (data.msg_type == 9) { console.log('[CALL] terminé'); handleCallEnd(); }
-            if (data.msg_type == 10){ updateUnreadBadge(data.from_user_id, data.count); }
+            if (data.msg_type == 8) { console.log('[CALL] rejeté'); handleCallReject(data); }
+            if (data.msg_type == 9) { console.log('[CALL] terminé'); handleCallEnd(data); }
+            if (data.msg_type == 10){
+                /* Quelqu'un qui n'était pas encore dans la liste : sa ligne est créée */
+                ensureFriendRow(data.from_user_id, data.from_username, data.from_image);
+                updateUnreadBadge(data.from_user_id, data.count);
+                if(data.count > 0) touchFriendRow(data.from_user_id, data.preview);
+            }
             if (data.msg_type == 11){ applyReactions(data.msg_id, data.reactions); }   // réaction emoji
             if (data.msg_type == 12 && window.VZSecret){ VZSecret.onToggle(data); }    // conversation secrète
             if (data.messages_payload) { handleMessagesPayload(data.messages, data.new_page_number) }
@@ -1413,31 +1636,38 @@ window._CT = {
     }
 
     function handleUserInfoPayload(user_info){
-        document.getElementById("id_other_username").innerHTML = user_info['username']
+        /* (le nom vient d'un autre membre : jamais interprété comme du HTML) */
+        document.getElementById("id_other_username").textContent = user_info['username']
         document.getElementById("id_other_user_profile_image").classList.remove("d-none")
         document.getElementById("id_user_info_container").href =
             "{% url 'account:view' user_id=53252646545223623632623 %}".replace("53252646545223623632623", user_info['id'])
         preloadImage(user_info['profile_image'], "id_other_user_profile_image")
         // Stocker infos de l'interlocuteur pour les overlays d'appel
         _callPeerInfo = { name: user_info['username'], img: user_info['profile_image'] };
-        // Afficher les boutons d'appel
-        var btnA = document.getElementById('btn-call-audio');
-        var btnV = document.getElementById('btn-call-video');
-        if(btnA) btnA.style.display = '';
-        if(btnV) btnV.style.display = '';
-        // Infos bouton header-info
-        var infoBtn = document.getElementById('chat-header-info-btn');
-        if(infoBtn) infoBtn.style.display = '';
     }
 
     function displayChatroomLoadingSpinner(isDisplayed){
         var spinner = document.getElementById("id_chatroom_loading_spinner")
-        if(spinner){ spinner.style.display = isDisplayed ? "block" : "none"; }
+        if(spinner){ spinner.hidden = !isDisplayed; }
     }
 
-    function showClientErrorModal(message){
-        document.getElementById("id_client_error_modal_body").innerHTML = message
-        document.getElementById("id_trigger_client_error_modal").click()
+    /* Quelques bulles grises pendant le chargement d'une conversation */
+    function showChatSkeleton(){
+        var chatLog = document.getElementById("id_chat_log");
+        if(!chatLog || chatLog.querySelector('.chat-skel')) return;
+        var box = document.createElement('div');
+        box.className = 'chat-skel';
+        box.setAttribute('aria-hidden', 'true');
+        ['w55', 'w35 own', 'w65', 'w40 own'].forEach(function(cls){
+            var line = document.createElement('div');
+            line.className = 'vz-skel chat-skel-bubble ' + cls;
+            box.appendChild(line);
+        });
+        chatLog.appendChild(box);
+    }
+    function hideChatSkeleton(){
+        var box = document.querySelector('#id_chat_log .chat-skel');
+        if(box) box.remove();
     }
 
     /* ── Date separator ─────────────────────────────────────────── */
@@ -1449,11 +1679,14 @@ window._CT = {
         var r = raw.trim().toLowerCase();
         if(r === "aujourd'hui" || r === 'today')     return (_CT ? _CT.today : "Aujourd'hui");
         if(r === 'hier'        || r === 'yesterday') return (_CT ? _CT.yesterday : 'Hier');
-        // Format JJ/MM/AAAA → "15 juin 2026"
+        // Format JJ/MM/AAAA → « 15 juin 2026 », dans la langue de la page
         var m = r.match(/^(\d{2})\/(\d{2})\/(\d{4})$/);
         if(m){
-            var MOIS = ['Jan','Fév','Mar','Avr','Mai','Juin','Juil','Août','Sep','Oct','Nov','Déc'];
-            return m[1] + ' ' + (MOIS[parseInt(m[2],10)-1]||m[2]) + ' ' + m[3];
+            try {
+                var lang = document.documentElement.lang || 'fr';
+                return new Date(Number(m[3]), Number(m[2]) - 1, Number(m[1]))
+                    .toLocaleDateString(lang === 'mg' ? ['mg', 'fr'] : lang, { day: 'numeric', month: 'short', year: 'numeric' });
+            } catch(e){ return raw; }
         }
         return raw;
     }
@@ -1617,8 +1850,10 @@ window._CT = {
         /* ── Bouton react ─────────────────────────────────────── */
         if(msg_id){
             var reactBtn = document.createElement("button");
-            reactBtn.classList.add("msg-react-btn");
-            reactBtn.title = "Réagir";
+            reactBtn.type = "button";
+            reactBtn.classList.add("vz-tap", "msg-react-btn");
+            reactBtn.title = _ct('react', 'Réagir');
+            reactBtn.setAttribute("aria-label", reactBtn.title);
             reactBtn.innerHTML = '<span class="material-icons" aria-hidden="true">add_reaction</span>';
             (function(id){ reactBtn.addEventListener("click", function(e){ e.stopPropagation(); openEmojiPicker(id, reactBtn, e); }); })(msg_id);
             row.appendChild(reactBtn);
@@ -1626,8 +1861,10 @@ window._CT = {
 
         /* ── Bouton reply ─────────────────────────────────────── */
         var replyBtn = document.createElement("button");
-        replyBtn.classList.add("msg-reply-btn");
-        replyBtn.title = "Répondre";
+        replyBtn.type = "button";
+        replyBtn.classList.add("vz-tap", "msg-reply-btn");
+        replyBtn.title = _ct('reply', 'Répondre');
+        replyBtn.setAttribute("aria-label", replyBtn.title);
         replyBtn.innerHTML = '<span class="material-icons" aria-hidden="true">reply</span>';
         (function(id, name, txt){
             replyBtn.addEventListener("click", function(e){
@@ -1682,7 +1919,7 @@ window._CT = {
         fileBubble.classList.add("msg-file-bubble");
 
         var ftype = data.file_type || 'document';
-        var fname = data.file_name || 'fichier';
+        var fname = data.file_name || _ct('file', 'fichier');
         var furl  = data.file_url  || '#';
 
         if(ftype === 'image'){
@@ -1694,7 +1931,7 @@ window._CT = {
             img.addEventListener("click", function(){
                 var lb = document.getElementById('chat-lightbox');
                 document.getElementById('chat-lightbox-img').src = furl;
-                lb.style.display = 'flex';
+                lb.hidden = false;
             });
             fileBubble.appendChild(img);
         } else if(ftype === 'video'){
@@ -1793,6 +2030,7 @@ window._CT = {
     }
 
     function handleMessagesPayload(messages, new_page_number){
+        hideChatSkeleton()
         if(messages != null && messages != "undefined" && messages != "None"){
             setPageNumber(new_page_number)
             messages.forEach(function(message){
@@ -1807,7 +2045,8 @@ window._CT = {
     function selectUser(user_id){
         var url = "{% url 'account:view' user_id=532526456223623632623 %}".replace("532526456223623632623", user_id)
         var win = window.open(url, "_blank")
-        win.focus()
+        if(win) win.focus()          /* (fenêtre bloquée par le navigateur : pas d'erreur) */
+        else window.location.href = url
     }
 
     function chatLogScrollListener(e) {
@@ -1831,14 +2070,10 @@ window._CT = {
     function updateSidebarPreview(msgUserId, msgText){
         // Trouver le conteneur ami dont l'user correspond à l'expéditeur
         // (le message reçu vient d'une autre personne, donc msgUserId ≠ currentUserId)
-        if(String(msgUserId) === String(currentUserId)) return; // propre message
-        // Dans une 1-à-1, l'expéditeur = l'ami actif
-        var activeEl = document.querySelector('.friend-container.active');
-        if(!activeEl) return;
-        // aperçu
-        var prev = activeEl.querySelector('.friend-preview');
-        if(prev && msgText) prev.textContent = (msgText||'').substring(0,30);
+        // Dans une 1-à-1, la conversation concernée est celle qui est ouverte — que le message
+        // vienne de l'autre ou de soi : l'aperçu suit, et elle remonte en tête de liste.
         // Pas de badge si la conv est active (utilisateur est en train de lire)
+        if(currentFriendId) touchFriendRow(currentFriendId, msgText || null);
     }
 
     /* Met à jour le badge d'un ami en temps-réel (msg_type 10) */
@@ -1878,7 +2113,7 @@ window._CT = {
         document.querySelectorAll('.friend-container').forEach(function(c){ c.classList.remove('active'); });
         document.getElementById("id_other_user_profile_image").classList.add("d-none")
         document.getElementById("id_other_user_profile_image").src = "{% static 'images/profile_pic.png' %}"
-        document.getElementById("id_other_username").innerHTML = ""
+        document.getElementById("id_other_username").textContent = ""
     }
 
     /* ═══════════════════════════════════════════════════════════════
@@ -1903,6 +2138,8 @@ window._CT = {
     var _callPeerInfo = { name: '', img: '' };  // infos de l'interlocuteur
     var _ringPeerId  = null;     // user_id de l'appelant en cours (ringing/actif)
     var _iceCandidateQueue = [];  // candidats ICE reçus avant que _peerConn soit prêt
+    var _callRingTimer = null;    // appel sortant sans réponse : arrêté au bout de 45 s
+    var CALL_RING_TIMEOUT = 45000;
 
     // Serveurs ICE — chargés dynamiquement depuis le serveur Django (/chat/ice-servers/)
     // → permet d'activer des TURN fiables (Metered.ca) via variable d'env METERED_API_KEY
@@ -1912,7 +2149,7 @@ window._CT = {
         iceServers: [
             // Fallback statique (remplacé par le fetch /chat/ice-servers/ au chargement)
             { urls: ['stun:stun.l.google.com:19302', 'stun:stun.cloudflare.com:3478'] },
-            // freestun.net = serveur européen, plus accessible depuis Madagascar
+            // freestun.net = serveur européen, plus accessible depuis l'Afrique
             { urls: ['turn:freestun.net:3479', 'turns:freestun.net:5350'], username: 'free', credential: 'free' },
             { urls: ['turn:openrelay.metered.ca:443', 'turns:openrelay.metered.ca:443?transport=tcp'], username: 'openrelayproject', credential: 'openrelayproject' }
         ]
@@ -1953,7 +2190,7 @@ window._CT = {
             if(circ && !img) circ.childNodes[0].textContent = (name || '?')[0].toUpperCase();
         });
         var names = ['call-out-name','call-inc-name','call-active-name'];
-        names.forEach(function(nid){ var el=_callEl(nid); if(el) el.textContent = name||'Contact'; });
+        names.forEach(function(nid){ var el=_callEl(nid); if(el) el.textContent = name || _ct('contact', 'Contact'); });
     }
 
     /* Démarrer / arrêter chronomètre */
@@ -2064,8 +2301,9 @@ window._CT = {
         if(_localStream){ _localStream.getTracks().forEach(function(t){ t.stop(); }); _localStream = null; }
         var rv  = _callEl('call-remote-video'); if(rv){ rv.pause(); rv.srcObject = null; rv.muted = true; _resetRemoteVideoStyle(rv); rv.style.display = 'none'; }
         var ra  = _callEl('call-remote-audio'); if(ra){ ra.srcObject = null; ra.pause(); }
-        var lv  = _callEl('call-local-video');  if(lv){ lv.srcObject = null; lv.style.display = 'none'; }
-        var lop = _callEl('call-out-local-vid'); if(lop){ lop.srcObject = null; lop.style.display = 'none'; }
+        var lv  = _callEl('call-local-video');  if(lv){ lv.srcObject = null; lv.hidden = true; }
+        var lop = _callEl('call-out-local-vid'); if(lop){ lop.srcObject = null; lop.hidden = true; }
+        clearTimeout(_callRingTimer); _callRingTimer = null;
         var _dbgEl = document.getElementById('call-ice-debug'); if(_dbgEl) _dbgEl.textContent = '';
         _removeCallUnmuteBtn();
         _iceCandidateQueue = [];
@@ -2139,24 +2377,22 @@ window._CT = {
             if(iceEl){
                 var _iceLabels = {
                     'new':          '',
-                    'checking':     'Connexion en cours…',
-                    'connected':    'Connecté',
-                    'completed':    'Connecté',
-                    'disconnected': 'Reconnexion…',
-                    'failed':       'Échec réseau',
+                    'checking':     _ct('ice_checking', 'Connexion en cours…'),
+                    'connected':    _ct('ice_connected', 'Connecté'),
+                    'completed':    _ct('ice_connected', 'Connecté'),
+                    'disconnected': _ct('ice_reconnect', 'Reconnexion…'),
+                    'failed':       _ct('ice_failed', 'Échec réseau'),
                     'closed':       ''
                 };
-                iceEl.textContent = _iceLabels[state] || state;
-                iceEl.style.color = (state==='connected'||state==='completed') ? 'var(--success)'
-                                  : (state==='failed')                          ? 'var(--danger)'
-                                  : 'var(--warning)';
+                _setIceStatus(_iceLabels[state] != null ? _iceLabels[state] : state,
+                              (state==='connected'||state==='completed') ? 'ok' : (state==='failed') ? 'bad' : 'wait');
             }
             if(state === 'failed'){
                 // Court délai pour ne pas raccrocher sur un échec transitoire
                 var pc = _peerConn;
                 setTimeout(function(){
                     if(pc && pc.iceConnectionState === 'failed'){
-                        _appendSysMsg('Échec de connexion réseau. Vérifiez votre connexion et réessayez.');
+                        _appendSysMsg(_ct('ice_failed_msg', 'Échec de connexion réseau. Vérifiez votre connexion et réessayez.'));
                         _callCleanup(false);
                     }
                 }, 3000);
@@ -2169,8 +2405,7 @@ window._CT = {
                Le navigateur tente de se reconnecter automatiquement — NE PAS couper l'appel ici.
                On ne coupe que sur 'failed' (défaillance permanente), avec un délai de sécurité. */
             if(state === 'disconnected'){
-                var iceEl = document.getElementById('call-ice-status');
-                if(iceEl){ iceEl.textContent = '⟳ Reconnexion…'; iceEl.style.color = '#ff9800'; }
+                _setIceStatus(_ct('ice_reconnect', 'Reconnexion…'), 'wait');
             } else if(_peerConn && state === 'failed'){
                 var _pc = _peerConn;
                 setTimeout(function(){
@@ -2181,6 +2416,15 @@ window._CT = {
                 }, 3000);
             }
         };
+    }
+
+    /* État du réseau affiché pendant l'appel : 'ok' (vert), 'wait' (orange), 'bad' (rouge) */
+    function _setIceStatus(text, kind){
+        var iceEl = document.getElementById('call-ice-status');
+        if(!iceEl) return;
+        iceEl.textContent = text || '';
+        iceEl.classList.remove('is-ok', 'is-wait', 'is-bad');
+        iceEl.classList.add('is-' + (kind || 'wait'));
     }
 
     /* ── Lecture du flux distant garantie (Opera/Safari/WebView) ─────────────
@@ -2196,8 +2440,13 @@ window._CT = {
         var btn = document.createElement('button');
         btn.id = 'call-unmute-btn';
         btn.type = 'button';
-        btn.innerHTML = '<span class="material-icons" aria-hidden="true">volume_off</span>&nbsp;' +
-                        'Son coupé — appuyez pour activer';
+        btn.className = 'vz-btn vz-btn--danger vz-btn--pill';
+        var _unmuteIcon = document.createElement('span');
+        _unmuteIcon.className = 'material-icons';
+        _unmuteIcon.setAttribute('aria-hidden', 'true');
+        _unmuteIcon.textContent = 'volume_off';
+        btn.appendChild(_unmuteIcon);
+        btn.appendChild(document.createTextNode(_ct('unmute', "Son coupé — appuyez pour l'activer")));
         btn.onclick = function(){
             btn.remove();
             rv.muted = false;
@@ -2245,11 +2494,7 @@ window._CT = {
                 });
                 console.log('[CALL] diagnostic flux — bytesReceived:', rx);
                 if(rx === 0){
-                    var iceEl = document.getElementById('call-ice-status');
-                    if(iceEl){
-                        iceEl.textContent = 'Aucun média reçu — réseau/VPN/pare-feu bloque le flux';
-                        iceEl.style.color = 'var(--danger)';
-                    }
+                    _setIceStatus(_ct('no_media', "Aucun son ni image reçu : le réseau, un VPN ou un pare-feu bloque l'appel."), 'bad');
                 }
             }).catch(function(){});
         } catch(e){}
@@ -2265,14 +2510,11 @@ window._CT = {
         /* Diagnostic après 6 s : le média circule-t-il vraiment ? */
         setTimeout(_checkMediaFlow, 6000);
         // Initialiser le statut ICE — sauf si déjà connecté (évite de réinitialiser après ontrack)
-        var iceEl = document.getElementById('call-ice-status');
-        if(iceEl){
-            var _curState = _peerConn && _peerConn.iceConnectionState;
-            if(_curState === 'connected' || _curState === 'completed'){
-                iceEl.textContent = 'Connecté'; iceEl.style.color = 'var(--success)';
-            } else {
-                iceEl.textContent = 'Connexion en cours…'; iceEl.style.color = 'var(--warning)';
-            }
+        var _curState = _peerConn && _peerConn.iceConnectionState;
+        if(_curState === 'connected' || _curState === 'completed'){
+            _setIceStatus(_ct('ice_connected', 'Connecté'), 'ok');
+        } else {
+            _setIceStatus(_ct('ice_checking', 'Connexion en cours…'), 'wait');
         }
         var rv  = _callEl('call-remote-video');
         var lv  = _callEl('call-local-video');
@@ -2290,28 +2532,35 @@ window._CT = {
                 rv.style.opacity       = '0';
                 rv.style.pointerEvents = 'none';
             }
-            if(lv) lv.style.display = 'none';
+            if(lv) lv.hidden = true;
             if(bg) bg.style.display = 'flex';
-            if(cw) cw.style.display = 'none';
-            if(fw) fw.style.display = 'none';
+            if(cw) cw.hidden = true;
+            if(fw) fw.hidden = true;
         } else {
             /* Mode vidéo : display:block pour les deux vidéos
                play() sera appelé par onRemoteStream quand le stream arrive.
                IMPORTANT : purger d'abord l'astuce 1px d'un éventuel appel audio précédent. */
             if(rv){ _resetRemoteVideoStyle(rv); rv.style.display = 'block'; }
-            if(lv) lv.style.display = 'block';
+            if(lv) lv.hidden = false;
             if(bg) bg.style.display = 'none';
-            if(cw) cw.style.display = 'flex';
-            if(fw) fw.style.display = 'flex';  /* bouton flip visible uniquement en vidéo */
+            if(cw) cw.hidden = false;
+            if(fw) fw.hidden = false;          /* bouton flip visible uniquement en vidéo */
         }
     }
 
     /* Message système dans le chat log */
-    function _appendSysMsg(text){
+    function _appendSysMsg(text, icon){
         var chatLog = _callEl('id_chat_log'); if(!chatLog) return;
         var wrap = document.createElement('div'); wrap.classList.add('system-message');
         var sp = document.createElement('span'); sp.classList.add('username-span');
-        sp.textContent = text; wrap.appendChild(sp);
+        if(icon){
+            var ic = document.createElement('span');
+            ic.className = 'material-icons';
+            ic.setAttribute('aria-hidden', 'true');
+            ic.textContent = icon;
+            sp.appendChild(ic);
+        }
+        sp.appendChild(document.createTextNode(text)); wrap.appendChild(sp);
         chatLog.insertBefore(wrap, chatLog.firstChild);
     }
 
@@ -2324,23 +2573,23 @@ window._CT = {
     }
     function _webrtcUnsupportedMsg(){
         if(window.isSecureContext === false)
-            return 'Les appels nécessitent une connexion sécurisée (https). Rechargez le site en https.';
-        return 'Ce navigateur ne prend pas en charge les appels audio/vidéo. Essayez de le mettre à jour ou utilisez Chrome, Firefox, Safari ou Opera récents.';
+            return _ct('need_https', 'Les appels nécessitent une connexion sécurisée (https).');
+        return _ct('unsupported', 'Ce navigateur ne prend pas en charge les appels. Mettez-le à jour, ou utilisez Chrome, Firefox ou Safari.');
     }
 
     /* Message d'erreur précis selon la cause du refus getUserMedia */
     function _gumErrorMsg(err, wantVideo){
         var n = (err && err.name) || '';
-        var dev = wantVideo ? 'micro / caméra' : 'micro';
         if(n === 'NotAllowedError' || n === 'PermissionDeniedError' || n === 'SecurityError')
-            return 'Accès au ' + dev + ' refusé. Autorisez-le dans les réglages du navigateur (icône cadenas dans la barre d\'adresse), puis réessayez.';
+            return _ct('gum_denied', 'Accès au micro ou à la caméra refusé. Autorisez-le dans les réglages du navigateur, puis réessayez.');
         if(n === 'NotFoundError' || n === 'DevicesNotFoundError')
-            return 'Aucun micro détecté sur cet appareil.';
+            return _ct('gum_none', 'Aucun micro détecté sur cet appareil.');
         if(n === 'NotReadableError' || n === 'TrackStartError' || n === 'AbortError')
-            return 'Le ' + dev + ' est déjà utilisé par une autre application. Fermez-la puis réessayez.';
+            return _ct('gum_busy', 'Le micro ou la caméra est déjà utilisé par une autre application. Fermez-la, puis réessayez.');
         if(n === 'InsecureContextError' || n === 'NotSupportedError')
             return _webrtcUnsupportedMsg();
-        return 'Impossible d\'accéder au ' + dev + '.' + (n ? ' (' + n + ')' : '');
+        return (wantVideo ? _ct('no_mic_cam', "Impossible d'accéder au micro / caméra.") : _ct('no_mic', "Impossible d'accéder au micro."))
+               + (n ? ' (' + n + ')' : '');
     }
 
     /* ── getUserMedia avec fallbacks multiplateforme ─────────────────────────
@@ -2394,6 +2643,8 @@ window._CT = {
         }
         _callMode  = mode || 'video';
         _callState = 'calling';
+        /* La personne appelée : seuls SES refus et fins d'appel comptent (voir handleCallReject) */
+        _ringPeerId = currentFriendId ? String(currentFriendId) : null;
 
         /* Pré-déverrouillage Safari/Opera — voir _preUnlockMedia() */
         _preUnlockMedia();
@@ -2414,13 +2665,13 @@ window._CT = {
                mode doit être cohérent des deux côtés). */
             if(_callMode === 'video' && (stream._zootAudioOnly || stream.getVideoTracks().length === 0)){
                 _callMode = 'audio';
-                _appendSysMsg('Caméra indisponible — appel converti en audio.');
+                _appendSysMsg(_ct('cam_to_audio', 'Caméra indisponible — appel converti en audio.'));
                 if(statusEl) statusEl.textContent = (_CT ? _CT.calling_audio : 'Appel audio en cours…');
             }
             // Mode vidéo : afficher préview locale
             if(_callMode === 'video'){
                 var lop = _callEl('call-out-local-vid');
-                if(lop){ lop.srcObject = stream; lop.style.display = 'block'; lop.style.transform = 'scaleX(-1)'; }
+                if(lop){ lop.srcObject = stream; lop.hidden = false; lop.style.transform = 'scaleX(-1)'; }
             }
             _buildPeer(function(remoteStream){
                 /* CALLER : ontrack arrive AVANT _activateCallUI → activer l'UI d'abord */
@@ -2442,7 +2693,7 @@ window._CT = {
                 }
                 var lv = _callEl('call-local-video');
                 if(lv && !lv.srcObject){
-                    lv.style.display = 'block';
+                    lv.hidden = (_callMode === 'audio');
                     lv.srcObject = _localStream;
                     lv.style.transform = (_callFacingMode === 'user') ? 'scaleX(-1)' : '';
                     lv.play().catch(function(){});
@@ -2457,6 +2708,13 @@ window._CT = {
                 command:'call_offer', room:roomId,
                 sdp: offer, call_mode: _callMode
             }));
+            /* Personne ne répond : on arrête de sonner au bout de 45 s (avant, sans fin) */
+            clearTimeout(_callRingTimer);
+            _callRingTimer = setTimeout(function(){
+                if(_callState !== 'calling') return;
+                _callCleanup(true);
+                _appendSysMsg(_ct('no_answer', 'Pas de réponse.'));
+            }, CALL_RING_TIMEOUT);
         })
         .catch(function(err){
             console.error('startCall:', err);
@@ -2493,7 +2751,10 @@ window._CT = {
         _ringPeerId = fromId;
         _callMode  = data.call_mode || _autoCallMode || 'video';
         _pendOffer = data.sdp;
-        _callFillPeer(data.username||_callPeerInfo.name, _callPeerInfo.img);
+        /* (nom et photo de CELUI QUI APPELLE : ce n'est pas toujours la conversation ouverte) */
+        var _fromOpenConvo = fromId && String(currentFriendId) === fromId;
+        _callFillPeer(data.username || _callPeerInfo.name,
+                      data.profile_image || (_fromOpenConvo ? _callPeerInfo.img : ''));
 
         // Auto-réponse si on a été redirigé depuis l'overlay global (header.html)
         if(_autoAnswer){
@@ -2529,12 +2790,12 @@ window._CT = {
             /* Caméra indisponible côté appelé : on répond en audio seul,
                mais on garde le mode vidéo pour AFFICHER la vidéo de l'appelant. */
             if(_callMode === 'video' && (stream._zootAudioOnly || stream.getVideoTracks().length === 0)){
-                _appendSysMsg('Caméra indisponible — votre vidéo ne sera pas envoyée.');
+                _appendSysMsg(_ct('cam_not_sent', 'Caméra indisponible — votre vidéo ne sera pas envoyée.'));
             }
             /* Vidéo locale — display:block avant play() (seulement si on a une piste vidéo) */
             var lv = _callEl('call-local-video');
             if(lv && _callMode === 'video' && stream.getVideoTracks().length > 0){
-                lv.style.display = 'block';
+                lv.hidden = false;
                 lv.srcObject = stream;
                 lv.style.transform = 'scaleX(-1)';  /* miroir caméra frontale */
                 lv.play().catch(function(){});
@@ -2606,6 +2867,8 @@ window._CT = {
     /* ── Réception réponse SDP ───────────────────────────────── */
     function handleCallAnswer(data){
         if(!_peerConn || _callState !== 'calling') return;
+        if(!_isCallPeer(data) || !data.sdp) return;
+        clearTimeout(_callRingTimer); _callRingTimer = null;
         /* Plain object — évite la dépréciation de RTCSessionDescription() sur Safari */
         _peerConn.setRemoteDescription({ type: data.sdp.type, sdp: data.sdp.sdp })
         .then(function(){
@@ -2635,13 +2898,22 @@ window._CT = {
     }
 
     /* ── Appel refusé par l'autre ────────────────────────────── */
-    function handleCallReject(){
+    /* Le signal vient-il bien de la personne avec qui l'on est en appel ? (Un refus ou une fin
+       d'appel venu de quelqu'un d'autre ne doit jamais couper l'appel en cours.) */
+    function _isCallPeer(data){
+        if(!data || data.user_id == null || !_ringPeerId) return true;   // (ancien serveur : pas d'expéditeur)
+        return String(data.user_id) === String(_ringPeerId);
+    }
+
+    function handleCallReject(data){
+        if(_callState === 'idle' || !_isCallPeer(data)) return;
         _callCleanup(false);
         _appendSysMsg(_CT ? _CT.call_rejected : 'Appel refusé.');
     }
 
     /* ── Appel terminé par l'autre ───────────────────────────── */
-    function handleCallEnd(){
+    function handleCallEnd(data){
+        if(_callState === 'idle' || !_isCallPeer(data)) return;
         var wasActive = (_callState === 'active');
         var dur = _callSecs;
         _callCleanup(false);
@@ -2735,7 +3007,7 @@ window._CT = {
         })
         .then(function(r){ return r.json(); })
         .then(function(data){
-            if(data['response'] == "Successfully got the chat."){
+            if(data.ok === true || data['response'] == "Successfully got the chat."){
                 setupWebSocket(data['chatroom_id']);
             } else if(data['response'] != null){
                 vzAlert(data['response']);

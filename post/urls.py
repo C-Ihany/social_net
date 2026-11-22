@@ -45,6 +45,8 @@ from .views import (
     mes_brouillons,
     mes_favoris_posts,
     reactions_who,
+    publish_draft,
+    delete_post_now,
 )
 from .products import my_products
 
@@ -56,6 +58,8 @@ urlpatterns = [
     path('add-post/',     ratelimit('10/m')(AddPostView.as_view()), name='addPost'),
     path('edit-post/<int:pk>/',   UpdatePostView.as_view(), name='edit-post'),
     path('delete-post/<int:pk>/', DeletePostView.as_view(), name='delete-post'),
+    path('delete-post/<int:pk>/now/', delete_post_now,   name='delete-post-now'),
+    path('publish/<int:pk>/',     publish_draft,            name='publish-draft'),
     path('like/',         ratelimit('60/m')(like_post), name='like-post'),
     path('follow/',       follow,                   name='follow'),
     path('unfollow/',     unfollow,                 name='unfollow'),

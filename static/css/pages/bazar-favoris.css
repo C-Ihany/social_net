@@ -3,71 +3,22 @@
 
 .bazar-fav-wrap {
     max-width: 860px;
-    margin: 2rem auto 4rem;
+    margin: 1.25rem auto 4rem;
     padding: 0 1rem;
 }
-.bazar-fav-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 1.5rem;
-    flex-wrap: wrap;
-    gap: .75rem;
-}
-/* ── Fil d'Ariane ── */
-.bazar-crumb {
-    display: flex; align-items: center; gap: .3rem; flex-wrap: wrap;
-    font-size: .8rem; color: var(--text-muted); margin-bottom: .4rem;
-}
-.bazar-crumb a { color: var(--accent); text-decoration: none; font-weight: 600; }
-.bazar-crumb a:hover { text-decoration: underline; }
-.bazar-fav-title { font-size: 1.5rem; font-weight: 800; display: flex; align-items: center; gap: .5rem; margin: 0; }
-.bazar-fav-title .material-icons { font-size: 1.6rem; color: var(--danger); }
-.bazar-fav-count { font-size: .85rem; font-weight: 400; color: var(--text-muted); margin-left: .4rem; }
+/* En-tête : .vz-page-head ; pagination : .vz-pager ; état vide : .vz-empty (zoot-base.css) */
+.bazar-fav-wrap .vz-page-title .material-icons { color: var(--danger); }
+.bazar-fav-count { font-size: .85rem; font-weight: 400; color: var(--text-muted); }
 
-/* Grille annonces : colonnes gérées par .vz-grid, cartes = .vz-card (zoot-base.css) */
+/* Grille annonces : colonnes gérées par .vz-grid, cartes = a.vz-card */
 .bazar-fav-grid { margin-bottom: 2rem; }
+.bazar-fav-card { position: relative; display: flex; transition: opacity .3s, transform .3s; }
+.bazar-fav-card > .vz-card { flex: 1; min-width: 0; }
+.bazar-fav-card.is-leaving { opacity: 0; transform: scale(.92); }
 
-/* Bouton retirer (positionné par .vz-card__corner) */
-.bazar-fav-remove {
-    background: rgba(17,24,39,.62);
-    border: none;
-    color: #fff;
-    width: 30px; height: 30px;
-    border-radius: 50%;
-    cursor: pointer;
-    display: flex; align-items: center; justify-content: center;
-    -webkit-backdrop-filter: blur(6px); backdrop-filter: blur(6px);
-    transition: background .18s;
-}
-.bazar-fav-remove .material-icons { font-size: 1rem; }
+/* Bouton retirer : .vz-icon-btn--over (44 px), posé au coin de la photo, hors du lien */
+.bazar-fav-remove { position: absolute; top: .4rem; right: .4rem; z-index: 2; }
 .bazar-fav-remove:hover { background: var(--danger); }
 
-/* État vide : composant partagé .vz-empty (zoot-base.css) */
 .bazar-fav-empty { padding: 4rem 1rem; }
-.bazar-fav-empty h3 { margin: 0; }
-.bazar-fav-empty p { margin-bottom: 1rem; }
-
-/* Pagination */
-.bazar-pagination {
-    display: flex;
-    justify-content: center;
-    gap: .4rem;
-    flex-wrap: wrap;
-    padding: 1rem 0;
-}
-.bazar-page-btn {
-    display: inline-flex; align-items: center; justify-content: center;
-    min-width: 38px; height: 38px;
-    border-radius: var(--radius);
-    border: 1.5px solid var(--border);
-    background: var(--bg-card);
-    color: var(--text);
-    font-size: .88rem; font-weight: 700;
-    text-decoration: none;
-    transition: all .18s;
-    padding: 0 .65rem;
-}
-.bazar-page-btn:hover { border-color: var(--accent); color: var(--accent); text-decoration: none; }
-.bazar-page-btn.active { background: var(--accent); border-color: var(--accent); color: #fff; }
-[data-theme="dark"] .bazar-page-btn.active { color: var(--on-accent); }
+.bazar-fav-empty .vz-empty-title { margin: 0; }

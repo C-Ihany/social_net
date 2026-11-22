@@ -9,47 +9,46 @@ import os
 
 
 def parse_po(path):
-    """Parse un fichier .po, gère les msgstr multilignes."""
+    """Parse un fichier .po : msgstr multilignes et formes plurielles (msgid_plural / msgstr[n])."""
     with open(path, 'r', encoding='utf-8') as f:
         text = f.read()
 
     entries = {}
     blocks = re.split(r'\n\n+', text.strip())
 
-    for block in blocks:
-        lines = block.strip().splitlines()
-        in_msgid = False
-        in_msgstr = False
-        cur_id = []
-        cur_str = []
+    unescape = lambda raw: raw.replace('\\n', '\n').replace('\\"', '"').replace('\\t', '\t')
 
-        for line in lines:
+    for block in blocks:
+        # Champs du bloc : msgid, msgid_plural, msgstr, msgstr[0], msgstr[1]…
+        fields, current = {}, None
+        for line in block.strip().splitlines():
             line = line.rstrip()
             if line.startswith('#'):
                 continue
-            elif line.startswith('msgid '):
-                in_msgid = True
-                in_msgstr = False
-                cur_id = [line[7:-1]]
-            elif line.startswith('msgstr '):
-                in_msgid = False
-                in_msgstr = True
-                cur_str = [line[8:-1]]
-            elif line.startswith('"') and line.endswith('"'):
-                val = line[1:-1]
-                if in_msgid:
-                    cur_id.append(val)
-                elif in_msgstr:
-                    cur_str.append(val)
+            m = re.match(r'(msgid_plural|msgid|msgstr(?:\[\d+\])?) "(.*)"$', line)
+            if m:
+                current = m.group(1)
+                fields[current] = [m.group(2)]
+            elif current and line.startswith('"') and line.endswith('"'):
+                fields[current].append(line[1:-1])
 
-        # Si aucun msgid trouvé dans ce bloc (bloc de commentaires pure),
-        # on ignore — sinon l'entrée header (msgid '') serait écrasée à ''
-        if not cur_id:
+        # Bloc de commentaires pur : on ignore — sinon l'entrée header
+        # (msgid '') serait écrasée à ''
+        if 'msgid' not in fields:
+            continue
+        get = lambda name: unescape(''.join(fields.get(name, [])))
+        msgid_raw = get('msgid')
+
+        if 'msgid_plural' in fields:
+            # Pluriel ({% blocktrans count %}) : dans le .mo, la clé est
+            # « singulier\0pluriel » et la valeur « forme0\0forme1 ».
+            forms = [get(k) for k in sorted((k for k in fields if k.startswith('msgstr[')),
+                                            key=lambda k: int(k[7:-1]))]
+            if forms and all(forms):
+                entries[msgid_raw + '\x00' + get('msgid_plural')] = '\x00'.join(forms)
             continue
 
-        msgid_raw = ''.join(cur_id).replace('\\n', '\n').replace('\\"', '"').replace('\\t', '\t')
-        msgstr_raw = ''.join(cur_str).replace('\\n', '\n').replace('\\"', '"').replace('\\t', '\t')
-
+        msgstr_raw = get('msgstr')
         # Inclure l'entrée header (msgid vide) ET les traductions non vides
         if msgstr_raw or msgid_raw == '':
             entries[msgid_raw] = msgstr_raw

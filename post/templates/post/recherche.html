@@ -6,42 +6,44 @@
 <link rel="stylesheet" href="{% static 'css/pages/post-recherche.css' %}">
 
 <div class="rech-page">
-    <div class="rech-hero">
-        <h1>
+    <div class="vz-page-head">
+        <div class="vz-page-head__main">
+            <h1 class="vz-page-title">
+                {% if query %}
+                    <span>{% trans "Résultats pour" %} <span class="query-hl">« {{ query }} »</span></span>
+                {% else %}
+                    {% trans "Recherche" %}
+                {% endif %}
+            </h1>
             {% if query %}
-                Résultats pour <span class="query-hl">« {{ query }} »</span>
-            {% else %}
-                Recherche globale
+            <p class="vz-page-sub">{% blocktrans count n=total %}{{ n }} résultat{% plural %}{{ n }} résultats{% endblocktrans %}</p>
             {% endif %}
-        </h1>
-        {% if query %}
-        <p>{{ total }} résultat{{ total|pluralize }} trouvé{{ total|pluralize }}</p>
-        {% endif %}
+        </div>
     </div>
 
-    <form class="rech-bar" method="get" action="{% url 'recherche' %}">
-        <span class="material-icons">search</span>
-        <input type="text" name="q" value="{{ query }}"
-               placeholder="Rechercher dans les posts, annonces, utilisateurs…" autofocus>
-        <button type="submit">Rechercher</button>
+    <form class="rech-bar" method="get" action="{% url 'recherche' %}" role="search">
+        <span class="material-icons" aria-hidden="true">search</span>
+        <input type="search" name="q" value="{{ query }}" aria-label="{% trans 'Rechercher' %}"
+               placeholder="{% trans 'Rechercher dans les posts, annonces, utilisateurs…' %}" autofocus>
+        <button type="submit" class="vz-btn vz-btn--primary vz-btn--sm vz-btn--pill">{% trans "Rechercher" %}</button>
     </form>
 
     {% if query %}
 
         {% if not accounts and not posts and not hashtags and not annonces %}
-        <div class="rech-empty">
-            <span class="material-icons">search_off</span>
-            <h3>Aucun résultat</h3>
-            <p>Essayez un autre terme ou vérifiez l'orthographe.</p>
+        <div class="vz-empty">
+            <span class="material-icons" aria-hidden="true">search_off</span>
+            <p class="vz-empty-title">{% trans "Aucun résultat" %}</p>
+            <p class="vz-empty-text">{% trans "Essayez un autre terme ou vérifiez l'orthographe." %}</p>
         </div>
 
         {% else %}
 
         <!-- ── Hashtags ───────────────────────────────────── -->
         {% if hashtags %}
-        <div class="rech-section-title">
-            <span class="material-icons">tag</span> Hashtags
-        </div>
+        <h2 class="rech-section-title">
+            <span class="material-icons" aria-hidden="true">tag</span> {% trans "Hashtags" %}
+        </h2>
         <div class="rech-hashtag-grid">
             {% for ht in hashtags %}
             <a class="rech-ht-pill" href="{% url 'post:hashtag' ht.tag|slice:'1:' %}">
@@ -54,9 +56,9 @@
 
         <!-- ── Utilisateurs ──────────────────────────────── -->
         {% if accounts %}
-        <div class="rech-section-title">
-            <span class="material-icons">group</span> Utilisateurs
-        </div>
+        <h2 class="rech-section-title">
+            <span class="material-icons" aria-hidden="true">group</span> {% trans "Utilisateurs" %}
+        </h2>
         <div class="vz-stack">
             {% for account, is_friend in accounts %}
             <div class="vz-card vz-card--row">
@@ -70,20 +72,20 @@
                 <div class="vz-card__actions vz-card__actions--end">
                     {% if account == request.user %}
                         <a class="vz-btn vz-btn--secondary vz-btn--sm" href="{% url 'account:view' user_id=account.id %}">
-                            <i class="material-icons">person_pin</i>Mon profil
+                            <i class="material-icons" aria-hidden="true">person_pin</i>{% trans "Mon profil" %}
                         </a>
                     {% elif is_friend %}
                         <a class="vz-btn vz-btn--secondary vz-btn--sm" href="{% url 'account:view' user_id=account.id %}">
-                            <i class="material-icons">check</i>Ami
+                            <i class="material-icons" aria-hidden="true">check</i>{% trans "Ami" %}
                         </a>
-                        <a class="vz-btn vz-btn--secondary vz-btn--sm vz-btn--icon" href="#"
-                           aria-label="Message" title="Message"
-                           onclick="createOrReturnPrivateChat('{{ account.id }}'); return false;">
-                            <i class="material-icons">chat_bubble_outline</i>
-                        </a>
+                        <button type="button" class="vz-btn vz-btn--secondary vz-btn--sm vz-btn--icon vz-tap"
+                                aria-label="{% trans 'Message' %}" title="{% trans 'Message' %}"
+                                onclick="createOrReturnPrivateChat('{{ account.id }}')">
+                            <i class="material-icons" aria-hidden="true">chat_bubble_outline</i>
+                        </button>
                     {% else %}
-                        <a class="vz-btn vz-btn--primary vz-btn--sm" href="{% url 'account:view' user_id=account.id %}">
-                            <i class="material-icons">visibility</i>Profil
+                        <a class="vz-btn vz-btn--tonal vz-btn--sm" href="{% url 'account:view' user_id=account.id %}">
+                            <i class="material-icons" aria-hidden="true">visibility</i>{% trans "Profil" %}
                         </a>
                     {% endif %}
                 </div>
@@ -94,9 +96,9 @@
 
         <!-- ── Annonces Bazar ─────────────────────────────── -->
         {% if annonces %}
-        <div class="rech-section-title">
-            <span class="material-icons">storefront</span> Annonces Bazar
-        </div>
+        <h2 class="rech-section-title">
+            <span class="material-icons" aria-hidden="true">storefront</span> {% trans "Annonces Bazar" %}
+        </h2>
         <div class="vz-grid">
             {% for annonce in annonces %}
             <a class="vz-card" href="{% url 'bazar:detail' annonce.pk %}">
@@ -114,7 +116,7 @@
                     {% if annonce.price %}
                     <span class="vz-card__price">{{ annonce.formatted_price }}</span>
                     {% else %}
-                    <span class="vz-card__price"><small>Prix à négocier</small></span>
+                    <span class="vz-card__price"><small>{% trans "Prix à négocier" %}</small></span>
                     {% endif %}
                 </div>
             </a>
@@ -124,15 +126,15 @@
 
         <!-- ── Posts ─────────────────────────────────────── -->
         {% if posts %}
-        <div class="rech-section-title">
-            <span class="material-icons">article</span> Publications
-        </div>
+        <h2 class="rech-section-title">
+            <span class="material-icons" aria-hidden="true">article</span> {% trans "Publications" %}
+        </h2>
         <div class="vz-stack">
             {% for post in posts %}
             <a class="vz-card vz-card--row" href="{% url 'post:post-detail' post.id %}">
                 <img class="vz-card__avatar vz-card__avatar--sm" src="{{ post.author.profile_image.url }}" alt="{{ post.author.username }}" loading="lazy">
                 <div class="vz-card__body">
-                    <h3 class="vz-card__title vz-card__title--1">{{ post.title|truncatechars:80 }}</h3>
+                    <h3 class="vz-card__title vz-card__title--1">{{ post.title|default:_("Sans titre")|truncatechars:80 }}</h3>
                     <p class="vz-card__subtitle">@{{ post.author.username }} · {{ post.created_at|default:post.post_date|vz_since }}</p>
                 </div>
                 <i class="material-icons rech-chevron" aria-hidden="true">chevron_right</i>

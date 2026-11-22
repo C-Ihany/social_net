@@ -24,19 +24,3 @@
 textarea.gp-input { resize: vertical; }
 .gp-help { font-size: .76rem; color: var(--text-muted); margin-top: .3rem; }
 .gp-errors { color: var(--danger); font-size: .8rem; margin-top: .3rem; }
-.gp-actions { display: flex; gap: .7rem; margin-top: 1.6rem; }
-.gp-submit {
-    flex: 1; display: inline-flex; align-items: center; justify-content: center; gap: .4rem;
-    padding: .65rem 1.1rem; border-radius: 12px; border: none; cursor: pointer;
-    background: linear-gradient(135deg, var(--accent), var(--accent2));
-    color: #fff; font-weight: 700; font-size: .92rem; transition: opacity .15s;
-}
-.gp-submit:hover { opacity: .9; }
-.gp-cancel {
-    display: inline-flex; align-items: center; justify-content: center;
-    padding: .65rem 1.2rem; border-radius: 12px;
-    border: 1.5px solid var(--border); background: var(--btn-bg);
-    color: var(--text-muted); font-weight: 700; font-size: .92rem;
-    text-decoration: none; transition: background .15s;
-}
-.gp-cancel:hover { background: var(--btn-hover); color: var(--text); text-decoration: none; }

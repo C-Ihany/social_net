@@ -48,7 +48,7 @@
         </div>
       </div>
       <div class="zsv-topbtns">
-        <button class="zsv-ibtn" id="zsv-mute-btn" onclick="zvToggleMute()" title="Son" type="button">
+        <button class="zsv-ibtn" id="zsv-mute-btn" onclick="zvToggleMute()" title="{% trans 'Son' %}" aria-label="{% trans 'Son' %}" type="button">
           <span class="material-icons" id="zsv-mute-icon">volume_up</span>
         </button>
         <button class="zsv-ibtn" onclick="zvClose()" type="button" aria-label="{% trans 'Fermer' %}">
@@ -69,7 +69,7 @@
   <div id="zsv-link">
     <a id="zsv-link-a" href="#" target="_blank" rel="noopener">
       <span class="material-icons">open_in_new</span>
-      <span id="zsv-link-lbl">Voir l'offre</span>
+      <span id="zsv-link-lbl">{% trans "Voir l'offre" %}</span>
     </a>
   </div>
 
@@ -90,10 +90,10 @@
   <div id="zsv-mine-bar">
     <button class="zsv-views-btn" onclick="zvOpenViewers()" type="button">
       <span class="material-icons">visibility</span>
-      <span id="zsv-view-count">0</span>&nbsp;vue(s)
+      <span id="zsv-view-count">0</span>&nbsp;{% trans "vue(s)" %}
     </button>
     <button class="zsv-del-btn" onclick="zvDeleteCurrent()" type="button">
-      <span class="material-icons">delete</span> Supprimer
+      <span class="material-icons" aria-hidden="true">delete</span> {% trans "Supprimer" %}
     </button>
   </div>
 
@@ -196,16 +196,16 @@
                oninput="zscSetSize(this.value)" aria-label="{% trans 'Taille du texte' %}">
       </div>
       <div class="zsc-palette" id="zsc-palette">
-        <button type="button" class="zsc-chip active" style="--c:#ffffff" data-c="#ffffff" onclick="zscSetColor('#ffffff',this)" aria-label="blanc"></button>
-        <button type="button" class="zsc-chip" style="--c:#111111" data-c="#111111" onclick="zscSetColor('#111111',this)" aria-label="noir"></button>
-        <button type="button" class="zsc-chip" style="--c:#2dd4bf" data-c="#2dd4bf" onclick="zscSetColor('#2dd4bf',this)" aria-label="lagon"></button>
-        <button type="button" class="zsc-chip" style="--c:#fbbf24" data-c="#fbbf24" onclick="zscSetColor('#fbbf24',this)" aria-label="or"></button>
-        <button type="button" class="zsc-chip" style="--c:#f97316" data-c="#f97316" onclick="zscSetColor('#f97316',this)" aria-label="orange"></button>
-        <button type="button" class="zsc-chip" style="--c:#ef4444" data-c="#ef4444" onclick="zscSetColor('#ef4444',this)" aria-label="rouge"></button>
-        <button type="button" class="zsc-chip" style="--c:#ec4899" data-c="#ec4899" onclick="zscSetColor('#ec4899',this)" aria-label="rose"></button>
-        <button type="button" class="zsc-chip" style="--c:#a855f7" data-c="#a855f7" onclick="zscSetColor('#a855f7',this)" aria-label="violet"></button>
-        <button type="button" class="zsc-chip" style="--c:#3b82f6" data-c="#3b82f6" onclick="zscSetColor('#3b82f6',this)" aria-label="bleu"></button>
-        <button type="button" class="zsc-chip" style="--c:#22c55e" data-c="#22c55e" onclick="zscSetColor('#22c55e',this)" aria-label="vert"></button>
+        <button type="button" class="zsc-chip active" style="--c:#ffffff" data-c="#ffffff" onclick="zscSetColor('#ffffff',this)" aria-label="{% trans 'blanc' %}"></button>
+        <button type="button" class="zsc-chip" style="--c:#111111" data-c="#111111" onclick="zscSetColor('#111111',this)" aria-label="{% trans 'noir' %}"></button>
+        <button type="button" class="zsc-chip" style="--c:#2dd4bf" data-c="#2dd4bf" onclick="zscSetColor('#2dd4bf',this)" aria-label="{% trans 'lagon' %}"></button>
+        <button type="button" class="zsc-chip" style="--c:#fbbf24" data-c="#fbbf24" onclick="zscSetColor('#fbbf24',this)" aria-label="{% trans 'or' %}"></button>
+        <button type="button" class="zsc-chip" style="--c:#f97316" data-c="#f97316" onclick="zscSetColor('#f97316',this)" aria-label="{% trans 'orange' %}"></button>
+        <button type="button" class="zsc-chip" style="--c:#ef4444" data-c="#ef4444" onclick="zscSetColor('#ef4444',this)" aria-label="{% trans 'rouge' %}"></button>
+        <button type="button" class="zsc-chip" style="--c:#ec4899" data-c="#ec4899" onclick="zscSetColor('#ec4899',this)" aria-label="{% trans 'rose' %}"></button>
+        <button type="button" class="zsc-chip" style="--c:#a855f7" data-c="#a855f7" onclick="zscSetColor('#a855f7',this)" aria-label="{% trans 'violet' %}"></button>
+        <button type="button" class="zsc-chip" style="--c:#3b82f6" data-c="#3b82f6" onclick="zscSetColor('#3b82f6',this)" aria-label="{% trans 'bleu' %}"></button>
+        <button type="button" class="zsc-chip" style="--c:#22c55e" data-c="#22c55e" onclick="zscSetColor('#22c55e',this)" aria-label="{% trans 'vert' %}"></button>
       </div>
     </div>
 
@@ -233,12 +233,12 @@
 
     <!-- Fonds des stories texte -->
     <div id="zsc-grads">
-      <button type="button" class="zsc-gswatch grad_cyan active" data-g="grad_cyan"   onclick="zscSetGrad('grad_cyan',this)"   aria-label="cyan"></button>
-      <button type="button" class="zsc-gswatch grad_purple"      data-g="grad_purple" onclick="zscSetGrad('grad_purple',this)" aria-label="violet"></button>
-      <button type="button" class="zsc-gswatch grad_sunset"      data-g="grad_sunset" onclick="zscSetGrad('grad_sunset',this)" aria-label="sunset"></button>
-      <button type="button" class="zsc-gswatch grad_forest"      data-g="grad_forest" onclick="zscSetGrad('grad_forest',this)" aria-label="vert"></button>
-      <button type="button" class="zsc-gswatch grad_night"       data-g="grad_night"  onclick="zscSetGrad('grad_night',this)"  aria-label="nuit"></button>
-      <button type="button" class="zsc-gswatch grad_gold"        data-g="grad_gold"   onclick="zscSetGrad('grad_gold',this)"   aria-label="or"></button>
+      <button type="button" class="zsc-gswatch grad_cyan active" data-g="grad_cyan"   onclick="zscSetGrad('grad_cyan',this)"   aria-label="{% trans 'cyan' %}"></button>
+      <button type="button" class="zsc-gswatch grad_purple"      data-g="grad_purple" onclick="zscSetGrad('grad_purple',this)" aria-label="{% trans 'violet' %}"></button>
+      <button type="button" class="zsc-gswatch grad_sunset"      data-g="grad_sunset" onclick="zscSetGrad('grad_sunset',this)" aria-label="{% trans 'sunset' %}"></button>
+      <button type="button" class="zsc-gswatch grad_forest"      data-g="grad_forest" onclick="zscSetGrad('grad_forest',this)" aria-label="{% trans 'vert' %}"></button>
+      <button type="button" class="zsc-gswatch grad_night"       data-g="grad_night"  onclick="zscSetGrad('grad_night',this)"  aria-label="{% trans 'nuit' %}"></button>
+      <button type="button" class="zsc-gswatch grad_gold"        data-g="grad_gold"   onclick="zscSetGrad('grad_gold',this)"   aria-label="{% trans 'or' %}"></button>
     </div>
 
     <!-- Pastilles : musique et produit liés -->
@@ -294,8 +294,11 @@
   </div>
   <div class="zsc-music-chips" id="zsc-music-chips">
     <button type="button" class="zsc-mchip active" data-tag="tendances" onclick="zscMusicTag('tendances',this)"><i class="material-icons" aria-hidden="true">local_fire_department</i> {% trans "Tendances" %}</button>
-    <button type="button" class="zsc-mchip" data-tag="gasy"   onclick="zscMusicTag('gasy',this)">🇲🇬 Gasy</button>
     <button type="button" class="zsc-mchip" data-tag="afro"   onclick="zscMusicTag('afro',this)">Afro</button>
+    <button type="button" class="zsc-mchip" data-tag="amapiano" onclick="zscMusicTag('amapiano',this)">Amapiano</button>
+    <button type="button" class="zsc-mchip" data-tag="rumba"  onclick="zscMusicTag('rumba',this)">Rumba</button>
+    <button type="button" class="zsc-mchip" data-tag="bongo"  onclick="zscMusicTag('bongo',this)">Bongo Flava</button>
+    <button type="button" class="zsc-mchip" data-tag="gasy"   onclick="zscMusicTag('gasy',this)">{% trans "Océan Indien" %}</button>
     <button type="button" class="zsc-mchip" data-tag="love"   onclick="zscMusicTag('love',this)">{% trans "Amour" %}</button>
     <button type="button" class="zsc-mchip" data-tag="gospel" onclick="zscMusicTag('gospel',this)">Gospel</button>
     <button type="button" class="zsc-mchip" data-tag="hiphop" onclick="zscMusicTag('hiphop',this)">Hip-hop</button>
@@ -587,12 +590,12 @@ function _zsMySheet(gi){
   sh.innerHTML =
     '<div class="zs-sheet">' +
       '<button class="zs-sheet-btn zs-sheet-btn--primary" onclick="_zsMySheetCreate()" type="button">' +
-        '<span class="material-icons">add_circle</span> Créer une story' +
+        '<span class="material-icons">add_circle</span> {% trans "Créer une story"|escapejs %}' +
       '</button>' +
       '<button class="zs-sheet-btn" onclick="_zsMySheetView('+gi+')" type="button">' +
-        '<span class="material-icons">play_circle</span> Voir mes stories' +
+        '<span class="material-icons">play_circle</span> {% trans "Voir mes stories"|escapejs %}' +
       '</button>' +
-      '<button class="zs-sheet-cancel" onclick="document.getElementById(\'_zs-mysheet\').remove()" type="button">Annuler</button>' +
+      '<button class="zs-sheet-cancel" onclick="document.getElementById(\'_zs-mysheet\').remove()" type="button">{% trans "Annuler"|escapejs %}</button>' +
     '</div>';
   sh.onclick = function(e){ if(e.target===sh) sh.remove(); };
   document.body.appendChild(sh);
@@ -705,10 +708,11 @@ function _zvLoad(){
   if(story.link){
     linkWrap.style.display='block';
     var la = document.getElementById('zsv-link-a');
-    la.href=story.link;
+    /* Uniquement http(s) ou chemin interne (le serveur filtre aussi) */
+    la.href = /^(https?:\/\/|\/(?!\/))/i.test(story.link) ? story.link : '#';
     /* Lien interne (Bazar, Resto…) : même onglet, pour rester dans l'app */
     la.target = story.link.indexOf(location.origin + '/') === 0 || story.link.charAt(0) === '/' ? '_self' : '_blank';
-    document.getElementById('zsv-link-lbl').textContent=story.link_label||'Voir l\'offre';
+    document.getElementById('zsv-link-lbl').textContent=story.link_label||'{% trans "Voir l'offre"|escapejs %}';
   } else { linkWrap.style.display='none'; }
 
   /* Audio */
@@ -913,18 +917,24 @@ window.zvSendReply = function(){
   var msg = inp.value.trim(); if(!msg) return;
   var story = (_sv.groups[_sv.curG]||{stories:[]}).stories[_sv.curS];
   if(!story) return;
+  var sendBtn = document.getElementById('zsv-reply-send');
+  {% trans "Message envoyé" as zs_sent %}{% trans "Une erreur est survenue" as zs_err %}
+  var genericErr = '{{ zs_err|escapejs }}';
+  if(sendBtn) sendBtn.disabled = true;
   _post(URLS.reply + story.id + '/', {message: msg})
-    .then(function(r){ return r.json(); })
+    /* Toute réponse en erreur (403 bloqué, 404 story expirée, 409 conversation
+       secrète, 429 trop de messages…) porte un champ `error` : on l'affiche. */
+    .then(function(r){ return r.json().catch(function(){ return {ok:false}; }).then(function(d){ d._status = r.status; return d; }); })
     .then(function(d){
       if(d.ok){
-        _notify('Message envoyé','success');
+        _notify('{{ zs_sent|escapejs }}','success');
         inp.value='';
-        document.getElementById('zsv-reply-send').disabled=true;
       } else {
-        _notify(d.error||'Erreur envoi','error');
+        _notify(d.error || genericErr, 'error');
+        if(sendBtn) sendBtn.disabled = false;
       }
     })
-    .catch(function(){ _notify('Erreur envoi','error'); });
+    .catch(function(){ _notify(genericErr,'error'); if(sendBtn) sendBtn.disabled = false; });
 };
 
 window.zvOpenViewers = function(){
@@ -933,21 +943,21 @@ window.zvOpenViewers = function(){
   _zvPause();
   document.getElementById('zsv-vmodal').classList.add('open');
   var list = document.getElementById('zsv-vlist');
-  list.innerHTML='<p class="zsv-vhint">Chargement…</p>';
+  list.innerHTML='<p class="zsv-vhint">{% trans "Chargement…"|escapejs %}</p>';
   fetch(URLS.viewers+story.id+'/')
     .then(function(r){ return r.json(); })
     .then(function(d){
       var rows = d.viewers || [];
-      document.getElementById('zsv-vmodal-title').textContent = 'Vues (' + d.count + ')';
+      document.getElementById('zsv-vmodal-title').textContent = '{% trans "Vues"|escapejs %} (' + d.count + ')';
 
       var html = '';
       if(!rows.length){
-        html = '<p class="zsv-vhint">Aucune vue pour l\'instant.</p>';
+        html = '<p class="zsv-vhint">{% trans "Aucune vue pour l'instant."|escapejs %}</p>';
       } else {
         html = rows.map(function(r){
           var hasReply = !!r.reply_msg;
           return '<div class="zsv-vrow' + (hasReply ? ' zsv-vrow-reply' : '') + '"' +
-            (hasReply ? ' data-uid="'+r.id+'" data-reply="'+_esc(r.reply_msg || '')+'" onclick="zvOpenReplyChat(this)" title="Répondre dans le chat"' : '') +
+            (hasReply ? ' data-uid="'+r.id+'" data-reply="'+_esc(r.reply_msg || '')+'" onclick="zvOpenReplyChat(this)" title="{% trans "Répondre dans le chat"|escapejs %}"' : '') +
             '>' +
             '<img src="'+_esc(r.avatar)+'" onerror="this.style.display=\'none\'" alt="">' +
             '<div class="zsv-vrow-body">' +
@@ -963,7 +973,7 @@ window.zvOpenViewers = function(){
 
       list.innerHTML = html;
     })
-    .catch(function(){ list.innerHTML='<p class="zsv-vhint">Erreur chargement.</p>'; });
+    .catch(function(){ list.innerHTML='<p class="zsv-vhint">{% trans "Une erreur est survenue"|escapejs %}</p>'; });
 };
 window.zvCloseViewers = function(){
   document.getElementById('zsv-vmodal').classList.remove('open'); _zvResume();
@@ -1449,7 +1459,7 @@ window.zscPublish = function(){
     var d={}; try { d=JSON.parse(xhr.responseText||'{}'); } catch(e){}
     if(xhr.status>=200 && xhr.status<300 && d.ok){
       _sc.published=true; upfill.style.width='100%';
-      if(window.vzToast) vzToast('{% trans "Story publiée !"|escapejs %}','success'); else _toast('Story publiée !');
+      if(window.vzToast) vzToast('{% trans "Story publiée !"|escapejs %}','success'); else _toast('{% trans "Story publiée !"|escapejs %}');
       setTimeout(function(){ btn.classList.remove('is-loading'); zscClose(); loadStories(); },400);
     } else fail(d.error||'{% trans "Erreur"|escapejs %}');
   };

@@ -9,16 +9,16 @@
 
 <div class="rs-rhead">{% if restaurant.banner %}<img src="{{ restaurant.banner.url }}" alt="">{% endif %}</div>
 <div class="rs-rinfo">
-    <div class="rs-card">
+    <div class="vz-card rs-box rs-rcard">
         <div class="rs-rlogo">{% if restaurant.logo %}<img src="{{ restaurant.logo.url }}" alt="">{% else %}<i class="material-icons" aria-hidden="true">ramen_dining</i>{% endif %}</div>
         <div class="rs-fill">
-            <h1 class="rs-h1 rs-h1--sm rs-rtitle">
+            <h1 class="rs-h1 rs-rtitle">
                 {{ restaurant.name }}
                 <span class="vz-chip vz-chip--sm vz-chip--static {% if restaurant.is_open %}vz-chip--success{% else %}vz-chip--danger{% endif %}">{% if restaurant.is_open %}{% trans "Ouvert" %}{% else %}{% trans "Fermé" %}{% endif %}</span>
                 {% if not restaurant.is_approved %}<span class="vz-chip vz-chip--sm vz-chip--static vz-chip--warning">{% trans "En attente de validation" %}</span>{% endif %}
                 {% include 'resto/_rating.html' with r=rating %}
                 {% if request.user.is_authenticated and not is_owner %}
-                <button type="button" class="vz-btn vz-btn--icon vz-btn--sm vz-btn--muted rs-report" onclick="openReportModal('restaurant','{{ restaurant.pk }}')" aria-label="{% trans 'Signaler ce restaurant' %}" title="{% trans 'Signaler' %}"><span class="material-icons">flag</span></button>
+                <button type="button" class="vz-icon-btn rs-report" onclick="openReportModal('restaurant','{{ restaurant.pk }}')" aria-label="{% trans 'Signaler ce restaurant' %}" title="{% trans 'Signaler' %}"><span class="material-icons">flag</span></button>
                 {% endif %}
             </h1>
             <p class="rs-muted rs-rmeta">{{ restaurant.get_category_display }} · <i class="material-icons rs-ico" aria-hidden="true">place</i> {{ restaurant.address }}{% if restaurant.opening_hours %} · <i class="material-icons rs-ico" aria-hidden="true">schedule</i> {{ restaurant.opening_hours }}{% endif %}</p>
@@ -43,7 +43,7 @@
 
 <div class="rs-wrap">
     {% if other_cart %}
-    <div class="rs-card rs-card--hl rs-other-cart">
+    <div class="vz-card rs-box rs-card--hl rs-other-cart">
         <i class="material-icons rs-ico" aria-hidden="true">shopping_basket</i> {% blocktrans with r=other_cart.restaurant.name %}Votre panier contient déjà des plats de <strong>{{ r }}</strong>. Ajouter un plat d'ici le videra.{% endblocktrans %}
         <a href="{% url 'resto:cart' %}" class="rs-link--b">{% trans "Voir le panier" %}</a>
     </div>
@@ -57,7 +57,7 @@
     <h2 class="rs-section-title" id="sec-{{ forloop.counter }}">{{ s.name }}</h2>
     <div class="vz-grid vz-grid--wide">
         {% for it in s.items %}
-        <div class="vz-card vz-card--row vz-card--link rs-dish" onclick="rsOpenItem({{ it.pk }})">
+        <div class="vz-card vz-card--row vz-card--link rs-dish">
             {% if it.image %}<img class="vz-card__avatar vz-card__avatar--lg vz-card__avatar--sq" src="{{ it.image.url }}" alt="{{ it.name }}" loading="lazy">{% else %}<div class="vz-card__avatar vz-card__avatar--lg vz-card__avatar--sq rs-avatar-ph"><i class="material-icons" aria-hidden="true">restaurant</i></div>{% endif %}
             <div class="vz-card__body">
                 <h3 class="vz-card__title">{{ it.name }}</h3>
@@ -66,7 +66,8 @@
                 <span class="vz-card__price">{{ it.formatted_price }}{% if it.option_groups.all %}<small>{% trans "personnalisable" %}</small>{% endif %}</span>
             </div>
             <div class="vz-card__actions vz-card__actions--end">
-                <button class="vz-btn vz-btn--primary vz-btn--icon vz-btn--sm" type="button" aria-label="{% trans 'Ajouter' %}"><i class="material-icons" aria-hidden="true">add</i></button>
+                {# Le bouton couvre toute la carte (::after) : la carte entière se touche, au clavier comme au doigt #}
+                <button class="vz-btn vz-btn--primary vz-btn--icon vz-btn--sm rs-dish-open" type="button" onclick="rsOpenItem({{ it.pk }})" aria-label="{% blocktrans with n=it.name %}Ajouter {{ n }} au panier{% endblocktrans %}"><i class="material-icons" aria-hidden="true">add</i></button>
             </div>
         </div>
         {% endfor %}
@@ -78,7 +79,7 @@
 
     {% if reviews %}
     <h2 class="rs-section-title"><i class="material-icons" aria-hidden="true">star</i> {% trans "Avis des clients" %} <span class="rs-muted rs-text">{% include 'resto/_rating.html' with r=rating %}</span></h2>
-    <div class="rs-card rs-reviews">
+    <div class="vz-card rs-box rs-reviews">
         {% for r in reviews %}
         <div class="rs-review">{% include 'resto/_stars.html' with n=r.rating %} <span class="who">{{ r.author.username }}</span> <span class="rs-muted">· {{ r.created_at|date:"d/m/Y" }}</span>{% if r.comment %}<div>{{ r.comment }}</div>{% endif %}</div>
         {% endfor %}
@@ -88,30 +89,32 @@
 
 <!-- ── Barre panier ── -->
 <a href="{% url 'resto:cart' %}" class="rs-cartbar {% if cart_summary.count %}show{% endif %}" id="rs-cartbar">
-    <span class="material-icons">shopping_basket</span>
-    <span id="rs-cartbar-count">{{ cart_summary.count }} {% trans "article(s)" %}</span>
+    <span class="material-icons" aria-hidden="true">shopping_basket</span>
+    <span id="rs-cartbar-count">{% blocktrans count n=cart_summary.count %}{{ n }} article{% plural %}{{ n }} articles{% endblocktrans %}</span>
     <span id="rs-cartbar-total">{{ cart_summary.total|vz_ariary }}</span> <i class="material-icons rs-ico" aria-hidden="true">arrow_forward</i>
 </a>
 
-<!-- ── Modale d'options ── -->
-<div class="rs-modal-bg" id="rs-modal-bg" onclick="if(event.target===this)rsCloseItem()">
-    <div class="rs-modal" role="dialog" aria-modal="true">
-        <div class="rs-between rs-between--top">
-            <div><h3 id="rs-m-name"></h3><p class="rs-muted rs-m-desc" id="rs-m-desc"></p></div>
-            <button class="vz-btn vz-btn--sm vz-btn--muted vz-btn--icon" type="button" onclick="rsCloseItem()" aria-label="{% trans 'Fermer' %}"><i class="material-icons" aria-hidden="true">close</i></button>
+<!-- ── Dialogue d'options ── -->
+<div class="vz-overlay" id="rs-item-dialog" data-rs-dialog hidden>
+    <div class="vz-dialog rs-dialog" role="dialog" aria-modal="true" aria-labelledby="rs-m-name">
+        <div class="vz-dialog-handle"></div>
+        <div class="vz-dialog-head">
+            <h3 class="vz-dialog-title" id="rs-m-name"></h3>
+            <button class="vz-icon-btn" type="button" onclick="rsCloseItem()" aria-label="{% trans 'Fermer' %}"><i class="material-icons" aria-hidden="true">close</i></button>
         </div>
-        <img id="rs-m-img" class="rs-m-img" alt="" style="display:none;">
-        <div id="rs-m-prep" class="rs-opt-group" style="display:none;"><h4><i class="material-icons rs-ico" aria-hidden="true">soup_kitchen</i> {% trans "Préparation" %}</h4><p class="rs-muted rs-m-prep-text" id="rs-m-prep-text"></p></div>
+        <p class="rs-muted rs-m-desc" id="rs-m-desc"></p>
+        <img id="rs-m-img" class="rs-m-img" alt="" hidden>
+        <div id="rs-m-prep" class="rs-opt-group" hidden><h4><i class="material-icons rs-ico" aria-hidden="true">soup_kitchen</i> {% trans "Préparation" %}</h4><p class="rs-muted rs-m-prep-text" id="rs-m-prep-text"></p></div>
         <div id="rs-m-ingredients"></div>
         <div id="rs-m-groups"></div>
         <div class="rs-opt-group">
-            <h4>{% trans "Instructions" %} <span class="rs-muted">{% trans "facultatif" %}</span></h4>
+            <h4><label for="rs-m-note">{% trans "Instructions" %}</label> <span class="rs-muted">{% trans "facultatif" %}</span></h4>
             <input id="rs-m-note" class="form-control" maxlength="200" placeholder="{% trans 'Ex : sans oignons, bien cuit…' %}">
         </div>
-        <p class="rs-form err rs-mt" id="rs-m-err"></p>
+        <p class="rs-form err rs-mt" id="rs-m-err" role="alert"></p>
         <div class="rs-m-foot">
             <div class="rs-qty">
-                <button type="button" onclick="rsQty(-1)">−</button><span id="rs-m-qty">1</span><button type="button" onclick="rsQty(1)">+</button>
+                <button type="button" class="vz-icon-btn" onclick="rsQty(-1)" aria-label="{% trans 'Retirer un' %}"><i class="material-icons" aria-hidden="true">remove</i></button><span id="rs-m-qty" aria-live="polite">1</span><button type="button" class="vz-icon-btn" onclick="rsQty(1)" aria-label="{% trans 'Ajouter un' %}"><i class="material-icons" aria-hidden="true">add</i></button>
             </div>
             <button class="vz-btn vz-btn--primary rs-grow" id="rs-m-add" type="button" onclick="rsAdd()">
                 {% trans "Ajouter" %} · <span id="rs-m-total"></span>
@@ -132,26 +135,28 @@
     ingredients: "{% trans 'Ingrédients'|escapejs %}", ingHint: "{% trans 'cochez ce que vous ne voulez pas'|escapejs %}", fixed: "{% trans 'inclus'|escapejs %}",
     remove: "{% trans 'Enlever'|escapejs %}", addIt: "{% trans 'Ajouter'|escapejs %}", extras: "{% trans 'En plus, si vous voulez'|escapejs %}",
     replace: "{% trans 'Votre panier contient des plats de'|escapejs %}", replace2: "{% trans 'Le vider et ajouter ce plat ?'|escapejs %}",
-    added: "{% trans 'Ajouté au panier'|escapejs %}", articles: "{% trans 'article(s)'|escapejs %}",
+    added: "{% trans 'Ajouté au panier'|escapejs %}", article: "{% trans 'article'|escapejs %}", articles: "{% trans 'articles'|escapejs %}",
+    loadError: "{% trans 'Impossible de charger ce plat. Vérifiez votre connexion et réessayez.'|escapejs %}", error: "{% trans 'Une erreur est survenue. Réessayez.'|escapejs %}",
   };
   let item = null, qty = 1;
-  const fmt = n => n.toLocaleString('fr-FR').replace(/ | /g, ' ') + ' Ar';
+  const fmt = window.rsMoney;
   const ico = name => `<i class="material-icons rs-ico" aria-hidden="true">${name}</i>`;
 
   window.rsOpenItem = async function(pk){
     if(!LOGGED){ window.location = "{% url 'login' %}?next=" + encodeURIComponent(window.location.pathname); return; }
     if(!CAN_ORDER){ vzAlert(I18N.closed); return; }
-    const r = await fetch(`/resto/r/${SLUG}/plat/${pk}/`, {credentials:'same-origin'});
-    if(!r.ok) return;
+    let r;
+    try { r = await fetch(`/resto/r/${SLUG}/plat/${pk}/`, {credentials:'same-origin'}); } catch(e) { r = null; }
+    if(!r || !r.ok){ vzToast(I18N.loadError, 'error'); return; }
     item = await r.json(); qty = 1;
     document.getElementById('rs-m-name').textContent = item.name;
     document.getElementById('rs-m-desc').textContent = item.description || '';
     const img = document.getElementById('rs-m-img');
-    if(item.image){ img.src = item.image; img.style.display='block'; } else { img.style.display='none'; }
+    if(item.image){ img.src = item.image; img.hidden = false; } else { img.hidden = true; }
     document.getElementById('rs-m-note').value = '';
     document.getElementById('rs-m-err').textContent = '';
     const prep = document.getElementById('rs-m-prep');
-    prep.style.display = item.preparation ? '' : 'none';
+    prep.hidden = !item.preparation;
     document.getElementById('rs-m-prep-text').textContent = item.preparation || '';
     // Ingrédients du plat, tels que le restaurant les prépare. Le client coche ce qu'il
     // NE veut PAS (case « Enlever »). Les ingrédients « toujours inclus » n'ont pas de case.
@@ -190,7 +195,7 @@
     });
     box.querySelectorAll('input').forEach(i => i.addEventListener('change', onChange));
     rsRefresh();
-    document.getElementById('rs-modal-bg').classList.add('show');
+    rsDialog.open('rs-item-dialog');
   };
   function onChange(e){
     // Limite le nombre de cases cochées par groupe
@@ -211,7 +216,7 @@
     document.getElementById('rs-m-total').textContent = fmt((item.price + extra) * qty);
   }
   window.rsQty = d => { qty = Math.max(1, Math.min(20, qty + d)); rsRefresh(); };
-  window.rsCloseItem = () => document.getElementById('rs-modal-bg').classList.remove('show');
+  window.rsCloseItem = () => rsDialog.close('rs-item-dialog');
   // Arrivée depuis un post / une vidéo : ?plat=<id> ouvre la fiche du plat
   (function(){ const pk = new URLSearchParams(location.search).get('plat');
     if(pk && /^\d+$/.test(pk)){ const open = () => rsOpenItem(pk);
@@ -226,21 +231,25 @@
       if(n < g.min){ err.textContent = `« ${g.name} » : ${I18N.choose} ${g.min}`; return; }
     }
     const btn = document.getElementById('rs-m-add'); btn.disabled = true;
-    const r = await fetch(`/resto/panier/ajouter/${item.id}/`, {
-      method:'POST', credentials:'same-origin',
-      headers:{'Content-Type':'application/json','X-CSRFToken':CSRF},
-      body: JSON.stringify({quantity: qty, note: document.getElementById('rs-m-note').value, options, ingredients, replace: !!replace}),
-    });
+    let r;
+    try {
+      r = await fetch(`/resto/panier/ajouter/${item.id}/`, {
+        method:'POST', credentials:'same-origin',
+        headers:{'Content-Type':'application/json','X-CSRFToken':CSRF},
+        body: JSON.stringify({quantity: qty, note: document.getElementById('rs-m-note').value, options, ingredients, replace: !!replace}),
+      });
+    } catch(e) { btn.disabled = false; err.textContent = I18N.error; return; }
     btn.disabled = false;
     const data = await r.json().catch(()=>({}));
     if(r.status === 409){
       if(await vzConfirm({ text: `${I18N.replace} ${data.current_restaurant}. ${I18N.replace2}` })) return rsAdd(true);
       return;
     }
-    if(!r.ok){ err.textContent = data.error || 'Erreur'; return; }
+    if(!r.ok){ err.textContent = data.error || I18N.error; return; }
     rsCloseItem();
+    vzToast(I18N.added, 'success');
     const bar = document.getElementById('rs-cartbar');
-    document.getElementById('rs-cartbar-count').textContent = `${data.cart.count} ${I18N.articles}`;
+    document.getElementById('rs-cartbar-count').textContent = `${data.cart.count} ${data.cart.count > 1 ? I18N.articles : I18N.article}`;
     document.getElementById('rs-cartbar-total').textContent = fmt(data.cart.total);
     bar.classList.add('show');
     bar.animate([{transform:'translateX(-50%) scale(1.06)'},{transform:'translateX(-50%) scale(1)'}], {duration:220});

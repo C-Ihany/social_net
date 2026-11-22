@@ -1,163 +1,78 @@
 {% extends 'base.html' %}
 {% load static %}
 {% load i18n %}
+{% block page_title %}{% trans "Friend requests" %} — Vazimba{% endblock %}
 
 {% block content %}
-<link rel="stylesheet" href="{% static 'css/pages/friend-friend_requests.css' %}">
+<link rel="stylesheet" href="{% static 'css/pages/friend-friend_list.css' %}">
 
-<div class="fr-wrapper">
+<div class="fl-wrapper">
 
-    <!-- Header -->
-    <div class="fr-header">
-        <div class="fr-title">
-            <div class="fr-title-icon">
-                <span class="material-icons">person_add</span>
-            </div>
-            <div class="fr-title-text">
-                <h1>{% trans "Friend requests" %}</h1>
-                <p>{% trans "People who want to be friends with you" %}</p>
-            </div>
+    <div class="vz-page-head">
+        <div class="vz-page-head__main">
+            <h1 class="vz-page-title"><span class="material-icons" aria-hidden="true">person_add</span>{% trans "Friend requests" %}</h1>
+            <p class="vz-page-sub">{% trans "People who want to be friends with you" %}</p>
         </div>
-        <div class="fr-header-right">
-            {% if friend_requests %}
-            <span class="fr-count-badge" id="fr-total-badge">
-                {{ friend_requests|length }} {% trans "requests" %}
-            </span>
-            {% endif %}
-            <a class="fr-friends-link" href="{% url 'friend:list' user_id=request.user.id %}">
-                <span class="material-icons">group</span>
-                {% trans "My friends" %}
+        <div class="vz-page-head__actions">
+            <a class="vz-btn vz-btn--secondary vz-btn--sm" href="{% url 'friend:list' user_id=request.user.id %}">
+                <span class="material-icons" aria-hidden="true">group</span>{% trans "My friends" %}
             </a>
         </div>
     </div>
 
-    <!-- Cards grid -->
-    <div class="fr-grid" id="fr-grid">
-
-        {% if friend_requests %}
-            {% for request in friend_requests %}
-            <div class="fr-card" id="fr-card-{{ request.id }}" style="animation-delay:{{ forloop.counter0 }}5ms;">
-
-                <!-- Banner -->
-                <div class="fr-card-banner"></div>
-
-                <div class="fr-card-body">
-                    <!-- Avatar -->
-                    <a class="fr-avatar-wrap" href="{% url 'account:view' user_id=request.sender.id %}">
-                        <div class="fr-avatar-ring">
-                            <img src="{{ request.sender.profile_image.url }}" alt="{{ request.sender.username }}">
-                        </div>
-                    </a>
-
-                    <!-- Name -->
-                    <a class="fr-username" href="{% url 'account:view' user_id=request.sender.id %}">
-                        {{ request.sender.username }}
-                    </a>
-                    <div class="fr-username-sub">
-                        <span class="material-icons">person_outline</span>
-                        {% trans "Wants to be your friend" %}
-                    </div>
-
-                    <!-- Actions -->
-                    <div class="fr-actions">
-                        <button class="fr-btn fr-btn-decline"
-                                id="id_cancel_{{ request.sender.id }}"
-                                onclick="handleDecline('{{ request.id }}')" type="button">
-                            <span class="material-icons">close</span>
-                            {% trans "Decline" %}
-                        </button>
-                        <button class="fr-btn fr-btn-accept"
-                                id="id_confirm_{{ request.sender.id }}"
-                                onclick="handleAccept('{{ request.id }}')" type="button">
-                            <span class="material-icons">check</span>
-                            {% trans "Accept" %}
-                        </button>
-                    </div>
-                </div>
-
-            </div>
-            {% endfor %}
-
-        {% else %}
-        <!-- Empty state -->
-        <div class="fr-empty">
-            <div class="fr-empty-icon-wrap">
-                <span class="material-icons">inbox</span>
-            </div>
-            <h3>{% trans "No requests" %}</h3>
-            <p>{% trans "When someone sends you a friend request, it will appear here." %}</p>
-            <a class="fr-empty-cta" href="{% url 'search' %}?q=">
-                <span class="material-icons">person_search</span>
-                {% trans "Find people" %}
+    {# (variable de boucle « fr » et non « request » : ce nom masquait la requête dans tout le bloc) #}
+    <div class="vz-stack" id="fr-grid"{% if not friend_requests %} hidden{% endif %}>
+        {% for fr in friend_requests %}
+        <div class="vz-card vz-card--row fl-card fl-card--request" id="fr-card-{{ fr.id }}">
+            <a class="vz-card__avatar-wrap" href="{% url 'account:view' user_id=fr.sender.id %}">
+                <img class="vz-card__avatar" src="{{ fr.sender.profile_image.url }}" alt="" loading="lazy">
             </a>
+            <div class="vz-card__body">
+                <h2 class="vz-card__title vz-card__title--1">
+                    <a href="{% url 'account:view' user_id=fr.sender.id %}">{{ fr.sender.username }}</a>
+                </h2>
+                <p class="vz-card__subtitle">{% trans "Wants to be your friend" %}</p>
+            </div>
+            <div class="vz-card__actions vz-card__actions--end">
+                <button class="vz-btn vz-btn--secondary vz-btn--sm" onclick="handleDecline('{{ fr.id }}', this)" type="button">
+                    <span class="material-icons" aria-hidden="true">close</span>{% trans "Refuser" %}
+                </button>
+                <button class="vz-btn vz-btn--primary vz-btn--sm" onclick="handleAccept('{{ fr.id }}', this)" type="button">
+                    <span class="material-icons" aria-hidden="true">check</span>{% trans "Accepter" %}
+                </button>
+            </div>
         </div>
-        {% endif %}
+        {% endfor %}
+    </div>
 
-    </div><!-- /fr-grid -->
+    <div class="vz-empty" id="fr-empty"{% if friend_requests %} hidden{% endif %}>
+        <span class="material-icons" aria-hidden="true">inbox</span>
+        <div class="vz-empty-title">{% trans "No requests" %}</div>
+        <p class="vz-empty-text">{% trans "When someone sends you a friend request, it will appear here." %}</p>
+        <a class="vz-btn vz-btn--primary" href="{% url 'recherche' %}">
+            <span class="material-icons" aria-hidden="true">person_search</span>{% trans "Find people" %}
+        </a>
+    </div>
 
 </div>
 
 <script type="text/javascript">
-var _frPendingCount = {{ friend_requests|length }};
+function handleAccept(requestId)  { acceptFriendRequest(requestId,  function() { removeCard(requestId); }); }
+function handleDecline(requestId) { declineFriendRequest(requestId, function() { removeCard(requestId); }); }
 
-function handleAccept(requestId) {
-    triggerAcceptFriendRequest(requestId, function() {
-        removeCard(requestId);
-    });
-}
-
-function handleDecline(requestId) {
-    triggerDeclineFriendRequest(requestId, function() {
-        removeCard(requestId);
-    });
-}
-
+/* Appelé seulement quand le serveur a confirmé (voir friend/snippets/*.html) */
 function removeCard(requestId) {
     var card = document.getElementById('fr-card-' + requestId);
     if (!card) return;
-    card.classList.add('fr-removing');
+    card.classList.add('is-removing');
     setTimeout(function() {
         card.remove();
-        _frPendingCount--;
-        updateBadge();
-        checkEmpty();
-    }, 310);
-}
-
-function updateBadge() {
-    var badge = document.getElementById('fr-total-badge');
-    if (!badge) return;
-    if (_frPendingCount <= 0) {
-        badge.style.display = 'none';
-    } else {
-        badge.textContent = _frPendingCount + ' fangatahana';
-    }
-}
-
-function checkEmpty() {
-    var grid = document.getElementById('fr-grid');
-    if (!grid) return;
-    var cards = grid.querySelectorAll('.fr-card');
-    if (cards.length === 0) {
-        grid.innerHTML = '<div class="fr-empty">' +
-            '<div class="fr-empty-icon-wrap"><span class="material-icons">inbox</span></div>' +
-            '<h3>{% trans "No requests"|escapejs %}</h3>' +
-            '<p>{% trans "When someone sends you a friend request, it will appear here."|escapejs %}</p>' +
-            '<a class="fr-empty-cta" href="/search/?q=">' +
-            '<span class="material-icons">person_search</span>{% trans "Find people"|escapejs %}</a>' +
-            '</div>';
-    }
-}
-
-function onFriendRequestAccepted() {}
-function onFriendRequestDeclined() {}
-
-function triggerAcceptFriendRequest(friend_request_id, callback) {
-    acceptFriendRequest(friend_request_id, callback || onFriendRequestAccepted);
-}
-
-function triggerDeclineFriendRequest(friend_request_id, callback) {
-    declineFriendRequest(friend_request_id, callback || onFriendRequestDeclined);
+        var grid = document.getElementById('fr-grid');
+        if (grid && !grid.querySelector('.fl-card')) {
+            grid.hidden = true;
+            document.getElementById('fr-empty').hidden = false;
+        }
+    }, 260);
 }
 </script>
 

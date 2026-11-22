@@ -23,5 +23,13 @@ MSG_TYPE_REACTION = 11  # Toggle emoji reaction sur un message
 MSG_TYPE_SECRET = 12
 
 # Ce que le serveur montre à la place d'un message chiffré (il ne peut pas le lire)
-SECRET_PREVIEW      = '🔒 Message chiffré'
-SECRET_FILE_PREVIEW = '🔒 Fichier chiffré'
+# (texte seul : l'icône est posée par l'interface, pas par un emoji dans la donnée)
+SECRET_PREVIEW      = 'Message chiffré'
+SECRET_FILE_PREVIEW = 'Fichier chiffré'
+
+
+def file_preview(file_type, file_name=''):
+    """L'aperçu d'un fichier envoyé en clair (liste des conversations, notification)."""
+    if file_type == 'voice':
+        return 'Message vocal'
+    return f'Fichier : {file_name}' if file_name else 'Fichier'

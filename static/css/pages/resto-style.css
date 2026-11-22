@@ -8,23 +8,23 @@
 .rs-wrap { max-width: 1100px; margin: 0 auto; padding: 1rem 1rem 5rem; }
 .rs-hero {
     background: linear-gradient(135deg, var(--accent-dark) 0%, var(--accent2) 100%);
-    color: #fff; padding: 2.4rem 1.2rem 2rem; text-align: center; position: relative; overflow: hidden;
+    color: var(--on-accent); padding: 2.4rem 1.2rem 2rem; text-align: center; position: relative; overflow: hidden;
 }
-[data-theme="dark"] .rs-hero { background: linear-gradient(135deg, #0b3f3a 0%, var(--accent-dark) 100%); }
 .rs-hero h1 { font-size: 1.9rem; font-weight: 800; letter-spacing: -.03em; margin: 0 0 .3rem; }
-.rs-hero p  { opacity: .85; font-size: .92rem; margin: 0 0 1.1rem; }
-.rs-search { display: flex; max-width: 560px; margin: 0 auto .8rem; background: rgba(0,0,0,.35);
-             border: 1.5px solid rgba(255,255,255,.25); border-radius: 50px; padding: .3rem .3rem .3rem 1.1rem; }
-.rs-search input { flex: 1; background: transparent !important; border: none !important; box-shadow: none !important;
-                   color: #fff !important; font-size: .95rem; outline: none; }
-.rs-search input::placeholder { color: rgba(255,255,255,.6); }
-.rs-search button { background: var(--bg-card); color: var(--accent); border: none; border-radius: 40px; padding: .5rem 1.2rem;
-                    font-weight: 700; font-size: .88rem; cursor: pointer; }
-[data-theme="dark"] .rs-search button { background: var(--accent); color: var(--on-accent); }
+.rs-hero p  { opacity: .9; font-size: .92rem; margin: 0 0 1.1rem; }
+/* Champ de recherche : une carte claire/sombre selon le thème, lisible sur le dégradé dans les deux cas */
+.rs-search { display: flex; align-items: center; max-width: 560px; margin: 0 auto .8rem; background: var(--bg-card);
+             border: 1.5px solid var(--border); border-radius: var(--radius-pill); padding: .25rem .25rem .25rem 1.1rem; }
+.rs-search input { flex: 1; min-width: 0; background: transparent !important; border: none !important; box-shadow: none !important;
+                   color: var(--text) !important; font-size: .95rem; outline: none; }
+.rs-search input::placeholder { color: var(--text-muted); }
+.rs-search-btn { background: var(--accent); color: var(--on-accent); flex: none; }
+.rs-search-btn:hover { background: var(--accent-dark); color: var(--on-accent); }
 .rs-hero-links { display: flex; gap: .5rem; justify-content: center; flex-wrap: wrap; }
-.rs-hero-links a { color: #fff; font-size: .82rem; font-weight: 600; text-decoration: none;
-                   border: 1px solid rgba(255,255,255,.4); border-radius: 30px; padding: .3rem .9rem; }
-.rs-hero-links a:hover { background: rgba(255,255,255,.15); color: #fff; text-decoration: none; }
+.rs-hero-links a { color: inherit; font-size: .85rem; font-weight: 600; text-decoration: none; min-height: 44px;
+                   display: inline-flex; align-items: center; gap: .3rem;
+                   border: 1px solid currentColor; border-radius: var(--radius-pill); padding: 0 1rem; }
+.rs-hero-links a:hover { background: rgba(var(--accent-rgb), .25); color: inherit; text-decoration: none; }
 
 /* Filtres */
 .rs-filters { background: var(--bg-card); border-bottom: 1px solid var(--border); padding: .7rem 1rem;
@@ -34,10 +34,9 @@
              padding: .42rem .85rem; font-size: .85rem; color: var(--text); min-width: 140px; }
 /* Puces de filtre : .vz-chip (zoot-base.css) */
 
-/* Cartes & boutons */
-.rs-card { background: var(--bg-card); border: 1px solid var(--border); border-radius: var(--main-radius, 12px);
-           box-shadow: var(--shadow); overflow: hidden; }
-.rs-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 1rem; }
+/* Cartes : .vz-card (zoot-base.css). .rs-box = carte « conteneur » (contenu en flux normal,
+   pas en colonne flex) ; les marges internes viennent des modificateurs .rs-card--pad… ci-dessous. */
+.vz-card.rs-box { display: block; }
 /* Petites cartes migrees vers .vz-card (zoot-base.css) : ne reste ici que le specifique Resto */
 .rs-avatar-ph { display: flex; align-items: center; justify-content: center; color: var(--text-subtle); }
 .rs-avatar-ph .material-icons { font-size: 1.5rem; }
@@ -63,8 +62,14 @@
 .rs-section-title { font-weight: 800; font-size: 1.15rem; margin: 1.4rem 0 .6rem; color: var(--text); }
 /* État vide : .vz-empty ; onglets : .vz-segmented / .vz-seg (zoot-base.css) */
 .rs-wrap .vz-empty { padding: 3rem 1rem; }
-.rs-wrap > .vz-segmented, .rs-wrap .rs-pager { margin: .8rem 0; }
-.rs-pager { display: flex; justify-content: center; margin-top: 1.4rem; }
+.rs-wrap > .vz-segmented, .rs-wrap [data-rs-live] > .vz-segmented { margin: .8rem 0; }
+.rs-wrap .vz-empty.rs-empty-sm { padding: 1.4rem 1rem; }
+.rs-label { display: block; font-weight: 600; font-size: .85rem; color: var(--text); margin-bottom: .2rem; }
+/* Rangée d'actions : un formulaire d'un seul bouton se comporte comme le bouton */
+@media (max-width: 480px) {
+    .vz-actions:not(.vz-actions--inline) > form { width: 100%; }
+    .vz-actions:not(.vz-actions--inline) > form > .vz-btn { width: 100%; }
+}
 .rs-form label { font-weight: 600; font-size: .85rem; color: var(--text); margin-bottom: .2rem; }
 .rs-form .form-control { background: var(--input-bg, var(--bg-card)); color: var(--text); border: 1.5px solid var(--border); border-radius: 8px; }
 .rs-form .help { font-size: .75rem; color: var(--text-muted); }
@@ -82,24 +87,19 @@
 .rs-cartbar.show { display: inline-flex; }
 @media (min-width: 992px) { .rs-cartbar { bottom: 24px; } }
 
-/* Fenêtre modale (options de plat) */
-/* z-index 10050 : au-dessus de l'en-tête et de la barre de navigation mobile (1000),
-   sous les toasts Django (99999). Sur mobile la barre du bas masquait le bouton « Ajouter ». */
-.rs-modal-bg { position: fixed; inset: 0; background: rgba(0,0,0,.55); z-index: 10050; display: none;
-               align-items: flex-end; justify-content: center; }
-.rs-modal-bg.show { display: flex; }
-.rs-modal { background: var(--bg-card); color: var(--text); width: 100%; max-width: 520px; max-height: 92vh;
-            overflow-y: auto; border-radius: 18px 18px 0 0;
-            padding: 1rem 1.1rem calc(1.2rem + env(safe-area-inset-bottom, 0px)); }
-@media (min-width: 768px) { .rs-modal-bg { align-items: center; } .rs-modal { border-radius: 18px; } }
-.rs-modal h3 { font-weight: 800; font-size: 1.15rem; margin: 0; }
+/* Dialogues (options de plat, éditeur d'options) : .vz-overlay/.vz-dialog (zoot-base.css).
+   Présents dans la page, ils portent l'attribut hidden tant qu'ils sont fermés. */
+.vz-overlay[hidden] { display: none; }
+.rs-dialog .vz-dialog-head { margin-bottom: .3rem; }
 .rs-opt-group { margin-top: .9rem; border-top: 1px solid var(--border); padding-top: .7rem; }
 .rs-opt-group h4 { font-size: .9rem; font-weight: 700; margin: 0 0 .3rem; display: flex; justify-content: space-between; }
 .rs-opt { display: flex; align-items: center; gap: .6rem; padding: .4rem 0; cursor: pointer; font-size: .9rem; }
 .rs-opt input { width: 18px; height: 18px; accent-color: var(--accent); }
 .rs-opt .extra { margin-left: auto; color: var(--text-muted); font-size: .82rem; }
 .rs-qty { display: inline-flex; align-items: center; border: 1.5px solid var(--border); border-radius: 30px; overflow: hidden; }
-.rs-qty button { background: transparent; border: none; width: 34px; height: 34px; font-size: 1.1rem; color: var(--text); cursor: pointer; }
+/* Boutons − / + : .vz-icon-btn (40 px) étendus à 44 px de zone de toucher */
+.rs-qty .vz-icon-btn { position: relative; border-radius: 50%; }
+.rs-qty .vz-icon-btn::after { content: ''; position: absolute; inset: -2px; }
 .rs-qty span { min-width: 28px; text-align: center; font-weight: 700; }
 
 /* Suivi de commande */
@@ -132,12 +132,7 @@
 /* ── Mise en page commune aux gabarits Resto (ex-styles en ligne) ── */
 .rs-wrap--narrow { max-width: 720px; } .rs-wrap--md { max-width: 760px; }
 .rs-wrap--lg { max-width: 820px; }    .rs-wrap--xl { max-width: 860px; }
-.rs-page-head { display: flex; justify-content: space-between; align-items: center; gap: .6rem; flex-wrap: wrap; margin: .5rem 0 1rem; }
-.rs-page-head--tight { margin-bottom: .4rem; }
-.rs-h1 { font-size: 1.4rem; font-weight: 800; margin: 0; display: flex; align-items: center; gap: .45rem; flex-wrap: wrap; line-height: 1.25; }
-.rs-h1 > .material-icons { font-size: 1.45rem; color: var(--accent); }
-.rs-h1--top { margin: .5rem 0 1rem; }
-.rs-h1--sm { font-size: 1.35rem; }
+.rs-h1 { font-size: 1.35rem; font-weight: 800; margin: 0; display: flex; align-items: center; gap: .45rem; flex-wrap: wrap; line-height: 1.25; }
 .rs-section-title .material-icons { font-size: 1.2rem; vertical-align: -.2em; color: var(--accent); }
 .rs-section-title--tight { margin-top: .5rem; }
 .rs-card--pad { padding: 1rem; }
@@ -150,20 +145,17 @@
 .rs-card-title--tight { margin-bottom: .3rem; }
 .rs-between { display: flex; justify-content: space-between; align-items: center; gap: .6rem; flex-wrap: wrap; }
 .rs-between--top { align-items: flex-start; }
-.rs-actions { display: flex; gap: .5rem; flex-wrap: wrap; }
+.rs-actions { display: flex; gap: .5rem; flex-wrap: wrap; align-items: center; }
 .rs-actions--sm { gap: .4rem; }
-.rs-actions--mt { margin-top: .8rem; }
 .rs-actions--end { justify-content: flex-end; }
 .rs-inline-form { display: flex; gap: .4rem; align-items: center; }
 .rs-inline-form--wrap { flex-wrap: wrap; }
 .rs-fill { flex: 1; min-width: 0; }
 .rs-grow { flex: 1; }
-.rs-full { width: 100%; }
 .rs-link { color: var(--accent); }
 .rs-link--b { color: var(--accent); font-weight: 700; }
 .rs-link--xb { color: var(--accent); font-weight: 800; }
 .rs-link--muted { display: inline-block; margin-top: .3rem; text-decoration: underline; }
-.rs-back { margin-top: 1rem; }
 .rs-m0 { margin: 0; }
 .rs-mt-xs { margin-top: .3rem; } .rs-mt-s { margin-top: .4rem; } .rs-mt { margin-top: .6rem; }
 .rs-mt-m { margin-top: .8rem; }  .rs-mt-l { margin-top: 1rem; }  .rs-mt-xl { margin-top: 1.4rem; }

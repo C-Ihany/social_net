@@ -240,6 +240,12 @@ class LiveConsumer(AsyncJsonWebsocketConsumer):
                     if self._heartbeat_task and not self._heartbeat_task.done():
                         self._heartbeat_task.cancel()
                     self._heartbeat_task = asyncio.ensure_future(self._heartbeat_monitor())
+                    # Une écriture par minute au plus : suffisant pour le ménage des lives inactifs
+                    now = timezone.now()
+                    last = getattr(self, '_last_touch', None)
+                    if last is None or (now - last).total_seconds() >= 60:
+                        self._last_touch = now
+                        await self._touch_room()
 
             elif msg_type == 'end':
                 if self.is_host:
@@ -487,7 +493,13 @@ class LiveConsumer(AsyncJsonWebsocketConsumer):
     @database_sync_to_async
     def _save_host_channel(self):
         from video.models import LiveRoom
-        LiveRoom.objects.filter(id=self.room_id).update(host_channel=self.channel_name)
+        LiveRoom.objects.filter(id=self.room_id).update(host_channel=self.channel_name, last_seen=timezone.now())
+
+    @database_sync_to_async
+    def _touch_room(self):
+        """Note que l'hôte est toujours là (voir video.views._cleanup_stale_rooms)."""
+        from video.models import LiveRoom
+        LiveRoom.objects.filter(id=self.room_id, status=LiveRoom.STATUS_ACTIVE).update(last_seen=timezone.now())
 
     @database_sync_to_async
     def _clear_host_channel(self):

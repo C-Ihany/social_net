@@ -1,0 +1,70 @@
+{% load i18n %}{% comment %}
+Zone d'ajout de photos (clic ou glisser-déposer) + aperçu.
+Attend : room (nombre de photos encore acceptées), show_primary (1 = la première est « principale »).
+{% endcomment %}
+<div class="ls-upload-zone" id="uploadZone">
+    <input type="file" name="images" id="imgInput" accept="image/jpeg,image/png,image/webp,image/heic,image/heif,.heic,.heif" multiple
+           aria-label="{% trans 'Ajouter des photos' %}">
+    <div class="ls-upload-icon">
+        <span class="material-icons" aria-hidden="true">add_photo_alternate</span>
+    </div>
+    <div class="ls-upload-label">{% trans "Cliquez ou glissez vos photos ici" %}</div>
+    <div class="ls-upload-hint">{% trans "JPG, PNG, WebP ou HEIC — 10 Mo par photo, 8 photos au maximum par lieu." %}</div>
+</div>
+<div class="ls-preview-grid" id="previewGrid"></div>
+
+<script>
+(function() {
+    var MAX = {{ room|default:8 }};
+    var SHOW_PRIMARY = {% if show_primary %}true{% else %}false{% endif %};
+    var PRIMARY_LABEL = "{% trans 'Principale' as t_primary %}{{ t_primary|escapejs }}";
+    var zone  = document.getElementById('uploadZone');
+    var input = document.getElementById('imgInput');
+    var grid  = document.getElementById('previewGrid');
+    if (!zone || !input || !grid) return;
+
+    function preview() {
+        grid.innerHTML = '';
+        Array.from(input.files).slice(0, MAX).forEach(function(file, i) {
+            var reader = new FileReader();
+            reader.onload = function(e) {
+                var div = document.createElement('div');
+                div.className = 'ls-preview-thumb';
+                var img = document.createElement('img');
+                img.src = e.target.result; img.alt = '';
+                div.appendChild(img);
+                if (SHOW_PRIMARY && i === 0) {
+                    var badge = document.createElement('span');
+                    badge.className = 'ls-preview-primary-badge';
+                    badge.textContent = PRIMARY_LABEL;
+                    div.appendChild(badge);
+                }
+                grid.appendChild(div);
+            };
+            reader.readAsDataURL(file);
+        });
+    }
+    input.addEventListener('change', preview);
+
+    // Glisser-déposer : les fichiers lâchés sont rangés dans le champ (DataTransfer),
+    // puis l'aperçu se met à jour comme après un choix classique.
+    ['dragenter', 'dragover'].forEach(function(evt) {
+        zone.addEventListener(evt, function(e) { e.preventDefault(); zone.classList.add('drag-over'); });
+    });
+    zone.addEventListener('dragleave', function() { zone.classList.remove('drag-over'); });
+    zone.addEventListener('drop', function(e) {
+        e.preventDefault();
+        zone.classList.remove('drag-over');
+        var dropped = Array.from((e.dataTransfer && e.dataTransfer.files) || []).filter(function(f) {
+            return /^image\//.test(f.type) || /\.(heic|heif)$/i.test(f.name);
+        });
+        if (!dropped.length) return;
+        try {
+            var dt = new DataTransfer();
+            dropped.slice(0, MAX).forEach(function(f) { dt.items.add(f); });
+            input.files = dt.files;
+        } catch (err) { return; }   /* navigateur sans DataTransfer modifiable : le clic reste possible */
+        preview();
+    });
+})();
+</script>

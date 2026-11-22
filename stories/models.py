@@ -93,6 +93,13 @@ class Story(models.Model):
         return timezone.now() < self.expires_at
 
     @property
+    def get_cname(self):
+        """Type lu par les notifications (notification/utils.py). « Post » = rendu
+        générique (verbe + lien) : une réaction ou une réponse à une story
+        s'affiche comme les autres notifications d'activité."""
+        return "Post"
+
+    @property
     def time_left_seconds(self):
         delta = self.expires_at - timezone.now()
         return max(0, int(delta.total_seconds()))

@@ -278,9 +278,11 @@ export class VazimbaE2EE {
         return true;
     }
 
-    /** Vrai si ce membre a déjà un code secret (sauvegarde) sur le serveur. */
+    /** Vrai si ce membre a déjà un code secret (sauvegarde) sur le serveur. Une erreur (réseau,
+     *  serveur) est LEVÉE, jamais prise pour « pas de code secret » : sinon l'interface proposait
+     *  d'en créer un nouveau, ce qui remplaçait la sauvegarde existante. */
     async hasRecovery() {
-        try { return JSON.parse(await this._fetch('GET', 'recovery')).exists === true; } catch (e) { return false; }
+        return JSON.parse(await this._fetch('GET', 'recovery')).exists === true;
     }
 
     /** Vrai si cet appareil a la clé de sauvegarde (code secret déjà saisi ou créé ici). */
@@ -294,13 +296,16 @@ export class VazimbaE2EE {
                                        base, { name: 'AES-GCM', length: 256 }, false, ['encrypt', 'decrypt']);
     }
 
-    /** Crée la sauvegarde des clés, protégée par `passphrase` (que le serveur ne voit jamais). */
-    setupRecovery(passphrase) {
+    /** Crée la sauvegarde des clés, protégée par `passphrase` (que le serveur ne voit jamais).
+     *  Si un code secret existe déjà, le serveur refuse (E2EEError 'M_RECOVERY_EXISTS') sauf
+     *  demande explicite `{ replace: true }` : l'ancienne sauvegarde est alors perdue. */
+    setupRecovery(passphrase, { replace = false } = {}) {
         return this._serial(async () => {
             const key = M.BackupDecryptionKey.createRandomKey();
             const publicKey = key.megolmV1PublicKey.publicKeyBase64;
-            const { version } = JSON.parse(await this._fetch('POST', 'room_keys/version',
-                JSON.stringify({ algorithm: BACKUP_ALGORITHM, auth_data: { public_key: publicKey } })));
+            const request = { algorithm: BACKUP_ALGORITHM, auth_data: { public_key: publicKey } };
+            if (replace) request.replace = true;
+            const { version } = JSON.parse(await this._fetch('POST', 'room_keys/version', JSON.stringify(request)));
             const salt = crypto.getRandomValues(new Uint8Array(16));
             const iv = crypto.getRandomValues(new Uint8Array(12));
             const wrapKey = await this._passwordKey(passphrase, salt, PBKDF2_ITERATIONS);

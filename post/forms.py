@@ -1,4 +1,5 @@
 from django import forms
+from django.utils.translation import gettext_lazy as _
 from .models import Post, Comment
 
 ACCEPTED_IMAGES = (
@@ -19,7 +20,7 @@ class PostForm(forms.ModelForm):
         model = Post
         fields = ('title', 'body', 'header_image', 'video', 'file')
         widgets = {
-            'title':        forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Title (optional for quick posts)'}),
+            'title':        forms.TextInput(attrs={'class': 'form-control', 'placeholder': _('Titre (facultatif)')}),
             'body':         forms.Textarea(attrs={'class': 'form-control'}),
             'header_image': forms.FileInput(attrs={'class': 'form-control', 'accept': ACCEPTED_IMAGES}),
             'video':        forms.FileInput(attrs={'class': 'form-control', 'accept': ACCEPTED_VIDEOS}),
@@ -34,7 +35,7 @@ class CommentForm(forms.ModelForm):
         widgets = {
             'body': forms.Textarea(attrs={
                 'class':       'form-control',
-                'placeholder': 'Écrire un commentaire…',
+                'placeholder': _('Écrire un commentaire…'),
                 'rows':        2,
                 'maxlength':   1000,
             }),
@@ -46,7 +47,7 @@ class EditForm(forms.ModelForm):
         model = Post
         fields = ('title', 'body', 'header_image', 'video', 'file')
         widgets = {
-            'title':        forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'title required'}),
+            'title':        forms.TextInput(attrs={'class': 'form-control', 'placeholder': _('Titre')}),
             'body':         forms.Textarea(attrs={'class': 'form-control'}),
             'header_image': forms.FileInput(attrs={'class': 'form-control', 'accept': ACCEPTED_IMAGES}),
             'video':        forms.FileInput(attrs={'class': 'form-control', 'accept': ACCEPTED_VIDEOS}),

@@ -2,7 +2,7 @@
     "id": "/feed/",
     "name": "Vazimba",
     "short_name": "Vazimba",
-    "description": "Le réseau social malgache — vaomiera, miresaka, mizara",
+    "description": "Le réseau social africain — fil d'actualité, messages, Bazar",
     "start_url": "/feed/",
     "scope": "/",
     "display": "standalone",

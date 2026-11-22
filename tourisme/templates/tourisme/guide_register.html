@@ -1,218 +1,195 @@
 {% extends 'base.html' %}
 {% load static i18n %}
 
+{% block page_title %}{% if is_new %}{% trans "Devenir guide touristique" %}{% else %}{% trans "Modifier mon profil de guide" %}{% endif %} — Vazimba{% endblock %}
+
 {% block extra_head %}
 <link rel="stylesheet" href="{% static 'css/pages/tourisme-guide_register.css' %}">
 {% endblock %}
 
 {% block content %}
-<main>
 <div class="guide-reg-wrap">
 
-    <!-- Hero -->
-    <div class="guide-reg-hero">
-        <span class="material-icons" aria-hidden="true">explore</span>
-        <h1>{% if guide %}Modifier mon profil guide{% else %}Devenir guide touristique{% endif %}</h1>
-        <p>
-            {% if guide %}
-                Mettez à jour vos informations pour être trouvé par davantage de voyageurs.
-            {% else %}
-                Partagez votre expertise de Madagascar avec des voyageurs du monde entier.
-            {% endif %}
-        </p>
+    <div class="vz-page-head">
+        <a class="vz-back" href="{% if is_new %}{% url 'tourisme:guides_list' %}{% else %}{% url 'tourisme:guide_profile' guide.pk %}{% endif %}"><span class="material-icons" aria-hidden="true">arrow_back</span>{% if is_new %}{% trans "Guides" %}{% else %}{% trans "Retour" %}{% endif %}</a>
+        <div class="vz-page-head__main">
+            <h1 class="vz-page-title"><span class="material-icons" aria-hidden="true">explore</span>{% if is_new %}{% trans "Devenir guide touristique" %}{% else %}{% trans "Modifier mon profil de guide" %}{% endif %}</h1>
+            <p class="vz-page-sub">
+                {% if is_new %}{% trans "Partagez votre connaissance du terrain avec des voyageurs du monde entier." %}{% else %}{% trans "Mettez à jour vos informations pour être trouvé par davantage de voyageurs." %}{% endif %}
+            </p>
+        </div>
     </div>
 
-    {% if messages %}
-    {% for msg in messages %}
-    <div class="alert-success">
-        <span class="material-icons">check_circle</span>
-        {{ msg }}
+    {% if error %}
+    <div class="guide-reg-error" role="alert">
+        <span class="material-icons" aria-hidden="true">error_outline</span>
+        {{ error }}
     </div>
-    {% endfor %}
     {% endif %}
 
     <form method="post" enctype="multipart/form-data">
         {% csrf_token %}
 
         <!-- ── 1. Photo de profil ── -->
-        <div class="form-section">
-            <div class="form-section-title">
-                <span class="material-icons">photo_camera</span>
+        <section class="vz-card vz-card--block form-section">
+            <h2 class="form-section-title">
+                <span class="material-icons" aria-hidden="true">photo_camera</span>
                 {% trans "Photo de profil" %}
-            </div>
+            </h2>
             <div class="photo-upload-wrap">
                 <div class="photo-preview" id="photoPreview">
                     {% if guide and guide.photo %}
                         <img src="{{ guide.photo.url }}" alt="{% trans 'Photo actuelle' %}" id="photoImg"
-                             onerror="this.style.display='none'; document.getElementById('photoIcon').style.display='block';">
-                        <span class="material-icons" id="photoIcon" style="display:none;">person</span>
+                             onerror="this.hidden=true; document.getElementById('photoIcon').hidden=false;">
+                        <span class="material-icons" id="photoIcon" aria-hidden="true" hidden>person</span>
                     {% else %}
-                        <span class="material-icons" id="photoIcon">person</span>
+                        <span class="material-icons" id="photoIcon" aria-hidden="true">person</span>
                     {% endif %}
                 </div>
                 <div>
-                    <label for="id_photo" class="photo-input-btn">
-                        <span class="material-icons">upload</span>
+                    <label for="id_photo" class="vz-btn vz-btn--secondary vz-btn--pill photo-input-btn">
+                        <span class="material-icons" aria-hidden="true">upload</span>
                         {% trans "Choisir une photo" %}
                     </label>
                     <input type="file" name="photo" id="id_photo"
-                           accept="image/*,.jpg,.jpeg,.png,.gif,.webp,.bmp,.tiff,.heic,.heif,.avif,.svg">
+                           accept="image/jpeg,image/png,image/webp,image/gif,image/heic,image/heif,.heic,.heif">
                     <div class="photo-help">
-                        {% trans "Tous formats image (JPG, PNG, HEIC, GIF…) — max 10 Mo" %}
+                        {% trans "JPG, PNG, WebP ou HEIC — 10 Mo au maximum" %}
                     </div>
                 </div>
             </div>
-        </div>
+        </section>
 
         <!-- ── 2. Présentation ── -->
-        <div class="form-section">
-            <div class="form-section-title">
-                <span class="material-icons">person</span>
+        <section class="vz-card vz-card--block form-section">
+            <h2 class="form-section-title">
+                <span class="material-icons" aria-hidden="true">person</span>
                 {% trans "Présentation" %}
-            </div>
-            <div class="form-group">
-                <label class="form-label">
-                    {% trans "Bio / Présentation" %} <span class="req">*</span>
-                    <span class="hint">{% trans "Décrivez votre expérience, vos points forts, pourquoi vous choisir." %}</span>
-                </label>
-                <textarea name="bio" class="form-control" rows="5"
-                          placeholder="Ex: Guide professionnel depuis 10 ans, spécialisé dans les treks dans le Parc National de l'Isalo et les circuits côtiers du sud…" required>{{ guide.bio|default:'' }}</textarea>
+            </h2>
+            <div class="vz-field">
+                <label for="id_bio">{% trans "Bio / Présentation" %}<span class="vz-req" aria-hidden="true">*</span></label>
+                <textarea name="bio" id="id_bio" rows="5"
+                          placeholder="{% trans 'Ex : guide depuis 10 ans, spécialisé dans les randonnées en parc national et les circuits côtiers…' %}" required>{{ guide.bio|default:'' }}</textarea>
+                <span class="vz-field-help">{% trans "Décrivez votre expérience, vos points forts, pourquoi vous choisir." %}</span>
             </div>
             <div class="form-row">
-                <div class="form-group">
-                    <label class="form-label">
-                        {% trans "Années d'expérience" %}
-                        <span class="hint">{% trans "Nombre d'années en tant que guide" %}</span>
-                    </label>
-                    <input type="number" name="years_experience" class="form-control"
+                <div class="vz-field">
+                    <label for="id_years">{% trans "Années d'expérience" %}</label>
+                    <input type="number" name="years_experience" id="id_years" inputmode="numeric"
                            min="0" max="60" value="{{ guide.years_experience|default:0 }}" placeholder="0">
+                    <span class="vz-field-help">{% trans "Nombre d'années en tant que guide" %}</span>
                 </div>
-                <div class="form-group">
-                    <label class="form-label">
-                        {% trans "Taille max du groupe" %}
-                        <span class="hint">{% trans "Nombre max de voyageurs" %}</span>
-                    </label>
-                    <input type="number" name="max_group_size" class="form-control"
+                <div class="vz-field">
+                    <label for="id_group">{% trans "Taille max du groupe" %}</label>
+                    <input type="number" name="max_group_size" id="id_group" inputmode="numeric"
                            min="1" max="100" value="{{ guide.max_group_size|default:10 }}" placeholder="10">
+                    <span class="vz-field-help">{% trans "Nombre max de voyageurs" %}</span>
                 </div>
             </div>
-        </div>
+        </section>
 
         <!-- ── 3. Langues & Contact ── -->
-        <div class="form-section">
-            <div class="form-section-title">
-                <span class="material-icons">translate</span>
+        <section class="vz-card vz-card--block form-section">
+            <h2 class="form-section-title">
+                <span class="material-icons" aria-hidden="true">translate</span>
                 {% trans "Langues &amp; Contact" %}
-            </div>
-            <div class="form-group">
-                <label class="form-label">
-                    {% trans "Langues parlées" %}
-                    <span class="hint">{% trans "Séparez par des virgules. Ex: Malagasy, Français, Anglais" %}</span>
-                </label>
-                <input type="text" name="languages" class="form-control"
-                       placeholder="{% trans 'Malagasy, Français, Anglais' %}"
+            </h2>
+            <div class="vz-field">
+                <label for="id_languages">{% trans "Langues parlées" %}</label>
+                <input type="text" name="languages" id="id_languages" maxlength="250"
+                       placeholder="{% trans 'Français, Anglais, Swahili' %}"
                        value="{{ guide.languages|default:'' }}">
+                <span class="vz-field-help">{% trans "Séparez par des virgules. Ex: Français, Anglais, Swahili" %}</span>
             </div>
-            <div class="form-group">
-                <label class="form-label">
-                    {% trans "Téléphone / WhatsApp" %}
-                    <span class="hint">{% trans "Format international recommandé. Ex: +261 32 00 000 00" %}</span>
-                </label>
-                <input type="tel" name="phone" class="form-control"
-                       placeholder="+261 32 00 000 00"
+            <div class="vz-field">
+                <label for="id_phone">{% trans "Téléphone / WhatsApp" %}</label>
+                <input type="tel" name="phone" id="id_phone" maxlength="30" autocomplete="tel"
+                       placeholder="+…"
                        value="{{ guide.phone|default:'' }}">
+                <span class="vz-field-help">{% trans "Format international, avec l'indicatif du pays (+…)." %}</span>
             </div>
-        </div>
+        </section>
 
         <!-- ── 4. Régions ── -->
-        <div class="form-section">
-            <div class="form-section-title">
-                <span class="material-icons">map</span>
+        <section class="vz-card vz-card--block form-section">
+            <h2 class="form-section-title">
+                <span class="material-icons" aria-hidden="true">map</span>
                 {% trans "Régions couvertes" %}
+            </h2>
+            <div class="vz-field">
+                <label for="id_regions">{% trans "Régions où vous guidez" %}</label>
+                <textarea name="regions_covered" id="id_regions" rows="3" maxlength="2000"
+                          placeholder="{% trans 'Ex : pays, régions, villes et parcs où vous accompagnez des voyageurs…' %}">{{ guide.regions_covered|default:'' }}</textarea>
+                <span class="vz-field-help">{% trans "Listez les pays, régions, noms de parcs et zones que vous couvrez : c'est ce texte que lit le filtre par pays." %}</span>
             </div>
-            <div class="form-group">
-                <label class="form-label">
-                    {% trans "Régions où vous guidez" %}
-                    <span class="hint">{% trans "Listez les régions, noms de parcs, zones géographiques que vous couvrez." %}</span>
-                </label>
-                <textarea name="regions_covered" class="form-control" rows="3"
-                          placeholder="Ex: Parc National de l'Isalo (région Ihorombe), Tuléar et côte sud-ouest, Diego-Suarez (Diana)…">{{ guide.regions_covered|default:'' }}</textarea>
-            </div>
-        </div>
+        </section>
 
         <!-- ── 5. Transport ── -->
-        <div class="form-section">
-            <div class="form-section-title">
-                <span class="material-icons">directions_car</span>
+        <section class="vz-card vz-card--block form-section">
+            <h2 class="form-section-title">
+                <span class="material-icons" aria-hidden="true">directions_car</span>
                 {% trans "Moyens de déplacement" %}
-            </div>
-            <div class="form-group">
-                <label class="form-label">
-                    {% trans "Transports disponibles" %}
-                    <span class="hint">{% trans "Séparez par des virgules. Ex: Voiture, 4×4, Pirogue" %}</span>
-                </label>
-                <input type="text" name="transport_modes" class="form-control"
+            </h2>
+            <div class="vz-field">
+                <label for="id_transport">{% trans "Transports disponibles" %}</label>
+                <input type="text" name="transport_modes" id="id_transport" maxlength="250"
                        placeholder="{% trans 'Voiture, 4×4, Pirogue, À pied' %}"
                        value="{{ guide.transport_modes|default:'' }}">
+                <span class="vz-field-help">{% trans "Séparez par des virgules. Ex: Voiture, 4×4, Pirogue" %}</span>
             </div>
-        </div>
+        </section>
 
         <!-- ── 6. Spécialités ── -->
-        <div class="form-section">
-            <div class="form-section-title">
-                <span class="material-icons">star</span>
+        <section class="vz-card vz-card--block form-section">
+            <h2 class="form-section-title">
+                <span class="material-icons" aria-hidden="true">star</span>
                 {% trans "Spécialités" %}
-            </div>
-            <div class="form-group">
-                <label class="form-label">
-                    {% trans "Types de circuits &amp; spécialités" %}
-                    <span class="hint">{% trans "Ex: Observation des lémuriens, Randonnée, Circuit culturel, Plongée" %}</span>
-                </label>
-                <input type="text" name="specialities" class="form-control"
-                       placeholder="{% trans 'Faune endémique, Randonnée, Culturel, Plage' %}"
+            </h2>
+            <div class="vz-field">
+                <label for="id_specialities">{% trans "Types de circuits &amp; spécialités" %}</label>
+                <input type="text" name="specialities" id="id_specialities" maxlength="250"
+                       placeholder="{% trans 'Faune, Randonnée, Culturel, Plage' %}"
                        value="{{ guide.specialities|default:'' }}">
+                <span class="vz-field-help">{% trans "Ex : Observation de la faune, Randonnée, Circuit culturel, Plongée" %}</span>
             </div>
-        </div>
+        </section>
 
         <!-- ── 7. Conditions & Tarifs ── -->
-        <div class="form-section">
-            <div class="form-section-title">
-                <span class="material-icons">receipt_long</span>
+        <section class="vz-card vz-card--block form-section">
+            <h2 class="form-section-title">
+                <span class="material-icons" aria-hidden="true">receipt_long</span>
                 {% trans "Conditions &amp; Tarifs" %}
+            </h2>
+            <div class="vz-field">
+                <label for="id_prix">{% trans "Prix indicatif / jour (Ariary)" %}</label>
+                <input type="number" name="prix_jour" id="id_prix" inputmode="numeric"
+                       min="0" max="9999999999" placeholder="100000"
+                       value="{{ guide.prix_jour|default:''|floatformat:0 }}">
+                <span class="vz-field-help">{% trans "Tarif journalier approximatif. Laissez vide si variable." %}</span>
             </div>
-            <div class="form-group">
-                <label class="form-label">
-                    {% trans "Prix indicatif / jour (Ariary)" %}
-                    <span class="hint">{% trans "Tarif journalier approximatif. Laissez vide si variable." %}</span>
-                </label>
-                <input type="number" name="prix_jour" class="form-control"
-                       min="0" placeholder="100000"
-                       value="{{ guide.prix_jour|default:'' }}">
-            </div>
-            <div class="form-group">
-                <label class="form-label">
-                    {% trans "Conditions détaillées" %}
-                    <span class="hint">{% trans "Inclusions, exclusions, forfaits, conditions d'annulation…" %}</span>
-                </label>
-                <textarea name="conditions" class="form-control" rows="4"
+            <div class="vz-field">
+                <label for="id_conditions">{% trans "Conditions détaillées" %}</label>
+                <textarea name="conditions" id="id_conditions" rows="4" maxlength="4000"
                           placeholder="{% trans 'Ex: Prix incluant le carburant et le chauffeur. Hébergement non inclus. Demi-tarif pour les enfants de moins de 12 ans…' %}">{{ guide.conditions|default:'' }}</textarea>
+                <span class="vz-field-help">{% trans "Inclusions, exclusions, forfaits, conditions d'annulation…" %}</span>
             </div>
-        </div>
+        </section>
 
-        <!-- ── Submit ── -->
-        <button type="submit" class="guide-reg-submit">
-            <span class="material-icons">save</span>
-            {% if guide %}Enregistrer les modifications{% else %}Soumettre mon profil{% endif %}
-        </button>
+        <div class="vz-actions">
+            <a href="{% if is_new %}{% url 'tourisme:guides_list' %}{% else %}{% url 'tourisme:guide_profile' guide.pk %}{% endif %}" class="vz-btn vz-btn--muted">{% trans "Annuler" %}</a>
+            <button type="submit" class="vz-btn vz-btn--primary">
+                <span class="material-icons" aria-hidden="true">save</span>
+                {% trans "Enregistrer" %}
+            </button>
+        </div>
 
         <p class="guide-reg-note">
             <span class="material-icons" aria-hidden="true">info</span>
-            {% trans "Votre profil sera examiné par un administrateur avant d'être publié." %}
+            {% trans "Votre profil est visible dans la liste des guides dès son enregistrement. Le badge « Guide vérifié » est attribué après contrôle par un administrateur." %}
         </p>
     </form>
 
 </div>
-</main>
 
 <script>
 /* Prévisualisation photo */
@@ -222,7 +199,10 @@ document.getElementById('id_photo').addEventListener('change', function(e) {
     var reader = new FileReader();
     reader.onload = function(ev) {
         var preview = document.getElementById('photoPreview');
-        preview.innerHTML = '<img src="' + ev.target.result + '" alt="Preview">';
+        var img = document.createElement('img');
+        img.src = ev.target.result; img.alt = '';
+        preview.innerHTML = '';
+        preview.appendChild(img);
     };
     reader.readAsDataURL(file);
 });

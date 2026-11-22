@@ -40,7 +40,7 @@ def push_subscribe(request):
         return JsonResponse({'ok': True, 'created': created})
 
     except Exception as e:
-        return JsonResponse({'error': str(e)}, status=400)
+        return JsonResponse({'error': 'invalid'}, status=400)
 
 
 @login_required(login_url='login')
@@ -53,7 +53,7 @@ def push_unsubscribe(request):
         PushSubscription.objects.filter(endpoint=endpoint, user=request.user).delete()
         return JsonResponse({'ok': True})
     except Exception as e:
-        return JsonResponse({'error': str(e)}, status=400)
+        return JsonResponse({'error': 'invalid'}, status=400)
 
 
 def _badge_counts(user):
@@ -110,12 +110,17 @@ def notification_journal(request):
         Notification.objects
         .filter(target=request.user, content_type__in=[fr_ct, fl_ct, post_ct, live_ct])
         .select_related('from_user', 'content_type')
+        # (l'icône de la carte se déduit du type de contenu : plus de requête
+        #  par notification pour charger l'objet lié)
         .order_by('-timestamp')
     )
 
     # On fige la liste AVANT de marquer lu : la page affiche ainsi une
     # dernière fois les non-lues en surbrillance (.vz-card--unread).
     items = list(notifications[:100])
+    kinds = {fr_ct.id: 'FriendRequest', fl_ct.id: 'FriendList', post_ct.id: 'Post', live_ct.id: 'Live'}
+    for n in items:
+        n.kind = kinds.get(n.content_type_id, '')
     notifications.filter(read=False).update(read=True)
 
     return render(request, 'notification/journal.html', {

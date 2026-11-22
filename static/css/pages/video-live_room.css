@@ -360,19 +360,6 @@
 .lr-ended-icon { font-size: 3.5rem; opacity: .4; }
 .lr-ended-title { font-size: 1.4rem; font-weight: 800; color: #fff; }
 .lr-ended-sub { color: rgba(255,255,255,.5); font-size: .92rem; }
-.lr-ended-btn {
-    padding: .7rem 2rem;
-    background: linear-gradient(135deg, #1877f2, #7c3aed);
-    color: #fff;
-    border: none;
-    border-radius: 14px;
-    font-size: .95rem;
-    font-weight: 700;
-    cursor: pointer;
-    font-family: inherit;
-    transition: opacity .2s;
-}
-.lr-ended-btn:hover { opacity: .85; }
 
 /* ── Waiting overlay (viewer) ── */
 .lr-waiting-overlay {
@@ -478,3 +465,9 @@
 .lr-ic-inline { font-size: 1.1em; vertical-align: -0.2em; color: var(--warning); }
 .lr-waiting-note { font-size: .85em; opacity: .75; }
 .lr-chat-msg-avatar-ph { font-size: 1.5rem; color: rgba(255,255,255,.3); margin-top: 2px; }
+
+/* ── Cibles tactiles (2026-11) ── */
+.lr-react-btn { min-width: 44px; min-height: 44px; display: inline-flex; align-items: center; justify-content: center; }
+.lr-ctrl-btn, .lr-source-btn, .lr-leave-link { min-height: 44px; }
+.lr-chat-send-btn, .lr-fullscreen-btn { min-width: 44px; min-height: 44px; }
+.lr-ended-btn { margin-top: 1rem; }

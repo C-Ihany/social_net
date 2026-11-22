@@ -41,7 +41,9 @@ class BlockTests(TestCase):
 
     def test_profile_shows_block_button_and_settings_list(self):
         html = self.c.get(reverse('account:view', kwargs={'user_id': self.other.pk})).content.decode()
-        self.assertIn('id="profile-block-btn"', html)
+        # « Bloquer » vit désormais dans le menu ⋯ du profil (vzMenu)
+        self.assertIn('id="profile-more-btn"', html)
+        self.assertIn('vzToggleBlock', html)
         UserBlock.objects.create(blocker=self.me, blocked=self.other)
         html = self.c.get(reverse('account:edit', kwargs={'user_id': self.me.pk})).content.decode()
         self.assertIn('blocked-row-%d' % self.other.pk, html)

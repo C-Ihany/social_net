@@ -24,7 +24,7 @@ from functools import wraps
 
 from django.contrib.auth.hashers import check_password
 from django.db import transaction
-from django.db.models import Max, Q
+from django.db.models import Count, Max, Q
 from django.http import JsonResponse
 from django.views.decorators.http import require_http_methods
 
@@ -37,6 +37,7 @@ MAX_BODY = 256 * 1024          # une demande ne dépasse pas 256 Ko
 MAX_DEVICES = 10               # appareils par membre (au-delà, le plus ancien est oublié)
 MAX_OTKS_PER_UPLOAD = 200
 MAX_INBOX_BATCH = 100
+MAX_INBOX = 2000               # messages en attente par appareil (au-delà, les nouveaux sont refusés)
 _DEVICE_RE = re.compile(r'^[A-Za-z0-9_\-]{4,64}$')
 
 
@@ -53,7 +54,12 @@ def api(view):
             return _error(401, 'M_UNKNOWN_TOKEN', 'Connexion requise.')
         request.json = {}
         if request.method in ('POST', 'PUT'):
-            if len(request.body) > MAX_BODY:
+            # (la taille annoncée d'abord : inutile de lire 100 Mo pour les refuser)
+            try:
+                announced = int(request.META.get('CONTENT_LENGTH') or 0)
+            except ValueError:
+                announced = 0
+            if announced > MAX_BODY or len(request.body) > MAX_BODY:
                 return _error(413, 'M_TOO_LARGE', 'Demande trop grande.')
             try:
                 request.json = json.loads(request.body or b'{}')
@@ -75,11 +81,15 @@ def _my_device(request):
 
 def contacts(user):
     """Les numéros de compte avec qui `user` peut échanger des clés : lui-même et les personnes
-    avec qui il a une conversation privée."""
+    avec qui il a une conversation privée (sauf celles qu'il a bloquées ou qui l'ont bloqué)."""
+    from account.models import UserBlock
     pairs = PrivateChatRoom.objects.filter(Q(user1=user) | Q(user2=user)).values_list('user1_id', 'user2_id')
     allowed = {user.pk}
     for a, b in pairs:
         allowed.update((a, b))
+    if len(allowed) > 1:
+        for blocker, blocked in UserBlock.objects.filter(Q(blocker=user) | Q(blocked=user)).values_list('blocker_id', 'blocked_id'):
+            allowed.discard(blocked if blocker == user.pk else blocker)
     return allowed
 
 
@@ -224,10 +234,12 @@ def send_to_device(request, event_type, txn_id):
         if pk is None or pk not in allowed or not isinstance(per_device, dict):
             continue
         for device_id, content in per_device.items():
-            targets = Device.objects.filter(user_id=pk)
+            targets = Device.objects.filter(user_id=pk).annotate(waiting=Count('inbox'))
             if device_id != '*':
                 targets = targets.filter(device_id=device_id)
             for device in targets:
+                if device.waiting >= MAX_INBOX:
+                    continue                             # (boîte pleine : on n'empile pas sans fin)
                 created.append(ToDeviceMessage(recipient=device, sender=me, sender_device_id=request.device_id,
                                                type=event_type, content=content, txn_id=txn_id))
     ToDeviceMessage.objects.bulk_create(created[:MAX_DEVICES * 20])
@@ -301,8 +313,9 @@ def device_signing_upload(request):
     # Remplacer une identité déjà posée exige le mot de passe : sinon, quelqu'un qui volerait la
     # session pourrait se faire passer pour ce membre auprès de ses contacts.
     if cross.master and keys['master'] and keys['master'] != cross.master:
-        password = (body.get('auth') or {}).get('password', '')
-        if not password or not check_password(password, me.password):
+        auth = body.get('auth')
+        password = auth.get('password', '') if isinstance(auth, dict) else ''
+        if not isinstance(password, str) or not password or not check_password(password, me.password):
             return JsonResponse({'errcode': 'M_FORBIDDEN', 'error': 'Mot de passe requis pour changer d\'identité.',
                                  'flows': [{'stages': ['m.login.password']}], 'params': {}}, status=401)
     for name, key in keys.items():
@@ -322,8 +335,9 @@ def signatures_upload(request):
         if pk is None or not isinstance(objects, dict):
             continue
         for key_id, signed in objects.items():
-            signatures = ((signed or {}).get('signatures') or {}).get(ids.user_id(me)) or {}
-            if not isinstance(signatures, dict):
+            all_signatures = signed.get('signatures') if isinstance(signed, dict) else None
+            signatures = all_signatures.get(ids.user_id(me)) if isinstance(all_signatures, dict) else None
+            if not isinstance(signatures, dict) or not signatures:
                 continue
             if pk == me.pk:
                 device = Device.objects.filter(user=me, device_id=key_id).first()
@@ -357,6 +371,10 @@ def backup_version(request):
         algorithm, auth_data = request.json.get('algorithm'), request.json.get('auth_data')
         if not isinstance(algorithm, str) or not isinstance(auth_data, dict):
             return _error(400, 'M_INVALID_PARAM', 'Sauvegarde invalide.')
+        # Un code secret existe déjà : refaire la sauvegarde rendrait illisibles, sur un nouvel
+        # appareil, tous les messages d'avant. Il faut le demander exprès (« replace »).
+        if request.json.get('replace') is not True and RecoverySecret.objects.filter(user=me).exists():
+            return _error(409, 'M_RECOVERY_EXISTS', 'Un code secret existe déjà pour ce compte.')
         KeyBackupVersion.objects.filter(user=me).update(deleted=True)
         backup = KeyBackupVersion.objects.create(user=me, algorithm=algorithm, auth_data=auth_data)
         return JsonResponse({'version': str(backup.pk)})
@@ -388,18 +406,33 @@ def backup_keys(request):
     if not isinstance(rooms, dict):
         return _error(400, 'M_INVALID_PARAM', 'rooms invalide.')
     mine = _my_room_ids(me)
+    wanted = {}
     for room_id, room in rooms.items():
-        if room_id not in mine or not isinstance(room, dict):
+        sessions = room.get('sessions') if isinstance(room, dict) else None
+        if room_id not in mine or not isinstance(sessions, dict):
             continue
-        for session_id, data in (room.get('sessions') or {}).items():
-            if not isinstance(data, dict):
-                continue
-            old = BackedUpRoomKey.objects.filter(backup=backup, room_id=room_id, session_id=session_id).first()
-            # (on garde la meilleure copie : celle qui remonte le plus loin dans la conversation)
-            if old and old.data.get('first_message_index', 0) < data.get('first_message_index', 0):
-                continue
-            BackedUpRoomKey.objects.update_or_create(backup=backup, room_id=room_id, session_id=session_id,
-                                                     defaults={'data': data})
+        for session_id, data in sessions.items():
+            if isinstance(data, dict) and isinstance(session_id, str) and len(session_id) <= 120:
+                wanted[(room_id, session_id)] = data
+    # Les copies déjà gardées, lues en une seule requête (avant : deux requêtes par clé)
+    existing = {(k.room_id, k.session_id): k for k in
+                BackedUpRoomKey.objects.filter(backup=backup, room_id__in={r for r, _ in wanted})}
+
+    def first_index(data):
+        value = data.get('first_message_index', 0) if isinstance(data, dict) else 0
+        return value if isinstance(value, int) else 0
+
+    to_create, to_update = [], []
+    for (room_id, session_id), data in wanted.items():
+        old = existing.get((room_id, session_id))
+        if old is None:
+            to_create.append(BackedUpRoomKey(backup=backup, room_id=room_id, session_id=session_id, data=data))
+        # (on garde la meilleure copie : celle qui remonte le plus loin dans la conversation)
+        elif first_index(old.data) >= first_index(data):
+            old.data = data
+            to_update.append(old)
+    BackedUpRoomKey.objects.bulk_create(to_create, ignore_conflicts=True)
+    BackedUpRoomKey.objects.bulk_update(to_update, ['data'])
     backup.etag += 1
     backup.save(update_fields=['etag'])
     return JsonResponse({'count': backup.keys.count(), 'etag': str(backup.etag)})

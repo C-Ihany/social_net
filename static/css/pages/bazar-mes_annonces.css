@@ -3,27 +3,10 @@
 
 .bazar-mes-wrap {
     max-width: 860px;
-    margin: 2rem auto 4rem;
+    margin: 1.25rem auto 4rem;
     padding: 0 1rem;
 }
-.bazar-mes-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 1.5rem;
-    flex-wrap: wrap;
-    gap: .75rem;
-}
-/* ── Fil d'Ariane ── */
-.bazar-crumb {
-    display: flex; align-items: center; gap: .3rem; flex-wrap: wrap;
-    font-size: .8rem; color: var(--text-muted); margin-bottom: .4rem;
-}
-.bazar-crumb a { color: var(--accent); text-decoration: none; font-weight: 600; }
-.bazar-crumb a:hover { text-decoration: underline; }
-.bazar-mes-title { font-size: 1.5rem; font-weight: 800; display: flex; align-items: center; gap: .5rem; margin: 0; }
-.bazar-mes-title .material-icons { font-size: 1.6rem; color: var(--accent); }
-.bazar-alert { border-radius: var(--radius); }
+/* En-tête : composant partagé .vz-page-head (+ .vz-back) */
 
 /* ── Bannières statut vendeur (jetons : lisibles en clair et en sombre) ── */
 .bazar-notice {
@@ -34,15 +17,13 @@
 }
 .bazar-notice--compact { padding: .85rem 1.2rem; gap: .75rem; }
 .bazar-notice__icon { font-size: 1.6rem; flex-shrink: 0; }
-.bazar-notice__body { flex: 1; min-width: 0; }
+.bazar-notice__body { flex: 1 1 12rem; min-width: 0; }
 .bazar-notice__title { font-weight: 700; font-size: .92rem; }
 .bazar-notice__text { font-size: .8rem; margin-top: .15rem; color: var(--text-muted); }
 .bazar-notice__btn { flex-shrink: 0; }
-.bazar-notice__link { margin-left: auto; flex-shrink: 0; font-size: .78rem; font-weight: 600; text-decoration: underline; }
-.bazar-notice--warning { background: rgba(217,119,6,.12); border-color: rgba(217,119,6,.35); }
+.bazar-notice--warning { background: color-mix(in srgb, var(--warning) 12%, transparent); border-color: color-mix(in srgb, var(--warning) 35%, transparent); }
 .bazar-notice--warning .bazar-notice__icon,
 .bazar-notice--warning .bazar-notice__title,
-.bazar-notice--warning .bazar-notice__link,
 .bazar-notice--warning strong { color: var(--warning); }
 .bazar-notice--success { background: rgba(var(--success-rgb), .10); border-color: rgba(var(--success-rgb), .35); }
 .bazar-notice--success .bazar-notice__icon,
@@ -50,7 +31,8 @@
 .bazar-notice--danger { background: rgba(var(--danger-rgb), .10); border-color: rgba(var(--danger-rgb), .35); }
 .bazar-notice--danger .bazar-notice__icon,
 .bazar-notice--danger strong { color: var(--danger); }
-/* Stats pills */
+
+/* Compteurs */
 .bazar-stats {
     display: flex;
     gap: .75rem;
@@ -60,7 +42,7 @@
 .bazar-stat-pill {
     background: var(--bg-card);
     border: 1px solid var(--border);
-    border-radius: 50px;
+    border-radius: var(--radius-pill);
     padding: .45rem 1.1rem;
     font-size: .85rem;
     font-weight: 700;
@@ -75,7 +57,8 @@
 /* Ligne annonce : composant partagé .vz-card.vz-card--row (zoot-base.css).
    Conteneur, miniature, titre, méta, prix et pastilles de statut viennent de
    .vz-card__* et .vz-chip ; ne restent ici que les spécificités. */
-.bazar-annonce-row { overflow: visible; } /* l'infobulle des actions dépasse la carte */
+.bazar-annonce-row { flex-wrap: wrap; }
+.bazar-annonce-row .vz-card__body { flex: 1 1 12rem; min-width: 0; }
 .bazar-annonce-thumb-link { flex-shrink: 0; display: block; line-height: 0; }
 .bazar-annonce-no-thumb {
     display: flex; align-items: center; justify-content: center;
@@ -83,59 +66,22 @@
 }
 .bazar-annonce-no-thumb .material-icons { font-size: 1.6rem; opacity: .6; }
 a.vz-card__title:hover { color: var(--accent); text-decoration: none; }
-.bazar-row-status { flex-shrink: 0; }
 
-/* Actions */
-.bazar-row-actions {
-    display: flex;
-    gap: .4rem;
-    flex-shrink: 0;
-}
-.bazar-action-btn {
-    width: 34px;
-    height: 34px;
-    border-radius: 8px;
-    border: 1.5px solid var(--border);
-    background: var(--bg-card);
-    color: var(--text-muted);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    cursor: pointer;
-    text-decoration: none;
-    transition: all .18s;
-    position: relative;
-}
-.bazar-action-btn .material-icons { font-size: 1.1rem; }
-.bazar-action-btn:hover { border-color: var(--accent); color: var(--accent); }
-.bazar-action-accent { border-color: var(--accent); color: var(--accent); }
-.bazar-action-ok, .bazar-action-ok:hover { border-color: var(--success); color: var(--success); }
-.bazar-action-del:hover { border-color: var(--danger); color: var(--danger); }
-/* Tooltip sur les boutons actions */
-.bazar-action-btn[title]:hover::after {
-    content: attr(title);
-    position: absolute;
-    bottom: calc(100% + 6px);
-    left: 50%; transform: translateX(-50%);
-    background: rgba(0,0,0,.75);
-    color: #fff;
-    font-size: .7rem;
-    font-weight: 600;
-    padding: .2rem .55rem;
-    border-radius: 6px;
-    white-space: nowrap;
-    pointer-events: none;
-}
-/* Statut badge cliquable */
-.bazar-row-status { cursor: default; }
-.bazar-row-status.toggleable { cursor: pointer; }
-.bazar-row-status.toggleable:hover { opacity: .8; }
+/* Statut + actions (boutons d'icône partagés .vz-icon-btn--lg, 44 px) */
+.bazar-row-end { display: flex; align-items: center; gap: .5rem; margin-left: auto; flex-shrink: 0; }
+.bazar-row-status { flex-shrink: 0; }
+button.bazar-row-status { cursor: pointer; font-family: inherit; }
+button.bazar-row-status:disabled { opacity: .55; cursor: default; }
+.bazar-row-actions { display: flex; align-items: center; gap: .1rem; }
+.bazar-row-actions form { margin: 0; display: flex; }
 
 /* État vide : composant partagé .vz-empty (zoot-base.css) */
 .bazar-mes-empty { padding: 3rem 1rem; }
-.bazar-mes-empty h4 { margin: 0; }
+.bazar-mes-empty .vz-empty-title { margin: 0; }
 
 @media (max-width: 575px) {
     .bazar-annonce-row .vz-card__avatar { width: 56px; height: 56px; }
-    .bazar-row-actions { display: none; } /* Accès via page détail sur mobile */
+    /* Sur mobile, statut et actions passent sous l'annonce, sur toute la largeur */
+    .bazar-row-end { flex: 1 1 100%; margin-left: 0; justify-content: space-between;
+                     border-top: 1px solid var(--border); padding-top: .35rem; }
 }

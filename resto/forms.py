@@ -19,12 +19,12 @@ class RestaurantForm(forms.ModelForm):
             'delivery_fee', 'min_order', 'avg_prep_minutes',
         ]
         widgets = {
-            'name':        forms.TextInput(attrs={**_INPUT, 'placeholder': _('Ex : Hotely Mamy, Pizza Tana…')}),
+            'name':        forms.TextInput(attrs={**_INPUT, 'placeholder': _('Le nom de votre établissement')}),
             'category':    forms.Select(attrs=_INPUT),
             'description': forms.Textarea(attrs={**_INPUT, 'rows': 3, 'placeholder': _('Spécialités, ambiance, ce qui vous distingue')}),
             'logo':        forms.ClearableFileInput(attrs={'accept': 'image/*,.heic,.heif'}),
             'banner':      forms.ClearableFileInput(attrs={'accept': 'image/*,.heic,.heif'}),
-            'phone':       forms.TextInput(attrs={**_INPUT, 'placeholder': '+261 34 XX XXX XX'}),
+            'phone':       forms.TextInput(attrs={**_INPUT, 'placeholder': '+… (indicatif du pays)'}),
             'address':     forms.TextInput(attrs={**_INPUT, 'placeholder': _('Quartier, rue, repère')}),
             'region':      forms.Select(attrs=_INPUT, choices=REGION_CHOICES),
             'latitude':    forms.HiddenInput(),
@@ -63,10 +63,10 @@ class MenuItemForm(forms.ModelForm):
         fields = ['category', 'name', 'description', 'ingredients', 'preparation', 'price', 'image', 'is_available', 'order']
         widgets = {
             'category':    forms.Select(attrs=_INPUT),
-            'name':        forms.TextInput(attrs={**_INPUT, 'placeholder': _('Ex : Ravitoto sy henakisoa')}),
+            'name':        forms.TextInput(attrs={**_INPUT, 'placeholder': _('Ex : Poulet braisé, riz et légumes')}),
             'description': forms.Textarea(attrs={**_INPUT, 'rows': 2, 'placeholder': _('Portion, accompagnement, particularités')}),
             'ingredients': forms.Textarea(attrs={**_INPUT, 'rows': 4, 'placeholder': _('Un ingrédient par ligne : Oignons, Piment, !Riz (obligatoire)')}),
-            'preparation': forms.Textarea(attrs={**_INPUT, 'rows': 3, 'placeholder': _('Ex : Porc mijoté 2 h avec les feuilles de manioc pilées, servi avec du riz blanc')}),
+            'preparation': forms.Textarea(attrs={**_INPUT, 'rows': 3, 'placeholder': _('Ex : Mijoté 2 h à feu doux, servi avec du riz blanc')}),
             'price':       forms.NumberInput(attrs={**_INPUT, 'min': 0, 'step': 100}),
             'image':       forms.ClearableFileInput(attrs={'accept': 'image/*,.heic,.heif'}),
             'is_available': forms.CheckboxInput(attrs=_CHECK),
@@ -95,7 +95,7 @@ class CheckoutForm(forms.ModelForm):
         widgets = {
             'mode':             forms.RadioSelect(),
             'customer_name':    forms.TextInput(attrs={**_INPUT, 'placeholder': _('Votre nom')}),
-            'customer_phone':   forms.TextInput(attrs={**_INPUT, 'placeholder': '+261 34 XX XXX XX'}),
+            'customer_phone':   forms.TextInput(attrs={**_INPUT, 'placeholder': '+… (indicatif du pays)'}),
             'delivery_address': forms.TextInput(attrs={**_INPUT, 'placeholder': _('Quartier, rue, porte, repère pour le livreur')}),
             'delivery_latitude':  forms.HiddenInput(),
             'delivery_longitude': forms.HiddenInput(),
@@ -133,15 +133,15 @@ class CourierForm(forms.ModelForm):
                   'mm_provider', 'mm_number',
                   'guarantor_name', 'guarantor_phone']
         widgets = {
-            'full_name':     forms.TextInput(attrs={**_INPUT, 'placeholder': _('Ex : RAKOTO Jean Mamy')}),
+            'full_name':     forms.TextInput(attrs={**_INPUT, 'placeholder': _('Votre nom et vos prénoms')}),
             'photo':         forms.ClearableFileInput(attrs={'accept': 'image/*,.heic,.heif', 'capture': 'user'}),
-            'phone':         forms.TextInput(attrs={**_INPUT, 'placeholder': '+261 34 XX XXX XX'}),
+            'phone':         forms.TextInput(attrs={**_INPUT, 'placeholder': '+… (indicatif du pays)'}),
             'bio':           forms.Textarea(attrs={**_INPUT, 'rows': 2}),
-            'cin_number':    forms.TextInput(attrs={**_INPUT, 'placeholder': '101 011 234 567', 'inputmode': 'numeric'}),
+            'cin_number':    forms.TextInput(attrs={**_INPUT, 'autocapitalize': 'characters'}),
             'cin_front':     forms.ClearableFileInput(attrs={'accept': 'image/*,.heic,.heif', 'capture': 'environment'}),
             'cin_back':      forms.ClearableFileInput(attrs={'accept': 'image/*,.heic,.heif', 'capture': 'environment'}),
             'vehicle':       forms.Select(attrs=_INPUT),
-            'vehicle_plate': forms.TextInput(attrs={**_INPUT, 'placeholder': _('Ex : 1234 TAB')}),
+            'vehicle_plate': forms.TextInput(attrs={**_INPUT, 'placeholder': _("N° d'immatriculation")}),
             'vehicle_photo': forms.ClearableFileInput(attrs={'accept': 'image/*,.heic,.heif'}),
             'region':        forms.Select(attrs=_INPUT, choices=REGION_CHOICES),
             'zones':         forms.TextInput(attrs=_INPUT),
@@ -149,15 +149,16 @@ class CourierForm(forms.ModelForm):
             'languages':     forms.TextInput(attrs=_INPUT),
             'years_experience': forms.NumberInput(attrs={**_INPUT, 'min': 0, 'max': 50}),
             'mm_provider':   forms.Select(attrs=_INPUT),
-            'mm_number':     forms.TextInput(attrs={**_INPUT, 'placeholder': '034 XX XXX XX'}),
+            'mm_number':     forms.TextInput(attrs={**_INPUT, 'placeholder': '+… (indicatif du pays)'}),
             'guarantor_name':  forms.TextInput(attrs=_INPUT),
-            'guarantor_phone': forms.TextInput(attrs={**_INPUT, 'placeholder': '+261 3X XX XXX XX'}),
+            'guarantor_phone': forms.TextInput(attrs={**_INPUT, 'placeholder': '+… (indicatif du pays)'}),
         }
 
     def clean_cin_number(self):
         raw = (self.cleaned_data.get('cin_number') or '').replace(' ', '')
-        if raw and (not raw.isdigit() or len(raw) != 12):
-            raise forms.ValidationError(_('La CIN malgache comporte 12 chiffres.'))
+        raw = raw.replace('-', '').replace('.', '').upper()
+        if raw and (not raw.isalnum() or not 6 <= len(raw) <= 20):
+            raise forms.ValidationError(_("Le numéro de pièce d'identité comporte 6 à 20 lettres ou chiffres."))
         return raw
 
     def clean(self):

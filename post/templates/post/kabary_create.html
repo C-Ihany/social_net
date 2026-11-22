@@ -7,8 +7,8 @@
 
 <div class="kbr-wrapper">
 
-    <a href="{% url 'post:post-view' %}" class="kbr-back">
-        <span class="material-icons">arrow_back</span> {% trans "Back to feed" %}
+    <a href="{% url 'post:post-view' %}" class="vz-back">
+        <span class="material-icons" aria-hidden="true">arrow_back</span> {% trans "Retour" %}
     </a>
 
     <!-- Hero -->
@@ -18,7 +18,7 @@
             {% trans "Kabary numérique" %}
         </div>
         <p class="kbr-hero-sub">
-            {% trans "The Kabary is a traditional Malagasy oral art form — a structured speech that opens with a salutation, develops ideas with imagery and proverbs, and closes with a blessing. Share your thoughts in this timeless format." %}
+            {% trans "The Kabary is a traditional African oral art form — a structured speech that opens with a salutation, develops ideas with imagery and proverbs, and closes with a blessing. Share your thoughts in this timeless format." %}
         </p>
     </div>
 
@@ -92,7 +92,7 @@
             </div>
             <div>
                 <div class="kbr-section-name">Ohabolana <span class="kbr-optional">{% trans "optional" %}</span></div>
-                <div class="kbr-section-desc">{% trans "A Malagasy proverb to illuminate your message." %}</div>
+                <div class="kbr-section-desc">{% trans "A proverb to illuminate your message." %}</div>
             </div>
         </div>
         <textarea id="kbr-ohabolana" class="kbr-input" rows="2"
@@ -125,14 +125,14 @@
     </div>
 
     <!-- Boîte d'erreur visible -->
-    <div id="kbr-error-box" role="alert"></div>
+    <div id="kbr-error-box" role="alert" hidden></div>
 
     <!-- Actions -->
-    <div class="kbr-actions">
-        <span class="kbr-feedback" id="kbr-feedback"></span>
-        <button class="kbr-submit" type="button" id="kbr-submit-btn" onclick="kbrSubmit()">
-            <span class="material-icons">record_voice_over</span>
-            {% trans "Publish Kabary" %}
+    <div class="vz-actions kbr-actions">
+        <a href="{% url 'post:post-view' %}" class="vz-btn vz-btn--muted">{% trans "Annuler" %}</a>
+        <button class="vz-btn vz-btn--primary" type="button" id="kbr-submit-btn" onclick="kbrSubmit()">
+            <span class="material-icons" aria-hidden="true">record_voice_over</span>
+            {% trans "Publier" %}
         </button>
     </div>
 
@@ -155,16 +155,12 @@ function kbrEscape(t) {
 
 function kbrShowError(msg) {
     var box = document.getElementById('kbr-error-box');
-    if (box) { box.textContent = msg; box.style.display = 'block'; box.scrollIntoView({behavior:'smooth', block:'center'}); }
-    var fb = document.getElementById('kbr-feedback');
-    if (fb) fb.textContent = msg;
+    if (box) { box.textContent = msg; box.hidden = false; box.scrollIntoView({behavior:'smooth', block:'center'}); }
 }
 
 function kbrHideError() {
     var box = document.getElementById('kbr-error-box');
-    if (box) { box.textContent = ''; box.style.display = 'none'; }
-    var fb = document.getElementById('kbr-feedback');
-    if (fb) fb.textContent = '';
+    if (box) { box.textContent = ''; box.hidden = true; }
 }
 
 function kbrUpdatePreview() {
@@ -206,7 +202,7 @@ function kbrSubmit() {
         return;
     }
     kbrHideError();
-    if (btn) { btn.disabled = true; btn.innerHTML = '<span class="material-icons kbr-spin">autorenew</span> Publication…'; }
+    if (btn) { btn.disabled = true; btn.classList.add('is-loading'); }
 
     var fd = new FormData();
     fd.append('csrfmiddlewaretoken', KBR_CSRF);
@@ -230,20 +226,15 @@ function kbrSubmit() {
         if (data.ok) {
             window.location.href = data.redirect;
         } else {
-            if (btn) { btn.disabled = false; btn.innerHTML = '<span class="material-icons">record_voice_over</span> {% trans "Publish Kabary"|escapejs %}'; }
+            if (btn) { btn.disabled = false; btn.classList.remove('is-loading'); }
             kbrShowError(data.error || '{% trans "An error occurred."|escapejs %}');
         }
     })
     .catch(function(e) {
         console.error('Kabary submit error:', e);
-        if (btn) { btn.disabled = false; btn.innerHTML = '<span class="material-icons">record_voice_over</span> {% trans "Publish Kabary"|escapejs %}'; }
-        kbrShowError('Erreur (' + e.message + '). Réessaie ou recharge la page.');
+        if (btn) { btn.disabled = false; btn.classList.remove('is-loading'); }
+        kbrShowError('{% trans "Une erreur est survenue. Réessayez ou rechargez la page."|escapejs %}');
     });
 }
-(function(){
-    var s = document.createElement('style');
-    s.textContent = '@keyframes kbr-spin { to { transform: rotate(360deg); } }';
-    document.head.appendChild(s);
-})();
 </script>
 {% endblock %}

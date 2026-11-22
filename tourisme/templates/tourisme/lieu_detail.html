@@ -1,12 +1,14 @@
 {% extends 'base.html' %}
 {% load static i18n %}
 
+{% block page_title %}{{ lieu.name }} — {% trans "Tourisme" %} Vazimba{% endblock %}
+{% block meta_description %}{{ lieu.description|truncatechars:150 }}{% endblock %}
+
 {% block extra_head %}
 <link rel="stylesheet" href="{% static 'css/pages/tourisme-lieu_detail.css' %}">
 {% endblock %}
 
 {% block content %}
-<main>
 <div class="lieu-detail-wrap">
 
     {% if not lieu.is_approved and is_owner %}
@@ -19,9 +21,9 @@
     <!-- Breadcrumb -->
     <nav class="tour-breadcrumb">
         <a href="{% url 'tourisme:home' %}">{% trans "Tourisme" %}</a>
-        <span class="material-icons">chevron_right</span>
+        <span class="material-icons" aria-hidden="true">chevron_right</span>
         <a href="{% url 'tourisme:lieux_list' %}">{% trans "Lieux" %}</a>
-        <span class="material-icons">chevron_right</span>
+        <span class="material-icons" aria-hidden="true">chevron_right</span>
         <span>{{ lieu.name }}</span>
     </nav>
 
@@ -31,17 +33,17 @@
             {% if images %}
                 <img src="{{ images.0.image.url }}" alt="{{ lieu.name }}" id="mainImg">
                 {% if images|length > 1 %}
-                <button class="gallery-nav-btn prev" id="galleryPrev" onclick="galleryNav(-1)" aria-label="{% trans 'Image précédente' %}" type="button">
-                    <span class="material-icons">chevron_left</span>
+                <button class="vz-icon-btn vz-icon-btn--lg vz-icon-btn--over gallery-nav-btn prev" id="galleryPrev" onclick="galleryNav(-1)" aria-label="{% trans 'Image précédente' %}" type="button">
+                    <span class="material-icons" aria-hidden="true">chevron_left</span>
                 </button>
-                <button class="gallery-nav-btn next" id="galleryNext" onclick="galleryNav(1)" aria-label="{% trans 'Image suivante' %}" type="button">
-                    <span class="material-icons">chevron_right</span>
+                <button class="vz-icon-btn vz-icon-btn--lg vz-icon-btn--over gallery-nav-btn next" id="galleryNext" onclick="galleryNav(1)" aria-label="{% trans 'Image suivante' %}" type="button">
+                    <span class="material-icons" aria-hidden="true">chevron_right</span>
                 </button>
                 <div class="gallery-counter" id="galleryCounter">1 / {{ images|length }}</div>
                 {% endif %}
             {% else %}
                 <div class="lieu-main-img-ph">
-                    <span class="material-icons">landscape</span>
+                    <span class="material-icons" aria-hidden="true">landscape</span>
                     <span class="lieu-main-img-ph-text">{% trans "Pas d'image disponible" %}</span>
                 </div>
             {% endif %}
@@ -49,12 +51,13 @@
         {% if images|length > 1 %}
         <div class="lieu-thumbs" id="thumbsRow">
             {% for img in images %}
-            <div class="lieu-thumb {% if forloop.first %}active{% endif %}"
-                 data-idx="{{ forloop.counter0 }}"
-                 data-src="{{ img.image.url }}"
-                 onclick="galleryGoTo({{ forloop.counter0 }})">
-                <img src="{{ img.image.url }}" alt="{{ img.caption|default:lieu.name }}">
-            </div>
+            <button type="button" class="lieu-thumb {% if forloop.first %}active{% endif %}"
+                    data-idx="{{ forloop.counter0 }}"
+                    data-src="{{ img.image.url }}"
+                    onclick="galleryGoTo({{ forloop.counter0 }})"
+                    aria-label="{% blocktrans with n=forloop.counter %}Afficher la photo {{ n }}{% endblocktrans %}">
+                <img src="{{ img.image.url }}" alt="{{ img.caption }}" loading="lazy">
+            </button>
             {% endfor %}
         </div>
         {% endif %}
@@ -64,26 +67,26 @@
     <div class="lieu-header">
         <div class="lieu-header-main">
             <h1 class="lieu-name">{{ lieu.name }}
-                {% if request.user.is_authenticated %}<button type="button" class="vz-btn vz-btn--icon vz-btn--sm vz-btn--muted lieu-report-btn" onclick="openReportModal('lieu','{{ lieu.pk }}')" aria-label="{% trans 'Signaler ce lieu' %}" title="{% trans 'Signaler' %}"><span class="material-icons">flag</span></button>{% endif %}
+                {% if request.user.is_authenticated %}<button type="button" class="vz-btn vz-btn--icon vz-btn--sm vz-btn--muted lieu-report-btn" onclick="openReportModal('lieu','{{ lieu.pk }}')" aria-label="{% trans 'Signaler ce lieu' %}" title="{% trans 'Signaler' %}"><span class="material-icons" aria-hidden="true">flag</span></button>{% endif %}
             </h1>
             <div class="lieu-meta-row">
                 <span class="lieu-cat-pill">{{ lieu.get_category_display }}</span>
                 {% if lieu.region %}
                 <span class="lieu-region-tag">
-                    <span class="material-icons">place</span>
+                    <span class="material-icons" aria-hidden="true">place</span>
                     {{ lieu.get_region_display }}
                 </span>
                 {% endif %}
                 {% if avg_rating %}
                 <span class="lieu-rating-pill">
-                    <span class="material-icons">star</span>
+                    <span class="material-icons" aria-hidden="true">star</span>
                     {{ avg_rating }}/5
                     <span class="lieu-rating-count">({{ avis_count }})</span>
                 </span>
                 {% endif %}
                 <span class="lieu-views">
-                    <span class="material-icons">visibility</span>
-                    {{ lieu.views_count }} vue{{ lieu.views_count|pluralize }}
+                    <span class="material-icons" aria-hidden="true">visibility</span>
+                    {% blocktrans count n=lieu.views_count %}{{ n }} vue{% plural %}{{ n }} vues{% endblocktrans %}
                 </span>
             </div>
         </div>
@@ -96,7 +99,7 @@
             {% endif %}
             <a href="{% url 'tourisme:lieux_list' %}?cat={{ lieu.category }}" class="lieu-more-link">
                 <span class="material-icons" aria-hidden="true">filter_list</span>
-                Plus de {{ lieu.get_category_display|lower }}
+                {% trans "Même catégorie" %}
             </a>
         </div>
     </div>
@@ -112,7 +115,7 @@
         {% if lieu.best_period %}
         <div class="vz-card vz-card--flat">
             <div class="vz-card__body">
-                <span class="vz-card__eyebrow"><i class="material-icons">calendar_today</i>{% trans "Meilleure période" %}</span>
+                <span class="vz-card__eyebrow"><i class="material-icons" aria-hidden="true">calendar_today</i>{% trans "Meilleure période" %}</span>
                 <div class="lieu-info-value">{{ lieu.best_period }}</div>
             </div>
         </div>
@@ -120,7 +123,7 @@
         {% if lieu.entry_fee %}
         <div class="vz-card vz-card--flat">
             <div class="vz-card__body">
-                <span class="vz-card__eyebrow"><i class="material-icons">paid</i>{% trans "Tarif d'entrée" %}</span>
+                <span class="vz-card__eyebrow"><i class="material-icons" aria-hidden="true">paid</i>{% trans "Tarif d'entrée" %}</span>
                 <div class="lieu-info-value">{{ lieu.entry_fee }}</div>
             </div>
         </div>
@@ -128,7 +131,7 @@
         {% if lieu.address %}
         <div class="vz-card vz-card--flat">
             <div class="vz-card__body">
-                <span class="vz-card__eyebrow"><i class="material-icons">location_on</i>{% trans "Adresse / GPS" %}</span>
+                <span class="vz-card__eyebrow"><i class="material-icons" aria-hidden="true">location_on</i>{% trans "Adresse / GPS" %}</span>
                 <div class="lieu-info-value">{{ lieu.address }}</div>
             </div>
         </div>
@@ -136,7 +139,7 @@
         {% if lieu.region %}
         <div class="vz-card vz-card--flat">
             <div class="vz-card__body">
-                <span class="vz-card__eyebrow"><i class="material-icons">map</i>{% trans "Région" %}</span>
+                <span class="vz-card__eyebrow"><i class="material-icons" aria-hidden="true">map</i>{% trans "Région" %}</span>
                 <div class="lieu-info-value">{{ lieu.get_region_display }}</div>
             </div>
         </div>
@@ -148,7 +151,7 @@
     {% if lieu.tips %}
     <div class="lieu-tips">
         <div class="lieu-tips-title">
-            <span class="material-icons">tips_and_updates</span>
+            <span class="material-icons" aria-hidden="true">tips_and_updates</span>
             {% trans "Conseils pratiques" %}
         </div>
         <div class="lieu-tips-text">{{ lieu.tips|linebreaksbr }}</div>
@@ -159,7 +162,7 @@
     {% if guides %}
     <section class="lieu-section">
         <h2 class="lieu-section-title">
-            <span class="material-icons">person_pin</span>
+            <span class="material-icons" aria-hidden="true">person_pin</span>
             {% trans "Guides pour ce lieu" %}
         </h2>
         <div class="vz-grid">
@@ -174,7 +177,7 @@
                         <span class="vz-card__avatar vz-card__avatar--initial" aria-hidden="true">{{ guide.display_name|first|upper }}</span>
                     {% endif %}
                     {% if guide.is_verified %}
-                    <span class="vz-card__avatar-dot" title="{% trans 'Vérifié' %}"><i class="material-icons">check</i></span>
+                    <span class="vz-card__avatar-dot" title="{% trans 'Vérifié' %}"><i class="material-icons" aria-hidden="true">check</i></span>
                     {% endif %}
                 </div>
                 <div class="vz-card__body">
@@ -196,7 +199,7 @@
     {% if lieu_posts %}
     <section class="lieu-section">
         <h2 class="lieu-section-title">
-            <span class="material-icons">article</span>
+            <span class="material-icons" aria-hidden="true">article</span>
             {% trans "Publications sur ce lieu" %}
         </h2>
         <div class="vz-grid vz-grid--wide">
@@ -204,10 +207,10 @@
             <a href="{% url 'post:post-detail' post.pk %}" class="vz-card">
                 <div class="vz-card__media vz-card__media--wide">
                     {% if post.header_image_url %}
-                        <img src="{{ post.header_image_url }}" alt="{{ post.title|default:'Post' }}" loading="lazy">
+                        <img src="{{ post.header_image_url }}" alt="{{ post.title }}" loading="lazy">
                     {% else %}
                         <div class="vz-card__media-ph">
-                            <i class="material-icons">image</i>
+                            <i class="material-icons" aria-hidden="true">image</i>
                         </div>
                     {% endif %}
                 </div>
@@ -238,8 +241,8 @@
     <!-- ── Avis des visiteurs ── -->
     <section class="lieu-section" id="avis">
         <h2 class="lieu-section-title">
-            <span class="material-icons">rate_review</span>
-            Avis des visiteurs
+            <span class="material-icons" aria-hidden="true">rate_review</span>
+            {% trans "Avis des visiteurs" %}
             {% if avis_count %}
             <span class="lieu-section-count">({{ avis_count }})</span>
             {% endif %}
@@ -250,47 +253,47 @@
             <div class="lieu-avis-big-score">{{ avg_rating }}</div>
             <div>
                 <div class="lieu-avis-stars-big" aria-label="{{ avg_rating }}/5">
-                    {% with r=avg_rating|floatformat:"0" %}
-                    {% for i in "12345" %}<i class="material-icons" aria-hidden="true">{% if forloop.counter <= r|add:"0" %}star{% else %}star_border{% endif %}</i>{% endfor %}
-                    {% endwith %}
+                    {% for i in "12345" %}<i class="material-icons" aria-hidden="true">{% if forloop.counter <= avg_stars %}star{% else %}star_border{% endif %}</i>{% endfor %}
                 </div>
-                <div class="lieu-avis-count-label">{{ avis_count }} avis</div>
+                <div class="lieu-avis-count-label">{% blocktrans count n=avis_count %}{{ n }} avis{% plural %}{{ n }} avis{% endblocktrans %}</div>
             </div>
         </div>
         {% endif %}
 
         {% if user.is_authenticated %}
-        <div class="avis-form-wrap">
+        <div class="vz-card vz-card--block avis-form-wrap">
             <div class="avis-form-title">
-                {% if user_avis %}Modifier votre avis{% else %}Laisser un avis{% endif %}
+                {% if user_avis %}{% trans "Modifier votre avis" %}{% else %}{% trans "Laisser un avis" %}{% endif %}
             </div>
-            {% if avis_error %}<div class="avis-error">{{ avis_error }}</div>{% endif %}
+            {% if avis_error %}<div class="avis-error" role="alert">{{ avis_error }}</div>{% endif %}
             <form method="post" action="{% url 'tourisme:lieu_detail' lieu.slug %}#avis">
                 {% csrf_token %}
                 <input type="hidden" name="action" value="avis">
-                <div class="star-rating-input">
+                <div class="star-rating-input" role="radiogroup" aria-label="{% trans 'Note' %}">
                     {% for v in "54321" %}
                     <input type="radio" name="rating" id="star{{ v }}" value="{{ v }}"
                         {% if user_avis and user_avis.rating|stringformat:"s" == v %}checked{% elif not user_avis and v == "5" %}checked{% endif %}>
                     <label for="star{{ v }}" aria-label="{{ v }}/5"><i class="material-icons" aria-hidden="true">star</i></label>
                     {% endfor %}
                 </div>
-                <textarea class="avis-comment-input" name="comment" placeholder="{% trans 'Décrivez votre expérience...' %}" required>{% if user_avis %}{{ user_avis.comment }}{% endif %}</textarea>
-                <div class="avis-visited-row">
+                <textarea class="vz-input avis-comment-input" name="comment" maxlength="4000" aria-label="{% trans 'Commentaire' %}" placeholder="{% trans 'Décrivez votre expérience...' %}" required>{% if user_avis %}{{ user_avis.comment }}{% endif %}</textarea>
+                <label class="avis-visited-row">
                     <span class="material-icons" aria-hidden="true">event</span>
                     {% trans "Date de visite (optionnel) :" %}
                     <input type="date" name="visited_at"
                            value="{% if user_avis and user_avis.visited_at %}{{ user_avis.visited_at|date:'Y-m-d' }}{% endif %}">
+                </label>
+                <div class="vz-actions vz-actions--start">
+                    <button type="submit" class="vz-btn vz-btn--primary">
+                        <span class="material-icons" aria-hidden="true">send</span>
+                        {% if user_avis %}{% trans "Modifier mon avis" %}{% else %}{% trans "Envoyer mon avis" %}{% endif %}
+                    </button>
                 </div>
-                <button type="submit" class="avis-submit-btn">
-                    <span class="material-icons" aria-hidden="true">send</span>
-                    {% if user_avis %}Mettre à jour{% else %}Publier{% endif %}
-                </button>
             </form>
         </div>
         {% else %}
         <p class="avis-login-note">
-            <a href="{% url 'login' %}">{% trans "Connectez-vous" %}</a>
+            <a href="{% url 'login' %}?next={% url 'tourisme:lieu_detail' lieu.slug %}%23avis" class="vz-btn vz-btn--secondary vz-btn--sm">{% trans "Se connecter" %}</a>
             {% trans "pour laisser un avis." %}
         </p>
         {% endif %}
@@ -316,8 +319,8 @@
                     {% if avis.visited_at %}
                     <div class="vz-card__meta">
                         <span class="vz-card__meta-item">
-                            <i class="material-icons">event</i>
-                            <span>Visité le {{ avis.visited_at|date:"j N Y" }}</span>
+                            <i class="material-icons" aria-hidden="true">event</i>
+                            <span>{% blocktrans with d=avis.visited_at|date:"j N Y" %}Visité le {{ d }}{% endblocktrans %}</span>
                         </span>
                     </div>
                     {% endif %}
@@ -336,7 +339,7 @@
     {% if similaires %}
     <section>
         <h2 class="lieu-section-title">
-            <span class="material-icons">grid_view</span>
+            <span class="material-icons" aria-hidden="true">grid_view</span>
             {% trans "Lieux similaires" %}
         </h2>
         <div class="vz-grid">
@@ -348,7 +351,7 @@
                         <img src="{{ img.image.url }}" alt="{{ sim.name }}" loading="lazy">
                     {% else %}
                         <div class="vz-card__media-ph vz-card__media-ph--accent">
-                            <i class="material-icons">landscape</i>
+                            <i class="material-icons" aria-hidden="true">landscape</i>
                         </div>
                     {% endif %}
                     {% endwith %}
@@ -364,7 +367,6 @@
     {% endif %}
 
 </div>
-</main>
 
 <script>
 (function() {
@@ -401,6 +403,10 @@
 
     // Keyboard
     document.addEventListener('keydown', function(e) {
+        // Pas de changement de photo pendant la saisie d'un avis (flèches = curseur)
+        var t = e.target;
+        if (t && (t.isContentEditable || /^(INPUT|TEXTAREA|SELECT)$/.test(t.tagName))) return;
+        if (e.altKey || e.ctrlKey || e.metaKey) return;
         if (e.key === 'ArrowLeft')  goTo(current - 1);
         if (e.key === 'ArrowRight') goTo(current + 1);
     });

@@ -1,6 +1,6 @@
 /* Styles de page resto/order.html (suivi de commande) — servis en statique (cache navigateur + service worker). */
 
-.rs-page-head--order { margin: .5rem 0 .8rem; }
+.rs-order-actions { align-items: flex-end; }
 .rs-parties { margin-top: .8rem; font-size: .88rem; }
 .rs-parties .rs-muted .material-icons { color: var(--text-subtle); }
 .rs-map-hint { margin: .3rem 0 0; font-size: .78rem; }

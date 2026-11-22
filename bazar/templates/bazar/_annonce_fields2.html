@@ -1,0 +1,47 @@
+{% load i18n %}
+{% comment %}Suite des champs communs (après le bloc Photos, propre à chaque page).{% endcomment %}
+<!-- Titre + Catégorie + État -->
+<div class="vz-card bazar-section">
+    <h2 class="bazar-section-title"><i class="material-icons" aria-hidden="true">local_offer</i>{% trans "Article" %}</h2>
+    {% include 'bazar/_field.html' with field=form.title required=1 %}
+    <div class="bazar-form-grid">
+        {% include 'bazar/_field.html' with field=form.category required=1 %}
+        {% include 'bazar/_field.html' with field=form.condition required=1 %}
+    </div>
+</div>
+
+<!-- Prix -->
+<div class="vz-card bazar-section" id="bazar-price-section">
+    <h2 class="bazar-section-title"><i class="material-icons" aria-hidden="true">payments</i>{% trans "Prix" %}</h2>
+    <div class="bazar-price-row">
+        {% trans "Laisser vide = « Prix à discuter »" as price_help %}
+        {% include 'bazar/_field.html' with field=form.price help=price_help %}
+        <div class="form-check bazar-check bazar-price-check">
+            {{ form.price_negotiable }}
+            <label class="form-check-label bazar-check-label" for="{{ form.price_negotiable.id_for_label }}">{{ form.price_negotiable.label }}</label>
+        </div>
+    </div>
+</div>
+
+<!-- Description -->
+<div class="vz-card bazar-section">
+    <h2 class="bazar-section-title"><i class="material-icons" aria-hidden="true">notes</i>{% trans "Description" %}</h2>
+    {% trans "Soyez précis : marque, modèle, dimensions, défauts éventuels…" as desc_help %}
+    {% include 'bazar/_field.html' with field=form.description required=1 help=desc_help %}
+</div>
+
+<!-- Localisation + Contact -->
+<div class="vz-card bazar-section">
+    <h2 class="bazar-section-title"><i class="material-icons" aria-hidden="true">place</i>{% trans "Localisation & Contact" %}</h2>
+    <div class="bazar-form-grid">
+        {% include 'bazar/_field.html' with field=form.location required=1 %}
+        {% trans "Facilite le filtre « Près de chez moi »" as region_help %}
+        {% include 'bazar/_field.html' with field=form.region help=region_help %}
+    </div>
+    {% trans "Visible sur votre annonce pour que les acheteurs vous contactent par appel ou WhatsApp. Indiquez l'indicatif du pays (+…) pour activer le bouton WhatsApp." as phone_help %}
+    {% include 'bazar/_field.html' with field=form.contact_phone icon='call' help=phone_help %}
+    <div class="form-check bazar-check">
+        {{ form.show_phone }}
+        <label class="form-check-label bazar-check-label" for="{{ form.show_phone.id_for_label }}">{{ form.show_phone.label }}</label>
+    </div>
+</div>

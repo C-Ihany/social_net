@@ -1,34 +1,29 @@
 {% load i18n %}
 <script type="text/javascript">
-
-	// POST + jeton CSRF : la vue n'accepte plus le GET (une requête GET
-	// n'est pas protégée contre le CSRF — voir friend/views.py).
+	/* Accepte une demande d'ami (POST + jeton CSRF : la vue refuse le GET).
+	   Le rappel d'interface n'est appelé qu'en cas de SUCCÈS : avant, il partait
+	   dans `complete`, et la page se mettait à jour même quand le serveur refusait. */
 	function acceptFriendRequest(friend_request_id, uiUpdateFunction){
-		var url = "{% url 'friend:friend-request-accept' friend_request_id=53252623623632623 %}".replace("53252623623632623", friend_request_id)
 		$.ajax({
 			type: 'POST',
 			dataType: "json",
-			url: url,
+			url: "{% url 'friend:friend-request-accept' friend_request_id=53252623623632623 %}".replace("53252623623632623", friend_request_id),
 			data: { csrfmiddlewaretoken: "{{ csrf_token }}" },
-			timeout: 5000,
+			timeout: 8000,
 			success: function(data) {
 				if(data['response'] == "Friend request accepted."){
 					vzToast('{% trans "Demande acceptée"|escapejs %}', 'success')
+					if (typeof uiUpdateFunction === 'function') uiUpdateFunction()
 				}
 				else if(data['response'] != null){
 					vzAlert(data['response'])
 				}
 			},
 			error: function(xhr) {
-				console.error("ERROR...", xhr)
-				var msg = "{% trans "Une erreur est survenue"|escapejs %}"
-				try { msg = JSON.parse(xhr.responseText)['response'] || msg } catch(e) {}
+				var msg = "{% trans 'Une erreur est survenue'|escapejs %}"
+				if (xhr && xhr.responseJSON && xhr.responseJSON.response) msg = xhr.responseJSON.response
 				vzAlert(msg)
-			},
-			complete: function(data){
-				uiUpdateFunction()
 			}
 		});
 	}
-
 </script>

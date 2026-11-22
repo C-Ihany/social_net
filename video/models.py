@@ -38,6 +38,9 @@ class LiveRoom(models.Model):
     viewer_count     = models.PositiveIntegerField(default=0)
     created_at       = models.DateTimeField(auto_now_add=True)
     ended_at         = models.DateTimeField(null=True, blank=True)
+    # Dernier signe de vie de l'hôte (connexion ou battement WebSocket). Sert à
+    # distinguer un live réellement abandonné d'un live long toujours en cours.
+    last_seen        = models.DateTimeField(null=True, blank=True, db_index=True)
     replay_url       = models.URLField(max_length=500, blank=True, default='')
     replay_available = models.BooleanField(default=False)
 
