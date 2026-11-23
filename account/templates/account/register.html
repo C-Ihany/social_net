@@ -57,8 +57,13 @@
                 <div class="auth-input-wrap">
                     <span class="material-icons" aria-hidden="true">place</span>
                     <select name="region" id="inputRegion" required autocomplete="country-name">
-                        {% for code, label in registration_form.fields.region.choices %}
-                        <option value="{{ code }}"{% if registration_form.region.value == code %} selected{% endif %}>{{ label }}</option>
+                        <option value="">{% trans "Choisir…" %}</option>
+                        {% for group, items in registration_form.residence_groups %}
+                        <optgroup label="{{ group }}">
+                            {% for code, label in items %}
+                            <option value="{{ code }}"{% if registration_form.region.value == code %} selected{% endif %}>{{ label }}</option>
+                            {% endfor %}
+                        </optgroup>
                         {% endfor %}
                     </select>
                 </div>
@@ -73,7 +78,7 @@
                         {% endfor %}
                     </select>
                 </div>
-                <small class="auth-hint" id="originHelp">{% trans "Si vous vivez hors d'Afrique ou dans un autre pays que le vôtre, indiquez d'où vous venez : vous retrouverez la communauté de votre pays." %}</small>
+                <small class="auth-hint" id="originHelp">{% trans "Si vous vivez hors d'Afrique ou dans un autre pays que le vôtre, indiquez votre pays d'origine en Afrique : vous retrouverez sa communauté." %}</small>
             </div>
             <div class="auth-field">
                 <label for="inputPassword1">{% trans "Password" %}</label>

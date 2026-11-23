@@ -6357,8 +6357,8 @@ msgstr "Firenena niaviana"
 msgid "Pays de résidence"
 msgstr "Firenena onenana"
 
-msgid "Si vous vivez hors d'Afrique ou dans un autre pays que le vôtre, indiquez d'où vous venez : vous retrouverez la communauté de votre pays."
-msgstr "Raha mipetraka ivelan'i Afrika na any amin'ny firenena hafa ianao, lazao ny niavianao : ho hitanao ny fiaraha-monin'ny firenenao."
+msgid "Si vous vivez hors d'Afrique ou dans un autre pays que le vôtre, indiquez votre pays d'origine en Afrique : vous retrouverez sa communauté."
+msgstr "Raha mipetraka ivelan'i Afrika na any amin'ny firenena hafa ianao, lazao ny firenena afrikanina niavianao : ho hitanao ny fiaraha-moniny."
 
 msgid "Devise"
 msgstr "Vola ampiasaina"

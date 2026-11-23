@@ -106,9 +106,14 @@
                     <div class="edit-input-wrap edit-input-wrap--select">
                         <span class="material-icons">map</span>
                         <select name="region" id="id_input_region">
-                            {% for code, label in region_choices %}
-                            <option value="{{ code }}" {% if form.region.value == code %}selected{% endif %}>{% if code %}{{ label }}{% else %}{% trans "Non précisé" %}{% endif %}</option>
+                            <option value="">{% trans "Non précisé" %}</option>
+                        {% for group, items in form.residence_groups %}
+                        <optgroup label="{{ group }}">
+                            {% for code, label in items %}
+                            <option value="{{ code }}"{% if form.region.value == code %} selected{% endif %}>{{ label }}</option>
                             {% endfor %}
+                        </optgroup>
+                        {% endfor %}
                         </select>
                     </div>
                     <small class="edit-help">
@@ -127,7 +132,7 @@
                         </select>
                     </div>
                     <small class="edit-help">
-                        {% trans "Si vous vivez hors d'Afrique ou dans un autre pays que le vôtre, indiquez d'où vous venez : vous retrouverez la communauté de votre pays." %}
+                        {% trans "Si vous vivez hors d'Afrique ou dans un autre pays que le vôtre, indiquez votre pays d'origine en Afrique : vous retrouverez sa communauté." %}
                     </small>
                 </div>
 

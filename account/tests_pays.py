@@ -26,26 +26,37 @@ class PaysInscriptionTests(TestCase):
         account = form.save()
         self.assertEqual((account.region, account.origin_country), ('sn', 'sn'))
 
-    def test_diaspora_doit_indiquer_son_origine(self):
-        form = RegistrationForm(_data(region='diaspora'))
-        self.assertFalse(form.is_valid())
-        self.assertIn('origin_country', form.errors)
-        form = RegistrationForm(_data(region='diaspora', origin_country='sn'))
+    def test_vivre_en_france_avec_une_origine(self):
+        form = RegistrationForm(_data(region='fr', origin_country='sn'))
         self.assertTrue(form.is_valid(), form.errors)
         account = form.save()
-        self.assertEqual((account.region, account.origin_country), ('diaspora', 'sn'))
+        self.assertEqual((account.region, account.origin_country), ('fr', 'sn'))
+        self.assertEqual(regions.currency_for_user(account), 'EUR')
+        self.assertEqual(regions.nearby_label(account), 'Sénégal')
+
+    def test_hors_d_afrique_l_origine_reste_facultative(self):
+        form = RegistrationForm(_data(region='fr'))
+        self.assertTrue(form.is_valid(), form.errors)
+        account = form.save()
+        self.assertEqual((account.region, account.origin_country), ('fr', ''))
+        self.assertEqual(regions.nearby_label(account), 'France')
+
+    def test_pays_inconnu_refuse(self):
+        self.assertIn('region', RegistrationForm(_data(region='zz')).errors)
 
     def test_page_inscription_propose_les_deux_listes(self):
         html = self.client.get(reverse('register')).content.decode()
         self.assertIn('name="region"', html)
         self.assertIn('name="origin_country"', html)
         self.assertIn('Sénégal', html)
+        for pays in ('France', 'Belgique', 'Canada', 'États-Unis', 'Autre pays'):
+            self.assertIn(pays, html)
 
     def test_inscription_complete(self):
-        r = self.client.post(reverse('register'), dict(_data(region='diaspora', origin_country='ci'), accept_terms='on'))
+        r = self.client.post(reverse('register'), dict(_data(region='fr', origin_country='ci'), accept_terms='on'))
         self.assertEqual(r.status_code, 302)
         account = Account.objects.get(email='awa@test.sn')
-        self.assertEqual((account.region, account.origin_country), ('diaspora', 'ci'))
+        self.assertEqual((account.region, account.origin_country), ('fr', 'ci'))
 
 
 class DeviseTests(TestCase):

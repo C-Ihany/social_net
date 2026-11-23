@@ -24,27 +24,30 @@ def validate_new_username(username):
     return username
 
 
-def residence_choices():
-    """Où vit le membre, à l'inscription : un pays d'Afrique, ou ailleurs (diaspora).
-    (Les régions de Madagascar se choisissent ensuite dans le profil.)"""
-    from regions import AFRICA_COUNTRIES, DIASPORA
-    return [('', _('Choisir…'))] + list(AFRICA_COUNTRIES) + [(DIASPORA[0], _("Hors d'Afrique (diaspora)"))]
+def residence_groups(with_regions=True):
+    """« Où vivez-vous ? » en groupes : l'Afrique d'abord, puis le reste du monde
+    (France, Belgique, Canada… : là où vit la diaspora), puis « Autre pays »."""
+    from regions import RESIDENCE_GROUPS
+    return [(label, list(items)) for label, items in RESIDENCE_GROUPS
+            if with_regions or label != 'Régions de Madagascar']
+
+
+def residence_choices(with_regions=True):
+    """Les mêmes, à plat, pour la validation du champ."""
+    return [('', _('Choisir…'))] + [item for _label, items in residence_groups(with_regions) for item in items]
 
 
 def origin_choices():
     from regions import AFRICA_COUNTRIES
-    return [('', _('Le même pays'))] + list(AFRICA_COUNTRIES)
+    return [('', _('Non précisé'))] + list(AFRICA_COUNTRIES)
 
 
 def clean_origin(region, origin):
-    """Pays d'origine cohérent avec le lieu de vie : repris du pays où l'on vit
-    s'il n'est pas précisé, exigé quand on vit hors d'Afrique."""
-    from regions import country_of, DIASPORA
-    if not origin:
-        origin = country_of(region)
-    if region == DIASPORA[0] and not origin:
-        raise forms.ValidationError(_("Vous vivez hors d'Afrique : indiquez votre pays d'origine."))
-    return origin
+    """Pays d'origine : repris du pays d'Afrique où l'on vit s'il n'est pas précisé.
+    Hors d'Afrique il reste facultatif (conjoint, ami, curieux) : sans lui, le
+    membre voit simplement le contenu de son pays de résidence."""
+    from regions import country_of
+    return origin or country_of(region)
 
 
 class RegistrationForm(UserCreationForm):
@@ -61,8 +64,9 @@ class RegistrationForm(UserCreationForm):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.fields['region'].choices = residence_choices()
+        self.fields['region'].choices = residence_choices(with_regions=False)
         self.fields['origin_country'].choices = origin_choices()
+        self.residence_groups = residence_groups(with_regions=False)
 
     def clean(self):
         data = super().clean()
@@ -146,8 +150,9 @@ class AccountUpdateForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         from regions import REGION_CHOICES
-        self.fields['region'].choices = REGION_CHOICES
+        self.fields['region'].choices = residence_choices()
         self.fields['origin_country'].choices = origin_choices()
+        self.residence_groups = residence_groups()
 
     class Meta:
         model = Account

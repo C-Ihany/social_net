@@ -6270,8 +6270,8 @@ msgstr "Country of origin"
 msgid "Pays de résidence"
 msgstr "Country of residence"
 
-msgid "Si vous vivez hors d'Afrique ou dans un autre pays que le vôtre, indiquez d'où vous venez : vous retrouverez la communauté de votre pays."
-msgstr "If you live outside Africa or in a country other than your own, tell us where you are from: you will find your home community."
+msgid "Si vous vivez hors d'Afrique ou dans un autre pays que le vôtre, indiquez votre pays d'origine en Afrique : vous retrouverez sa communauté."
+msgstr "If you live outside Africa or in a country other than your own, tell us your country of origin in Africa: you will find its community."
 
 msgid "Devise"
 msgstr "Currency"
